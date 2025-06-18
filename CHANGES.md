@@ -1,6 +1,24 @@
 # Farewell/Howdy Unified Project - Changes Documentation
 
-## 🆕 Recent Updates (June 18, 2025)
+## 🆕 Recent Updates (June 18, 2025 - Evening)
+
+### 🐛 Critical Bug Fixes & TypeScript Improvements
+- **FIXED: Admin Domain Routing**: Completely resolved `admin.farewellcafe.com` routing issue by eliminating duplicate middleware
+- **FIXED: Image Upload Content-Type**: Proper auto-detection for PNG, JPEG, WEBP, etc. (was hardcoded to JPEG)
+- **FIXED: Font Asset Serving**: Added `/f/` path support for admin dashboard fonts
+- **FIXED: Blog Post Editing**: Individual post loading and Quill.js rich text editor now functional
+- **ENHANCED: TypeScript Support**: Added proper `BlogPost` interface and eliminated improper `any` types
+- **ENHANCED: D1 Database Operations**: Fixed batch operations with proper TypeScript bindings
+- **UPDATED: Login UI**: Enhanced "Administrate Me!" styling with responsive design
+
+### 🔧 Technical Improvements
+- **Router Architecture**: Fixed middleware mounting order to prevent conflicts
+- **Image Serving Pipeline**: Worker-based R2 serving with proper MIME type detection
+- **Type Safety**: Comprehensive TypeScript interfaces for all data structures
+- **Error Handling**: Improved error types and response handling
+- **Code Quality**: Eliminated `any` types throughout codebase
+
+## 🆕 Previous Updates (June 18, 2025 - Morning)
 
 ### UI/UX Improvements & Bug Fixes
 - **Fixed Admin Domain Routing**: Resolved issue where `admin.farewellcafe.com` was showing dev site instead of admin interface
