@@ -63,8 +63,11 @@ declare global {
   }
   
   interface R2Object {
-    body: ReadableStream;
-    bodyUsed: boolean;
+    readonly body: ReadableStream;
+    readonly bodyUsed: boolean;
+    readonly httpEtag: string;
+    readonly size: number;
+    writeHttpMetadata(headers: Headers): void;
   }
   
   interface Fetcher {

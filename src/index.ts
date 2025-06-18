@@ -9,71 +9,106 @@ import { authenticate } from './middleware/auth';
 import { generateUnifiedDashboardHTML } from './dashboard/unified-admin-dashboard';
 import { Env } from './types/env';
 
-// ====================================================================================
-// ADMIN APPLICATION (admin.farewellcafe.com)
-// ====================================================================================
-const adminApp = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env }>();
 
-// --- Admin API Router ---
-const adminApi = new Hono<{ Bindings: Env }>();
-adminApi.use('*', cors());
+// Enable CORS for API routes
+app.use('/api/*', cors());
 
-// Auth endpoints (public)
-adminApi.post('/login', (c) => handleAuth(c, 'login'));
-adminApi.post('/logout', (c) => handleAuth(c, 'logout'));
+// Handle host-based routing first
+app.use('*', async (c, next) => {
+  const host = c.req.header('host') || '';
+  console.log(`[DEBUG] Processing request for ${host} ${c.req.method} ${c.req.path}`);
+  
+  if (host.startsWith('admin.')) {
+    // First handle static assets
+    if (c.req.path.match(/^\/(css|jss|img|f)\//)) {
+      console.log('[DEBUG] Serving admin static asset');
+      try {
+        return await c.env.ASSETS.fetch(c.req.raw);
+      } catch (e) {
+        return c.text('Asset not found', 404);
+      }
+    }
+    
+    // Then handle API routes
+    if (c.req.path.startsWith('/api/')) {
+      console.log('[DEBUG] Processing admin API request');
+      return await next();
+    }
 
-// Event management (protected)
-adminApi.get('/events', authenticate, (c) => handleEvents(c, 'list'));
-adminApi.post('/events', authenticate, (c) => handleEvents(c, 'create'));
-adminApi.put('/events/:id', authenticate, (c) => handleEvents(c, 'update'));
-adminApi.delete('/events/:id', authenticate, (c) => handleEvents(c, 'delete'));
-adminApi.post('/events/flyer', authenticate, (c) => handleEvents(c, 'upload-flyer'));
+    // For authenticated users, serve the dashboard
+    const cookie = c.req.header('cookie') || '';
+    const tokenMatch = cookie.match(/sessionToken=([^;]+)/);
+    if (tokenMatch) {
+      const token = tokenMatch[1];
+      try {
+        const sessionData = await c.env.SESSIONS_KV.get(token);
+        if (sessionData) {
+          return c.html(`<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <!-- Include your CSS and other head elements -->
+</head>
+<body>
+  <h1>Admin Dashboard</h1>
+  <p>You are logged in!</p>
+  <!-- Add your dashboard content -->
+</body>
+</html>`);
+        }
+      } catch (e) {
+        console.error('Session verification failed:', e);
+      }
+    }
 
-// Blog management (protected)
-adminApi.get('/blog/posts', authenticate, (c) => handleBlog(c.req.raw, c.env));
-adminApi.post('/blog/posts', authenticate, (c) => handleBlog(c.req.raw, c.env));
-adminApi.put('/blog/:id', authenticate, (c) => handleBlog(c.req.raw, c.env));
-adminApi.delete('/blog/:id', authenticate, (c) => handleBlog(c.req.raw, c.env));
-adminApi.post('/blog/featured', authenticate, (c) => handleBlog(c.req.raw, c.env));
-
-// Legacy sync (protected)
-adminApi.post('/sync-events', authenticate, (c) => handleSync(c));
-
-// Mount admin API under /api
-adminApp.route('/api', adminApi);
-
-// --- Admin UI Routes ---
-
-// Serve static assets for admin domain
-adminApp.get('/css/*', async (c) => {
-  try {
-    return await c.env.ASSETS.fetch(c.req.raw);
-  } catch (e) {
-    return c.text('Asset not found', 404);
+    // If not authenticated or session invalid, serve login page
+    return serveLoginPage(c);
   }
+  
+  // Continue to next handler for non-admin domains
+  await next();
 });
 
-adminApp.get('/jss/*', async (c) => {
-  try {
-    return await c.env.ASSETS.fetch(c.req.raw);
-  } catch (e) {
-    return c.text('Asset not found', 404);
-  }
+// Admin API routes
+app.post('/api/login', (c) => handleAuth(c, 'login'));
+app.post('/api/logout', (c) => handleAuth(c, 'logout'));
+
+// Protected admin API routes
+app.use('/api/*', authenticate);
+app.get('/api/events', (c) => handleEvents(c, 'list'));
+app.post('/api/events', (c) => handleEvents(c, 'create'));
+app.put('/api/events/:id', (c) => handleEvents(c, 'update'));
+app.delete('/api/events/:id', (c) => handleEvents(c, 'delete'));
+app.get('/api/blog/posts', async (c) => {
+  const response = await handleBlog(c.req.raw, c.env);
+  return new Response(response.body, response);
+});
+app.post('/api/blog/posts', async (c) => {
+  const response = await handleBlog(c.req.raw, c.env);
+  return new Response(response.body, response);
 });
 
-adminApp.get('/img/*', async (c) => {
-  try {
-    return await c.env.ASSETS.fetch(c.req.raw);
-  } catch (e) {
-    return c.text('Asset not found', 404);
-  }
-});
+// Public API routes (for dev.farewellcafe.com)
+app.get('/list/:state', (c) => handleEvents(c, 'list', { venue: c.req.param('state') }));
+app.get('/archives', (c) => handleEvents(c, 'archives'));
+app.get('/api/events/slideshow', (c) => handleEvents(c, 'slideshow'));
 
-adminApp.get('/f/*', async (c) => {
+// Serve static files and handle SPA routing for non-admin domains
+app.get('*', async (c) => {
+  const host = c.req.header('host') || '';
+  if (host.startsWith('admin.')) {
+    return serveLoginPage(c);
+  }
+  
   try {
     return await c.env.ASSETS.fetch(c.req.raw);
   } catch (e) {
-    return c.text('Asset not found', 404);
+    try {
+      return await c.env.ASSETS.fetch(new Request('http://localhost/index.html'));
+    } catch (e) {
+      return c.text('Not found', 404);
+    }
   }
 });
 
@@ -230,7 +265,7 @@ function serveLoginPage(c: Context<{ Bindings: Env }>) {
       e.preventDefault();
       const formData = new FormData(e.target);
       try {
-        const response = await fetch('/admin/api/login', {
+        const response = await fetch('/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -240,7 +275,7 @@ function serveLoginPage(c: Context<{ Bindings: Env }>) {
         });
         const result = await response.json();
         if (result.success) {
-          window.location.href = '/admin';
+          window.location.href = '/';
         } else {
           document.getElementById('error').textContent = result.error || 'invalid credentials';
         }
@@ -254,10 +289,10 @@ function serveLoginPage(c: Context<{ Bindings: Env }>) {
 }
 
 // Serve login page for unauthenticated users
-adminApp.get('/login', (c) => serveLoginPage(c));
+app.get('/login', (c) => serveLoginPage(c));
 
 // Protected dashboard route
-adminApp.get('/', authenticate, async (c) => {
+app.get('/', authenticate, async (c) => {
   try {
     const html = generateUnifiedDashboardHTML();
     return c.html(html);
@@ -268,7 +303,7 @@ adminApp.get('/', authenticate, async (c) => {
 });
 
 // Fallback route - serve login for unauthenticated, redirect to dashboard for authenticated
-adminApp.get('*', async (c) => {
+app.get('*', async (c) => {
   // Check for authentication
   const cookie = c.req.header('cookie') || '';
   const tokenMatch = cookie.match(/sessionToken=([^;]+)/);
@@ -286,86 +321,6 @@ adminApp.get('*', async (c) => {
   }
   
   return serveLoginPage(c);
-});
-
-// ====================================================================================
-// PUBLIC APPLICATION (dev.farewellcafe.com)
-// ====================================================================================
-const publicApp = new Hono<{ Bindings: Env }>();
-
-// --- Public API Router ---
-const publicApi = new Hono<{ Bindings: Env }>();
-publicApi.use('*', cors());
-
-// Public event endpoints
-publicApi.get('/events', (c) => handleEvents(c, 'list'));
-publicApi.get('/events/slideshow', (c) => handleEvents(c, 'slideshow'));
-
-// Public blog endpoints
-publicApi.get('/blog/posts', (c) => handleBlog(c.req.raw, c.env));
-publicApi.get('/blog/featured', (c) => handleBlog(c.req.raw, c.env));
-
-// Legacy endpoints
-publicApi.get('/list/:state', (c) => handleEvents(c, 'list', { venue: c.req.param('state') }));
-publicApi.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.query('type') }));
-
-// Mount public API
-publicApp.route('/api', publicApi);
-
-// --- Image Serving ---
-publicApp.get('/images/*', async (c) => {
-  const imagePath = c.req.path.replace('/images/', '');
-  const object = await c.env.FWHY_IMAGES.get(imagePath);
-  
-  if (!object) {
-    return c.text('Image not found', 404);
-  }
-  
-  const headers = new Headers();
-  headers.set('cache-control', 'public, max-age=31536000'); // 1 year cache
-  
-  const contentType = imagePath.toLowerCase().endsWith('.png') ? 'image/png' :
-                     imagePath.toLowerCase().endsWith('.webp') ? 'image/webp' :
-                     imagePath.toLowerCase().endsWith('.gif') ? 'image/gif' :
-                     'image/jpeg';
-  headers.set('content-type', contentType);
-  
-  return new Response(object.body, { headers });
-});
-
-// --- Static Asset Serving with SPA Fallback ---
-publicApp.get('*', async (c) => {
-  try {
-    // Try to serve the requested static asset
-    const response = await c.env.ASSETS.fetch(c.req.raw);
-    return response;
-  } catch (e) {
-    // If asset not found, serve index.html for SPA routing
-    try {
-      return await c.env.ASSETS.fetch(new Request('http://localhost/index.html'));
-    } catch (e) {
-      return c.text('Site not found', 404);
-    }
-  }
-});
-
-// ====================================================================================
-// MAIN ROUTER
-// ====================================================================================
-const app = new Hono<{ Bindings: Env }>();
-
-// Host-based routing
-app.use('*', async (c) => {
-  const host = c.req.header('host') || '';
-  console.log(`[ROUTER] Request to host: ${host}, path: ${c.req.path}`);
-  
-  if (host.startsWith('admin.')) {
-    console.log(`[ROUTER] -> Routing to adminApp`);
-    return adminApp.fetch(c.req.raw, c.env, c.executionCtx);
-  }
-  
-  console.log(`[ROUTER] -> Routing to publicApp`);
-  return publicApp.fetch(c.req.raw, c.env, c.executionCtx);
 });
 
 export default app;

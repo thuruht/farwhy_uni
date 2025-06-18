@@ -2,16 +2,16 @@
 import { Context } from 'hono';
 import { Env, User } from '../types/env';
 
-// Simple JWT implementation for Cloudflare Workers with role support
+// JWT utility functions
 async function createJWT(payload: any, secret: string): Promise<string> {
   const header = {
     alg: 'HS256',
     typ: 'JWT'
   };
-  
-  const encodedHeader = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-  const encodedPayload = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-  
+
+  const encodedHeader = btoa(JSON.stringify(header)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  const encodedPayload = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+
   const data = `${encodedHeader}.${encodedPayload}`;
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -21,11 +21,11 @@ async function createJWT(payload: any, secret: string): Promise<string> {
     false,
     ['sign']
   );
-  
+
   const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
   const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
-    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-  
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+
   return `${data}.${encodedSignature}`;
 }
 
@@ -68,52 +68,53 @@ async function verifyJWT(token: string, secret: string): Promise<any | null> {
   }
 }
 
-function generateSessionToken() {
+function generateSessionToken(): string {
   return crypto.randomUUID();
 }
 
-// Improved password hashing with salt for better security
 async function hashPassword(password: string, salt?: string): Promise<string> {
-  const actualSalt = salt || crypto.randomUUID();
   const encoder = new TextEncoder();
-  const data = encoder.encode(password + actualSalt);
+  const data = encoder.encode(password + (salt || 'default-salt'));
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return `${actualSalt}:${hashHex}`;
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 async function verifyPassword(inputPassword: string, hashedPassword: string): Promise<boolean> {
-  // Handle legacy hashes without salt
-  if (!hashedPassword.includes(':')) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(inputPassword);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    return inputHash === hashedPassword;
+  try {
+    // Handle bcrypt-style hashes or simple SHA-256 hashes
+    if (hashedPassword.startsWith('$2')) {
+      // This would be bcrypt, but we'll use simple comparison for now
+      // In production, you'd want to use a proper bcrypt library
+      return false;
+    } else {
+      // Simple SHA-256 comparison
+      const inputHash = await hashPassword(inputPassword);
+      return inputHash === hashedPassword;
+    }
+  } catch (error) {
+    console.error('Password verification error:', error);
+    return false;
   }
-  
-  // Handle salted hashes
-  const [salt, hash] = hashedPassword.split(':');
-  const inputHash = await hashPassword(inputPassword, salt);
-  return inputHash === hashedPassword;
 }
 
-// Get user from database by username
 async function getUserByUsername(db: D1Database, username: string): Promise<User | null> {
   try {
-    const result = await db.prepare('SELECT * FROM users WHERE username = ?')
-      .bind(username)
-      .first() as User | null;
-    return result;
-  } catch (error: any) {
-    // Handle case where users table doesn't exist
-    if (error.message && error.message.includes('no such table: users')) {
-      console.log('Users table does not exist, will fall back to environment variables');
-      throw new Error('USERS_TABLE_NOT_EXISTS');
-    }
-    console.error('Error fetching user:', error);
+    const result = await db.prepare('SELECT * FROM users WHERE username = ?').bind(username).first();
+    if (!result) return null;
+    
+    const row = result as any; // D1 returns unknown, so we cast to any for property access
+    
+    return {
+      id: row.id,
+      username: row.username,
+      password_hash: row.password_hash,
+      role: row.role as 'admin' | 'thrift' | 'user',
+      isAdmin: row.role === 'admin',
+      authMethod: 'jwt'
+    };
+  } catch (error) {
+    console.error('Database query error:', error);
     throw error;
   }
 }
