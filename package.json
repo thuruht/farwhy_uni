@@ -1,0 +1,26 @@
+{
+  "name": "farewell-unified-project",
+  "version": "1.0.0",
+  "description": "Farewell Cafe unified worker project",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "wrangler deploy --dry-run",
+    "cf-typegen": "wrangler types"
+  },
+  "keywords": [
+    "cloudflare-workers",
+    "typescript",
+    "hono"
+  ],
+  "author": "thuruht",
+  "license": "MIT",
+  "dependencies": {
+    "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250617.0",
+    "typescript": "^5.0.0"
+  }
+}

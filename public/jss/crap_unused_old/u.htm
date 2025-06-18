@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>bl10g</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./css/ccssss.css">
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+  <style>/* ==============================
+    3. Global Styles (Adjusted for Blog Context)
+============================== */
+/*body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0;
+    font-family: var(--font-hnm11);
+    background-color: #f0ffff;
+    color: var(--text-color);
+    padding: var(--padding-medium);
+    text-align: center;
+}
+*/
+/* ==============================
+    11. Typography (Adjusted for Blog Content)
+============================== */
+h2 {
+    color:#333f3c;
+    font-family: var(--font-secondary);
+    font-size: 2.8rem;
+    margin-bottom: var(--padding-small);
+    -webkit-text-stroke: 1px black;
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px  1px 0 #000, 1px  1px 0 #000;
+}
+
+p.pp {color: #454545; font-family: 'kb'; font-weight: 200; font-size: 0.98rem; margin-left:var(--padding-small); margin-bottom:var(--padding-large); -webkit-text-stroke: 1px #000000; letter-spacing:0.11rem; text-align: left; width: 80%;
+        text-shadow: -1px -1px 0 #a0e600, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #e60000;}
+
+p.nrml {color: #030403; font-family: 'kb'; font-weight: 200; font-size: 0.98rem; margin-left:var(--padding-medium); margin-bottom:var(--padding-large); letter-spacing:0.1rem; text-align: left;
+        text-shadow: 1px 1px 0px #faeffb33; line-height:1.33;}
+
+/* ==============================
+    17. Button Styles (Adjusted for Blog Content)
+============================== */
+button {
+    background: var(--button-bg-color);
+    color: var(--button-text-color);
+    font-family: var(--font-main);
+    border: 1px solid var(--nav-border-color);
+    padding: 10px 10px;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+    border-radius: 0px;
+    cursor: pointer;
+    width: 128px;
+    transition: background-color var(--transition-speed) ease  0.4s, color var(--transition-speed) ease  0.4s, transform var(--transition-speed) ease 0.4s;
+}
+
+button:hover {
+    background: #58e880;
+    color: #ffffff;
+    transform: scale(1.015);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* Accent Colors for Elements */
+.modal-content input:focus {
+    outline: 2px solid var(--pupil);
+}
+
+/* Close Button */
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #f00;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-button:hover {
+    color: #f00;
+}
+
+/* Optional: Error Message */
+.modal-content .error {
+    font-family: 'hnm11', sans-serif;
+    font-size: 12px;
+    color: var(--redd);
+    margin-top: -8px;
+    margin-bottom: 12px;
+}
+
+/* Optional: Success Message */
+.modal-content .success {
+    font-family: 'hnm11', sans-serif;
+    font-size: 12px;
+    color: var(--lima);
+    margin-top: -8px;
+    margin-bottom: 12px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .admin-panel .video-container {
+        width: calc(100% + 2 * var(--padding-medium));
+        margin: 0 calc(-1 * var(--padding-medium));
+    }
+
+    #editor-container,
+    #featured-editr {
+        height: 250px !important;
+    }
+
+    .modal-content {
+        padding: 1.5rem;
+    }
+
+    .action-btn {
+        padding: 0.75rem;
+        width: 100%;
+    }
+}
+
+/* Video Container Fixes */
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    width: 100vw;
+    max-width: calc(100% + 2 * var(--padding-medium));
+    margin: 1rem calc(-1 * var(--padding-medium));
+    left: 50%;
+    transform: translateX(-50%);
+    transition: margin 0.3s ease;
+    box-sizing: content-box;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    position: relative;
+    padding: 2rem;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 800px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* ===== Loading States ===== */
+button[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.button-text::after {
+    content: '';
+    display: inline-block;
+    width: 0.5em;
+}
+
+.loading-dots::after {
+    content: '.';
+    animation: dots 1.4s infinite steps(4, end);
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60% { content: '...'; }
+    80%, 100% { content: ''; }
+}
+  </style>
+</head>
+<body style="background:transparent;">
+  <!-- Blog Structure -->
+  <div class="griddy-admin">
+    <!-- Posts Section -->
+    <div class="blog-content">
+      <section id="blog">
+        <h2 class="section-heading">NEWS</h2>
+        <div id="posts" class="pp nrml">Loading...</div>
+      </section>
+      <button id="toggle-editor" data-admin-only>New Post +</button>
+      <form id="new-post" data-admin-only>
+<label>Post title:
+          <input type="text" id="title" placeholder="Title" required>
+        </label>
+        <div id="editor-container"></div>
+        <input type="file" id="image" hidden>
+        <button type="submit" class="action-btn">
+          <span class="button-text">Create Post</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel">
+      <div id="about-blurb">
+        <h2 class="section-heading" style="color:var(--blew)">FEATURED</h2>
+        <div id="about-content" class="pp nrml"></div>
+        <button id="edit-about-btn" data-admin-only>Edit</button>
+        <form id="about-form" data-admin-only>
+                    <div id="featured-editr"></div>
+          <input type="file" id="about-image" hidden>
+          <div class="form-actions">
+            <button type="submit" class="action-btn">Update</button>
+            <button type="button" id="cancel-about-btn" class="action-btn">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+      <div id="admin-controls">
+        <button id="admin-login-btn" class="admin-button">admin</button>
+        <button id="admin-logout-btn" data-admin-only>Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+<div id="login-modal" class="modal">
+    <div class="modal-content">
+      <span id="close-login-modal" class="close-button">&times;</span>
+      <h2 class="modal-heading">Admin Login</h2>
+      <form id="login-form">
+        <input type="password" id="login-password" 
+               placeholder="Password" required>
+        <button type="submit" class="action-btn">
+          <span class="button-text">Login</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <span id="close-edit-modal" class="close-button">&times;</span>
+      <h2>Edit Post</h2>
+      <form id="edit-post-form">
+        <input type="text" id="edit-title" placeholder="Title" required>
+        <div id="edit-editor-container"></div>
+        <input type="file" id="edit-image">
+        <div class="form-actions">
+          <button type="submit" class="action-btn">Save Changes</button>
+          <button type="button" id="cancel-edit" class="action-btn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <!-- Scripts -->
+  <script src="https://cdn.quilljs.com/1.3.7/quill.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
+
+  <script>
+// Configuration
+const API_BASE = "";
+
+let sessionToken = localStorage.getItem("sessionToken") || null;
+
+let postEditor = null;
+let featuredEditor = null;
+
+// Sanitization Config
+const sanitizeConfig = {
+    ALLOWED_TAGS: ['iframe', 'img', 'p', 'br', 'strong', 'em', 'a'],
+    ALLOWED_ATTR: ['src', 'alt', 'href', 'allowfullscreen', 'frameborder', 'style']
+};
+
+// Core Functions
+function cacheBust(url) {
+    return `${url}${url.includes('?') ? '&' : '?'}_=${Date.now()}`;
+}
+
+async function updateAdminUI() {
+    const isAuth = !!sessionToken;
+    document.querySelectorAll('[data-admin-only]').forEach(el => {
+        el.style.display = isAuth ? 'block' : 'none';
+    });
+    try {
+        await loadContent();
+        if (isAuth) showToast("Admin mode activated", "success");
+    } catch (error) {
+        console.error("Failed to update admin UI:", error);
+        showToast("Failed to update UI", "error");
+    }
+    await loadContent();
+    if(isAuth) showToast("Admin mode activated", "success");
+}
+
+async function loadContent() {
+    try {
+        try {
+            await Promise.all([loadPosts(), loadFeaturedContent()]);
+        } catch (error) {
+            console.error("Failed to load content:", error);
+            showToast("Failed to load content", "error");
+        }
+    } catch (error) {
+        console.error("Failed to load content:", error);
+        showToast("Failed to load content", "error");
+    }
+    await Promise.all([loadPosts(), loadFeaturedContent()]);
+}
+
+// Post Loading
+async function loadPosts() {
+    try {
+        const response = await fetch(cacheBust(`${API_BASE}/bl10g/posts`));
+        if (!response.ok) throw new Error("Failed to fetch posts");
+        const posts = await response.json();
+        const container = document.getElementById("posts");
+        if (!container) throw new Error("Posts container not found");
+        
+        container.innerHTML = posts.map(post => DOMPurify.sanitize(`
+            <div class="post-section">
+                <h3>${post.title}</h3>
+                <div>${post.content}</div>
+                ${post.image_url ? `<img src="${post.image_url}" alt="Post image">` : ''}
+                <small>${new Date(post.created_at).toLocaleDateString()}</small>
+                ${sessionToken ? `
+                    <button class="action-btn" onclick="deletePost('${post.id}')">Delete</button>
+                ` : ''}
+            </div>
+        `)).join('');
+    } catch (error) {
+        console.error("Failed to load posts:", error);
+        showToast("Failed to load posts", "error");
+    }
+}
+
+// Featured Content
+async function loadFeaturedContent() {
+    try {
+    try {
+        const response = await fetch(cacheBust(`${API_BASE}/bl10g/about`));
+        if (!response.ok) throw new Error("Failed to fetch featured content");
+        const { text, imageUrl } = await response.json();
+        const container = document.getElementById("about-content");
+        if (!container) throw new Error("About content container not found");
+
+        container.innerHTML = DOMPurify.sanitize(`
+            ${text || ''}
+            ${imageUrl ? `<img src="${imageUrl}" alt="Featured content">` : ''}
+        `, sanitizeConfig);
+    } catch (error) {
+        console.error("Failed to load featured content:", error);
+        showToast("Failed to load featured content", "error");
+    }
+}
+
+  function updateSocialLinks(state) {
+      try {
+          const socialLinks = {
+            howdy: {
+              facebook: 'https://www.facebook.com/howdykcmo',
+              instagram: 'https://instagram.com/howdykcmo',
+              twitter: 'https://x.com/HowdyKCMO',
+              spotify: 'https://open.spotify.com/playlist/44StXfAJQiPoDQYegr4kec?si=8f07faf57647401f',
+              secret: 'https://linktr.ee/farewellhowdy',
+            },
+            farewell: {
+              facebook: 'https://www.facebook.com/farewelltransmission',
+              instagram: 'https://instagram.com/farewellkcmo',
+              twitter: 'https://x.com/farewellcafe',
+              spotify: 'https://open.spotify.com/playlist/1eXsLdNQe319cAbnsmpi06?si=333d96c262f5424d',
+              secret: 'https://linktr.ee/farewellhowdy',
+            },
+          };
+
+          const links = socialLinks[state];
+          if (!links) {
+            console.error(`No social links for state: ${state}`);
+            return;
+          }
+
+          // Update each social link
+          const socialAnchors = document.querySelectorAll('.social-icons a');
+          const platforms = ['facebook', 'instagram', 'twitter', 'spotify', 'secret'];
+
+          socialAnchors.forEach((anchor, index) => {
+            const platform = platforms[index];
+            if (links[platform]) {
+              anchor.href = links[platform];
+            }
+          });
+      } catch (error) {
+          console.error("Error updating social links:", error);
+      }
+  }
+  function initializeEditors() {
+    try {
+        postEditor = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                ]
+            }
+        });
+
+        featuredEditor = new Quill('#featured-editr', {
+            theme: 'snow',
+            modules: {
+                toolbar: {
+                    container: [
+                        ['video', 'image'],
+                        ['bold', 'italic', 'link'],
+                        ['clean']
+                    ],
+                    handlers: {
+                        image: () => document.getElementById("about-image")?.click(),
+                        video: handleYouTubeEmbed
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error("Failed to initialize editors:", error);
+    }
+}
+
+// YouTube Embed
+function handleYouTubeEmbed() {
+    if (url) {
+        try {
+            const videoId = new URL(url).searchParams.get('v');
+            if (!videoId) throw new Error("Invalid YouTube URL");
+            featuredEditor.clipboard.dangerouslyPasteHTML(`
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/${videoId}" 
+                            frameborder="0" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            `);
+        } catch (error) {
+            console.error("Failed to embed YouTube video:", error);
+            alert("Invalid YouTube URL");
+        }
+    }
+    const button = e.target.querySelector('button');
+    if (!password || !button) {
+        showToast("Invalid login form", "error");
+    const password = document.getElementById("login-password")?.value;
+    const originalText = button.innerHTML;
+
+    try {
+    const password = document.getElementById("login-password").value;
+    const originalText = button.innerHTML;
+
+    try {
+        button.innerHTML = '<span class="loading-dots">Authenticating</span>';
+        
+        const response = await fetch(`${API_BASE}/bl10g/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+
+        if (!response.ok) throw new Error(await response.text());
+        await updateAdminUI();
+        hideModal("login-modal");
+    } catch (error) {
+        console.error("Failed to login:", error);
+    } catch(error) {
+        showToast(error.message || "Login failed", "error");
+    } finally {
+        button.innerHTML = originalText;
+    }
+    } catch (error) {
+        showToast(error.message || "Login failed", "error");
+    } finally {
+        button.innerHTML = originalText;
+    }
+    try {
+        await loadContent();
+        showToast("Logged out", "success");
+        updateAdminUI();
+    } catch (error) {
+        console.error("Failed to handle logout:", error);
+        showToast("Failed to logout", "error");
+    }
+    await loadContent();
+    showToast("Logged out", "success");
+    updateAdminUI();
+}
+
+// Post Management
+async function deletePost(postId) {
+    if (!confirm("Delete this post permanently?")) return;
+    if(!confirm("Delete this post permanently?")) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/bl10g/posts`, {
+        await fetch(`${API_BASE}/bl10g/posts`, {
+            method: 'DELETE',
+            headers: {
+        const response = await fetch(`${API_BASE}/bl10g/posts`, {
+            },
+            body: JSON.stringify({ id: postId })
+        });
+        if (!response.ok) throw new Error("Failed to delete post");
+        await loadPosts();
+    } catch (error) {
+        console.error("Failed to delete post:", error);
+    } catch(error) {
+        showToast("Delete failed", "error");
+    }
+}
+
+async function editPost(postId) {
+    try {
+        const response = await fetch(`${API_BASE}/bl10g/posts`);
+        if (!response.ok) throw new Error("Failed to fetch posts");
+        const posts = await response.json();
+        const posts = await (await fetch(`${API_BASE}/bl10g/posts`)).json();
+        const post = posts.find(p => p.id === postId);
+        if (!post) throw new Error("Post not found");
+        
+        const posts = await response.json();
+            modules: { toolbar: postEditor.options.modules.toolbar }
+        });
+        
+        editEditor.root.innerHTML = post.content;
+        document.getElementById('edit-title').value = post.title;
+        showModal('edit-modal');
+
+        document.getElementById('edit-post-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const button = form.querySelector('button[type="submit"]');
+            if (!button) return;
+            const originalText = button.innerHTML;
+
+            try {
+                button.innerHTML = '<span class="loading-dots">Saving</span>';
+                
+                const title = document.getElementById('edit-title').value;
+                const content = editEditor.root.innerHTML;
+                const imageFile = document.getElementById('edit-image').files[0];
+                const imageUrl = imageFile ? await uploadImage(imageFile) : post.image_url;
+
+                const updateResponse = await fetch(`${API_BASE}/bl10g/posts`, {
+                await fetch(`${API_BASE}/bl10g/posts`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionToken}`
+                    },
+                    body: JSON.stringify({ id: postId, title, content, imageUrl })
+                });
+
+                if (!updateResponse.ok) throw new Error("Failed to update post");
+
+                await loadPosts();
+                hideModal('edit-modal');
+            } catch (error) {
+                console.error("Failed to save post changes:", error);
+                showToast("Failed to save changes", "error");
+            } finally {
+                button.innerHTML = originalText;
+            }
+        };
+    } catch (error) {
+        console.error("Failed to edit post:", error);
+    } catch(error) {
+        showToast("Failed to edit post", "error");
+    }
+}
+
+// Image Handling
+async function uploadImage(file) {
+    try {
+        const response = await fetch(`${API_BASE}/bl10g/upload`, {
+        const { signedUrl } = await (await fetch(`${API_BASE}/bl10g/upload`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${sessionToken}` }
+        });
+        if (!response.ok) throw new Error("Failed to get upload URL");
+        const response = await fetch(`${API_BASE}/bl10g/upload`, {
+            headers: { 'Authorization': `Bearer ${sessionToken}` }
+        });
+        const { signedUrl } = await response.json();
+        })).json();
+
+        const uploadResponse = await fetch(signedUrl, {
+        await fetch(signedUrl, {
+            method: 'PUT',
+            headers: { "Content-Type": file.type },
+            function updateSocialLinks(state) {
+      try {
+          const socialLinks = {
+            howdy: {
+              facebook: 'https://www.facebook.com/howdykcmo',
+              instagram: 'https://instagram.com/howdykcmo',
+              twitter: 'https://x.com/HowdyKCMO',
+              spotify: 'https://open.spotify.com/playlist/44StXfAJQiPoDQYegr4kec?si=8f07faf57647401f',
+              secret: 'https://linktr.ee/farewellhowdy',
+            },
+            farewell: {
+              facebook: 'https://www.facebook.com/farewelltransmission',
+              instagram: 'https://instagram.com/farewellkcmo',
+              twitter: 'https://x.com/farewellcafe',
+              spotify: 'https://open.spotify.com/playlist/1eXsLdNQe319cAbnsmpi06?si=333d96c262f5424d',
+              secret: 'https://linktr.ee/farewellhowdy',
+            },
+          };
+
+          const links = socialLinks[state];
+          if (!links) {
+            console.error(`No social links for state: ${state}`);
+            return;
+          }
+
+          // Update each social link
+          const socialAnchors = document.querySelectorAll('.social-icons a');
+          const platforms = ['facebook', 'instagram', 'twitter', 'spotify', 'secret'];
+
+          socialAnchors.forEach((anchor, index) => {
+            const platform = platforms[index];
+            if (links[platform]) {
+              anchor.href = links[platform];
+            }
+          });
+      } catch (error) {
+          console.error("Error updating social links:", error);
+      }
+  }
+  function initializeEditors() {
+    try {
+        postEditor = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }]
+                ]
+            }
+        });
+
+        featuredEditor = new Quill('#featured-editr', {
+            theme: 'snow',
+            modules: {
+                toolbar: {
+                    container: [
+                        ['video', 'image'],
+                        ['bold', 'italic', 'link'],
+                        ['clean']
+                    ],
+                    handlers: {
+                        image: () => document.getElementById("about-image")?.click(),
+                        video: handleYouTubeEmbed
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error("Failed to initialize editors:", error);
+    }
+}
+
+// YouTube Embed
+function handleYouTubeEmbed() {
+    if (url) {
+        try {
+            const videoId = new URL(url).searchParams.get('v');
+            if (!videoId) throw new Error("Invalid YouTube URL");
+            featuredEditor.clipboard.dangerouslyPasteHTML(`
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/${videoId}" 
+                            frameborder="0" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            `);
+        } catch (error) {
+            console.error("Failed to embed YouTube video:", error);
+            alert("Invalid YouTube URL");
+        }
+    }
+    const button = e.target.querySelector('button');
+    if (!password || !button) {
+        showToast("Invalid login form", "error");
+    const password = document.getElementById("login-password")?.value;
+    const originalText = button.innerHTML;
+
+    try {
+    const password = document.getElementById("login-password").value;
+    const originalText = button.innerHTML;
+
+    try {
+        button.innerHTML = '<span class="loading-dots">Authenticating</span>';
+        
+        const response = await fetch(`${API_BASE}/bl10g/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+
+        if (!response.ok) throw new Error(await response.text());
+        await updateAdminUI();
+        hideModal("login-modal");
+    } catch (error) {
+        console.error("Failed to login:", error);
+    } catch(error) {
+        showToast(error.message || "Login failed", "error");
+    } finally {
+        button.innerHTML = originalText;
+    }
+    } catch (error) {
+        showToast(error.message || "Login failed", "error");
+    } finally {
+        button.innerHTML = originalText;
+    }
+    try {
+        await loadContent();
+        showToast("Logged out", "success");
+        updateAdminUI();
+    } catch (error) {
+        console.error("Failed to handle logout:", error);
+        showToast("Failed to logout", "error");
+    }
+    await loadContent();
+    showToast("Logged out", "success");
+    updateAdminUI();
+}
+
+// Post Management
+async function deletePost(postId) {
+    if (!confirm("Delete this post permanently?")) return;
+    if(!confirm("Delete this post permanently?")) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/bl10g/posts`, {
+        await fetch(`${API_BASE}/bl10g/posts`, {
+            method: 'DELETE',
+            headers: {
+        const response = await fetch(`${API_BASE}/bl10g/posts`, {
+            },
+            body: JSON.stringify({ id: postId })
+        });
+        if (!response.ok) throw new Error("Failed to delete post");
+        await loadPosts();
+    } catch (error) {
+        console.error("Failed to delete post:", error);
+    } catch(error) {
+        showToast("Delete failed", "error");
+    }
+}
+
+async function editPost(postId) {
+    try {
+        const response = await fetch(`${API_BASE}/bl10g/posts`);
+        if (!response.ok) throw new Error("Failed to fetch posts");
+        const posts = await response.json();
+        const posts = await (await fetch(`${API_BASE}/bl10g/posts`)).json();
+        const post = posts.find(p => p.id === postId);
+        if (!post) throw new Error("Post not found");
+        
+        const posts = await response.json();
+            modules: { toolbar: postEditor.options.modules.toolbar }
+        });
+        
+        editEditor.root.innerHTML = post.content;
+        document.getElementById('edit-title').value = post.title;
+        showModal('edit-modal');
+
+        document.getElementById('edit-post-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const button = form.querySelector('button[type="submit"]');
+            if (!button) return;
+            const originalText = button.innerHTML;
+
+            try {
+                button.innerHTML = '<span class="loading-dots">Saving</span>';
+                
+                const title = document.getElementById('edit-title').value;
+                const content = editEditor.root.innerHTML;
+                const imageFile = document.getElementById('edit-image').files[0];
+                const imageUrl = imageFile ? await uploadImage(imageFile) : post.image_url;
+
+                const updateResponse = await fetch(`${API_BASE}/bl10g/posts`, {
+                await fetch(`${API_BASE}/bl10g/posts`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionToken}`
+                    },
+                    body: JSON.stringify({ id: postId, title, content, imageUrl })
+                });
+
+                if (!updateResponse.ok) throw new Error("Failed to update post");
+
+                await loadPosts();
+                hideModal('edit-modal');
+            } catch (error) {
+                console.error("Failed to save post changes:", error);
+                showToast("Failed to save changes", "error");
+            } finally {
+                button.innerHTML = originalText;
+            }
+        };
+    } catch (error) {
+        console.error("Failed to edit post:", error);
+    } catch(error) {
+        showToast("Failed to edit post", "error");
+    }
+}
+
+// Image Handling
+async function uploadImage(file) {
+    try {
+        const response = await fetch(`${API_BASE}/bl10g/upload`, {
+        const { signedUrl } = await (await fetch(`${API_BASE}/bl10g/upload`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${sessionToken}` }
+        });
+        if (!response.ok) throw new Error("Failed to get upload URL");
+        const response = await fetch(`${API_BASE}/bl10g/upload`, {
+            headers: { 'Authorization': `Bearer ${sessionToken}` }
+        });
+        const { signedUrl } = await response.json();
+        })).json();
+
+        const uploadResponse = await fetch(signedUrl, {
+        await fetch(signedUrl, {
+            method: 'PUT',
+            headers: { "Content-Type": file.type },
+            body: file
+        }).json();
+        if (!uploadResponse.ok) throw new Error("Failed to upload image");
+
+        return signedUrl.split('?')[0];
+    } catch (error) {
+        console.error("Failed to upload image:", error);
+    } catch(error) {
+        showToast("Image upload failed", "error");
+        throw error;
+    }
+}
+
+// UI Functions
+function showModal(id) {
+    const element = document.getElementById(id);
+    if (element) element.style.display = "flex";
+    document.getElementById(id).style.display = "flex";
+}
+
+function hideModal(id) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.style.display = "none";
+        if (id === "login-modal") {
+            document.getElementById("login-password").value = "";
+        }
+    document.getElementById(id).style.display = "none";
+    if(id === "login-modal") {
+        document.getElementById("login-password").value = "";
+    }
+}
+
+function showToast(message, type = "info") {
+    const toast = document.getElementById("toast");
+    if (toast) {
+        toast.textContent = message;
+        toast.className = type;
+        toast.style.display = "block";
+        setTimeout(() => toast.style.display = "none", 3000);
+    }
+    toast.textContent = message;
+    toast.className = type;
+    toast.style.display = "block";
+    setTimeout(() => toast.style.display = "none", 3000);
+}
+
+// Event Listeners
+function setupEventListeners() {
+    // Modals
+    document.querySelectorAll('.close-button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('.modal');
+            if (modal) hideModal(modal.id);
+        });
+        btn.addEventListener('click', () => hideModal(btn.closest('.modal').id));
+    });
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('.modal');
+            if (modal) hideModal(modal.id);
+        });
+    document.getElementById("admin-login-btn").addEventListener('click', () => showModal("login-modal"));
+    document.getElementById("admin-logout-btn").addEventListener('click', handleLogout);
+    document.getElementById("login-form").addEventListener('submit', handleLogin);
+
+    // Post Creation
+    document.getElementById("new-post")?.addEventListener('submit', async (e) => {
+    document.getElementById("new-post").addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const button = form.querySelector('button');
+        if (!button) return;
+        const originalText = button.innerHTML;
+
+        try {
+            button.innerHTML = '<span class="loading-dots">Creating</span>';
+            
+            const title = document.getElementById("title").value;
+            const content = postEditor.root.innerHTML;
+            const imageFile = document.getElementById("image").files[0];
+            const imageUrl = imageFile ? await uploadImage(imageFile) : null;
+
+            const response = await fetch(`${API_BASE}/bl10g/posts`, {
+            await fetch(`${API_BASE}/bl10g/posts`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionToken}`
+                },
+                body: JSON.stringify({ title, content, imageUrl })
+            });
+
+            if (!response.ok) throw new Error("Failed to create post");
+
+            await loadPosts();
+            form.reset();
+            postEditor.root.innerHTML = "";
+        } catch (error) {
+            console.error("Failed to create post:", error);
+            showToast("Post creation failed", "error");
+        } finally {
+            button.innerHTML = originalText;
+        }
+    });
+
+    // Featured Content Editing
+    document.getElementById("about-form")?.addEventListener('submit', async (e) => {
+    document.getElementById("about-form").addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const button = form.querySelector('button');
+        if (!button) return;
+        const originalText = button.innerHTML;
+
+        try {
+            button.innerHTML = '<span class="loading-dots">Updating</span>';
+            
+            const text = featuredEditor.root.innerHTML;
+            const imageFile = document.getElementById("about-image").files[0];
+            const imageUrl = imageFile ? await uploadImage(imageFile) : null;
+
+            const response = await fetch(`${API_BASE}/bl10g/about`, {
+            await fetch(`${API_BASE}/bl10g/about`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionToken}`
+                },
+                body: JSON.stringify({ text, imageUrl })
+            });
+
+            if (!response.ok) throw new Error("Failed to update featured content");
+
+            await loadFeaturedContent();
+            form.reset();
+            featuredEditor.root.innerHTML = "";
+        } catch (error) {
+            console.error("Failed to update featured content:", error);
+            showToast("Update failed", "error");
+        } finally {
+            button.innerHTML = originalText;
+        }
+    });
+
+    // Editor Toggles
+    document.getElementById("toggle-editor")?.addEventListener('click', () => {
+        const newPost = document.getElementById("new-post");
+        if (newPost) {
+            newPost.style.display = newPost.style.display === 'none' ? 'block' : 'none';
+        }
+    });
+
+    document.getElementById("toggle-editor").addEventListener('click', () => {
+        document.getElementById("new-post").style.display = 
+            document.getElementById("new-post").style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById("edit-about-btn")?.addEventListener('click', () => {
+        const aboutForm = document.getElementById("about-form");
+        if (aboutForm) {
+            aboutForm.style.display = aboutForm.style.display === 'none' ? 'block' : 'none';
+        }
+    document.getElementById("edit-about-btn").addEventListener('click', () => {
+        document.getElementById("about-form").style.display = 
+            document.getElementById("about-form").style.display === 'none' ? 'block' : 'none';
+    });
+}
+
+// Initialization
+document.addEventListener('DOMContentLoaded', () => {
+    initializeEditors();
+    setupEventListeners();
+    updateAdminUI();
+});        body: file
+        }).json();
+        if (!uploadResponse.ok) throw new Error("Failed to upload image");
+
+        return signedUrl.split('?')[0];
+    } catch (error) {
+        console.error("Failed to upload image:", error);
+    } catch(error) {
+        showToast("Image upload failed", "error");
+        throw error;
+    }
+}
+
+// UI Functions
+function showModal(id) {
+    const element = document.getElementById(id);
+    if (element) element.style.display = "flex";
+    document.getElementById(id).style.display = "flex";
+}
+
+function hideModal(id) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.style.display = "none";
+        if (id === "login-modal") {
+            document.getElementById("login-password").value = "";
+        }
+    document.getElementById(id).style.display = "none";
+    if(id === "login-modal") {
+        document.getElementById("login-password").value = "";
+    }
+}
+
+function showToast(message, type = "info") {
+    const toast = document.getElementById("toast");
+    if (toast) {
+        toast.textContent = message;
+        toast.className = type;
+        toast.style.display = "block";
+        setTimeout(() => toast.style.display = "none", 3000);
+    }
+    toast.textContent = message;
+    toast.className = type;
+    toast.style.display = "block";
+    setTimeout(() => toast.style.display = "none", 3000);
+}
+
+// Event Listeners
+function setupEventListeners() {
+    // Modals
+    document.querySelectorAll('.close-button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('.modal');
+            if (modal) hideModal(modal.id);
+        });
+        btn.addEventListener('click', () => hideModal(btn.closest('.modal').id));
+    });
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('.modal');
+            if (modal) hideModal(modal.id);
+        });
+    document.getElementById("admin-login-btn").addEventListener('click', () => showModal("login-modal"));
+    document.getElementById("admin-logout-btn").addEventListener('click', handleLogout);
+    document.getElementById("login-form").addEventListener('submit', handleLogin);
+
+    // Post Creation
+    document.getElementById("new-post")?.addEventListener('submit', async (e) => {
+    document.getElementById("new-post").addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const button = form.querySelector('button');
+        if (!button) return;
+        const originalText = button.innerHTML;
+
+        try {
+            button.innerHTML = '<span class="loading-dots">Creating</span>';
+            
+            const title = document.getElementById("title").value;
+            const content = postEditor.root.innerHTML;
+            const imageFile = document.getElementById("image").files[0];
+            const imageUrl = imageFile ? await uploadImage(imageFile) : null;
+
+            const response = await fetch(`${API_BASE}/bl10g/posts`, {
+            await fetch(`${API_BASE}/bl10g/posts`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionToken}`
+                },
+                body: JSON.stringify({ title, content, imageUrl })
+            });
+
+            if (!response.ok) throw new Error("Failed to create post");
+
+            await loadPosts();
+            form.reset();
+            postEditor.root.innerHTML = "";
+        } catch (error) {
+            console.error("Failed to create post:", error);
+            showToast("Post creation failed", "error");
+        } finally {
+            button.innerHTML = originalText;
+        }
+    });
+
+    // Featured Content Editing
+    document.getElementById("about-form")?.addEventListener('submit', async (e) => {
+    document.getElementById("about-form").addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const button = form.querySelector('button');
+        if (!button) return;
+        const originalText = button.innerHTML;
+
+        try {
+            button.innerHTML = '<span class="loading-dots">Updating</span>';
+            
+            const text = featuredEditor.root.innerHTML;
+            const imageFile = document.getElementById("about-image").files[0];
+            const imageUrl = imageFile ? await uploadImage(imageFile) : null;
+
+            const response = await fetch(`${API_BASE}/bl10g/about`, {
+            await fetch(`${API_BASE}/bl10g/about`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionToken}`
+                },
+                body: JSON.stringify({ text, imageUrl })
+            });
+
+            if (!response.ok) throw new Error("Failed to update featured content");
+
+            await loadFeaturedContent();
+            form.reset();
+            featuredEditor.root.innerHTML = "";
+        } catch (error) {
+            console.error("Failed to update featured content:", error);
+            showToast("Update failed", "error");
+        } finally {
+            button.innerHTML = originalText;
+        }
+    });
+
+    // Editor Toggles
+    document.getElementById("toggle-editor")?.addEventListener('click', () => {
+        const newPost = document.getElementById("new-post");
+        if (newPost) {
+            newPost.style.display = newPost.style.display === 'none' ? 'block' : 'none';
+        }
+    });
+
+    document.getElementById("toggle-editor").addEventListener('click', () => {
+        document.getElementById("new-post").style.display = 
+            document.getElementById("new-post").style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById("edit-about-btn")?.addEventListener('click', () => {
+        const aboutForm = document.getElementById("about-form");
+        if (aboutForm) {
+            aboutForm.style.display = aboutForm.style.display === 'none' ? 'block' : 'none';
+        }
+    document.getElementById("edit-about-btn").addEventListener('click', () => {
+        document.getElementById("about-form").style.display = 
+            document.getElementById("about-form").style.display === 'none' ? 'block' : 'none';
+    });
+}
+
+// Initialization
+document.addEventListener('DOMContentLoaded', () => {
+    initializeEditors();
+    setupEventListeners();
+    updateAdminUI();
+});
+</script>
+</body>
+</html>

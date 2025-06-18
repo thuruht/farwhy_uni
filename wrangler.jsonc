@@ -1,19 +1,19 @@
 {
-  "$schema": "https://raw.githubusercontent.com/cloudflare/workerd/main/src/workerd/server/workerd.config.schema.json",
   "name": "farewell-unified",
   "main": "src/index.ts",
   "compatibility_date": "2025-03-07",
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "site": {
-    "bucket": "./public"
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
   },
   "d1_databases": [
     {
       "binding": "FWHY_D1",
       "database_name": "farewell-db",
-      "database_id": "YOUR_D1_DATABASE_ID_HERE"
+      "database_id": "76dc7b30-005a-4268-afa0-10b2fe242253"
     }
   ],
   "r2_buckets": [
@@ -25,8 +25,8 @@
   "kv_namespaces": [
     {
       "binding": "SESSIONS_KV",
-      "id": "YOUR_SESSIONS_KV_ID_HERE",
-      "preview_id": "YOUR_SESSIONS_KV_PREVIEW_ID_HERE"
+      "id": "2038b95e785545af8486bc353c3cbe62",
+      "preview_id": "2038b95e785545af8486bc353c3cbe62"
     }
   ],
   "vars": {
