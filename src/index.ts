@@ -31,38 +31,119 @@ app.get('/archives', async (c) => {
 // --- Modern API Routes ---
 const api = new Hono<{ Bindings: Env }>();
 
-// Events API
+// Events API (public)
 api.get('/events', (c) => handleEvents(c, 'list'));
 api.get('/events/slideshow', (c) => handleEvents(c, 'slideshow'));
-api.post('/events', (c) => handleEvents(c, 'create'));
-api.put('/events/:id', (c) => handleEvents(c, 'update'));
-api.delete('/events/:id', (c) => handleEvents(c, 'delete'));
 
-// Legacy sync from old site
+// Legacy sync from old site (public for testing)
 api.post('/sync-events', (c) => handleSync(c));
 
-// Auth API
-api.post('/login', (c) => handleAuth(c, 'login'));
-api.post('/logout', (c) => handleAuth(c, 'logout'));
-
-// --- Admin Dashboard & API (Requires Auth) ---
+// --- Admin Dashboard & API ---
 const admin = new Hono<{ Bindings: Env }>();
-admin.use('*', authenticate);
 
-// Serve the admin dashboard HTML
-admin.get('/', (c) => c.html(generateUnifiedDashboardHTML()));
+// Login page (no auth required)
+admin.get('/login', (c) => {
+  return c.html(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Login - Farewell/Howdy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/css/fleeting-journey.css">
+  <style>
+    .login-container {
+      max-width: 400px;
+      margin: 5rem auto;
+      padding: 2rem;
+      background: var(--base2);
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .login-form input {
+      padding: 0.75rem;
+      border: 2px solid var(--base1);
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+    .login-form button {
+      padding: 0.75rem;
+      background: var(--blue);
+      color: var(--base3);
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .login-form button:hover {
+      background: var(--cyan);
+    }
+    .error {
+      color: var(--red);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>Admin Login</h1>
+    <form class="login-form" id="loginForm">
+      <input type="password" id="password" placeholder="Admin Password" required>
+      <button type="submit">Login</button>
+    </form>
+    <div id="error" class="error"></div>
+  </div>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+      const errorDiv = document.getElementById('error');
+      
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          window.location.href = '/admin';
+        } else {
+          errorDiv.textContent = result.error || 'Login failed';
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Login failed - please try again';
+      }
+    });
+  </script>
+</body>
+</html>`);
+});
 
-// Admin APIs for Events
-admin.get('/api/events', (c) => handleEvents(c, 'list'));
-admin.post('/api/events', (c) => handleEvents(c, 'create'));
-admin.put('/api/events/:id', (c) => handleEvents(c, 'update'));
-admin.delete('/api/events/:id', (c) => handleEvents(c, 'delete'));
+// Auth API (no auth required)
+admin.post('/api/login', (c) => handleAuth(c, 'login'));
+admin.post('/api/logout', (c) => handleAuth(c, 'logout'));
 
-// Admin APIs for flyer uploads
-admin.post('/api/flyers/upload', (c) => handleEvents(c, 'upload-flyer'));
+// Serve the admin dashboard HTML (requires auth)
+admin.get('/', authenticate, (c) => c.html(generateUnifiedDashboardHTML()));
 
-// Route for triggering the legacy sync
-admin.post('/api/sync-events', (c) => handleSync(c));
+// Admin APIs for Events (requires auth)
+admin.get('/api/events', authenticate, (c) => handleEvents(c, 'list'));
+admin.post('/api/events', authenticate, (c) => handleEvents(c, 'create'));
+admin.put('/api/events/:id', authenticate, (c) => handleEvents(c, 'update'));
+admin.delete('/api/events/:id', authenticate, (c) => handleEvents(c, 'delete'));
+
+// Admin APIs for flyer uploads (requires auth)
+admin.post('/api/flyers/upload', authenticate, (c) => handleEvents(c, 'upload-flyer'));
+
+// Route for triggering the legacy sync (requires auth)
+admin.post('/api/sync-events', authenticate, (c) => handleSync(c));
 
 // Wire up the routers
 app.route('/api', api);
@@ -72,23 +153,29 @@ app.route('/admin', admin);
 app.use('*', async (c, next) => {
   const host = c.req.header('host') || '';
   
-  // Admin domain: serve /admin dashboard and /login.html
+  // Admin domain: handle admin routes
   if (host.startsWith('admin.')) {
-    if (c.req.path === '/login.html') {
-      try {
-        const asset = await c.env.ASSETS.fetch(new Request(`http://localhost${c.req.path}`));
-        return new Response(asset.body, {
-          headers: asset.headers
-        });
-      } catch (e) {
-        return c.text('Login page not found', 404);
-      }
+    // Let admin routes handle all admin domain requests
+    if (c.req.path.startsWith('/admin') || 
+        c.req.path.startsWith('/api/') || 
+        c.req.path.startsWith('/login') ||
+        c.req.path.startsWith('/css/') ||
+        c.req.path.startsWith('/jss/')) {
+      return await next();
     }
-    if (c.req.path.startsWith('/admin')) {
-      return await next(); // Let /admin routes handle
+    // Redirect root to login page
+    if (c.req.path === '/') {
+      return c.redirect('/login');
     }
-    // Redirect all other requests to /admin
-    return c.redirect('/admin');
+    // Serve static assets for admin domain
+    try {
+      const asset = await c.env.ASSETS.fetch(new Request(`http://localhost${c.req.path}`));
+      return new Response(asset.body, {
+        headers: asset.headers
+      });
+    } catch (e) {
+      return c.redirect('/login');
+    }
   }
   
   // Dev/public domain: serve frontend

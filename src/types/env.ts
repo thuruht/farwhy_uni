@@ -5,8 +5,19 @@ export interface Env {
   SESSIONS_KV: KVNamespace;
   ASSETS: Fetcher;
   ADMIN_USERNAME: string;
-  ADMIN_PASSWORD?: string;
+  ADMIN_PASSWORD_HASH: string;
+  JWT_SECRET: string;
 }
+
+export interface User {
+  username: string;
+  isAdmin: boolean;
+  authMethod: 'jwt' | 'session';
+}
+
+export type Variables = {
+  user: User;
+};
 
 declare global {
   interface D1Database {
@@ -33,7 +44,7 @@ declare global {
   
   interface KVNamespace {
     get(key: string): Promise<string | null>;
-    put(key: string, value: string): Promise<void>;
+    put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
     delete(key: string): Promise<void>;
   }
   
