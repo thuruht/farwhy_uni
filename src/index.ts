@@ -194,12 +194,20 @@ app.use('/api/*', cors());
 app.use('*', async (c, next) => {
   const host = c.req.header('host') || '';
   console.log(`[DEBUG] Host: ${host}, Path: ${c.req.path}`);
-  
-  // Admin domain: handle admin routes
+
+  // --- Admin Domain ---
   if (host.startsWith('admin.')) {
     console.log(`[DEBUG] Admin domain detected, path: ${c.req.path}`);
-    
-    // Serve static assets for admin domain (CSS, JS, fonts, images etc.)
+
+    // First, handle API routes - these should pass through to their handlers
+    if (c.req.path.startsWith('/api/') || 
+        c.req.path.startsWith('/list/') || 
+        c.req.path.startsWith('/admin/')) {
+      console.log(`[DEBUG] Admin API route detected, passing to handler: ${c.req.path}`);
+      return await next();
+    }
+
+    // Then handle static assets
     if (c.req.path.startsWith('/css/') ||
         c.req.path.startsWith('/jss/') ||
         c.req.path.startsWith('/img/') ||
@@ -211,63 +219,45 @@ app.use('*', async (c, next) => {
           headers: asset.headers
         });
       } catch (e) {
+        console.error(`[ERROR] Asset not found: ${c.req.path}`, e);
         return c.text('Asset not found', 404);
       }
     }
-    
-    // Handle admin API routes
-    if (c.req.path.startsWith('/admin/api')) {
-      console.log(`[DEBUG] Admin API route detected: ${c.req.path}`);
-      return await next();
-    }
-    
-    // Handle admin dashboard routes
-    if (c.req.path.startsWith('/admin') && c.req.path !== '/admin/login') {
-      console.log(`[DEBUG] Admin dashboard route detected: ${c.req.path}`);
-      return await next();
-    }
-    
-    // Serve login page directly at root and /login and /admin/login
-    if (c.req.path === '/' || c.req.path === '/login' || c.req.path === '/admin/login') {
-      console.log(`[DEBUG] Serving login page at: ${c.req.path}`);
-      // Serve login page directly here instead of redirecting
-      return await serveLoginPage(c);
-    }
-    
-    // For any other path on admin domain, serve login
-    console.log(`[DEBUG] Other admin path, serving login: ${c.req.path}`);
-    return await serveLoginPage(c);
+
+    // For everything else on admin domain, serve the login page
+    console.log(`[DEBUG] Serving login page for path: ${c.req.path}`);
+    return serveLoginPage(c);
   }
   
-  // Dev/public domain: serve frontend
-  if (host.startsWith('dev.')) {
-    // Handle API endpoints first
-    if (c.req.path.startsWith('/api/') || 
-        c.req.path.startsWith('/list/') || 
+  // --- Development/Public Domain ---
+  else if (host.startsWith('dev.')) {
+    // Let API routes pass through
+    if (c.req.path.startsWith('/api/') ||
+        c.req.path.startsWith('/list/') ||
         c.req.path.startsWith('/archives')) {
       return await next();
     }
-    
-    // Serve static assets
+
+    // Serve static assets with SPA fallback
     try {
       const asset = await c.env.ASSETS.fetch(new Request(`http://localhost${c.req.path}`));
       return new Response(asset.body, {
         headers: asset.headers
       });
     } catch (e) {
-      // Fallback to index.html for SPA
+      // Fallback to index.html for SPA routes
       try {
         const asset = await c.env.ASSETS.fetch(new Request('http://localhost/index.html'));
         return new Response(asset.body, {
-          headers: asset.headers
+          headers: { 'Content-Type': 'text/html; charset=utf-8' }
         });
       } catch (e) {
         return c.text('Site not found', 404);
       }
     }
   }
-  
-  // Continue to next handler for non-host-specific routes
+
+  // --- Unknown domain ---
   return await next();
 });
 
