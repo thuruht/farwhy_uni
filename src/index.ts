@@ -1,5 +1,5 @@
 // src/index.ts
-import { Hono, Context } from 'hono';
+import { Hono, Context, Next } from 'hono';
 import { cors } from 'hono/cors';
 import { handleAuth } from './handlers/auth';
 import { handleEvents } from './handlers/events';
@@ -70,26 +70,85 @@ app.use('*', async (c, next) => {
   await next();
 });
 
-// Admin API routes
-app.post('/api/login', (c) => handleAuth(c, 'login'));
-app.post('/api/logout', (c) => handleAuth(c, 'logout'));
+// Conditional admin authentication middleware
+const requireAdminAuth = async (c: Context<{ Bindings: Env }>, next: Next) => {
+  const host = c.req.header('host') || '';
+  if (host.startsWith('admin.')) {
+    return authenticate(c, next);
+  }
+  // For non-admin domains, just continue
+  await next();
+};
 
-// Protected admin API routes
-app.use('/api/*', authenticate);
-app.get('/api/events', (c) => handleEvents(c, 'list'));
-app.post('/api/events', (c) => handleEvents(c, 'create'));
-app.put('/api/events/:id', (c) => handleEvents(c, 'update'));
-app.delete('/api/events/:id', (c) => handleEvents(c, 'delete'));
-app.get('/api/blog/posts', async (c) => {
-  const response = await handleBlog(c.req.raw, c.env);
-  return new Response(response.body, response);
-});
-app.post('/api/blog/posts', async (c) => {
-  const response = await handleBlog(c.req.raw, c.env);
-  return new Response(response.body, response);
+// Admin API routes (only for admin subdomain)
+app.post('/api/login', async (c) => {
+  const host = c.req.header('host') || '';
+  if (!host.startsWith('admin.')) {
+    return c.json({ error: 'Not found' }, 404);
+  }
+  return handleAuth(c, 'login');
 });
 
-// Public API routes (for dev.farewellcafe.com)
+app.post('/api/logout', async (c) => {
+  const host = c.req.header('host') || '';
+  if (!host.startsWith('admin.')) {
+    return c.json({ error: 'Not found' }, 404);
+  }
+  return handleAuth(c, 'logout');
+});
+
+// Protected admin API routes (auth required only for admin subdomain)
+app.get('/api/events', requireAdminAuth, async (c) => {
+  const host = c.req.header('host') || '';
+  if (host.startsWith('admin.')) {
+    return handleEvents(c, 'list');
+  }
+  return c.json({ error: 'Not found' }, 404);
+});
+
+app.post('/api/events', requireAdminAuth, async (c) => {
+  const host = c.req.header('host') || '';
+  if (host.startsWith('admin.')) {
+    return handleEvents(c, 'create');
+  }
+  return c.json({ error: 'Not found' }, 404);
+});
+
+app.put('/api/events/:id', requireAdminAuth, async (c) => {
+  const host = c.req.header('host') || '';
+  if (host.startsWith('admin.')) {
+    return handleEvents(c, 'update');
+  }
+  return c.json({ error: 'Not found' }, 404);
+});
+
+app.delete('/api/events/:id', requireAdminAuth, async (c) => {
+  const host = c.req.header('host') || '';
+  if (host.startsWith('admin.')) {
+    return handleEvents(c, 'delete');
+  }
+  return c.json({ error: 'Not found' }, 404);
+});
+
+app.get('/api/blog/posts', requireAdminAuth, async (c) => {
+  const host = c.req.header('host') || '';
+  if (host.startsWith('admin.')) {
+    const response = await handleBlog(c.req.raw, c.env);
+    return new Response(response.body, response);
+  }
+  return c.json({ error: 'Not found' }, 404);
+});
+
+app.post('/api/blog/posts', requireAdminAuth, async (c) => {
+  const host = c.req.header('host') || '';
+  if (host.startsWith('admin.')) {
+    const response = await handleBlog(c.req.raw, c.env);
+    return new Response(response.body, response);
+  }
+  return c.json({ error: 'Not found' }, 404);
+});
+
+// Public API routes (for dev.farewellcafe.com and other non-admin domains)
 app.get('/list/:state', (c) => handleEvents(c, 'list', { venue: c.req.param('state') }));
 app.get('/archives', (c) => handleEvents(c, 'archives'));
 app.get('/api/events/slideshow', (c) => handleEvents(c, 'slideshow'));
