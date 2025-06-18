@@ -271,6 +271,34 @@ app.use('*', async (c, next) => {
   return await next();
 });
 
+// Add middleware to check host and serve login page for admin domain
+app.use('*', async (c, next) => {
+  const host = c.req.header('host') || '';
+  if (host.startsWith('admin.farewellcafe.com')) {
+    // Check if user is already authenticated
+    const cookie = c.req.header('cookie') || '';
+    const cookieMatch = cookie.match(/sessionToken=([^;]+)/);
+    const sessionToken = cookieMatch ? cookieMatch[1] : null;
+    if (sessionToken) {
+      // User has a session, try to verify it
+      try {
+        const sessionData = await c.env.SESSIONS_KV.get(sessionToken);
+        if (sessionData) {
+          // Valid session, let them continue to admin routes
+          await next();
+          return;
+        }
+      } catch (e) {
+        console.error('Session verification failed:', e);
+      }
+    }
+    // No valid session, serve login page
+    console.log('[DEBUG] Serving login page for admin domain');
+    return serveLoginPage(c);
+  }
+  await next();
+});
+
 // --- Legacy API Endpoints (for ffww frontend compatibility) ---
 // These endpoints match what the original script.js expects
 
