@@ -49,7 +49,16 @@ export async function handleSync(c: Context<{ Bindings: Env }>) {
     }
   }
 
-  if (statements.length > 0) await FWHY_D1.batch(statements);
+  // Execute all statements
+  if (statements.length > 0) {
+    try {
+      for (const stmt of statements) {
+        await stmt.run();
+      }
+    } catch (e: any) {
+      errors.push(`Database error: ${e.message}`);
+    }
+  }
   if (errors.length > 0) return c.json({ success: false, error: 'Sync completed with errors', details: errors, imported: totalImported }, 500);
   return c.json({ success: true, message: 'Sync completed successfully.', imported: totalImported });
 }

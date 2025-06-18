@@ -344,3 +344,107 @@ async function setFeaturedContent(request: Request, env: any): Promise<Response>
     });
   }
 }
+
+async function getPostById(request: Request, env: any, postId: string): Promise<Response> {
+  try {
+    const postsData = await env.BLOG_KV.get('blog:posts');
+    
+    if (!postsData) {
+      return new Response(JSON.stringify({ success: false, error: 'Post not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const posts = JSON.parse(postsData);
+    const post = posts.find((p: any) => p.id === postId);
+    
+    if (!post) {
+      return new Response(JSON.stringify({ success: false, error: 'Post not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true, data: post }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('Get post by ID error:', error);
+    return new Response(JSON.stringify({ success: false, error: 'Failed to fetch post' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+async function updatePostById(request: Request, env: any, postId: string): Promise<Response> {
+  try {
+    const updateData = await request.json();
+    const postsData = await env.BLOG_KV.get('blog:posts');
+    const posts = postsData ? JSON.parse(postsData) : [];
+    
+    const postIndex = posts.findIndex((p: any) => p.id === postId);
+    
+    if (postIndex === -1) {
+      return new Response(JSON.stringify({ success: false, error: 'Post not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Update the post
+    posts[postIndex] = {
+      ...posts[postIndex],
+      ...updateData,
+      id: postId, // Ensure ID doesn't get overwritten
+      updated_at: new Date().toISOString()
+    };
+
+    await env.BLOG_KV.put('blog:posts', JSON.stringify(posts));
+
+    return new Response(JSON.stringify({ success: true, data: posts[postIndex] }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('Update post by ID error:', error);
+    return new Response(JSON.stringify({ success: false, error: 'Failed to update post' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+async function deletePostById(request: Request, env: any, postId: string): Promise<Response> {
+  try {
+    const postsData = await env.BLOG_KV.get('blog:posts');
+    const posts = postsData ? JSON.parse(postsData) : [];
+    
+    const postIndex = posts.findIndex((p: any) => p.id === postId);
+    
+    if (postIndex === -1) {
+      return new Response(JSON.stringify({ success: false, error: 'Post not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Remove the post
+    posts.splice(postIndex, 1);
+    
+    await env.BLOG_KV.put('blog:posts', JSON.stringify(posts));
+
+    return new Response(JSON.stringify({ success: true, message: 'Post deleted successfully' }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('Delete post by ID error:', error);
+    return new Response(JSON.stringify({ success: false, error: 'Failed to delete post' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}

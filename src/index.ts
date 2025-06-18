@@ -17,13 +17,18 @@ app.use('/api/*', cors());
 // --- Host-based Routing (FIRST - before other routes) ---
 app.use('*', async (c, next) => {
   const host = c.req.header('host') || '';
+  console.log(`[DEBUG] Host: ${host}, Path: ${c.req.path}`);
   
   // Admin domain: handle admin routes
   if (host.startsWith('admin.')) {
-    // Serve static assets for admin domain (CSS, JS, etc.)
+    console.log(`[DEBUG] Admin domain detected, path: ${c.req.path}`);
+    
+    // Serve static assets for admin domain (CSS, JS, fonts, images etc.)
     if (c.req.path.startsWith('/css/') ||
         c.req.path.startsWith('/jss/') ||
-        c.req.path.startsWith('/img/')) {
+        c.req.path.startsWith('/img/') ||
+        c.req.path.startsWith('/f/')) {
+      console.log(`[DEBUG] Serving static asset: ${c.req.path}`);
       try {
         const asset = await c.env.ASSETS.fetch(new Request(`http://localhost${c.req.path}`));
         return new Response(asset.body, {
@@ -36,15 +41,18 @@ app.use('*', async (c, next) => {
     
     // Handle admin routes
     if (c.req.path.startsWith('/admin')) {
+      console.log(`[DEBUG] Admin route detected: ${c.req.path}`);
       return await next();
     }
     
     // Redirect root and /login to admin login page
     if (c.req.path === '/' || c.req.path === '/login') {
+      console.log(`[DEBUG] Redirecting ${c.req.path} to /admin/login`);
       return c.redirect('/admin/login');
     }
     
     // For any other path on admin domain, redirect to login
+    console.log(`[DEBUG] Other admin path, redirecting to login: ${c.req.path}`);
     return c.redirect('/admin/login');
   }
   
@@ -126,226 +134,169 @@ const admin = new Hono<{ Bindings: Env }>();
 
 // Login page (no auth required)
 admin.get('/login', (c) => {
+  console.log('[DEBUG] Admin login route hit!');
   return c.html(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Administrate Me! - Farewell/Howdy</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>admin login</title>
+  <link rel="stylesheet" href="/css/ccssss.css">
   <link rel="stylesheet" href="/css/fleeting-journey.css">
   <style>
     body {
-      background: linear-gradient(135deg, var(--magenta), var(--cyan));
+      background: var(--header-bg);
+      font-family: var(--font-main, 'Lora', serif);
+      margin: 0;
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      font-family: var(--font-main);
-      margin: 0;
-      padding: 2rem;
+      justify-content: flex-start;
     }
-    
-    .login-container {
-      max-width: 450px;
+    .admin-header {
       width: 100%;
-      text-align: center;
-      background: rgba(0, 23, 31, 0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 2rem;
-      padding: 3rem 2.5rem;
-      box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.25),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
-      border: 2px solid var(--cyan);
+      background: var(--primary-bg-color) url('/img/bg4.png') center/cover no-repeat;
+      background-attachment: fixed;
+      border-bottom: 1px solid var(--nav-border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 212px;
     }
-    
-    .login-container h1 {
-      color: var(--base3);
-      font-size: 3rem;
-      margin-bottom: 0.5rem;
-      font-family: var(--font-hnb2);
-      text-shadow: 0 0 20px var(--cyan);
-      background: linear-gradient(135deg, var(--cyan), var(--magenta));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .admin-header h1 {
+      font-family: var(--font-db, 'Lora', serif);
+      font-size: clamp(2.5rem, 8vw, 4em);
+      color: var(--secondary-bg-color);
+      -webkit-text-stroke: 1px black;
+      text-shadow: -1px -1px 0 #000,
+           1px -1px 0 #000,
+          -1px  1px 0 #000,
+           1px  1px 0 #000,
+          -8px 8px 0px var(--nav-border-color);
+      margin: 0;
     }
-    
-    .login-subtitle {
-      color: var(--base1);
-      font-size: 1.2rem;
-      margin-bottom: 2.5rem;
-      font-family: var(--font-hnm11);
-      opacity: 0.8;
-    }
-    
-    .login-form {
+    .login-container {
+      background: var(--card-bg-color);
+      border: 2px solid var(--nav-border-color);
+      border-radius: 8px;
+      box-shadow: -5px 5px 0px rgba(0,0,0,0.08);
+      padding: 2.5rem 2rem 2rem 2rem;
+      margin: 2rem auto 0 auto;
+      max-width: 400px;
+      width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      align-items: center;
+    }
+    .login-title {
+      font-family: var(--font-db, 'Lora', serif);
+      font-size: 2.2rem;
+      color: var(--accent-color);
+      margin-bottom: 1.5rem;
+      text-shadow: 2px 2px 4px var(--header-text-shadow);
+    }
+    .form-group {
+      width: 100%;
+      margin-bottom: 1.2rem;
       text-align: left;
     }
-    
-    .login-form label {
-      font-weight: 600;
-      color: var(--base2);
-      margin-bottom: 0.5rem;
-      font-size: 1.1rem;
-      font-family: var(--font-hnm11);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    label {
+      font-family: var(--font-main, 'Lora', serif);
+      color: var(--accent-color);
+      font-weight: bold;
+      margin-bottom: 0.3rem;
+      display: block;
     }
-    
-    .login-form input {
-      padding: 1.2rem;
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-radius: 1rem;
-      font-size: 1.1rem;
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--base3);
-      font-family: var(--font-main);
-      backdrop-filter: blur(5px);
-      transition: all 0.3s ease;
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1.5px solid var(--nav-border-color);
+      border-radius: 4px;
+      font-family: var(--font-hnm11, 'Lora', serif);
+      font-size: 1rem;
+      background: rgba(255,255,255,0.95);
+      color: var(--text-color);
+      transition: border 0.2s;
     }
-    
-    .login-form input:focus {
+    input:focus {
       outline: none;
-      border-color: var(--cyan);
-      background: rgba(255, 255, 255, 0.1);
-      box-shadow: 
-        0 0 0 3px rgba(42, 161, 152, 0.2),
-        0 0 20px rgba(42, 161, 152, 0.3);
+      border-color: var(--secondary-bg-color);
+      box-shadow: -3px 3px 0px rgba(0,0,0,0.08);
+    }
+    .login-btn {
+      width: 100%;
+      padding: 1rem 2rem;
+      background: var(--button-bg-color);
+      color: var(--button-text-color);
+      font-family: var(--font-main, 'Lora', serif);
+      font-weight: bold;
+      border-radius: 4px;
+      border: 2px solid var(--text-color);
+      font-size: 1.1rem;
+      margin-top: 0.5rem;
+      cursor: pointer;
+      transition: all var(--transition-speed) ease;
+    }
+    .login-btn:hover {
+      background: var(--accent-color);
+      color: white;
       transform: translateY(-2px);
     }
-    
-    .login-form input::placeholder {
-      color: var(--base1);
-      opacity: 0.6;
-    }
-    
-    .login-form button {
-      padding: 1.3rem 2rem;
-      background: linear-gradient(135deg, var(--blue), var(--violet));
-      color: var(--base3);
-      border: 2px solid var(--cyan);
-      border-radius: 1rem;
-      font-size: 1.2rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-family: var(--font-hnb2);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-top: 1rem;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .login-form button:before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s;
-    }
-    
-    .login-form button:hover {
-      background: linear-gradient(135deg, var(--cyan), var(--magenta));
-      transform: translateY(-3px);
-      box-shadow: 
-        0 15px 25px rgba(0, 0, 0, 0.2),
-        0 0 30px var(--cyan);
-      border-color: var(--magenta);
-    }
-    
-    .login-form button:hover:before {
-      left: 100%;
-    }
-    
-    .login-form button:active {
-      transform: translateY(-1px);
-    }
-    
     .error {
-      color: var(--red);
+      color: var(--redd);
+      margin-top: 0.7rem;
+      font-size: 1rem;
+      min-height: 1.2em;
       text-align: center;
-      font-weight: 600;
-      background: rgba(220, 50, 47, 0.1);
-      padding: 1rem;
-      border-radius: 1rem;
-      border: 2px solid var(--red);
-      font-family: var(--font-main);
-      margin-top: 1.5rem;
-      backdrop-filter: blur(5px);
-      display: none;
+      font-family: var(--font-main, 'Lora', serif);
     }
-    
-    .error.show {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* Responsive design */
-    @media (max-width: 768px) {
-      .login-container {
-        margin: 1rem;
-        padding: 2rem 1.5rem;
-      }
-      
-      .login-container h1 {
-        font-size: 2.5rem;
-      }
+    @media (max-width: 600px) {
+      .login-container { padding: 1.2rem 0.5rem; }
+      .admin-header { min-height: 120px; padding: 0.5rem; }
+      .admin-header h1 { font-size: 2rem; }
     }
   </style>
 </head>
-<body>
-  <div class="login-container">
-    <h1>ADMINISTRATE ME!</h1>
-    <p class="login-subtitle">Farewell & Howdy Management Portal</p>
-    <form class="login-form" id="loginForm">
-      <label for="username">Username</label>
-      <input type="text" id="username" required placeholder="Enter your username">
-      <label for="password">Password</label>
-      <input type="password" id="password" required placeholder="Enter your password">
-      <button type="submit">AUTHENTICATE</button>
-    </form>
-    <div id="error" class="error"></div>
+<body data-state="farewell">
+  <div class="admin-header">
+    <h1>administration!</h1>
   </div>
+  <main>
+    <div class="login-container">
+      <div class="login-title">log in</div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="password">pass:</label>
+          <input type="password" id="password" name="password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="login-btn">let me in</button>
+        <div id="error" class="error"></div>
+      </form>
+    </div>
+  </main>
   <script>
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const errorDiv = document.getElementById('error');
-      
+      const formData = new FormData(e.target);
       try {
         const response = await fetch('/admin/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify({
+            username: 'anmid',
+            password: formData.get('password')
+          })
         });
-        
         const result = await response.json();
-        
         if (result.success) {
           window.location.href = '/admin';
         } else {
-          errorDiv.textContent = result.error || 'Login failed';
-          errorDiv.classList.add('show');
-          setTimeout(() => errorDiv.classList.remove('show'), 5000);
+          document.getElementById('error').textContent = result.error || 'nope.';
         }
-      } catch (error) {
-        errorDiv.textContent = 'Login failed - please try again';
-        errorDiv.classList.add('show');
-        setTimeout(() => errorDiv.classList.remove('show'), 5000);
+      } catch (err) {
+        document.getElementById('error').textContent = 'try again later.';
       }
     });
   </script>
@@ -357,8 +308,63 @@ admin.get('/login', (c) => {
 admin.post('/api/login', (c) => handleAuth(c, 'login'));
 admin.post('/api/logout', (c) => handleAuth(c, 'logout'));
 
-// Serve the admin dashboard HTML (requires auth)
-admin.get('/', authenticate, (c) => c.html(generateUnifiedDashboardHTML()));
+// Serve the admin dashboard HTML (redirect to login if not authenticated)
+admin.get('/', async (c) => {
+  const { SESSIONS_KV, JWT_SECRET } = c.env;
+  const cookie = c.req.header('cookie') || '';
+  const match = cookie.match(/sessionToken=([^;]+)/);
+  
+  // Check if user is authenticated
+  let isAuthenticated = false;
+  
+  if (match) {
+    const token = match[1];
+    
+    // Try JWT verification
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const [header, payload, signature] = parts;
+        const data = `${header}.${payload}`;
+        
+        const encoder = new TextEncoder();
+        const key = await crypto.subtle.importKey(
+          'raw',
+          encoder.encode(JWT_SECRET),
+          { name: 'HMAC', hash: 'SHA-256' },
+          false,
+          ['verify']
+        );
+        
+        const signatureBuffer = Uint8Array.from(
+          atob(signature.replace(/-/g, '+').replace(/_/g, '/')), 
+          c => c.charCodeAt(0)
+        );
+        
+        const isValid = await crypto.subtle.verify('HMAC', key, signatureBuffer, encoder.encode(data));
+        if (isValid) {
+          isAuthenticated = true;
+        }
+      }
+    } catch (e) {
+      // JWT verification failed, try session
+    }
+    
+    // Fallback to KV session check
+    if (!isAuthenticated && token.includes('-')) {
+      const session = await SESSIONS_KV.get(token);
+      if (session) {
+        isAuthenticated = true;
+      }
+    }
+  }
+  
+  if (isAuthenticated) {
+    return c.html(generateUnifiedDashboardHTML());
+  } else {
+    return c.redirect('/admin/login');
+  }
+});
 
 // Admin APIs for Events (requires auth)
 admin.get('/api/events', authenticate, (c) => handleEvents(c, 'list'));
@@ -429,8 +435,10 @@ admin.delete('/api/blog/:id', authenticate, async (c) => {
 admin.post('/api/sync-events', authenticate, (c) => handleSync(c));
 
 // Wire up the routers (IMPORTANT: Must be after router definitions but before middleware)
+console.log('[DEBUG] Mounting routers...');
 app.route('/api', api);
 app.route('/admin', admin);
+console.log('[DEBUG] Routers mounted successfully');
 
 // --- Image serving from R2 ---
 app.get('/images/*', async (c) => {
@@ -443,7 +451,14 @@ app.get('/images/*', async (c) => {
     }
     
     const headers = new Headers();
-    headers.set('content-type', 'image/jpeg'); // Default to JPEG for flyer images
+    
+    // Detect content type from file extension
+    const contentType = imagePath.toLowerCase().endsWith('.png') ? 'image/png' :
+                       imagePath.toLowerCase().endsWith('.webp') ? 'image/webp' :
+                       imagePath.toLowerCase().endsWith('.gif') ? 'image/gif' :
+                       'image/jpeg'; // Default to JPEG
+    
+    headers.set('content-type', contentType);
     headers.set('cache-control', 'public, max-age=31536000'); // 1 year cache
     
     return new Response(object.body, {
@@ -457,12 +472,18 @@ app.get('/images/*', async (c) => {
 
 // --- Fallback for any unmatched routes ---
 app.get('*', async (c) => {
+  const host = c.req.header('host') || '';
+  console.log(`[DEBUG] FALLBACK HIT - Host: ${host}, Path: ${c.req.path}`);
+  console.log(`[DEBUG] This should NOT happen for admin.farewellcafe.com/`);
+  
   try {
     const asset = await c.env.ASSETS.fetch(new Request(`http://localhost${c.req.path}`));
+    console.log(`[DEBUG] Fallback serving asset: ${c.req.path}`);
     return new Response(asset.body, {
       headers: asset.headers
     });
   } catch (e) {
+    console.log(`[DEBUG] Fallback asset not found: ${c.req.path}`);
     return c.text('Not found', 404);
   }
 });

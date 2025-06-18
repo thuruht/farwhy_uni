@@ -1,7 +1,7 @@
 {
   "name": "farewell-unified",
   "main": "src/index.ts",
-  "compatibility_date": "2025-03-07",
+  "compatibility_date": "2025-06-18",
   "compatibility_flags": [
     "nodejs_compat"
   ],
@@ -42,6 +42,12 @@
     "enabled": true,
     "head_sampling_rate": 1
   },
+  "tail_consumers": [
+    {
+      "service": "farewell-unified",
+      "environment": "production"
+    }
+  ],
   "routes": [
     { "pattern": "dev.farewellcafe.com/*", "zone_name": "farewellcafe.com" },
     { "pattern": "admin.farewellcafe.com/*", "zone_name": "farewellcafe.com" }

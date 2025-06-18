@@ -77,3 +77,16 @@ export interface Event {
   event_time?: string;
   created_at?: string;
 }
+
+// Blog Post Types
+export interface BlogPost {
+  id: string | number;
+  title: string;
+  content: string;
+  date?: string;
+  image_url?: string;
+  created_at: string;
+  updated_at?: string;
+  slug?: string;
+  status?: 'published' | 'draft';
+}
