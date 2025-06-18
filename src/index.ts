@@ -9,7 +9,73 @@ import { authenticate } from './middleware/auth';
 import { generateUnifiedDashboardHTML } from './dashboard/unified-admin-dashboard';
 import { Env } from './types/env';
 
-const app = new Hono<{ Bindings: Env }>();
+// ====================================================================================
+// ADMIN APPLICATION (admin.farewellcafe.com)
+// ====================================================================================
+const adminApp = new Hono<{ Bindings: Env }>();
+
+// --- Admin API Router ---
+const adminApi = new Hono<{ Bindings: Env }>();
+adminApi.use('*', cors());
+
+// Auth endpoints (public)
+adminApi.post('/login', (c) => handleAuth(c, 'login'));
+adminApi.post('/logout', (c) => handleAuth(c, 'logout'));
+
+// Event management (protected)
+adminApi.get('/events', authenticate, (c) => handleEvents(c, 'list'));
+adminApi.post('/events', authenticate, (c) => handleEvents(c, 'create'));
+adminApi.put('/events/:id', authenticate, (c) => handleEvents(c, 'update'));
+adminApi.delete('/events/:id', authenticate, (c) => handleEvents(c, 'delete'));
+adminApi.post('/events/flyer', authenticate, (c) => handleEvents(c, 'upload-flyer'));
+
+// Blog management (protected)
+adminApi.get('/blog/posts', authenticate, (c) => handleBlog(c.req.raw, c.env));
+adminApi.post('/blog/posts', authenticate, (c) => handleBlog(c.req.raw, c.env));
+adminApi.put('/blog/:id', authenticate, (c) => handleBlog(c.req.raw, c.env));
+adminApi.delete('/blog/:id', authenticate, (c) => handleBlog(c.req.raw, c.env));
+adminApi.post('/blog/featured', authenticate, (c) => handleBlog(c.req.raw, c.env));
+
+// Legacy sync (protected)
+adminApi.post('/sync-events', authenticate, (c) => handleSync(c));
+
+// Mount admin API under /api
+adminApp.route('/api', adminApi);
+
+// --- Admin UI Routes ---
+
+// Serve static assets for admin domain
+adminApp.get('/css/*', async (c) => {
+  try {
+    return await c.env.ASSETS.fetch(c.req.raw);
+  } catch (e) {
+    return c.text('Asset not found', 404);
+  }
+});
+
+adminApp.get('/jss/*', async (c) => {
+  try {
+    return await c.env.ASSETS.fetch(c.req.raw);
+  } catch (e) {
+    return c.text('Asset not found', 404);
+  }
+});
+
+adminApp.get('/img/*', async (c) => {
+  try {
+    return await c.env.ASSETS.fetch(c.req.raw);
+  } catch (e) {
+    return c.text('Asset not found', 404);
+  }
+});
+
+adminApp.get('/f/*', async (c) => {
+  try {
+    return await c.env.ASSETS.fetch(c.req.raw);
+  } catch (e) {
+    return c.text('Asset not found', 404);
+  }
+});
 
 // Function to serve the login page with username field
 function serveLoginPage(c: Context<{ Bindings: Env }>) {
@@ -187,414 +253,119 @@ function serveLoginPage(c: Context<{ Bindings: Env }>) {
 </html>`);
 }
 
-// Add CORS for API endpoints
-app.use('/api/*', cors());
+// Serve login page for unauthenticated users
+adminApp.get('/login', (c) => serveLoginPage(c));
 
-// --- Host-based Routing (FIRST - before other routes) ---
-app.use('*', async (c, next) => {
-  const host = c.req.header('host') || '';
-  console.log(`[DEBUG] Host: ${host}, Path: ${c.req.path}`);
-
-  // --- Admin Domain ---
-  if (host.startsWith('admin.')) {
-    console.log(`[DEBUG] Admin domain detected, path: ${c.req.path}`);
-
-    // First, handle API routes - these should pass through to their handlers
-    if (c.req.path.startsWith('/api/') || 
-        c.req.path.startsWith('/list/') || 
-        c.req.path.startsWith('/admin/')) {
-      console.log(`[DEBUG] Admin API route detected, passing to handler: ${c.req.path}`);
-      return await next();
-    }
-
-    // Then handle static assets
-    if (c.req.path.startsWith('/css/') ||
-        c.req.path.startsWith('/jss/') ||
-        c.req.path.startsWith('/img/') ||
-        c.req.path.startsWith('/f/')) {
-      console.log(`[DEBUG] Serving static asset: ${c.req.path}`);
-      try {
-        const asset = await c.env.ASSETS.fetch(new Request(`http://localhost${c.req.path}`));
-        return new Response(asset.body, {
-          headers: asset.headers
-        });
-      } catch (e) {
-        console.error(`[ERROR] Asset not found: ${c.req.path}`, e);
-        return c.text('Asset not found', 404);
-      }
-    }
-
-    // For everything else on admin domain, serve the login page
-    console.log(`[DEBUG] Serving login page for path: ${c.req.path}`);
-    return serveLoginPage(c);
-  }
-  
-  // --- Development/Public Domain ---
-  else if (host.startsWith('dev.')) {
-    // Let API routes pass through
-    if (c.req.path.startsWith('/api/') ||
-        c.req.path.startsWith('/list/') ||
-        c.req.path.startsWith('/archives')) {
-      return await next();
-    }
-
-    // Serve static assets with SPA fallback
-    try {
-      const asset = await c.env.ASSETS.fetch(new Request(`http://localhost${c.req.path}`));
-      return new Response(asset.body, {
-        headers: asset.headers
-      });
-    } catch (e) {
-      // Fallback to index.html for SPA routes
-      try {
-        const asset = await c.env.ASSETS.fetch(new Request('http://localhost/index.html'));
-        return new Response(asset.body, {
-          headers: { 'Content-Type': 'text/html; charset=utf-8' }
-        });
-      } catch (e) {
-        return c.text('Site not found', 404);
-      }
-    }
-  }
-
-  // --- Unknown domain ---
-  return await next();
-});
-
-// Add middleware to check host and serve login page for admin domain
-app.use('*', async (c, next) => {
-  const host = c.req.header('host') || '';
-  if (host.startsWith('admin.farewellcafe.com')) {
-    // Check if user is already authenticated
-    const cookie = c.req.header('cookie') || '';
-    const cookieMatch = cookie.match(/sessionToken=([^;]+)/);
-    const sessionToken = cookieMatch ? cookieMatch[1] : null;
-    if (sessionToken) {
-      // User has a session, try to verify it
-      try {
-        const sessionData = await c.env.SESSIONS_KV.get(sessionToken);
-        if (sessionData) {
-          // Valid session, let them continue to admin routes
-          await next();
-          return;
-        }
-      } catch (e) {
-        console.error('Session verification failed:', e);
-      }
-    }
-    // No valid session, serve login page
-    console.log('[DEBUG] Serving login page for admin domain');
-    return serveLoginPage(c);
-  }
-  await next();
-});
-
-// --- Legacy API Endpoints (for ffww frontend compatibility) ---
-// These endpoints match what the original script.js expects
-
-// GET /list/{state} - Event listings per venue
-app.get('/list/:state', async (c) => {
-  const state = c.req.param('state'); // 'farewell' or 'howdy'
-  return handleEvents(c, 'list', { venue: state });
-});
-
-// GET /archives - Past events with type parameter
-app.get('/archives', async (c) => {
-  const type = c.req.query('type'); // 'farewell' or 'howdy'
-  return handleEvents(c, 'archives', { venue: type });
-});
-
-// --- Modern API Routes ---
-const api = new Hono<{ Bindings: Env }>();
-
-// Events API (public)
-api.get('/events', (c) => handleEvents(c, 'list'));
-api.get('/events/slideshow', (c) => handleEvents(c, 'slideshow'));
-
-// Blog API (public)
-api.get('/blog/posts', async (c) => {
-  const request = new Request(c.req.url, {
-    method: c.req.method,
-    headers: c.req.raw.headers
-  });
-  return await handleBlog(request, c.env);
-});
-api.get('/blog/featured', async (c) => {
-  const request = new Request(c.req.url, {
-    method: c.req.method,
-    headers: c.req.raw.headers
-  });
-  return await handleBlog(request, c.env);
-});
-
-// Legacy sync from old site (public for testing)
-api.post('/sync-events', (c) => handleSync(c));
-
-// --- Admin Dashboard & API ---
-const admin = new Hono<{ Bindings: Env }>();
-
-// Auth API (no auth required)
-admin.post('/api/login', (c) => handleAuth(c, 'login'));
-admin.post('/api/logout', (c) => handleAuth(c, 'logout'));
-
-// Serve the admin dashboard HTML (redirect to login if not authenticated)
-admin.get('/', async (c) => {
-  const { SESSIONS_KV, JWT_SECRET } = c.env;
-  const cookie = c.req.header('cookie') || '';
-  const match = cookie.match(/sessionToken=([^;]+)/);
-  
-  // Check if user is authenticated
-  let isAuthenticated = false;
-  
-  if (match) {
-    const token = match[1];
-    
-    // Try JWT verification
-    try {
-      const parts = token.split('.');
-      if (parts.length === 3) {
-        const [header, payload, signature] = parts;
-        const data = `${header}.${payload}`;
-        
-        const encoder = new TextEncoder();
-        const key = await crypto.subtle.importKey(
-          'raw',
-          encoder.encode(JWT_SECRET),
-          { name: 'HMAC', hash: 'SHA-256' },
-          false,
-          ['verify']
-        );
-        
-        const signatureBuffer = Uint8Array.from(
-          atob(signature.replace(/-/g, '+').replace(/_/g, '/')), 
-          c => c.charCodeAt(0)
-        );
-        
-        const isValid = await crypto.subtle.verify('HMAC', key, signatureBuffer, encoder.encode(data));
-        if (isValid) {
-          isAuthenticated = true;
-        }
-      }
-    } catch (e) {
-      // JWT verification failed, try session
-    }
-    
-    // Fallback to KV session check
-    if (!isAuthenticated && token.includes('-')) {
-      const session = await SESSIONS_KV.get(token);
-      if (session) {
-        isAuthenticated = true;
-      }
-    }
-  }
-  
-  if (isAuthenticated) {
-    // Serve the redesigned admin.html file
-    try {
-      const asset = await c.env.ASSETS.fetch(new Request('http://localhost/admin.html'));
-      return new Response(asset.body, {
-        headers: {
-          'content-type': 'text/html'
-        }
-      });
-    } catch (e) {
-      console.error('Error serving admin.html:', e);
-      return c.text('Admin dashboard not found', 404);
-    }
-  } else {
-    return c.redirect('/admin/login');
-  }
-});
-
-// Also serve the admin dashboard at /dashboard
-admin.get('/dashboard', async (c) => {
-  const { SESSIONS_KV, JWT_SECRET } = c.env;
-  const cookie = c.req.header('cookie') || '';
-  const match = cookie.match(/sessionToken=([^;]+)/);
-  
-  // Check if user is authenticated
-  let isAuthenticated = false;
-  
-  if (match) {
-    const token = match[1];
-    
-    // Try JWT verification
-    try {
-      const parts = token.split('.');
-      if (parts.length === 3) {
-        const [header, payload, signature] = parts;
-        const data = `${header}.${payload}`;
-        
-        const encoder = new TextEncoder();
-        const key = await crypto.subtle.importKey(
-          'raw',
-          encoder.encode(JWT_SECRET),
-          { name: 'HMAC', hash: 'SHA-256' },
-          false,
-          ['verify']
-        );
-        
-        const signatureBuffer = Uint8Array.from(
-          atob(signature.replace(/-/g, '+').replace(/_/g, '/')), 
-          c => c.charCodeAt(0)
-        );
-        
-        const isValid = await crypto.subtle.verify('HMAC', key, signatureBuffer, encoder.encode(data));
-        if (isValid) {
-          isAuthenticated = true;
-        }
-      }
-    } catch (e) {
-      // JWT verification failed, try session
-    }
-    
-    // Fallback to KV session check
-    if (!isAuthenticated && token.includes('-')) {
-      const session = await SESSIONS_KV.get(token);
-      if (session) {
-        isAuthenticated = true;
-      }
-    }
-  }
-  
-  if (isAuthenticated) {
-    // Serve the redesigned admin.html file
-    try {
-      const asset = await c.env.ASSETS.fetch(new Request('http://localhost/admin.html'));
-      return new Response(asset.body, {
-        headers: {
-          'content-type': 'text/html'
-        }
-      });
-    } catch (e) {
-      console.error('Error serving admin.html:', e);
-      return c.text('Admin dashboard not found', 404);
-    }
-  } else {
-    return c.redirect('/admin/login');
-  }
-});
-
-// Admin APIs for Events (requires auth)
-admin.get('/api/events', authenticate, (c) => handleEvents(c, 'list'));
-admin.post('/api/events', authenticate, (c) => handleEvents(c, 'create'));
-admin.put('/api/events/:id', authenticate, (c) => handleEvents(c, 'update'));
-admin.delete('/api/events/:id', authenticate, (c) => handleEvents(c, 'delete'));
-
-// Admin APIs for flyer uploads (requires auth)
-admin.post('/api/flyers/upload', authenticate, (c) => handleEvents(c, 'upload-flyer'));
-
-// Admin APIs for Blog (requires auth)
-admin.get('/api/blog', authenticate, async (c) => {
-  const request = new Request(c.req.url, {
-    method: c.req.method,
-    headers: c.req.raw.headers
-  });
-  return await handleBlog(request, c.env);
-});
-admin.post('/api/blog', authenticate, async (c) => {
-  const request = new Request(c.req.url, {
-    method: c.req.method,
-    headers: c.req.raw.headers,
-    body: c.req.raw.body
-  });
-  return await handleBlog(request, c.env);
-});
-admin.put('/api/blog', authenticate, async (c) => {
-  const request = new Request(c.req.url, {
-    method: c.req.method,
-    headers: c.req.raw.headers,
-    body: c.req.raw.body
-  });
-  return await handleBlog(request, c.env);
-});
-admin.delete('/api/blog', authenticate, async (c) => {
-  const request = new Request(c.req.url, {
-    method: c.req.method,
-    headers: c.req.raw.headers
-  });
-  return await handleBlog(request, c.env);
-});
-
-// Individual blog post routes with ID parameter
-admin.get('/api/blog/:id', authenticate, async (c) => {
-  const request = new Request(c.req.url, {
-    method: c.req.method,
-    headers: c.req.raw.headers
-  });
-  return await handleBlog(request, c.env);
-});
-admin.put('/api/blog/:id', authenticate, async (c) => {
-  const request = new Request(c.req.url, {
-    method: c.req.method,
-    headers: c.req.raw.headers,
-    body: c.req.raw.body
-  });
-  return await handleBlog(request, c.env);
-});
-admin.delete('/api/blog/:id', authenticate, async (c) => {
-  const request = new Request(c.req.url, {
-    method: c.req.method,
-    headers: c.req.raw.headers
-  });
-  return await handleBlog(request, c.env);
-});
-
-// Route for triggering the legacy sync (requires auth)
-admin.post('/api/sync-events', authenticate, (c) => handleSync(c));
-
-// Wire up the routers (IMPORTANT: Must be after router definitions but before middleware)
-console.log('[DEBUG] Mounting routers...');
-app.route('/api', api);
-app.route('/admin', admin);
-console.log('[DEBUG] Routers mounted successfully');
-
-// --- Image serving from R2 ---
-app.get('/images/*', async (c) => {
+// Protected dashboard route
+adminApp.get('/', authenticate, async (c) => {
   try {
-    const imagePath = c.req.path.replace('/images/', '');
-    const object = await c.env.FWHY_IMAGES.get(imagePath);
-    
-    if (!object) {
-      return c.text('Image not found', 404);
-    }
-    
-    const headers = new Headers();
-    
-    // Detect content type from file extension
-    const contentType = imagePath.toLowerCase().endsWith('.png') ? 'image/png' :
-                       imagePath.toLowerCase().endsWith('.webp') ? 'image/webp' :
-                       imagePath.toLowerCase().endsWith('.gif') ? 'image/gif' :
-                       'image/jpeg'; // Default to JPEG
-    
-    headers.set('content-type', contentType);
-    headers.set('cache-control', 'public, max-age=31536000'); // 1 year cache
-    
-    return new Response(object.body, {
-      headers,
-    });
-  } catch (error) {
-    console.error('Error serving image:', error);
-    return c.text('Error serving image', 500);
-  }
-});
-
-// --- Fallback for any unmatched routes ---
-app.get('*', async (c) => {
-  const host = c.req.header('host') || '';
-  console.log(`[DEBUG] FALLBACK HIT - Host: ${host}, Path: ${c.req.path}`);
-  console.log(`[DEBUG] This should NOT happen for admin.farewellcafe.com/`);
-  
-  try {
-    const asset = await c.env.ASSETS.fetch(new Request(`http://localhost${c.req.path}`));
-    console.log(`[DEBUG] Fallback serving asset: ${c.req.path}`);
-    return new Response(asset.body, {
-      headers: asset.headers
-    });
+    const html = generateUnifiedDashboardHTML();
+    return c.html(html);
   } catch (e) {
-    console.log(`[DEBUG] Fallback asset not found: ${c.req.path}`);
-    return c.text('Not found', 404);
+    console.error('Error serving dashboard:', e);
+    return c.text('Error loading dashboard', 500);
   }
+});
+
+// Fallback route - serve login for unauthenticated, redirect to dashboard for authenticated
+adminApp.get('*', async (c) => {
+  // Check for authentication
+  const cookie = c.req.header('cookie') || '';
+  const tokenMatch = cookie.match(/sessionToken=([^;]+)/);
+  
+  if (tokenMatch) {
+    const token = tokenMatch[1];
+    try {
+      const sessionData = await c.env.SESSIONS_KV.get(token);
+      if (sessionData) {
+        return c.redirect('/'); // Redirect to dashboard if authenticated
+      }
+    } catch (e) {
+      console.error('Session verification failed:', e);
+    }
+  }
+  
+  return serveLoginPage(c);
+});
+
+// ====================================================================================
+// PUBLIC APPLICATION (dev.farewellcafe.com)
+// ====================================================================================
+const publicApp = new Hono<{ Bindings: Env }>();
+
+// --- Public API Router ---
+const publicApi = new Hono<{ Bindings: Env }>();
+publicApi.use('*', cors());
+
+// Public event endpoints
+publicApi.get('/events', (c) => handleEvents(c, 'list'));
+publicApi.get('/events/slideshow', (c) => handleEvents(c, 'slideshow'));
+
+// Public blog endpoints
+publicApi.get('/blog/posts', (c) => handleBlog(c.req.raw, c.env));
+publicApi.get('/blog/featured', (c) => handleBlog(c.req.raw, c.env));
+
+// Legacy endpoints
+publicApi.get('/list/:state', (c) => handleEvents(c, 'list', { venue: c.req.param('state') }));
+publicApi.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.query('type') }));
+
+// Mount public API
+publicApp.route('/api', publicApi);
+
+// --- Image Serving ---
+publicApp.get('/images/*', async (c) => {
+  const imagePath = c.req.path.replace('/images/', '');
+  const object = await c.env.FWHY_IMAGES.get(imagePath);
+  
+  if (!object) {
+    return c.text('Image not found', 404);
+  }
+  
+  const headers = new Headers();
+  headers.set('cache-control', 'public, max-age=31536000'); // 1 year cache
+  
+  const contentType = imagePath.toLowerCase().endsWith('.png') ? 'image/png' :
+                     imagePath.toLowerCase().endsWith('.webp') ? 'image/webp' :
+                     imagePath.toLowerCase().endsWith('.gif') ? 'image/gif' :
+                     'image/jpeg';
+  headers.set('content-type', contentType);
+  
+  return new Response(object.body, { headers });
+});
+
+// --- Static Asset Serving with SPA Fallback ---
+publicApp.get('*', async (c) => {
+  try {
+    // Try to serve the requested static asset
+    const response = await c.env.ASSETS.fetch(c.req.raw);
+    return response;
+  } catch (e) {
+    // If asset not found, serve index.html for SPA routing
+    try {
+      return await c.env.ASSETS.fetch(new Request('http://localhost/index.html'));
+    } catch (e) {
+      return c.text('Site not found', 404);
+    }
+  }
+});
+
+// ====================================================================================
+// MAIN ROUTER
+// ====================================================================================
+const app = new Hono<{ Bindings: Env }>();
+
+// Host-based routing
+app.use('*', async (c) => {
+  const host = c.req.header('host') || '';
+  console.log(`[ROUTER] Request to host: ${host}, path: ${c.req.path}`);
+  
+  if (host.startsWith('admin.')) {
+    console.log(`[ROUTER] -> Routing to adminApp`);
+    return adminApp.fetch(c.req.raw, c.env, c.executionCtx);
+  }
+  
+  console.log(`[ROUTER] -> Routing to publicApp`);
+  return publicApp.fetch(c.req.raw, c.env, c.executionCtx);
 });
 
 export default app;
