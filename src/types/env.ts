@@ -3,6 +3,7 @@ export interface Env {
   FWHY_D1: D1Database;
   FWHY_IMAGES: R2Bucket;
   SESSIONS_KV: KVNamespace;
+  BLOG_KV: KVNamespace;
   ASSETS: Fetcher;
   ADMIN_USERNAME: string;
   ADMIN_PASSWORD_HASH: string;

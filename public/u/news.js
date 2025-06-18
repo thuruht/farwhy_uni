@@ -1,4 +1,4 @@
-const API_BASE = '/bl10g';
+const API_BASE = '/api/blog';
 let sessionToken = sessionStorage.getItem("sessionToken");
 let editingPostId = null;
 
@@ -80,8 +80,8 @@ function resetAuthTimer() {
 function handleLogout() {
     sessionStorage.removeItem("sessionToken");
     sessionToken = null;
-    alert("Logged out due to inactivity");
-    updateView();
+    // Redirect to main admin logout
+    window.location.href = '/admin/api/logout';
 }
 
 document.addEventListener('mousemove', resetAuthTimer);
@@ -356,36 +356,18 @@ featuredForm.addEventListener('submit', async (e) => {
 });
 
 loginBtn.addEventListener('click', () => {
-    loginModal.classList.add('active');
-    loginPasswordEl.focus();
+    // Redirect to main admin login instead of using modal
+    window.location.href = '/admin/login';
 });
 
-cancelLoginBtn.addEventListener('click', () => {
-    loginModal.classList.remove('active');
-});
+// Remove the modal-based login handlers since we're redirecting to main admin
+// cancelLoginBtn.addEventListener('click', () => {
+//     loginModal.classList.remove('active');
+// });
 
-loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    loginErrorEl.style.display = 'none';
-
-    try {
-        const { data } = await fetchApi('/login', {
-            method: 'POST',
-            body: JSON.stringify({ password: loginPasswordEl.value }),
-            excludeAuth: true
-        });
-        
-        sessionStorage.setItem("sessionToken", data.sessionToken);
-        sessionToken = data.sessionToken;
-        loginModal.classList.remove('active');
-        updateView();
-    } catch (err) {
-        loginErrorEl.textContent = err.status === 429 ? 
-            'Too many attempts' : 
-            `Login failed: ${err.message}`;
-        loginErrorEl.style.display = 'block';
-    }
-});
+// loginForm.addEventListener('submit', async (e) => {
+//     // This is now handled by the main admin login page
+// });
 
 logoutBtn.addEventListener('click', handleLogout);
 

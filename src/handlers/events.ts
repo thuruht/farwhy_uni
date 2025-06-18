@@ -158,7 +158,8 @@ async function uploadFlyer(c: Context<{ Bindings: Env }>) {
     // R2 put method expects key, value, and optional options
     await FWHY_IMAGES.put(fileName, arrayBuffer);
     
-    const flyerUrl = `https://fwhy-images.farewellcafe.com/${fileName}`;
+    // Use the worker's image serving endpoint instead of direct R2 URL
+    const flyerUrl = `https://dev.farewellcafe.com/images/${fileName}`;
     
     return c.json({ 
       success: true, 

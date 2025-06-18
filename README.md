@@ -1,8 +1,27 @@
-# Farewell Unified Project
+# Farewell/Howdy Unified Project
 
-A unified Cloudflare Worker that serves both the public Farewell/Howdy website and admin dashboard, replacing the previous multi-worker architecture.
+A unified Cloudflare Worker application that manages both Farewell and Howdy venue events, providing a single admin interface for event management, blog posts, and flyer uploads.
 
-## 🚀 Quick Start
+## 🚀 Live Deployment
+
+- **Public Site**: https://dev.farewellcafe.com
+- **Admin Dashboard**: https://admin.farewellcafe.com
+
+## ✨ Recent Updates (June 18, 2025)
+
+### 🎨 UI/UX Improvements
+- **Enhanced Admin Interface**: "Administrate Me!" login with 404-inspired styling
+- **Fixed Domain Routing**: Proper admin.farewellcafe.com redirects now working
+- **Flyer Upload System**: Direct file upload with preview and progress feedback
+- **Blog Management**: Rich text editor (Quill.js) with individual post editing
+- **Modernized Dashboard**: "Farewell/Howdy Administration" with consistent branding
+
+### 🔧 Technical Fixes
+- **Router Architecture**: Fixed middleware ordering for proper host-based routing
+- **Image Serving**: Worker-based R2 image serving at `/images/*`
+- **Individual Blog APIs**: Added `/admin/api/blog/:id` endpoints
+
+## � Quick Start
 
 ```bash
 # Install dependencies

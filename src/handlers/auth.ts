@@ -86,18 +86,24 @@ async function verifyPassword(inputPassword: string, hashedPassword: string): Pr
 }
 
 export async function handleAuth(c: Context<{ Bindings: Env }>, mode: 'login' | 'logout') {
-  const { SESSIONS_KV, ADMIN_PASSWORD_HASH, JWT_SECRET } = c.env;
+  const { SESSIONS_KV, ADMIN_PASSWORD_HASH, ADMIN_USERNAME, JWT_SECRET } = c.env;
   
   if (mode === 'login') {
-    const { password } = await c.req.json();
+    const { username, password } = await c.req.json();
     
-    if (!password) {
-      return c.json({ success: false, error: 'Password required' }, 400);
+    if (!username || !password) {
+      return c.json({ success: false, error: 'Username and password required' }, 400);
     }
     
+    // Check username
+    if (username !== ADMIN_USERNAME) {
+      return c.json({ success: false, error: 'Invalid credentials' }, 401);
+    }
+    
+    // Check password
     const isValid = await verifyPassword(password, ADMIN_PASSWORD_HASH);
     if (!isValid) {
-      return c.json({ success: false, error: 'Invalid password' }, 401);
+      return c.json({ success: false, error: 'Invalid credentials' }, 401);
     }
     
     // Create JWT token

@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sortSelect = document.getElementById('sort-select');
 
   // Constants / Config
-  const BASE_URL = 'https://fygw0.kcmo.xyz'; // Worker endpoint
+  const BASE_URL = window.location.origin; // Use current domain
   const CACHE_EXPIRY_MS = 15 * 60 * 1000;    // 15 minutes
   const cache = new Map(); // Simple in-memory cache
 
