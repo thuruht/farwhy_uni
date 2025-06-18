@@ -1,5 +1,5 @@
 // src/index.ts
-import { Hono } from 'hono';
+import { Hono, Context } from 'hono';
 import { cors } from 'hono/cors';
 import { handleAuth } from './handlers/auth';
 import { handleEvents } from './handlers/events';
@@ -11,130 +11,9 @@ import { Env } from './types/env';
 
 const app = new Hono<{ Bindings: Env }>();
 
-// Add CORS for API endpoints
-app.use('/api/*', cors());
-
-// --- Host-based Routing (FIRST - before other routes) ---
-app.use('*', async (c, next) => {
-  const host = c.req.header('host') || '';
-  console.log(`[DEBUG] Host: ${host}, Path: ${c.req.path}`);
-  
-  // Admin domain: handle admin routes
-  if (host.startsWith('admin.')) {
-    console.log(`[DEBUG] Admin domain detected, path: ${c.req.path}`);
-    
-    // Serve static assets for admin domain (CSS, JS, fonts, images etc.)
-    if (c.req.path.startsWith('/css/') ||
-        c.req.path.startsWith('/jss/') ||
-        c.req.path.startsWith('/img/') ||
-        c.req.path.startsWith('/f/')) {
-      console.log(`[DEBUG] Serving static asset: ${c.req.path}`);
-      try {
-        const asset = await c.env.ASSETS.fetch(new Request(`http://localhost${c.req.path}`));
-        return new Response(asset.body, {
-          headers: asset.headers
-        });
-      } catch (e) {
-        return c.text('Asset not found', 404);
-      }
-    }
-    
-    // Handle admin routes
-    if (c.req.path.startsWith('/admin')) {
-      console.log(`[DEBUG] Admin route detected: ${c.req.path}`);
-      return await next();
-    }
-    
-    // Redirect root and /login to admin login page
-    if (c.req.path === '/' || c.req.path === '/login') {
-      console.log(`[DEBUG] Redirecting ${c.req.path} to /admin/login`);
-      return c.redirect('/admin/login');
-    }
-    
-    // For any other path on admin domain, redirect to login
-    console.log(`[DEBUG] Other admin path, redirecting to login: ${c.req.path}`);
-    return c.redirect('/admin/login');
-  }
-  
-  // Dev/public domain: serve frontend
-  if (host.startsWith('dev.')) {
-    // Handle API endpoints first
-    if (c.req.path.startsWith('/api/') || 
-        c.req.path.startsWith('/list/') || 
-        c.req.path.startsWith('/archives')) {
-      return await next();
-    }
-    
-    // Serve static assets
-    try {
-      const asset = await c.env.ASSETS.fetch(new Request(`http://localhost${c.req.path}`));
-      return new Response(asset.body, {
-        headers: asset.headers
-      });
-    } catch (e) {
-      // Fallback to index.html for SPA
-      try {
-        const asset = await c.env.ASSETS.fetch(new Request('http://localhost/index.html'));
-        return new Response(asset.body, {
-          headers: asset.headers
-        });
-      } catch (e) {
-        return c.text('Site not found', 404);
-      }
-    }
-  }
-  
-  // Continue to next handler for non-host-specific routes
-  return await next();
-});
-
-// --- Legacy API Endpoints (for ffww frontend compatibility) ---
-// These endpoints match what the original script.js expects
-
-// GET /list/{state} - Event listings per venue
-app.get('/list/:state', async (c) => {
-  const state = c.req.param('state'); // 'farewell' or 'howdy'
-  return handleEvents(c, 'list', { venue: state });
-});
-
-// GET /archives - Past events with type parameter
-app.get('/archives', async (c) => {
-  const type = c.req.query('type'); // 'farewell' or 'howdy'
-  return handleEvents(c, 'archives', { venue: type });
-});
-
-// --- Modern API Routes ---
-const api = new Hono<{ Bindings: Env }>();
-
-// Events API (public)
-api.get('/events', (c) => handleEvents(c, 'list'));
-api.get('/events/slideshow', (c) => handleEvents(c, 'slideshow'));
-
-// Blog API (public)
-api.get('/blog/posts', async (c) => {
-  const request = new Request(c.req.url, {
-    method: c.req.method,
-    headers: c.req.raw.headers
-  });
-  return await handleBlog(request, c.env);
-});
-api.get('/blog/featured', async (c) => {
-  const request = new Request(c.req.url, {
-    method: c.req.method,
-    headers: c.req.raw.headers
-  });
-  return await handleBlog(request, c.env);
-});
-
-// Legacy sync from old site (public for testing)
-api.post('/sync-events', (c) => handleSync(c));
-
-// --- Admin Dashboard & API ---
-const admin = new Hono<{ Bindings: Env }>();
-
-// Login page (no auth required)
-admin.get('/login', (c) => {
-  console.log('[DEBUG] Admin login route hit!');
+// Function to serve the login page with username field
+function serveLoginPage(c: Context<{ Bindings: Env }>) {
+  console.log('[DEBUG] Serving login page');
   return c.html(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -268,8 +147,12 @@ admin.get('/login', (c) => {
       <div class="login-title">log in</div>
       <form id="loginForm">
         <div class="form-group">
+          <label for="username">username:</label>
+          <input type="text" id="username" name="username" required autocomplete="username" placeholder="enter username">
+        </div>
+        <div class="form-group">
           <label for="password">pass:</label>
-          <input type="password" id="password" name="password" required autocomplete="current-password">
+          <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="enter password">
         </div>
         <button type="submit" class="login-btn">let me in</button>
         <div id="error" class="error"></div>
@@ -285,7 +168,7 @@ admin.get('/login', (c) => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            username: 'anmid',
+            username: formData.get('username'),
             password: formData.get('password')
           })
         });
@@ -293,7 +176,7 @@ admin.get('/login', (c) => {
         if (result.success) {
           window.location.href = '/admin';
         } else {
-          document.getElementById('error').textContent = result.error || 'nope.';
+          document.getElementById('error').textContent = result.error || 'invalid credentials';
         }
       } catch (err) {
         document.getElementById('error').textContent = 'try again later.';
@@ -302,7 +185,135 @@ admin.get('/login', (c) => {
   </script>
 </body>
 </html>`);
+}
+
+// Add CORS for API endpoints
+app.use('/api/*', cors());
+
+// --- Host-based Routing (FIRST - before other routes) ---
+app.use('*', async (c, next) => {
+  const host = c.req.header('host') || '';
+  console.log(`[DEBUG] Host: ${host}, Path: ${c.req.path}`);
+  
+  // Admin domain: handle admin routes
+  if (host.startsWith('admin.')) {
+    console.log(`[DEBUG] Admin domain detected, path: ${c.req.path}`);
+    
+    // Serve static assets for admin domain (CSS, JS, fonts, images etc.)
+    if (c.req.path.startsWith('/css/') ||
+        c.req.path.startsWith('/jss/') ||
+        c.req.path.startsWith('/img/') ||
+        c.req.path.startsWith('/f/')) {
+      console.log(`[DEBUG] Serving static asset: ${c.req.path}`);
+      try {
+        const asset = await c.env.ASSETS.fetch(new Request(`http://localhost${c.req.path}`));
+        return new Response(asset.body, {
+          headers: asset.headers
+        });
+      } catch (e) {
+        return c.text('Asset not found', 404);
+      }
+    }
+    
+    // Handle admin API routes
+    if (c.req.path.startsWith('/admin/api')) {
+      console.log(`[DEBUG] Admin API route detected: ${c.req.path}`);
+      return await next();
+    }
+    
+    // Handle admin dashboard routes
+    if (c.req.path.startsWith('/admin') && c.req.path !== '/admin/login') {
+      console.log(`[DEBUG] Admin dashboard route detected: ${c.req.path}`);
+      return await next();
+    }
+    
+    // Serve login page directly at root and /login and /admin/login
+    if (c.req.path === '/' || c.req.path === '/login' || c.req.path === '/admin/login') {
+      console.log(`[DEBUG] Serving login page at: ${c.req.path}`);
+      // Serve login page directly here instead of redirecting
+      return await serveLoginPage(c);
+    }
+    
+    // For any other path on admin domain, serve login
+    console.log(`[DEBUG] Other admin path, serving login: ${c.req.path}`);
+    return await serveLoginPage(c);
+  }
+  
+  // Dev/public domain: serve frontend
+  if (host.startsWith('dev.')) {
+    // Handle API endpoints first
+    if (c.req.path.startsWith('/api/') || 
+        c.req.path.startsWith('/list/') || 
+        c.req.path.startsWith('/archives')) {
+      return await next();
+    }
+    
+    // Serve static assets
+    try {
+      const asset = await c.env.ASSETS.fetch(new Request(`http://localhost${c.req.path}`));
+      return new Response(asset.body, {
+        headers: asset.headers
+      });
+    } catch (e) {
+      // Fallback to index.html for SPA
+      try {
+        const asset = await c.env.ASSETS.fetch(new Request('http://localhost/index.html'));
+        return new Response(asset.body, {
+          headers: asset.headers
+        });
+      } catch (e) {
+        return c.text('Site not found', 404);
+      }
+    }
+  }
+  
+  // Continue to next handler for non-host-specific routes
+  return await next();
 });
+
+// --- Legacy API Endpoints (for ffww frontend compatibility) ---
+// These endpoints match what the original script.js expects
+
+// GET /list/{state} - Event listings per venue
+app.get('/list/:state', async (c) => {
+  const state = c.req.param('state'); // 'farewell' or 'howdy'
+  return handleEvents(c, 'list', { venue: state });
+});
+
+// GET /archives - Past events with type parameter
+app.get('/archives', async (c) => {
+  const type = c.req.query('type'); // 'farewell' or 'howdy'
+  return handleEvents(c, 'archives', { venue: type });
+});
+
+// --- Modern API Routes ---
+const api = new Hono<{ Bindings: Env }>();
+
+// Events API (public)
+api.get('/events', (c) => handleEvents(c, 'list'));
+api.get('/events/slideshow', (c) => handleEvents(c, 'slideshow'));
+
+// Blog API (public)
+api.get('/blog/posts', async (c) => {
+  const request = new Request(c.req.url, {
+    method: c.req.method,
+    headers: c.req.raw.headers
+  });
+  return await handleBlog(request, c.env);
+});
+api.get('/blog/featured', async (c) => {
+  const request = new Request(c.req.url, {
+    method: c.req.method,
+    headers: c.req.raw.headers
+  });
+  return await handleBlog(request, c.env);
+});
+
+// Legacy sync from old site (public for testing)
+api.post('/sync-events', (c) => handleSync(c));
+
+// --- Admin Dashboard & API ---
+const admin = new Hono<{ Bindings: Env }>();
 
 // Auth API (no auth required)
 admin.post('/api/login', (c) => handleAuth(c, 'login'));

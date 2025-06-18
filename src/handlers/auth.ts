@@ -107,9 +107,14 @@ async function getUserByUsername(db: D1Database, username: string): Promise<User
       .bind(username)
       .first() as User | null;
     return result;
-  } catch (error) {
+  } catch (error: any) {
+    // Handle case where users table doesn't exist
+    if (error.message && error.message.includes('no such table: users')) {
+      console.log('Users table does not exist, will fall back to environment variables');
+      throw new Error('USERS_TABLE_NOT_EXISTS');
+    }
     console.error('Error fetching user:', error);
-    return null;
+    throw error;
   }
 }
 
@@ -126,12 +131,19 @@ export async function handleAuth(c: Context<{ Bindings: Env }>, mode: 'login' | 
     let user: User | null = null;
     let isValid = false;
     
-    // First check database for user
-    user = await getUserByUsername(FWHY_D1, username);
-    if (user) {
-      isValid = await verifyPassword(password, user.password_hash!);
-    } else {
-      // Fallback to environment variables for backward compatibility
+    // First try to check database for user, but gracefully fall back if table doesn't exist
+    try {
+      user = await getUserByUsername(FWHY_D1, username);
+      if (user) {
+        isValid = await verifyPassword(password, user.password_hash!);
+      }
+    } catch (error) {
+      console.log('Database user lookup failed, falling back to environment variables:', error);
+      user = null; // Continue to fallback
+    }
+    
+    // Fallback to environment variables if database lookup failed or user not found
+    if (!user) {
       if (username === ADMIN_USERNAME) {
         isValid = await verifyPassword(password, ADMIN_PASSWORD_HASH);
         if (isValid) {
