@@ -607,6 +607,19 @@ function renderEventForm(event = {}) {
 - Role-based endpoint protection
 - Secure password storage
 
+### Admin Domain Routing (Updated June 18, 2025)
+
+The admin interface is now properly secured at the domain level:
+
+- All requests to `admin.farewellcafe.com` are intercepted by a host-based middleware
+- Unauthenticated users are always served the login page, regardless of the path
+- Session tokens are verified before allowing access to admin routes
+- The site index is completely prevented from showing on the admin subdomain
+- Authentication state is preserved across page reloads
+- Login form includes manual username entry as required
+
+This ensures complete separation between public and administrative interfaces, with no possibility of serving public content on the admin domain.
+
 ---
 
 ## 🏢 Multi-Tenant Architecture
