@@ -1,0 +1,17 @@
+@font-face {
+  font-family: 'hnb2';
+  src: url('../f/fnt/hnb2.woff2') format('woff2'),
+       url('../f/fnt/hnb2.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'kb';
+  src: url('../f/fnt/kb.woff2') format('woff2'),
+       url('../f/fnt/kb.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ...rest of news.css... */

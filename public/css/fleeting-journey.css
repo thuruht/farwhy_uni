@@ -1,0 +1,389 @@
+/*
+ * Fleeting Journey - A Universal Stylesheet
+ * Version: 1.1
+ * Description: A stylesheet designed to give any standard webpage the
+ * aesthetic of the "Fleeting Journey" game. It uses a 
+ * Solarized Light color palette and a classic serif font 
+ * to create a warm, retro, literary feel.
+ *
+ * How to use: Link this stylesheet in the <head> of your HTML document.
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Base & Reset                               */
+/* -------------------------------------------------------------------------- */
+
+/* Universal box-sizing for predictable layout */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Root variables for the color palette for easy customization */
+:root {
+    --base03: #002b36;  /* Darkest background */
+    --base02: #073642;  /* Dark background */
+    --base01: #586e75;  /* Content */
+    --base00: #657b83;  /* Subdued content */
+    --base0: #839496;   /* Comments / Emphasized content */
+    --base1: #93a1a1;   /* Optional background */
+    --base2: #eee8d5;   /* Light background (Canvas) */
+    --base3: #fdf6e3;   /* Lightest background (Body) */
+    --yellow: #b58900;
+    --orange: #cb4b16;
+    --red: #dc322f;
+    --magenta: #d33682;
+    --violet: #6c71c4;
+    --blue: #268bd2;
+    --cyan: #2aa198;
+    --green: #859900;
+}
+
+/* Base body styles */
+body {
+    font-family: 'Lora', serif;
+    line-height: 1.7;
+    background-color: var(--base3);
+    color: var(--base01);
+    margin: 0;
+    padding: 2rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Typography                                 */
+/* -------------------------------------------------------------------------- */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--base02);
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+h1, .h1 { font-size: 2.5rem; }
+h2, .h2 { font-size: 2rem; }
+h3, .h3 { font-size: 1.75rem; }
+h4, .h4 { font-size: 1.5rem; }
+
+p {
+    margin-bottom: 1.5rem;
+}
+
+a {
+    color: var(--blue);
+    text-decoration: none;
+    transition: color 0.2s ease, border-bottom 0.2s ease;
+    border-bottom: 1px solid transparent;
+}
+
+a:hover, a:focus {
+    color: var(--orange);
+    border-bottom: 1px solid var(--orange);
+}
+
+strong, b {
+    font-weight: 700;
+    color: var(--base02);
+}
+
+em, i {
+    font-style: italic;
+    color: var(--base00);
+}
+
+ul, ol {
+    margin-left: 1.5rem;
+    padding-left: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+li {
+    margin-bottom: 0.5rem;
+}
+
+dl dt {
+    font-weight: bold;
+    color: var(--base02);
+}
+
+dl dd {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+blockquote {
+    border-left: 4px solid var(--base1);
+    padding-left: 1.5rem;
+    margin: 2rem 0;
+    font-style: italic;
+    color: var(--base00);
+}
+
+blockquote p {
+    margin-bottom: 0;
+}
+
+code, pre {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: var(--base2);
+    border: 1px solid var(--base1);
+    border-radius: 0.25rem;
+}
+
+code {
+    padding: 0.2em 0.4em;
+    font-size: 0.9em;
+}
+
+pre {
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+pre code {
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+hr {
+    border: 0;
+    height: 2px;
+    background-color: var(--base1);
+    margin: 3rem 0;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Layout & Structure                            */
+/* -------------------------------------------------------------------------- */
+
+header, .header {
+    margin-bottom: 3rem;
+    border-bottom: 2px solid var(--base1);
+    padding-bottom: 2rem;
+}
+
+footer, .footer {
+    margin-top: 3rem;
+    border-top: 2px solid var(--base1);
+    padding-top: 2rem;
+    font-size: 0.9em;
+    color: var(--base00);
+}
+
+main, section, article {
+    display: block;
+    max-width: 800px;
+    margin: 0 auto; /* Center main content */
+}
+
+figure {
+    margin: 2rem 0;
+    padding: 0;
+}
+
+figure img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border: 2px solid var(--base1);
+}
+
+figcaption {
+    text-align: center;
+    font-style: italic;
+    font-size: 0.9em;
+    color: var(--base00);
+    margin-top: 0.5rem;
+}
+
+/* Navigation */
+nav ul, nav ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+nav a {
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    padding-bottom: 0.25rem;
+}
+
+nav a:hover, nav a.active {
+    color: var(--base02);
+    border-bottom-color: var(--orange);
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Components                                  */
+/* -------------------------------------------------------------------------- */
+
+/* Buttons */
+button,
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+.btn {
+    display: inline-block;
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.5rem;
+    
+    /* "Fleeting Journey" Button Style */
+    background-color: var(--blue);
+    color: var(--base3);
+    border: 2px solid var(--base02);
+    box-shadow: 4px 4px 0px var(--base02);
+    transition: all 0.1s ease-in-out;
+}
+
+button:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+input[type="button"]:hover,
+.btn:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--base02);
+}
+
+button:active,
+input[type="submit"]:active,
+input[type="reset"]:active,
+input[type="button"]:active,
+.btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0px 0px 0px var(--base02);
+}
+
+/* Cards & Panels */
+.card, .panel, .widget {
+    background-color: var(--base3);
+    border: 2px solid var(--base1);
+    box-shadow: 10px 10px 0px var(--base2);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Wells or Asides */
+.well, .notice {
+    background-color: var(--base2);
+    border: 2px solid var(--base1);
+    border-radius: 0.25rem;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+/* Forms */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+fieldset {
+    border: 2px solid var(--base1);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+}
+
+legend {
+    font-weight: 700;
+    color: var(--base02);
+    padding: 0 0.5rem;
+}
+
+label {
+    font-weight: 600;
+    color: var(--base02);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    font-family: 'Lora', serif;
+    font-size: 1rem;
+    padding: 0.75rem;
+    background-color: var(--base2);
+    border: 2px solid var(--base1);
+    border-radius: 0.25rem;
+    color: var(--base01);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(38, 139, 210, 0.3);
+}
+
+.form-group-checkbox, .form-group-radio {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.form-group-checkbox label, .form-group-radio label {
+    margin-bottom: 0;
+    font-weight: normal;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+}
+
+th, td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 2px solid var(--base1);
+}
+
+th {
+    font-weight: 700;
+    color: var(--base02);
+    background-color: var(--base2);
+}
+
+tbody tr:hover {
+    background-color: rgba(181, 137, 0, 0.1); /* Faint yellow on hover */
+}
+
+tbody tr:nth-child(even) {
+    background-color: rgba(147, 161, 161, 0.1); /* Faint stripe */
+}

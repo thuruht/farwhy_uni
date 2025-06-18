@@ -1,0 +1,620 @@
+/* farewellcafe.com/css/ccssss.css */
+
+:root {
+    /* Colors */
+    --pupil: #d990ff;
+    --redd: #ff2b13;
+    --lima: #b0ee00;
+    --blew: #00e2ff;
+    --primary-bg-color: #b0ee00;
+    --secondary-bg-color: #D990FF;
+    --accent-color: #ff2b13;
+    --text-color: #010101;
+    --header-text-shadow: rgba(0, 0, 0, 0.5);
+    --nav-bg-color: #ffffff;
+    --nav-border-color: #000000;
+    --card-bg-color: #f9f9f9;
+    --button-bg-color: #b0ee00;
+    --button-text-color: #000000;
+    --header-bg: var(--primary-bg-color) url('../img/bg4.png') center/cover no-repeat; /* Combined background */
+	--howder-bg: var(--secondary-bg-color) url('../img/bg7.png') center/cover no-repeat;
+    /* Fonts */
+    --font-howder: 'ds', sans-serif;
+    --font-main: 'hnb2', sans-serif;
+    --font-secondary: 'kb', sans-serif;
+    --font-db: 'db', sans-serif;
+    --font-mt: 'mt', sans-serif;
+    --font-hnm11: 'hnm11', sans-serif;
+    --font-hnmi12: 'hnmi12', sans-serif;
+    --font-hnbi4: 'hnbi4', sans-serif;
+
+    /* Spacing */
+    --padding-small: 24px;
+    --padding-medium: 32px;
+    --padding-large: 36px;
+
+    /* Other */
+    --transition-speed: 0.3s;
+}
+/* ==============================
+   2. Font Faces
+============================== */
+
+@font-face {
+    font-family: 'ds';
+    src: url('../fnt/ds.woff2') format('woff2');
+      font-weight: normal;
+  font-style: normal;
+    font-display: swap;
+  }
+
+@font-face {
+  font-family: 'db';
+  src: url('../fnt/db.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+
+@font-face {
+  font-family: 'kb';
+  src: url('../fnt/kb.woff2') format('woff2');
+        font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+
+@font-face {
+  font-family: 'mt';
+  src: url('../fnt/mrt.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+
+@font-face {
+  font-family: 'hnm11';
+  src: url('../fnt/hnm11.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+
+@font-face {
+  font-family: 'hnmi12';
+  src: url('../fnt/hnmi12.woff2') format('woff2');
+    font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+
+@font-face {
+  font-family: 'hnb2';
+  src: url('../fnt/hnb2.woff2') format('woff2');
+    font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+
+@font-face {
+  font-family: 'hnbi4';
+  src: url('../fnt/hnbi4.woff2') format('woff2');
+    font-weight: normal;
+  font-style: normal;
+     font-display: swap;
+}
+/* ==============================
+   3. Global Styles
+============================== */
+*, *::before, *::after {
+  box-sizing: border-box; /* Ensures consistent sizing across elements */
+}
+
+body {
+  display: flex; /* Enables Flexbox for body */
+  flex-direction: column; /* Stacks child elements vertically */
+  align-items: center; /* Centers child elements horizontally */
+  justify-content: flex-start; /* Aligns child elements to the top */
+  margin: 0 auto;
+  margin-bottom:24px;
+  font-family: var(--font-hnm11);
+  background-color: #f0ffff;
+  color: var(--text-color);
+  padding: var(--padding-medium);
+  text-align: center;
+  gap:var(--padding-medium);
+}
+
+/* ==============================
+   4. Header Styles
+============================== */
+
+header {
+  width: 100%;
+  padding: var(--padding-medium) 0;
+  background-color: var(--nav-bg-color);
+  border-bottom: 2px solid var(--nav-border-color);
+  position: relative;
+  z-index: 1000;
+}
+
+.logo {
+  height: 50px;
+  margin-bottom: var(--padding-small);
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  gap: var(--padding-medium);
+}
+
+nav a {
+  font-family: var(--font-main);
+  font-size: 18px;
+  color: var(--text-color);
+  text-decoration: none;
+  padding: var(--padding-small) var(--padding-medium);
+  transition: background-color var(--transition-speed);
+}
+
+nav a:hover {
+  background-color: var(--primary-bg-color);
+  border-radius: 4px;
+}
+
+/* ==============================
+   5. Hero Section Styles
+============================== */
+
+.hero {
+  width: 100%;
+  height: 80vh;
+  background: var(--header-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  text-align: center;
+  position: relative;
+}
+
+.hero h1 {
+  font-family: var(--font-howder);
+  font-size: 48px;
+  margin-bottom: var(--padding-medium);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.hero p {
+  font-family: var(--font-main);
+  font-size: 24px;
+  margin-bottom: var(--padding-large);
+  max-width: 800px;
+}
+
+.cta-button {
+  font-family: var(--font-secondary);
+  font-size: 18px;
+  color: #ffffff;
+  background-color: var(--accent-color);
+  padding: var(--padding-small) var(--padding-medium);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+}
+
+.cta-button:hover {
+  background-color: var(--redd);
+}
+
+/* ==============================
+   6. About Section Styles
+============================== */
+
+.about {
+  width: 100%;
+  padding: var(--padding-large) 0;
+  background-color: var(--card-bg-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.about h2 {
+  font-family: var(--font-howder);
+  font-size: 36px;
+  margin-bottom: var(--padding-medium);
+}
+
+.about p {
+  font-family: var(--font-main);
+  font-size: 18px;
+  margin-bottom: var(--padding-large);
+  max-width: 800px;
+}
+
+.team {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--padding-medium);
+}
+
+.team-member {
+  background-color: var(--secondary-bg-color);
+  border-radius: 8px;
+  padding: var(--padding-medium);
+  width: 300px;
+  text-align: center;
+  transition: transform var(--transition-speed);
+}
+
+.team-member:hover {
+  transform: translateY(-5px);
+}
+
+.team-member img {
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  margin-bottom: var(--padding-small);
+}
+
+.team-member h3 {
+  font-family: var(--font-secondary);
+  font-size: 22px;
+  margin-bottom: var(--padding-small);
+}
+
+.team-member p {
+  font-family: var(--font-main);
+  font-size: 16px;
+  color: #333333;
+}
+
+/* ==============================
+   7. Services Section Styles
+============================== */
+
+.services {
+  width: 100%;
+  padding: var(--padding-large) 0;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.services h2 {
+  font-family: var(--font-howder);
+  font-size: 36px;
+  margin-bottom: var(--padding-medium);
+}
+
+.services p {
+  font-family: var(--font-main);
+  font-size: 18px;
+  margin-bottom: var(--padding-large);
+  max-width: 800px;
+}
+
+.service {
+  background-color: var(--card-bg-color);
+  border-radius: 8px;
+  padding: var(--padding-medium);
+  width: 300px;
+  text-align: center;
+  transition: transform var(--transition-speed);
+}
+
+.service:hover {
+  transform: translateY(-5px);
+}
+
+.service-icon {
+  font-size: 48px;
+  color: var(--primary-bg-color);
+  margin-bottom: var(--padding-small);
+}
+
+.service-title {
+  font-family: var(--font-secondary);
+  font-size: 22px;
+  margin-bottom: var(--padding-small);
+}
+
+.service-description {
+  font-family: var(--font-main);
+  font-size: 16px;
+  color: #333333;
+}
+
+/* ==============================
+   8. Testimonials Section Styles
+============================== */
+
+.testimonials {
+  width: 100%;
+  padding: var(--padding-large) 0;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.testimonials h2 {
+  font-family: var(--font-howder);
+  font-size: 36px;
+  margin-bottom: var(--padding-medium);
+}
+
+.testimonials p {
+  font-family: var(--font-main);
+  font-size: 18px;
+  margin-bottom: var(--padding-large);
+  max-width: 800px;
+}
+
+.testimonial {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: var(--padding-medium);
+  width: 300px;
+  text-align: center;
+  transition: transform var(--transition-speed);
+}
+
+.testimonial:hover {
+  transform: translateY(-5px);
+}
+
+.testimonial-author {
+  font-family: var(--font-secondary);
+  font-size: 22px;
+  margin-top: var(--padding-small);
+}
+
+.testimonial-text {
+  font-family: var(--font-main);
+  font-size: 16px;
+  color: #333333;
+  italic;
+}
+
+/* ==============================
+   9. Contact Section Styles
+============================== */
+
+.contact {
+  width: 100%;
+  padding: var(--padding-large) 0;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.contact h2 {
+  font-family: var(--font-howder);
+  font-size: 36px;
+  margin-bottom: var(--padding-medium);
+}
+
+.contact p {
+  font-family: var(--font-main);
+  font-size: 18px;
+  margin-bottom: var(--padding-large);
+  max-width: 800px;
+}
+
+.contact-form {
+  width: 100%;
+  max-width: 600px;
+  background-color: var(--card-bg-color);
+  border-radius: 8px;
+  padding: var(--padding-medium);
+  display: flex;
+  flex-direction: column;
+  gap: var(--padding-small);
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: var(--padding-small);
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  font-family: var(--font-main);
+  font-size: 16px;
+  color: #333333;
+}
+
+.contact-form button {
+  font-family: var(--font-secondary);
+  font-size: 18px;
+  color: #ffffff;
+  background-color: var(--accent-color);
+  padding: var(--padding-small) var(--padding-medium);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+}
+
+.contact-form button:hover {
+  background-color: var(--redd);
+}
+
+/* ==============================
+   10. Footer Styles
+============================== */
+
+footer {
+  width: 100%;
+  padding: var(--padding-medium) 0;
+  background-color: var(--nav-bg-color);
+  border-top: 2px solid var(--nav-border-color);
+  position: relative;
+  z-index: 1000;
+  margin-top: 24px;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.footer-logo {
+  height: 40px;
+  margin-bottom: var(--padding-small);
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: var(--padding-medium);
+  margin-bottom: var(--padding-small);
+}
+
+.footer-links a {
+  font-family: var(--font-main);
+  font-size: 16px;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: color var(--transition-speed);
+}
+
+.footer-links a:hover {
+  color: var(--primary-bg-color);
+}
+
+.footer-copy {
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: #333333;
+  margin-top: var(--padding-small);
+}
+
+/* ==============================
+   11. Utility Classes
+============================== */
+
+.text-center {
+  text-align: center;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.mt-0 {
+  margin-top: 0;
+}
+
+.pt-0 {
+  padding-top: 0;
+}
+
+.pb-0 {
+  padding-bottom: 0;
+}
+
+.rounded {
+  border-radius: 4px;
+}
+
+.shadow {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.transition {
+  transition: all var(--transition-speed);
+}
+
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+}
+
+/* ==============================
+   12. Media Queries
+============================== */
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 36px;
+  }
+
+  .hero p {
+    font-size: 18px;
+  }
+
+  nav {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  nav a {
+    padding: var(--padding-small) 0;
+  }
+
+  .team-member,
+  .service,
+  .testimonial {
+    width: 100%;
+    max-width: none;
+  }
+
+  .contact-form {
+    width: 100%;
+    padding: var(--padding-small);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 28px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  nav a {
+    font-size: 16px;
+  }
+
+  .team-member h3,
+  .service-title,
+  .testimonial-author {
+    font-size: 18px;
+  }
+
+  .team-member p,
+  .service-description,
+  .testimonial-text {
+    font-size: 14px;
+  }
+
+  .contact-form input,
+  .contact-form textarea {
+    font-size: 14px;
+  }
+
+  .contact-form button {
+    font-size: 16px;
+  }
+}
