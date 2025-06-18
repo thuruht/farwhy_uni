@@ -312,26 +312,34 @@ function showBlogForm(id = null) {
 }
 
 function loadBlogPostForEdit(id) {
+  console.log(`[DEBUG] Loading blog post for edit: ${id}`);
   fetch(`/admin/api/blog/${id}`)
-    .then(r => r.json())
+    .then(r => {
+      console.log(`[DEBUG] Blog fetch response status: ${r.status}`);
+      return r.json();
+    })
     .then(data => {
+      console.log(`[DEBUG] Blog fetch response data:`, data);
       if (data.success && data.data) {
         const post = data.data;
         const f = document.getElementById('blog-form');
         if (f && f instanceof HTMLFormElement) {
           f.elements.namedItem('title').value = post.title || '';
           f.elements.namedItem('date').value = post.date || '';
-          // @ts-ignore
-          if (quill) quill.root.innerHTML = post.content || '';
+          
+          // Set Quill content
+          if (quill) {
+            quill.root.innerHTML = post.content || '';
+          }
         }
       } else {
-        console.error('Failed to load blog post:', data.error);
-        alert('Failed to load blog post for editing');
+        console.error('[DEBUG] Failed to load blog post:', data.error || 'Unknown error');
+        alert('Failed to load blog post: ' + (data.error || 'Unknown error'));
       }
     })
     .catch(error => {
-      console.error('Error loading blog post:', error);
-      alert('Error loading blog post for editing');
+      console.error('[DEBUG] Blog fetch error:', error);
+      alert('Error loading blog post: ' + error.message);
     });
 }
 

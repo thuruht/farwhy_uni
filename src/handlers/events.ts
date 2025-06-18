@@ -155,8 +155,16 @@ async function uploadFlyer(c: Context<{ Bindings: Env }>) {
     const fileName = `flyers/${Date.now()}-${file.name}`;
     const arrayBuffer = await file.arrayBuffer();
     
-    // R2 put method expects key, value, and optional options
-    await FWHY_IMAGES.put(fileName, arrayBuffer);
+    // Determine content type based on file extension
+    const contentType = file.type || 'image/jpeg';
+    
+    // R2 put method with proper metadata
+    await FWHY_IMAGES.put(fileName, arrayBuffer, {
+      httpMetadata: {
+        contentType: contentType,
+        cacheControl: 'public, max-age=31536000'
+      }
+    });
     
     // Use the worker's image serving endpoint instead of direct R2 URL
     const flyerUrl = `https://dev.farewellcafe.com/images/${fileName}`;
