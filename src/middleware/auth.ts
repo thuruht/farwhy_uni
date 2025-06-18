@@ -1,6 +1,6 @@
 // src/middleware/auth.ts
 import { Context, Next } from 'hono';
-import { Env } from '../types/env';
+import { Env, User } from '../types/env';
 
 async function verifyJWT(token: string, secret: string): Promise<any | null> {
   try {
@@ -41,6 +41,78 @@ async function verifyJWT(token: string, secret: string): Promise<any | null> {
   }
 }
 
+// Enhanced authentication middleware with role-based access control
+export function authMiddleware(allowedRoles: string[] = ['admin']) {
+  return async (c: Context<{ Bindings: Env }>, next: Next) => {
+    const { SESSIONS_KV, JWT_SECRET } = c.env;
+    
+    // Try to get token from cookie first
+    let token: string | null = null;
+    const cookie = c.req.header('cookie') || '';
+    const cookieMatch = cookie.match(/sessionToken=([^;]+)/);
+    
+    if (cookieMatch) {
+      token = cookieMatch[1];
+    } else {
+      // Fallback to Authorization header
+      const authHeader = c.req.header('authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+      }
+    }
+    
+    if (!token) {
+      return c.json({ success: false, error: 'Authentication required' }, 401);
+    }
+    
+    let user: any = null;
+    
+    // Try JWT verification first
+    try {
+      user = await verifyJWT(token, JWT_SECRET);
+    } catch (e) {
+      console.log('JWT verification failed, trying KV fallback');
+    }
+    
+    // Fallback to KV session check
+    if (!user && token.includes('-')) {
+      try {
+        const sessionData = await SESSIONS_KV.get(token);
+        if (sessionData) {
+          user = JSON.parse(sessionData);
+        }
+      } catch (e) {
+        console.log('KV session check failed');
+      }
+    }
+    
+    if (!user) {
+      return c.json({ success: false, error: 'Invalid or expired token' }, 401);
+    }
+    
+    // Check if user has required role
+    const userRole = user.role || 'admin'; // Default to admin for legacy compatibility
+    if (!allowedRoles.includes(userRole)) {
+      return c.json({ 
+        success: false, 
+        error: `Access denied. Required roles: ${allowedRoles.join(', ')}` 
+      }, 403);
+    }
+    
+    // Set user in context for handlers to use
+    (c as any).user = {
+      username: user.user || user.username,
+      role: userRole,
+      id: user.id,
+      isAdmin: userRole === 'admin',
+      authMethod: 'jwt'
+    };
+    
+    await next();
+  };
+}
+
+// Legacy authenticate function for backward compatibility
 export async function authenticate(c: Context<{ Bindings: Env }>, next: Next) {
   const { SESSIONS_KV, JWT_SECRET } = c.env;
   const cookie = c.req.header('cookie') || '';
@@ -58,7 +130,8 @@ export async function authenticate(c: Context<{ Bindings: Env }>, next: Next) {
     // Valid JWT token - store user info in a simple way
     (c as any).user = { 
       username: jwtPayload.user, 
-      isAdmin: true,
+      role: jwtPayload.role || 'admin',
+      isAdmin: (jwtPayload.role || 'admin') === 'admin',
       authMethod: 'jwt'
     };
     await next();
@@ -71,6 +144,7 @@ export async function authenticate(c: Context<{ Bindings: Env }>, next: Next) {
     if (session) {
       (c as any).user = { 
         username: 'admin', 
+        role: 'admin',
         isAdmin: true,
         authMethod: 'session'
       };

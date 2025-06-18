@@ -64,28 +64,70 @@ function showEventForm(id = null) {
     <div class="admin-form">
       <h3>${id ? 'Edit Event' : 'Create New Event'}</h3>
       <form id='event-form'>
-        <label>Title *</label>
-        <input name='title' required placeholder="Event title">
-        
-        <label>Date *</label>
-        <input name='date' type='date' required>
-        
-        <label>Venue *</label>
-        <select name='venue' required>
-          <option value="">Select venue</option>
+        <!-- Required Fields -->
+        <label>Venue * <span class="required-note">(Determines auto-populated defaults)</span></label>
+        <select name='venue' id='venue-select' required onchange='updateAutoPopulation()'>
+          <option value="">-- Select Venue --</option>
           <option value="farewell">Farewell</option>
           <option value="howdy">Howdy</option>
         </select>
         
-        <label>Event Time</label>
-        <input name='event_time' placeholder="e.g., 8:00 PM, Doors at 7:30">
+        <label>Title *</label>
+        <input name='title' required placeholder="Event title">
         
+        <label>Date & Time *</label>
+        <input name='date' type='datetime-local' required>
+        
+        <!-- Aaron's Auto-Population Section -->
+        <div class="auto-population-section" style="background: #f5f5f5; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+          <h4 style="margin-top: 0; color: #333;">Auto-Populated Fields</h4>
+          
+          <div class="field-group" style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <strong>Age Restriction:</strong>
+              <span id="default-age-display" style="color: #666; font-style: italic;">Select venue first</span>
+            </div>
+            <label style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+              <input type="checkbox" id="override-age-check" style="margin-right: 0.5rem;"> 
+              Use custom age restriction
+            </label>
+            <input type="text" id="custom-age-restriction" name="age_restriction" 
+                   placeholder="Custom age restriction" style="display: none; width: 100%;">
+          </div>
+          
+          <div class="field-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <strong>Event Time:</strong>
+              <span id="default-time-display" style="color: #666; font-style: italic;">Select venue first</span>
+            </div>
+            <label style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+              <input type="checkbox" id="override-time-check" style="margin-right: 0.5rem;"> 
+              Use custom event time
+            </label>
+            <input type="text" id="custom-event-time" name="event_time" 
+                   placeholder="Custom event time" style="display: none; width: 100%;">
+          </div>
+        </div>
+        
+        <!-- Optional Fields -->
         <label>Description</label>
         <textarea name='description' rows="4" placeholder="Event description"></textarea>
         
-        <label>Age Restriction</label>
-        <input name='age_restriction' placeholder="e.g., 21+, All Ages">
+        <!-- Enhanced Fields -->
+        <label>Price</label>
+        <input name='price' placeholder="e.g., $15, Free, Donation">
         
+        <label>Capacity</label>
+        <input name='capacity' type="number" placeholder="Maximum attendance">
+        
+        <div class="checkbox-group" style="margin: 1rem 0;">
+          <label style="display: flex; align-items: center;">
+            <input type="checkbox" name="is_featured" style="margin-right: 0.5rem;">
+            Feature this event on homepage
+          </label>
+        </div>
+        
+        <!-- File Upload Section -->
         <label>Flyer Image</label>
         <div class="flyer-upload-section">
           <input name='flyer_image_url' type="url" placeholder="Enter image URL or upload file below">
@@ -181,37 +223,154 @@ function showEventForm(id = null) {
     fetch(`/admin/api/events`).then(r => r.json()).then(events => {
       const ev = events.find(e => e.id === id);
       if (!ev) return;
+      
       const f = document.getElementById('event-form');
-      f.title.value = ev.title;
-      f.date.value = ev.date;
-      f.venue.value = ev.venue;
-      f.flyer_image_url.value = ev.imageUrl || ''; // Use legacy format
-      f.ticket_url.value = ev.ticketLink || ''; // Use legacy format
+      
+      // Fill basic fields
+      f.title.value = ev.title || '';
+      f.date.value = ev.date || '';
+      f.venue.value = ev.venue || '';
       f.description.value = ev.description || '';
-      f.age_restriction.value = ev.ageRestriction || ''; // Use legacy format
-      f.event_time.value = ev.time || ''; // Use legacy format
+      f.price.value = ev.price || '';
+      f.capacity.value = ev.capacity || '';
+      f.flyer_image_url.value = ev.imageUrl || ev.flyer_image_url || '';
+      f.ticket_url.value = ev.ticketLink || ev.ticket_url || '';
+      
+      // Handle featured checkbox
+      const featuredCheckbox = document.querySelector('input[name="is_featured"]');
+      if (featuredCheckbox) {
+        featuredCheckbox.checked = ev.is_featured || false;
+      }
+      
+      // Handle Aaron's auto-population fields
+      updateAutoPopulation(); // Set defaults first
+      
+      // Check if event has custom values (different from defaults)
+      const defaultAge = ev.venue === 'howdy' ? 'All ages' : '21+ unless with parent or legal guardian';
+      const defaultTime = 'Doors at 7pm / Music at 8pm';
+      
+      if (ev.ageRestriction && ev.ageRestriction !== defaultAge) {
+        // Has custom age restriction
+        document.getElementById('override-age-check').checked = true;
+        document.getElementById('custom-age-restriction').style.display = 'block';
+        document.getElementById('custom-age-restriction').value = ev.ageRestriction;
+      }
+      
+      if (ev.time && ev.time !== defaultTime) {
+        // Has custom event time
+        document.getElementById('override-time-check').checked = true;
+        document.getElementById('custom-event-time').style.display = 'block';
+        document.getElementById('custom-event-time').value = ev.time;
+      }
       
       // Trigger flyer preview
-      if (ev.imageUrl) {
-        flyerPreview.innerHTML = `<img src="${ev.imageUrl}" alt="Current flyer" style="max-width: 300px; max-height: 300px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">`;
+      if (ev.imageUrl || ev.flyer_image_url) {
+        const imageUrl = ev.imageUrl || ev.flyer_image_url;
+        flyerPreview.innerHTML = `<img src="${imageUrl}" alt="Current flyer" style="max-width: 300px; max-height: 300px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">`;
       }
+    }).catch(error => {
+      console.error('Error loading event for editing:', error);
+      alert('Error loading event data');
     });
   }
   document.getElementById('event-form').onsubmit = async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
     const data = Object.fromEntries(fd.entries());
-    let method = id ? 'PUT' : 'POST';
-    let url = '/admin/api/events' + (id ? `/${id}` : '');
-    await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    closeEventForm();
-    fetchEvents();
+    
+    // Handle Aaron's auto-population logic
+    const venue = data.venue;
+    const overrideAge = document.getElementById('override-age-check').checked;
+    const overrideTime = document.getElementById('override-time-check').checked;
+    
+    // If not overriding, remove custom fields so backend applies defaults
+    if (!overrideAge) {
+      delete data.age_restriction;
+    }
+    if (!overrideTime) {
+      delete data.event_time;
+    }
+    
+    // Convert checkbox to boolean
+    data.is_featured = document.querySelector('input[name="is_featured"]').checked;
+    
+    // Convert capacity to number if present
+    if (data.capacity) {
+      data.capacity = parseInt(data.capacity);
+    }
+    
+    try {
+      let method = id ? 'PUT' : 'POST';
+      let url = '/admin/api/events' + (id ? `/${id}` : '');
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        closeEventForm();
+        fetchEvents();
+      } else {
+        alert('Error saving event: ' + (result.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error saving event:', error);
+      alert('Error saving event: ' + error.message);
+    }
   };
 }
+
+// Aaron's Auto-Population Logic
+window.updateAutoPopulation = function() {
+  const venueSelect = document.getElementById('venue-select');
+  const venue = venueSelect.value;
+  const defaultAgeDisplay = document.getElementById('default-age-display');
+  const defaultTimeDisplay = document.getElementById('default-time-display');
+  
+  if (venue === 'howdy') {
+    defaultAgeDisplay.textContent = 'All ages';
+    defaultTimeDisplay.textContent = 'Doors at 7pm / Music at 8pm';
+  } else if (venue === 'farewell') {
+    defaultAgeDisplay.textContent = '21+ unless with parent or legal guardian';
+    defaultTimeDisplay.textContent = 'Doors at 7pm / Music at 8pm';
+  } else {
+    defaultAgeDisplay.textContent = 'Select venue first';
+    defaultTimeDisplay.textContent = 'Select venue first';
+  }
+};
+
+// Override checkbox handlers
+const overrideAgeCheck = document.getElementById('override-age-check');
+const overrideTimeCheck = document.getElementById('override-time-check');
+const customAgeInput = document.getElementById('custom-age-restriction');
+const customTimeInput = document.getElementById('custom-event-time');
+
+overrideAgeCheck.addEventListener('change', (e) => {
+  if (e.target.checked) {
+    customAgeInput.style.display = 'block';
+    customAgeInput.required = true;
+  } else {
+    customAgeInput.style.display = 'none';
+    customAgeInput.required = false;
+    customAgeInput.value = '';
+  }
+});
+
+overrideTimeCheck.addEventListener('change', (e) => {
+  if (e.target.checked) {
+    customTimeInput.style.display = 'block';
+    customTimeInput.required = true;
+  } else {
+    customTimeInput.style.display = 'none';
+    customTimeInput.required = false;
+    customTimeInput.value = '';
+  }
+});
+
 // --- Import Legacy ---
 document.getElementById('import-legacy-btn').onclick = async () => {
   const status = document.getElementById('import-status');

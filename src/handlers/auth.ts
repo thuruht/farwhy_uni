@@ -1,8 +1,8 @@
 // src/handlers/auth.ts
 import { Context } from 'hono';
-import { Env } from '../types/env';
+import { Env, User } from '../types/env';
 
-// Simple JWT implementation for Cloudflare Workers
+// Simple JWT implementation for Cloudflare Workers with role support
 async function createJWT(payload: any, secret: string): Promise<string> {
   const header = {
     alg: 'HS256',
@@ -72,21 +72,49 @@ function generateSessionToken() {
   return crypto.randomUUID();
 }
 
-async function hashPassword(password: string): Promise<string> {
+// Improved password hashing with salt for better security
+async function hashPassword(password: string, salt?: string): Promise<string> {
+  const actualSalt = salt || crypto.randomUUID();
   const encoder = new TextEncoder();
-  const data = encoder.encode(password);
+  const data = encoder.encode(password + actualSalt);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return `${actualSalt}:${hashHex}`;
 }
 
 async function verifyPassword(inputPassword: string, hashedPassword: string): Promise<boolean> {
-  const inputHash = await hashPassword(inputPassword);
+  // Handle legacy hashes without salt
+  if (!hashedPassword.includes(':')) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(inputPassword);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return inputHash === hashedPassword;
+  }
+  
+  // Handle salted hashes
+  const [salt, hash] = hashedPassword.split(':');
+  const inputHash = await hashPassword(inputPassword, salt);
   return inputHash === hashedPassword;
 }
 
+// Get user from database by username
+async function getUserByUsername(db: D1Database, username: string): Promise<User | null> {
+  try {
+    const result = await db.prepare('SELECT * FROM users WHERE username = ?')
+      .bind(username)
+      .first() as User | null;
+    return result;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return null;
+  }
+}
+
 export async function handleAuth(c: Context<{ Bindings: Env }>, mode: 'login' | 'logout') {
-  const { SESSIONS_KV, ADMIN_PASSWORD_HASH, ADMIN_USERNAME, JWT_SECRET } = c.env;
+  const { SESSIONS_KV, FWHY_D1, ADMIN_PASSWORD_HASH, ADMIN_USERNAME, JWT_SECRET } = c.env;
   
   if (mode === 'login') {
     const { username, password } = await c.req.json();
@@ -95,20 +123,37 @@ export async function handleAuth(c: Context<{ Bindings: Env }>, mode: 'login' | 
       return c.json({ success: false, error: 'Username and password required' }, 400);
     }
     
-    // Check username
-    if (username !== ADMIN_USERNAME) {
+    let user: User | null = null;
+    let isValid = false;
+    
+    // First check database for user
+    user = await getUserByUsername(FWHY_D1, username);
+    if (user) {
+      isValid = await verifyPassword(password, user.password_hash!);
+    } else {
+      // Fallback to environment variables for backward compatibility
+      if (username === ADMIN_USERNAME) {
+        isValid = await verifyPassword(password, ADMIN_PASSWORD_HASH);
+        if (isValid) {
+          user = {
+            username: ADMIN_USERNAME,
+            role: 'admin',
+            isAdmin: true,
+            authMethod: 'jwt'
+          };
+        }
+      }
+    }
+    
+    if (!user || !isValid) {
       return c.json({ success: false, error: 'Invalid credentials' }, 401);
     }
     
-    // Check password
-    const isValid = await verifyPassword(password, ADMIN_PASSWORD_HASH);
-    if (!isValid) {
-      return c.json({ success: false, error: 'Invalid credentials' }, 401);
-    }
-    
-    // Create JWT token
+    // Create JWT token with role information
     const payload = {
-      user: 'admin',
+      user: user.username,
+      role: user.role,
+      id: user.id,
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
     };
@@ -117,7 +162,7 @@ export async function handleAuth(c: Context<{ Bindings: Env }>, mode: 'login' | 
     
     // Also store in KV as fallback
     const sessionToken = generateSessionToken();
-    await SESSIONS_KV.put(sessionToken, jwtToken, { expirationTtl: 60 * 60 * 24 });
+    await SESSIONS_KV.put(sessionToken, JSON.stringify(payload), { expirationTtl: 60 * 60 * 24 });
     
     // Set secure HTTP-only cookie with JWT
     const cookieOptions = [
@@ -133,6 +178,10 @@ export async function handleAuth(c: Context<{ Bindings: Env }>, mode: 'login' | 
     return c.json({ 
       success: true, 
       token: jwtToken,
+      user: {
+        username: user.username,
+        role: user.role
+      },
       message: 'Login successful' 
     });
     

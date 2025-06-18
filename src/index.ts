@@ -360,7 +360,87 @@ admin.get('/', async (c) => {
   }
   
   if (isAuthenticated) {
-    return c.html(generateUnifiedDashboardHTML());
+    // Serve the redesigned admin.html file
+    try {
+      const asset = await c.env.ASSETS.fetch(new Request('http://localhost/admin.html'));
+      return new Response(asset.body, {
+        headers: {
+          'content-type': 'text/html'
+        }
+      });
+    } catch (e) {
+      console.error('Error serving admin.html:', e);
+      return c.text('Admin dashboard not found', 404);
+    }
+  } else {
+    return c.redirect('/admin/login');
+  }
+});
+
+// Also serve the admin dashboard at /dashboard
+admin.get('/dashboard', async (c) => {
+  const { SESSIONS_KV, JWT_SECRET } = c.env;
+  const cookie = c.req.header('cookie') || '';
+  const match = cookie.match(/sessionToken=([^;]+)/);
+  
+  // Check if user is authenticated
+  let isAuthenticated = false;
+  
+  if (match) {
+    const token = match[1];
+    
+    // Try JWT verification
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const [header, payload, signature] = parts;
+        const data = `${header}.${payload}`;
+        
+        const encoder = new TextEncoder();
+        const key = await crypto.subtle.importKey(
+          'raw',
+          encoder.encode(JWT_SECRET),
+          { name: 'HMAC', hash: 'SHA-256' },
+          false,
+          ['verify']
+        );
+        
+        const signatureBuffer = Uint8Array.from(
+          atob(signature.replace(/-/g, '+').replace(/_/g, '/')), 
+          c => c.charCodeAt(0)
+        );
+        
+        const isValid = await crypto.subtle.verify('HMAC', key, signatureBuffer, encoder.encode(data));
+        if (isValid) {
+          isAuthenticated = true;
+        }
+      }
+    } catch (e) {
+      // JWT verification failed, try session
+    }
+    
+    // Fallback to KV session check
+    if (!isAuthenticated && token.includes('-')) {
+      const session = await SESSIONS_KV.get(token);
+      if (session) {
+        isAuthenticated = true;
+      }
+    }
+  }
+  
+  if (isAuthenticated) {
+    // Serve the redesigned admin.html file
+    try {
+      const asset = await c.env.ASSETS.fetch(new Request('http://localhost/admin.html'));
+      return new Response(asset.body, {
+        headers: {
+          'content-type': 'text/html'
+        }
+      });
+    } catch (e) {
+      console.error('Error serving admin.html:', e);
+      return c.text('Admin dashboard not found', 404);
+    }
   } else {
     return c.redirect('/admin/login');
   }
