@@ -311,6 +311,8 @@ async function loadEvents() {
         }
     }
 }
+
+function renderEvents(events) {
     const eventList = document.getElementById('event-list');
     if (!eventList) return;
     if (!Array.isArray(events) || events.length === 0) {
