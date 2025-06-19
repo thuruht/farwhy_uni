@@ -299,15 +299,14 @@ async function loadEvents() {
         dashboardState.events = events;
         renderEvents(events);
         
-        // Add the event listener here after the events section is loaded
         const addEventBtn = document.getElementById('add-event-btn');
         if (addEventBtn) {
-            // Remove any existing listeners to prevent duplicates
+            // To prevent multiple listeners on re-renders, we clone and replace the button
             const newAddEventBtn = addEventBtn.cloneNode(true);
+            addEventBtn.parentNode.replaceChild(newAddEventBtn, addEventBtn);
+            // And add the listener to the new button
             newAddEventBtn.addEventListener('click', () => showEventForm());
-            addEventBtn.replaceWith(newAddEventBtn);
             console.log('New Event button listener attached');
-            newAddEventBtn.addEventListener('click', () => showEventForm());
         }
     }
 }
@@ -347,8 +346,6 @@ function setupEventFilters() {
     if (venueFilter) venueFilter.onchange = applyFilters;
     if (searchInput) searchInput.oninput = applyFilters;
 }
-
-// Event handlers are now set up in loadEvents() function
 
 window.deleteEvent = async function(id) {
     if (confirm('Are you sure? This will also delete the flyer from storage.')) {
@@ -448,13 +445,13 @@ async function loadBlogPosts() {
         dashboardState.blogPosts = result.data;
         renderBlogPosts(result.data);
         
-        // Add the event listener here after the blog section is loaded
         const addBlogBtn = document.getElementById('add-blog-btn');
         if (addBlogBtn) {
-            // Remove any existing listeners to prevent duplicates
-            addBlogBtn.replaceWith(addBlogBtn.cloneNode(true));
-            // Add the event listener
-            document.getElementById('add-blog-btn').addEventListener('click', () => showBlogForm());
+            // To prevent multiple listeners on re-renders, we clone and replace the button
+            const newAddBlogBtn = addBlogBtn.cloneNode(true);
+            addBlogBtn.parentNode.replaceChild(newAddBlogBtn, addBlogBtn);
+            // And add the listener to the new button
+            newAddBlogBtn.addEventListener('click', () => showBlogForm());
             console.log('New Blog Post button listener attached');
         }
     }
@@ -478,7 +475,8 @@ function renderBlogPosts(posts) {
         </tr>`).join('') + `</tbody></table>`;
 }
 
-document.getElementById('add-blog-btn')?.addEventListener('click', () => showBlogForm());
+// THIS is the problematic listener that is now removed.
+// document.getElementById('add-blog-btn')?.addEventListener('click', () => showBlogForm());
 
 window.editBlogPost = (id) => {
     const post = dashboardState.blogPosts.find(p => p.id === id);
