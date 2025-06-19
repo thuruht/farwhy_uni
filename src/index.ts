@@ -307,6 +307,16 @@ app.get('*', async (c) => {
   }
 });
 
+// Direct route for admin.farewellcafe.com root path
+app.get('/', (c) => {
+  const host = c.req.header('host') || '';
+  if (host.includes('admin.')) {
+    console.log(`[DEBUG] Admin domain root route: ${host}`);
+    return serveLoginPage(c);
+  }
+  return c.env.ASSETS.fetch(c.req.raw);
+});
+
 // --- R2 IMAGE SERVING ---
 app.get('/images/*', async (c) => {
   try {
