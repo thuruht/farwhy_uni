@@ -240,7 +240,8 @@ app.use('*', async (c, next) => {
   }
   
   // Admin domain handling
-  if (host.startsWith('admin.')) {
+  if (host.includes('admin.farewellcafe.com')) {
+    console.log(`[DEBUG] Admin domain detected: ${host}, Path: ${c.req.path}`);
     // Admin login flow - check for existing session
     const cookie = c.req.header('cookie') || '';
     const hasSession = cookie.includes('sessionToken=');
@@ -281,7 +282,7 @@ app.use('*', async (c, next) => {
 app.get('*', async (c) => {
   const host = c.req.header('host') || '';
   
-  if (host.startsWith('admin.')) {
+  if (host.includes('admin.farewellcafe.com')) {
     console.log(`[DEBUG] Admin domain fallback: ${c.req.path}`);
     return serveLoginPage(c);
   }
