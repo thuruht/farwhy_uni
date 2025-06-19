@@ -179,17 +179,30 @@ function getCookie(name) {
 const api = {
     _call: async (endpoint, options = {}) => {
         try {
+            console.log(`API call to ${endpoint}`, options);
             const response = await fetch(endpoint, { ...options, credentials: 'include', cache: 'no-store' });
+            console.log(`API response status: ${response.status}`);
+            
             if (response.status === 401) {
                 console.error('API Auth failed (401)');
+                showToast('Authentication failed. Please log in again.', 'error');
                 showLoginScreen();
                 return null;
             }
+            
             if (!response.ok) {
                 console.error(`API Error for ${endpoint}: ${response.status}`);
-                showToast(`API Error: ${response.status}`, 'error');
+                // Try to get more error details
+                try {
+                    const errorData = await response.json();
+                    console.error('API error details:', errorData);
+                    showToast(`API Error: ${errorData.error || response.statusText}`, 'error');
+                } catch (jsonError) {
+                    showToast(`API Error: ${response.status} ${response.statusText}`, 'error');
+                }
                 return null;
             }
+            
             return response; // Return the whole response object
         } catch (error) {
             console.error(`API call error for ${endpoint}:`, error);
@@ -203,18 +216,22 @@ const api = {
         return null;
     },
     post: async function(endpoint, data) {
-        return await this._call(endpoint, {
+        const res = await this._call(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+        if (res) return await res.json();
+        return null;
     },
     put: async function(endpoint, data) {
-        return await this._call(endpoint, {
+        const res = await this._call(endpoint, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+        if (res) return await res.json();
+        return null;
     },
     delete: async function(endpoint) {
         return await this._call(endpoint, { method: 'DELETE' });
@@ -471,8 +488,15 @@ window.deleteEvent = async function(id) {
 };
 
 window.editEvent = function(id) {
+    console.log('editEvent called with id:', id);
     const event = dashboardState.events.find(e => e.id === id);
-    if(event) showEventForm(id);
+    console.log('Found event:', event);
+    if(event) {
+        showEventForm(id);
+    } else {
+        console.error('Event not found with ID:', id);
+        showToast('Event not found', 'error');
+    }
 };
 
 function showEventForm(id = null) {
@@ -525,11 +549,43 @@ function showEventForm(id = null) {
             </form>
         </div>
     `;
-    modal.classList.add('active');
+    // Modal class already added at the beginning of the function, don't add it twice
     
     document.getElementById('flyer-upload-btn').addEventListener('click', () => {
         document.getElementById('flyer-upload-input').click();
     });
+    
+    // Add auto-population logic for venue selection
+    const venueSelect = document.querySelector('select[name="venue"]');
+    const ageRestrictionInput = document.querySelector('input[name="age_restriction"]');
+    
+    // Auto-populate defaults if creating a new event (not editing)
+    if (!id) {
+        // Auto-populate "Doors at 7pm / Music at 8pm" for all new events
+        const eventTimeInput = document.querySelector('input[name="description"]');
+        if (eventTimeInput && !eventTimeInput.value) {
+            eventTimeInput.value = 'Doors at 7pm / Music at 8pm';
+        }
+    }
+    
+    // Set up venue change handler for auto-population
+    venueSelect.addEventListener('change', (e) => {
+        const venue = e.target.value;
+        
+        // Auto-populate age restriction based on venue
+        if (venue === 'farewell') {
+            ageRestrictionInput.value = '21+ unless with parent or legal guardian';
+        } else if (venue === 'howdy') {
+            ageRestrictionInput.value = 'All ages';
+        }
+        
+        console.log(`Auto-populated age restriction for ${venue}: ${ageRestrictionInput.value}`);
+    });
+    
+    // Trigger the change event if a venue is already selected (for edit mode)
+    if (venueSelect.value) {
+        venueSelect.dispatchEvent(new Event('change'));
+    }
 
     document.getElementById('flyer-upload-input').addEventListener('change', async (e) => {
         const file = e.target.files[0];
@@ -553,14 +609,33 @@ function showEventForm(id = null) {
 
     document.getElementById('event-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const data = Object.fromEntries(new FormData(e.target).entries());
+        console.log('Event form submitted');
+        
+        // Get form data
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        console.log('Event form data:', data);
+        
+        // Determine API endpoint and method
         const url = id ? `/api/admin/events/${id}` : '/api/admin/events';
         const method = id ? 'put' : 'post';
-        const response = await api[method](url, data);
-        if (response) {
-            showToast(`Event ${id ? 'updated' : 'created'}`, 'success');
-            modal.classList.remove('active');
-            loadEvents();
+        console.log(`Making ${method.toUpperCase()} request to ${url}`);
+        
+        try {
+            const response = await api[method](url, data);
+            console.log('API response:', response);
+            
+            if (response) {
+                showToast(`Event ${id ? 'updated' : 'created'}`, 'success');
+                modal.classList.remove('active');
+                loadEvents();
+            } else {
+                console.error('API call returned null response');
+                showToast('Failed to save event. Please try again.', 'error');
+            }
+        } catch (error) {
+            console.error('Error submitting event form:', error);
+            showToast('An error occurred while saving the event.', 'error');
         }
     });
 }
@@ -650,7 +725,7 @@ function showBlogForm(id = null) {
             </form>
         </div>
     `;
-    modal.classList.add('active');
+    // Modal class already added at the beginning of the function, don't add it twice
 
     const quill = new Quill('#quill-editor', { theme: 'snow' });
     dashboardState.quill = quill;
@@ -661,18 +736,36 @@ function showBlogForm(id = null) {
 
     document.getElementById('blog-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+        console.log('Blog form submitted');
+        
+        // Get form data
         const data = {
             title: e.target.title.value,
             date: e.target.date.value,
             content: dashboardState.quill.root.innerHTML
         };
+        console.log('Blog form data:', data);
+        
+        // Determine API endpoint and method
         const url = id ? `/api/admin/blog/posts/${id}` : '/api/admin/blog/posts';
         const method = id ? 'put' : 'post';
-        const response = await api[method](url, data);
-        if(response) {
-            showToast(`Post ${id ? 'updated' : 'created'}`, 'success');
-            modal.classList.remove('active');
-            loadBlogPosts();
+        console.log(`Making ${method.toUpperCase()} request to ${url}`);
+        
+        try {
+            const response = await api[method](url, data);
+            console.log('API response:', response);
+            
+            if(response) {
+                showToast(`Post ${id ? 'updated' : 'created'}`, 'success');
+                modal.classList.remove('active');
+                loadBlogPosts();
+            } else {
+                console.error('API call returned null response');
+                showToast('Failed to save blog post. Please try again.', 'error');
+            }
+        } catch (error) {
+            console.error('Error submitting blog form:', error);
+            showToast('An error occurred while saving the blog post.', 'error');
         }
     });
 }
