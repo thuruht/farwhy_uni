@@ -1,4 +1,3 @@
-// src/index.ts
 import { Hono, Context } from 'hono';
 import { cors } from 'hono/cors';
 import { timing } from 'hono/timing';
@@ -11,126 +10,135 @@ import { Env } from './types/env';
 
 const app = new Hono<{ Bindings: Env }>();
 
-// --- Helper Functions ---
-const serveAsset = async (c: Context<{ Bindings: Env }>, path: string, headers: Record<string, string> = {}) => {
+// --- Helper: Serves a specific asset from the ASSETS binding ---
+const serveAsset = async (c: Context<{ Bindings: Env }>, assetPath: string, headers: Record<string, string> = {}) => {
   try {
-    const asset = await c.env.ASSETS.fetch(new Request(new URL(path, c.req.url)));
-    if (!asset.ok) {
-        return c.text(`${path} not found`, 404);
-    }
+    const assetRequest = new Request(`http://assets-server/${assetPath}`, c.req.raw);
+    const asset = await c.env.ASSETS.fetch(assetRequest);
+    if (!asset.ok) return c.text(`${assetPath} not found`, 404);
+    
     const newHeaders = new Headers(asset.headers);
     Object.entries(headers).forEach(([key, value]) => newHeaders.set(key, value));
-    return new Response(asset.body, { ...asset, headers: newHeaders });
+    return new Response(asset.body, { status: asset.status, statusText: asset.statusText, headers: newHeaders });
   } catch (e) {
-    console.error(`[ERROR] Asset fetch failed for ${path}:`, e);
     return c.text('Asset not found', 404);
   }
 };
 
-const serveLoginPage = (c: Context<{ Bindings: Env }>) => {
-    return serveAsset(c, 'login.html');
-};
 
-const serveAdminDashboard = (c: Context<{ Bindings: Env }>) => {
-    return serveAsset(c, 'admin.html', {
-        'Cache-Control': 'no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-    });
-};
-
-// --- Middleware ---
-app.use('*', timing());
+// ====================================
+// API ROUTING
+// ====================================
+app.use('/api/*', timing());
 app.use('/api/*', cors());
 
-// --- API Routes ---
-const api = new Hono<{ Bindings: Env }>();
+// --- Public API Routes ---
+const publicApi = new Hono<{ Bindings: Env }>();
+publicApi.get('/events', (c) => handleEvents(c, 'list'));
+publicApi.get('/events/slideshow', (c) => handleEvents(c, 'slideshow'));
+publicApi.get('/list/:state', (c) => {
+publicApi.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.query('venue') }));
+  const state = c.req.param('state');
+  if (!state) return c.text('State parameter is required', 400);
+  return handleEvents(c, 'list', { venue: state });
+});
+publicApi.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.query('type') }));
+publicApi.get('/blog/posts', (c) => handleBlog(c.req.raw, c.env));
+publicApi.get('/blog/featured', (c) => handleBlog(c.req.raw, c.env));
+app.route('/api', publicApi);
 
-// Public API
-api.get('/events', (c) => handleEvents(c, 'list'));
-api.get('/events/slideshow', (c) => handleEvents(c, 'slideshow'));
-api.get('/list/:state', (c) => handleEvents(c, 'list', { venue: c.req.param('state') }));
-api.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.query('type') }));
-api.get('/blog/posts', (c) => handleBlog(c.req.raw, c.env));
-api.get('/blog/featured', (c) => handleBlog(c.req.raw, c.env));
 
-// Admin API
-api.post('/login', (c) => handleAuth(c, 'login'));
-api.post('/logout', (c) => handleAuth(c, 'logout'));
-api.get('/check', authMiddleware(), (c) => handleAuth(c, 'check'));
+// --- Admin API Routes ---
+const adminApi = new Hono<{ Bindings: Env }>();
+// Publicly accessible admin actions
+adminApi.post('/login', (c) => handleAuth(c, 'login'));
+adminApi.post('/logout', (c) => handleAuth(c, 'logout'));
+adminApi.get('/check', authMiddleware(), (c) => handleAuth(c, 'check'));
 
-const adminRoutes = new Hono<{ Bindings: Env }>().use('*', authMiddleware());
-adminRoutes.get('/events', (c) => handleEvents(c, 'list'));
-adminRoutes.post('/events', (c) => handleEvents(c, 'create'));
-adminRoutes.put('/events/:id', (c) => handleEvents(c, 'update'));
-adminRoutes.delete('/events/:id', (c) => handleEvents(c, 'delete'));
-adminRoutes.post('/events/flyer', (c) => handleEvents(c, 'upload-flyer'));
-adminRoutes.get('/blog/posts', (c) => handleBlog(c.req.raw, c.env));
-adminRoutes.post('/blog/posts', (c) => handleBlog(c.req.raw, c.env));
-adminRoutes.put('/blog/:id', (c) => handleBlog(c.req.raw, c.env));
-adminRoutes.delete('/blog/:id', (c) => handleBlog(c.req.raw, c.env));
-adminRoutes.post('/sync-events', (c) => handleSync(c));
+// Protected Admin Actions
+adminApi.use('/admin/events/*', authMiddleware());
+adminApi.get('/admin/events', (c) => handleEvents(c, 'list'));
+adminApi.post('/admin/events', (c) => handleEvents(c, 'create'));
+adminApi.put('/admin/events/:id', (c) => handleEvents(c, 'update'));
+adminApi.delete('/admin/events/:id', (c) => handleEvents(c, 'delete'));
+adminApi.post('/admin/events/flyer', (c) => handleEvents(c, 'upload-flyer'));
 
-api.route('/admin', adminRoutes);
-app.route('/api', api);
+adminApi.use('/admin/blog/*', authMiddleware());
+adminApi.get('/admin/blog/posts', (c) => handleBlog(c.req.raw, c.env));
+adminApi.post('/admin/blog/posts', (c) => handleBlog(c.req.raw, c.env));
+adminApi.put('/admin/blog/:id', (c) => handleBlog(c.req.raw, c.env));
+adminApi.delete('/admin/blog/:id', (c) => handleBlog(c.req.raw, c.env));
 
-// --- Frontend & Asset Serving ---
-app.get('*', async (c, next) => {
-    const host = c.req.header('host') || '';
-    const isAdminDomain = host.startsWith('admin.');
+adminApi.use('/admin/sync-events*', authMiddleware());
+adminApi.post('/admin/sync-events', (c) => handleSync(c));
+app.route('/api', adminApi);
 
-    if (isAdminDomain) {
-        // --- Admin Domain Logic ---
-        const cookie = c.req.header('cookie') || '';
-        const hasSession = cookie.includes('sessionToken='); // Simple check
 
-        if (c.req.path === '/login') {
-            return serveLoginPage(c);
+// ====================================
+// ROOT LEVEL & ASSET SERVING
+// ====================================
+
+// --- Root-level legacy routes for backward compatibility ---
+app.get('/list/:state', (c) => handleEvents(c, 'list', { venue: c.req.param('state') }));
+app.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.query('type') }));
+
+// --- R2 Image Serving ---
+app.get('/images/*', async (c) => {
+    try {
+        const imagePath = c.req.path.slice('/images/'.length);
+        const object = await c.env.FWHY_IMAGES.get(imagePath);
+        if (!object) return c.text('Image not found', 404);
+
+        const headers = new Headers();
+        headers.set('cache-control', 'public, max-age=31536000');
+        let contentType = 'application/octet-stream';
+        if (object.httpMetadata && object.httpMetadata.contentType) {
+            contentType = object.httpMetadata.contentType;
+        } else if (object.metadata && object.metadata.contentType) {
+            contentType = object.metadata.contentType;
         }
-
-        // For any other path, check for a session.
-        // If it exists, serve the dashboard (auth middleware will handle API validation).
-        // If not, redirect to the login page.
-        if (hasSession) {
-            return serveAdminDashboard(c);
-        } else {
-            return c.redirect('/login');
-        }
-    } else {
-        // --- Public Domain Logic ---
-        const url = new URL(c.req.url);
-
-        // Serve R2 images
-        if (url.pathname.startsWith('/images/')) {
-            try {
-                const imagePath = url.pathname.replace('/images/', '');
-                const object = await c.env.FWHY_IMAGES.get(imagePath);
-                if (!object) return c.text('Image not found', 404);
-
-                const headers = new Headers();
-                headers.set('cache-control', 'public, max-age=31536000');
-                headers.set('content-type', object.httpMetadata?.contentType || 'image/jpeg');
-                return new Response(object.body, { headers });
-
-            } catch (error) {
-                console.error('Error serving image:', error);
-                return c.text('Error serving image', 500);
-            }
-        }
-        
-        // Let ASSETS handler try to find the file
-        try {
-            const assetResponse = await c.env.ASSETS.fetch(c.req.raw);
-            if (assetResponse.ok) {
-                return assetResponse;
-            }
-        } catch (e) {
-            // This is expected when a file is not found.
-        }
-
-        // Fallback to index.html for SPA routing on the public site
-        return serveAsset(c, 'index.html', {'Cache-Control': 'public, max-age=3600'});
+        headers.set('content-type', contentType);
+        return new Response(object.body, { headers });
+    } catch (error) {
+        return c.text('Error serving image', 500);
     }
+});
+
+// --- Main application serving (SPA Handler) ---
+app.get('*', async (c) => {
+    const host = c.req.header('host') || '';
+    const url = new URL(c.req.url);
+
+    // If on the admin domain, serve the admin SPA shell for any non-asset/API path.
+    if (host.startsWith('admin.')) {
+        if (url.pathname.startsWith('/api/')) {
+            return c.text('API endpoint not found', 404);
+        }
+        // For any other path, serve the main admin html file.
+        // The client-side JS will handle showing the login form or the dashboard.
+        return serveAsset(c, 'admin.html');
+    }
+
+    // --- Public Domain Logic ---
+    // Try to fetch a static asset directly from the binding
+    // Cache for index.html fallback to avoid repeated fetches
+    const cache = c.env.CACHE || new Map<string, Response>();
+    try {
+        const assetResponse = await c.env.ASSETS.fetch(c.req.raw);
+        if (assetResponse.ok) return assetResponse;
+    } catch (e) { /* Expected when file not found, fall through */ }
+
+    // If not a static asset, fall back to the public index.html for SPA routing
+    if (cache.has('index.html')) {
+        // Clone the cached response to avoid body stream lock
+        const cached = cache.get('index.html');
+        if (cached) return cached.clone();
+    }
+    const indexResponse = await serveAsset(c, 'index.html');
+    if (indexResponse instanceof Response && indexResponse.ok) {
+        cache.set('index.html', indexResponse.clone());
+    }
+    return indexResponse;
 });
 
 export default app;

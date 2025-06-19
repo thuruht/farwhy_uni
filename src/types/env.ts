@@ -1,5 +1,6 @@
 // src/types/env.ts
 export interface Env {
+  CACHE: Map<string, Response>;
   FWHY_D1: D1Database;
   FWHY_IMAGES: R2Bucket;
   SESSIONS_KV: KVNamespace;
@@ -63,6 +64,8 @@ declare global {
   }
   
   interface R2Object {
+    metadata: any;
+    httpMetadata: any;
     body: ReadableStream;
     bodyUsed: boolean;
   }
