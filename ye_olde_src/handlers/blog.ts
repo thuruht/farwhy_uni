@@ -1,96 +1,150 @@
-import { Context, HonoRequest } from 'hono';
-import { Env } from '../types/env';
+// src/handlers/blog.ts
+import { Context } from 'hono';
+import { Env, BlogPost } from '../types/env';
 
-export async function handleBlog(req: HonoRequest, env: Env): Promise<Response> {
-    const { BLOG_KV } = env;
-    const url = new URL(req.url);
-    const method = req.method;
-    const pathname = url.pathname;
+// Helper to safely get and parse KV data
+async function getPostsFromKV(c: Context<{ Bindings: Env }>): Promise<BlogPost[]> {
+    const postsData = await c.env.BLOG_KV.get('blog:posts');
+    return postsData ? JSON.parse(postsData) : [];
+}
+
+// --- Public Handlers ---
+
+export async function getPublicPosts(c: Context<{ Bindings: Env }>): Promise<Response> {
+    const limit = parseInt(c.req.query('limit') || '10');
+    const offset = parseInt(c.req.query('offset') || '0');
 
     try {
-        const pathParts = pathname.split('/');
-        const lastPart = pathParts[pathParts.length - 1];
+        const posts = await getPostsFromKV(c);
+        const publishedPosts = posts
+            .filter((post: any) => post.status === 'published' || !post.status)
+            .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-        // --- PUBLIC GET Endpoints ---
-        if (method === 'GET') {
-            if (pathname.endsWith('/blog/posts')) {
-                const data = await BLOG_KV.get('blog:posts');
-                return new Response(data || '[]', { headers: { 'Content-Type': 'application/json' } });
-            }
-            if (pathname.endsWith('/blog/featured')) {
-                const data = await BLOG_KV.get('post_featured_info');
-                return new Response(data || '{}', { headers: { 'Content-Type': 'application/json' } });
-            }
+        const paginatedPosts = publishedPosts.slice(offset, offset + limit);
+
+        return c.json({
+            data: paginatedPosts,
+            total: publishedPosts.length
+        });
+    } catch (error) {
+        console.error('Get public posts error:', error);
+        return c.json({ error: 'Failed to fetch posts' }, 500);
+    }
+}
+
+export async function getFeaturedContent(c: Context<{ Bindings: Env }>): Promise<Response> {
+    try {
+        const featuredData = await c.env.BLOG_KV.get('blog:featured');
+        const featured = featuredData ? JSON.parse(featuredData) : { text: '', youtubeUrl: '' };
+        return c.json(featured);
+    } catch (error) {
+        console.error('Get featured content error:', error);
+        return c.json({ error: 'Failed to fetch featured content' }, 500);
+    }
+}
+
+
+// --- Admin Handlers ---
+
+export async function listAllPosts(c: Context<{ Bindings: Env }>): Promise<Response> {
+    try {
+        const posts = await getPostsFromKV(c);
+        posts.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        return c.json({ data: posts });
+    } catch (error) {
+        console.error('List all posts error:', error);
+        return c.json({ error: 'Failed to list posts' }, 500);
+    }
+}
+
+export async function createPost(c: Context<{ Bindings: Env }>): Promise<Response> {
+    try {
+        const postData = await c.req.json<any>();
+        if (!postData.title || !postData.content) {
+            return c.json({ error: 'Title and content are required' }, 400);
         }
 
-        // --- ADMIN API Endpoints (/api/admin/blog/...) ---
-        const isAdminRoute = pathname.includes('/api/admin/blog');
-        if (isAdminRoute) {
-            const adminPathParts = pathname.split('/api/admin/blog/');
-            const slug = adminPathParts[1]; // This will be 'posts' or an ID
+        const newPost: Partial<BlogPost> = {
+            id: crypto.randomUUID(),
+            title: postData.title,
+            content: postData.content,
+            image_url: postData.imageUrl || null,
+            status: postData.status || 'published',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        };
 
-            if (method === 'GET') {
-                if (slug === 'posts') {
-                    const data = await BLOG_KV.get('blog:posts');
-                    return new Response(data || '[]', { headers: { 'Content-Type': 'application/json' } });
-                }
-                // GET single post by ID
-                const postData = await BLOG_KV.get(`blog:${slug}`);
-                return new Response(postData || null, { status: postData ? 200 : 404, headers: { 'Content-Type': 'application/json' } });
-            }
+        const posts = await getPostsFromKV(c);
+        posts.push(newPost as BlogPost);
+        await c.env.BLOG_KV.put('blog:posts', JSON.stringify(posts));
+        return c.json({ success: true, data: newPost }, 201);
+    } catch (error) {
+        console.error('Create post error:', error);
+        return c.json({ error: 'Failed to create post' }, 500);
+    }
+}
 
-            if (method === 'POST' && slug === 'posts') {
-                const newPost = await req.json();
-                const postsData = await BLOG_KV.get('blog:posts');
-                const posts = postsData ? JSON.parse(postsData) : [];
+export async function getPostById(c: Context<{ Bindings: Env }>): Promise<Response> {
+    const postId = c.req.param('id');
+    const posts = await getPostsFromKV(c);
+    const post = posts.find((p: any) => p.id === postId);
 
-                const createdPost = { ...newPost, id: crypto.randomUUID(), created_at: new Date().toISOString() };
+    if (!post) {
+        return c.json({ success: false, error: 'Post not found' }, 404);
+    }
+    return c.json({ success: true, data: post });
+}
 
-                posts.unshift(createdPost);
+export async function updatePostById(c: Context<{ Bindings: Env }>): Promise<Response> {
+    const postId = c.req.param('id');
+    const updateData = await c.req.json();
 
-                await BLOG_KV.put(`blog:${createdPost.id}`, JSON.stringify(createdPost));
-                await BLOG_KV.put('blog:posts', JSON.stringify(posts));
+    const posts = await getPostsFromKV(c);
+    const postIndex = posts.findIndex((p: any) => p.id === postId);
 
-                return new Response(JSON.stringify({ success: true, id: createdPost.id }), { status: 201 });
-            }
+    if (postIndex === -1) {
+        return c.json({ success: false, error: 'Post not found' }, 404);
+    }
 
-            if (method === 'PUT' && slug) {
-                const updatedData = await req.json();
-                const postsData = await BLOG_KV.get('blog:posts');
-                const posts = postsData ? JSON.parse(postsData) : [];
+    posts[postIndex] = {
+        ...posts[postIndex],
+        ...updateData,
+        id: postId, // Ensure ID is not overwritten
+        updated_at: new Date().toISOString()
+    };
 
-                const postIndex = posts.findIndex((p: any) => p.id == slug);
-                if (postIndex === -1) return new Response(JSON.stringify({ error: 'Post not found in index' }), { status: 404 });
+    await c.env.BLOG_KV.put('blog:posts', JSON.stringify(posts));
+    return c.json({ success: true, data: posts[postIndex] });
+}
 
-                const originalPostData = await BLOG_KV.get(`blog:${slug}`);
-                if (!originalPostData) return new Response(JSON.stringify({ error: 'Post not found' }), { status: 404 });
+export async function deletePostById(c: Context<{ Bindings: Env }>): Promise<Response> {
+    const postId = c.req.param('id');
+    let posts = await getPostsFromKV(c);
+    const initialLength = posts.length;
 
-                const originalPost = JSON.parse(originalPostData);
-                const updatedPost = { ...originalPost, ...updatedData, updated_at: new Date().toISOString() };
+    posts = posts.filter((p: any) => p.id !== postId);
 
-                posts[postIndex] = updatedPost;
+    if (posts.length === initialLength) {
+        return c.json({ success: false, error: 'Post not found' }, 404);
+    }
 
-                await BLOG_KV.put(`blog:${slug}`, JSON.stringify(updatedPost));
-                await BLOG_KV.put('blog:posts', JSON.stringify(posts));
+    await c.env.BLOG_KV.put('blog:posts', JSON.stringify(posts));
+    return c.json({ success: true, message: 'Post deleted successfully' });
+}
 
-                return new Response(JSON.stringify({ success: true, data: updatedPost }));
-            }
 
-            if (method === 'DELETE' && slug) {
-                const postsData = await BLOG_KV.get('blog:posts');
-                const posts = postsData ? JSON.parse(postsData) : [];
-                const updatedPosts = posts.filter((p: any) => p.id != slug);
-
-                await BLOG_KV.delete(`blog:${slug}`);
-                await BLOG_KV.put('blog:posts', JSON.stringify(updatedPosts));
-
-                return new Response(JSON.stringify({ success: true }));
-            }
-        }
-
-        return new Response(JSON.stringify({ error: 'Not Found' }), { status: 404 });
-    } catch (e: any) {
-        console.error(`[blog.ts] Error: ${e.message}`);
-        return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
+export async function setFeaturedContent(c: Context<{ Bindings: Env }>): Promise<Response> {
+    try {
+        const featuredData = await c.req.json<any>();
+        const featured = {
+            text: featuredData.text || '',
+            youtubeUrl: featuredData.youtubeUrl || '',
+            updated_at: new Date().toISOString()
+        };
+        await c.env.BLOG_KV.put('blog:featured', JSON.stringify(featured));
+        return c.json({ success: true, data: featured });
+    } catch (error) {
+        console.error('Set featured content error:', error);
+        return c.json({ error: 'Failed to set featured content' }, 500);
     }
 }

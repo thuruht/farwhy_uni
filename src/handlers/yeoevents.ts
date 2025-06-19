@@ -4,23 +4,6 @@ import { Env, Event, LegacyEvent } from '../types/env';
 
 type EventAction = 'list' | 'create' | 'update' | 'delete' | 'slideshow' | 'archives' | 'upload-flyer';
 
-// NEW: Helper function to delete a flyer from R2 based on its URL
-async function deleteFlyerFromR2(env: Env, flyerUrl?: string | null) {
-  if (!flyerUrl) return;
-
-  try {
-    // Extract the R2 object key from the full URL (e.g., https://.../images/flyers/123.jpg -> flyers/123.jpg)
-    const key = new URL(flyerUrl).pathname.substring('/images/'.length);
-    if (key) {
-      await env.FWHY_IMAGES.delete(key);
-      console.log(`[R2] Deleted flyer: ${key}`);
-    }
-  } catch (r2Error) {
-    // Log the error but don't block the main operation (e.g., if the URL is malformed)
-    console.error(`[R2] Failed to parse URL and delete flyer from R2 for URL ${flyerUrl}:`, r2Error);
-  }
-}
-
 // Helper function to normalize event data for display
 function normalizeEventForDisplay(event: Event): any {
   return {
@@ -52,47 +35,49 @@ function normalizeEventForDisplay(event: Event): any {
 // Helper function to apply Aaron's auto-population rules
 function applyAutoPopulationRules(eventData: Partial<Event>): Partial<Event> {
   const result = { ...eventData };
-
+  
   // Auto-populate age restriction based on venue if not provided
   if (!result.age_restriction && result.venue) {
-    result.age_restriction = result.venue === 'howdy'
-      ? 'All ages'
+    result.age_restriction = result.venue === 'howdy' 
+      ? 'All ages' 
       : '21+ unless with parent or legal guardian';
   }
-
+  
   // Auto-populate event time if not provided
   if (!result.event_time) {
     result.event_time = 'Doors at 7pm / Music at 8pm';
   }
-
+  
   // Set default status
   if (!result.status) {
     result.status = 'active';
   }
-
+  
   return result;
 }
 
 async function listEvents(c: Context<{ Bindings: Env }>, options?: { venue?: string }) {
   const { FWHY_D1 } = c.env;
-
+  
   try {
     let query = "SELECT * FROM events WHERE status != 'cancelled' ORDER BY date DESC";
     let params: any[] = [];
-
+    
     if (options?.venue) {
       query = "SELECT * FROM events WHERE venue = ? AND status != 'cancelled' ORDER BY date DESC";
       params = [options.venue];
     }
-
+    
     console.log(`[DEBUG] Running events query: ${query} with params:`, params);
-
+    
     const { results } = await FWHY_D1.prepare(query).bind(...params).all();
-
+    
+    // Normalize all events for display compatibility
     const events = (results as Event[] ?? []).map(normalizeEventForDisplay);
-
+    
     console.log(`[DEBUG] Returning ${events.length} events`);
-
+    
+    // Set CORS headers for cross-domain requests
     return c.json(events, 200, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -107,23 +92,24 @@ async function listEvents(c: Context<{ Bindings: Env }>, options?: { venue?: str
 
 async function getArchives(c: Context<{ Bindings: Env }>, options?: { venue?: string }) {
   const { FWHY_D1 } = c.env;
-
+  
   try {
     let query = "SELECT * FROM events WHERE date < datetime('now') ORDER BY date DESC";
     let params: any[] = [];
-
+    
     if (options?.venue) {
       query = "SELECT * FROM events WHERE venue = ? AND date < datetime('now') ORDER BY date DESC";
       params = [options.venue];
     }
-
+    
     console.log(`[DEBUG] Running archives query: ${query} with params:`, params);
-
+    
     const { results } = await FWHY_D1.prepare(query).bind(...params).all();
     const events = (results as Event[] ?? []).map(normalizeEventForDisplay);
-
+    
     console.log(`[DEBUG] Returning ${events.length} archive events`);
-
+    
+    // Set CORS headers for cross-domain requests
     return c.json(events, 200, {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -138,14 +124,14 @@ async function getArchives(c: Context<{ Bindings: Env }>, options?: { venue?: st
 
 async function getSlideshow(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
-
+  
   try {
     const { results } = await FWHY_D1.prepare(`
-      SELECT * FROM events
-      WHERE date >= datetime('now') AND status = 'active'
+      SELECT * FROM events 
+      WHERE date >= datetime('now') AND status = 'active' 
       ORDER BY date ASC
     `).all();
-
+    
     const events = (results as Event[] ?? []).map(event => ({
       id: event.id,
       title: event.title || 'Untitled Event',
@@ -158,12 +144,13 @@ async function getSlideshow(c: Context<{ Bindings: Env }>) {
       ticketLink: event.ticket_url || '',
       price: event.price || '',
       ageRestriction: event.age_restriction || 'Check with venue',
+      // Add new fields for enhanced CMS features
       event_type: event.event_type || 'music',
       performers: event.performers || '[]',
       tags: event.tags || '[]',
       external_links: event.external_links || '{}'
     }));
-
+    
     return c.json(events);
   } catch (error) {
     console.error('Error fetching slideshow events:', error);
@@ -173,36 +160,46 @@ async function getSlideshow(c: Context<{ Bindings: Env }>) {
 
 async function createEvent(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
-
+  
   try {
     const eventData: Partial<Event> = await c.req.json();
-
+    
+    // Validate required fields
     if (!eventData.title || !eventData.date || !eventData.venue) {
-      return c.json({ success: false, error: "Missing required fields: title, date, venue" }, 400);
+      return c.json({ 
+        success: false, 
+        error: "Missing required fields: title, date, venue" 
+      }, 400);
     }
-
+    
+    // Validate venue
     if (!['farewell', 'howdy'].includes(eventData.venue)) {
-      return c.json({ success: false, error: "Invalid venue. Must be 'farewell' or 'howdy'" }, 400);
+      return c.json({ 
+        success: false, 
+        error: "Invalid venue. Must be 'farewell' or 'howdy'" 
+      }, 400);
     }
-
+    
+    // Apply Aaron's auto-population rules
     const normalizedData = applyAutoPopulationRules(eventData);
+    
     const newId = `event_${crypto.randomUUID()}`;
-
+    
     await FWHY_D1.prepare(`
       INSERT INTO events (
-        id, title, date, venue, ticket_url, flyer_image_url, description,
+        id, title, date, venue, ticket_url, flyer_image_url, description, 
         age_restriction, event_time, price, capacity, status, is_featured,
         event_type, performers, tags, external_links, created_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
     `).bind(
-      newId,
-      normalizedData.title,
-      normalizedData.date,
-      normalizedData.venue,
-      normalizedData.ticket_url || null,
-      normalizedData.flyer_image_url || null,
-      normalizedData.description || null,
-      normalizedData.age_restriction,
+      newId, 
+      normalizedData.title, 
+      normalizedData.date, 
+      normalizedData.venue, 
+      normalizedData.ticket_url || null, 
+      normalizedData.flyer_image_url || null, 
+      normalizedData.description || null, 
+      normalizedData.age_restriction, 
       normalizedData.event_time,
       normalizedData.price || null,
       normalizedData.capacity || null,
@@ -213,7 +210,7 @@ async function createEvent(c: Context<{ Bindings: Env }>) {
       normalizedData.tags || '[]',
       normalizedData.external_links || '{}'
     ).run();
-
+    
     return c.json({ success: true, id: newId }, 201);
   } catch (error) {
     console.error('Error creating event:', error);
@@ -221,42 +218,32 @@ async function createEvent(c: Context<{ Bindings: Env }>) {
   }
 }
 
-// MODIFIED: updateEvent function with flyer cleanup logic
 async function updateEvent(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
   const eventId = c.req.param('id');
-
+  
   try {
     const eventData: Partial<Event> = await c.req.json();
-
-    // Fetch the current event to check if the flyer URL is changing
-    const currentEvent: Event | null = await FWHY_D1.prepare("SELECT flyer_image_url FROM events WHERE id = ?")
-      .bind(eventId)
-      .first();
-
-    // If the flyer URL is being updated and is different from the old one, delete the old flyer
-    if (currentEvent && currentEvent.flyer_image_url && currentEvent.flyer_image_url !== eventData.flyer_image_url) {
-      await deleteFlyerFromR2(c.env, currentEvent.flyer_image_url);
-    }
-
+    
+    // Apply auto-population rules if venue is being changed
     const normalizedData = applyAutoPopulationRules(eventData);
-
+    
     await FWHY_D1.prepare(`
-      UPDATE events SET
-        title = ?, date = ?, venue = ?, ticket_url = ?,
-        flyer_image_url = ?, description = ?, age_restriction = ?,
-        event_time = ?, price = ?, capacity = ?, status = ?,
+      UPDATE events SET 
+        title = ?, date = ?, venue = ?, ticket_url = ?, 
+        flyer_image_url = ?, description = ?, age_restriction = ?, 
+        event_time = ?, price = ?, capacity = ?, status = ?, 
         is_featured = ?, event_type = ?, performers = ?,
-        tags = ?, external_links = ?, updated_at = datetime('now')
+        tags = ?, external_links = ?, updated_at = datetime('now') 
       WHERE id = ?
     `).bind(
-      normalizedData.title,
-      normalizedData.date,
-      normalizedData.venue,
-      normalizedData.ticket_url || null,
-      normalizedData.flyer_image_url || null,
-      normalizedData.description || null,
-      normalizedData.age_restriction,
+      normalizedData.title, 
+      normalizedData.date, 
+      normalizedData.venue, 
+      normalizedData.ticket_url || null, 
+      normalizedData.flyer_image_url || null, 
+      normalizedData.description || null, 
+      normalizedData.age_restriction, 
       normalizedData.event_time,
       normalizedData.price || null,
       normalizedData.capacity || null,
@@ -268,7 +255,7 @@ async function updateEvent(c: Context<{ Bindings: Env }>) {
       normalizedData.external_links || '{}',
       eventId
     ).run();
-
+    
     return c.json({ success: true });
   } catch (error) {
     console.error('Error updating event:', error);
@@ -276,26 +263,13 @@ async function updateEvent(c: Context<{ Bindings: Env }>) {
   }
 }
 
-// MODIFIED: deleteEvent function with flyer cleanup logic
 async function deleteEvent(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
   const eventId = c.req.param('id');
-
+  
   try {
-    // First, find the event to get its flyer URL
-    const event: Event | null = await FWHY_D1.prepare("SELECT flyer_image_url FROM events WHERE id = ?")
-        .bind(eventId)
-        .first();
-
-    // If the event exists and has a flyer, delete it from R2
-    if (event && event.flyer_image_url) {
-      await deleteFlyerFromR2(c.env, event.flyer_image_url);
-    }
-
-    // Now, delete the event record from D1
     await FWHY_D1.prepare("DELETE FROM events WHERE id = ?").bind(eventId).run();
-
-    return c.json({ success: true, message: 'Event and associated flyer deleted.' });
+    return c.json({ success: true });
   } catch (error) {
     console.error('Error deleting event:', error);
     return c.json({ success: false, error: 'Failed to delete event' }, 500);
@@ -304,34 +278,36 @@ async function deleteEvent(c: Context<{ Bindings: Env }>) {
 
 async function uploadFlyer(c: Context<{ Bindings: Env }>) {
   const { FWHY_IMAGES } = c.env;
-
+  
   try {
     const formData = await c.req.formData();
     const file = formData.get('flyer') as File;
-
+    
     if (!file) {
       return c.json({ success: false, error: 'No file uploaded' }, 400);
     }
-
-    const fileName = `flyers/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
+    
+    const fileName = `flyers/${Date.now()}-${file.name}`;
     const arrayBuffer = await file.arrayBuffer();
-
+    
+    // Determine content type based on file extension
     const contentType = file.type || 'image/jpeg';
-
+    
+    // R2 put method with proper metadata
     await FWHY_IMAGES.put(fileName, arrayBuffer, {
       httpMetadata: {
         contentType: contentType,
         cacheControl: 'public, max-age=31536000'
       }
     });
-
-    // This URL will be served by the new /images/* route in index.ts
+    
+    // Use the worker's image serving endpoint instead of direct R2 URL
     const flyerUrl = `https://dev.farewellcafe.com/images/${fileName}`;
-
-    return c.json({
-      success: true,
+    
+    return c.json({ 
+      success: true, 
       url: flyerUrl,
-      fileName: fileName // The R2 key
+      fileName: fileName
     });
   } catch (error) {
     console.error('Error uploading flyer:', error);
@@ -355,13 +331,14 @@ async function migrateLegacyEvent(legacyEvent: LegacyEvent): Promise<Event> {
     legacy_id: legacyEvent.id,
     legacy_data: JSON.stringify(legacyEvent)
   };
-
+  
+  // Apply auto-population rules to fill missing fields
   return applyAutoPopulationRules(normalizedEvent) as Event;
 }
 
 export async function handleEvents(
-  c: Context<{ Bindings: Env }>,
-  action: EventAction,
+  c: Context<{ Bindings: Env }>, 
+  action: EventAction, 
   options?: { venue?: string }
 ) {
   try {
@@ -389,4 +366,5 @@ export async function handleEvents(
   }
 }
 
+// Export individual functions for use in sync operations
 export { createEvent, updateEvent, deleteEvent, migrateLegacyEvent, normalizeEventForDisplay };

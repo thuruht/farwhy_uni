@@ -1,10 +1,9 @@
+// wrangler.jsonc
 {
   "name": "farewell-unified",
   "main": "src/index.ts",
-  "compatibility_date": "2025-06-19",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_date": "2025-6-07",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "binding": "ASSETS",
     "directory": "./public"
@@ -36,6 +35,7 @@
     "ENVIRONMENT": "production"
   },
   "observability": {
-    "enabled": true
+    "enabled": true,
+    "head_sampling_rate": 1
   }
 }
