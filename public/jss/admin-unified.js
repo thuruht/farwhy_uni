@@ -294,20 +294,31 @@ async function loadDashboardStats() {
 }
 
 async function loadEvents() {
+    console.log('Loading events...');
     const events = await api.get('/api/admin/events');
     if (events) {
+        console.log(`Loaded ${events.length} events`);
         dashboardState.events = events;
         renderEvents(events);
         
         const addEventBtn = document.getElementById('add-event-btn');
+        console.log('Add Event button element:', addEventBtn);
         if (addEventBtn) {
             // To prevent multiple listeners on re-renders, we clone and replace the button
             const newAddEventBtn = addEventBtn.cloneNode(true);
             addEventBtn.parentNode.replaceChild(newAddEventBtn, addEventBtn);
             // And add the listener to the new button
-            newAddEventBtn.addEventListener('click', () => showEventForm());
+            newAddEventBtn.addEventListener('click', (e) => {
+                console.log('New Event button clicked via direct handler');
+                e.preventDefault();
+                showEventForm();
+            });
             console.log('New Event button listener attached');
+        } else {
+            console.log('Add Event button not found in the DOM');
         }
+    } else {
+        console.log('Failed to load events or received empty response');
     }
 }
 
@@ -360,12 +371,18 @@ window.editEvent = function(id) {
 };
 
 function showEventForm(id = null) {
+    console.log('showEventForm called with id:', id);
     const modal = document.getElementById('form-modal');
     const modalBody = document.getElementById('modal-form-body');
-    if (!modal || !modalBody) return;
+    console.log('Modal elements:', modal, modalBody);
+    if (!modal || !modalBody) {
+        console.error('Modal elements not found!');
+        return;
+    }
 
     dashboardState.editingEventId = id;
     let event = id ? dashboardState.events.find(e => e.id === id) : {};
+    console.log('Event data:', event);
 
     modalBody.innerHTML = `
         <div class="admin-form">
@@ -581,3 +598,22 @@ function showSection(sectionName) {
         }
     }
 }
+
+// ====================================
+// Helper Functions
+// ====================================
+
+// Add direct event handlers at document level since we're using a SPA
+document.addEventListener('click', (e) => {
+    // Handle New Event button click
+    if (e.target.id === 'add-event-btn' || e.target.closest('#add-event-btn')) {
+        console.log('New Event button clicked via global handler');
+        showEventForm();
+    }
+    
+    // Handle New Blog Post button click
+    if (e.target.id === 'add-blog-btn' || e.target.closest('#add-blog-btn')) {
+        console.log('New Blog button clicked via global handler');
+        showBlogForm();
+    }
+});
