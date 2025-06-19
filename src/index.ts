@@ -160,7 +160,7 @@ function serveLoginPage(c: Context<{ Bindings: Env }>) {
         });
         const result = await response.json();
         if (response.ok && result.success) {
-          window.location.href = '/';
+          window.location.href = '/admin';
         } else {
           document.getElementById('error').textContent = result.error || 'invalid credentials';
         }
@@ -246,10 +246,37 @@ app.use('*', async (c, next) => {
     const cookie = c.req.header('cookie') || '';
     const hasSession = cookie.includes('sessionToken=');
     
-    // Handle /admin/api/* paths - these should be passed to the next middleware
+    // Handle /api/ paths - these should be passed to the next middleware
     if (c.req.path.startsWith('/api/')) {
       console.log(`[DEBUG] Admin API request: ${c.req.path}`);
       return next();
+    }
+    
+    // Handle /admin path specifically
+    if (c.req.path === '/admin' || c.req.path === '/') {
+      console.log(`[DEBUG] Admin dashboard path: ${c.req.path}`);
+      if (hasSession) {
+        // If user has a session, serve admin dashboard
+        console.log(`[DEBUG] Session found, serving admin dashboard for ${c.req.path} path`);
+        try {
+          const asset = await c.env.ASSETS.fetch(new Request('http://localhost/admin.html'));
+          return new Response(asset.body, {
+            headers: {
+              ...asset.headers,
+              'Cache-Control': 'no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          });
+        } catch (e) {
+          console.error('[ERROR] Admin dashboard not found', e);
+          return serveLoginPage(c);
+        }
+      } else {
+        // No session, serve login page
+        console.log(`[DEBUG] No session found, serving login page for ${c.req.path} path`);
+        return serveLoginPage(c);
+      }
     }
     
     // For admin dashboard paths
@@ -259,11 +286,16 @@ app.use('*', async (c, next) => {
       try {
         const asset = await c.env.ASSETS.fetch(new Request('http://localhost/admin.html'));
         return new Response(asset.body, {
-          headers: asset.headers
+          headers: {
+            ...asset.headers,
+            'Cache-Control': 'no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
         });
       } catch (e) {
         console.error('[ERROR] Admin dashboard not found', e);
-        return c.text('Admin dashboard not found', 404);
+        return serveLoginPage(c);
       }
     } else {
       // No session, serve login page
@@ -304,6 +336,37 @@ app.get('*', async (c) => {
       console.error(`[ERROR] Not found: ${c.req.path}`, e);
       return c.text('Not found', 404);
     }
+  }
+});
+
+// Special admin dashboard route
+app.get('/admin', async (c) => {
+  const host = c.req.header('host') || '';
+  console.log(`[DEBUG] Admin dashboard route: ${host}, path: /admin`);
+  
+  // Check if user has an active session
+  const cookie = c.req.header('cookie') || '';
+  const hasSession = cookie.includes('sessionToken=');
+  
+  if (hasSession) {
+    console.log(`[DEBUG] Admin dashboard route - session found, serving admin dashboard`);
+    try {
+      const asset = await c.env.ASSETS.fetch(new Request('http://localhost/admin.html'));
+      return new Response(asset.body, {
+        headers: {
+          ...asset.headers,
+          'Cache-Control': 'no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+    } catch (e) {
+      console.error('[ERROR] Admin dashboard not found', e);
+      return serveLoginPage(c);
+    }
+  } else {
+    console.log(`[DEBUG] Admin dashboard route - no session, redirecting to login`);
+    return serveLoginPage(c);
   }
 });
 

@@ -7,16 +7,17 @@ DROP TABLE IF EXISTS blog_posts;
 DROP TABLE IF EXISTS menus;
 DROP TABLE IF EXISTS menu_items;
 DROP TABLE IF EXISTS business_hours;
-DROP TABLE IF EXISTS thrift_items;
-DROP TABLE IF EXISTS thrift_content;
-DROP TABLE IF EXISTS thrift_social_links;
+-- Thrift tables removed as per frontend changes
+-- DROP TABLE IF EXISTS thrift_items;
+-- DROP TABLE IF EXISTS thrift_content;
+-- DROP TABLE IF EXISTS thrift_social_links;
 
 -- Users table with role-based access control
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'thrift', 'user')),
+    role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'user')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -43,6 +44,12 @@ CREATE TABLE events (
     capacity INTEGER, -- Venue capacity (optional)
     status TEXT DEFAULT 'active' CHECK (status IN ('active', 'cancelled', 'postponed')),
     is_featured BOOLEAN DEFAULT FALSE,
+    
+    -- Additional CMS fields for the events modal
+    event_type TEXT, -- e.g., 'music', 'art', 'comedy', 'special'
+    performers TEXT, -- JSON array of performer names/details
+    tags TEXT, -- JSON array of tags for filtering
+    external_links TEXT, -- JSON object for social media/external links
     
     -- Metadata
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -91,7 +98,7 @@ CREATE TABLE menu_items (
 -- Business hours for venues
 CREATE TABLE business_hours (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    venue TEXT NOT NULL CHECK (venue IN ('farewell', 'howdy', 'thrift')),
+    venue TEXT NOT NULL CHECK (venue IN ('farewell', 'howdy')),
     day_of_week INTEGER NOT NULL CHECK (day_of_week BETWEEN 0 AND 6), -- 0=Sunday, 6=Saturday
     open_time TEXT, -- HH:MM format
     close_time TEXT, -- HH:MM format
@@ -101,6 +108,8 @@ CREATE TABLE business_hours (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Thrift tables removed as per frontend changes
+/*
 -- Thrift store inventory
 CREATE TABLE thrift_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -140,6 +149,7 @@ CREATE TABLE thrift_social_links (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+*/
 
 -- Create indexes for better performance
 CREATE INDEX idx_events_date ON events (date);
@@ -147,8 +157,9 @@ CREATE INDEX idx_events_venue ON events (venue);
 CREATE INDEX idx_blog_posts_status ON blog_posts (status);
 CREATE INDEX idx_blog_posts_created ON blog_posts (created_at DESC);
 CREATE INDEX idx_menu_items_menu ON menu_items (menu_id);
-CREATE INDEX idx_thrift_items_status ON thrift_items (status);
-CREATE INDEX idx_thrift_items_category ON thrift_items (category);
+-- Removed thrift-related indexes
+-- CREATE INDEX idx_thrift_items_status ON thrift_items (status);
+-- CREATE INDEX idx_thrift_items_category ON thrift_items (category);
 CREATE INDEX idx_business_hours_venue ON business_hours (venue, day_of_week);
 
 -- Insert default admin user (password hash should be replaced with actual hash)
@@ -175,7 +186,9 @@ INSERT INTO business_hours (venue, day_of_week, open_time, close_time, is_closed
 ('howdy', 5, '17:00', '02:00', 0), -- Friday 5pm-2am
 ('howdy', 6, '17:00', '02:00', 0); -- Saturday 5pm-2am
 
--- Default thrift content
+-- Default thrift content removed
+/*
 INSERT INTO thrift_content (section, title, content) VALUES 
 ('about', 'About Our Thrift Store', '<p>Welcome to Howdy DIY Thrift! We specialize in unique finds and sustainable fashion.</p>'),
 ('announcements', 'Current Announcements', '<p>Check back regularly for special sales and new arrivals!</p>');
+*/

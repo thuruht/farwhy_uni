@@ -14,7 +14,7 @@ export interface User {
   id?: number;
   username: string;
   password_hash?: string;
-  role: 'admin' | 'thrift' | 'user';
+  role: 'admin' | 'user'; // Removed 'thrift' role
   created_at?: string;
   updated_at?: string;
   isAdmin?: boolean; // Legacy compatibility
@@ -94,6 +94,12 @@ export interface Event {
   status?: 'active' | 'cancelled' | 'postponed';
   is_featured?: boolean;
   
+  // Additional CMS fields for the events modal
+  event_type?: string; // e.g., 'music', 'art', 'comedy', 'special'
+  performers?: string; // JSON array of performer names/details
+  tags?: string; // JSON array of tags for filtering
+  external_links?: string; // JSON object for social media/external links
+  
   // Metadata
   created_at?: string;
   updated_at?: string;
@@ -153,7 +159,7 @@ export interface MenuItem {
 
 export interface BusinessHours {
   id: number;
-  venue: 'farewell' | 'howdy' | 'thrift';
+  venue: 'farewell' | 'howdy'; // Removed 'thrift'
   day_of_week: number; // 0=Sunday, 6=Saturday
   open_time?: string; // HH:MM format
   close_time?: string; // HH:MM format
@@ -163,6 +169,8 @@ export interface BusinessHours {
   updated_at: string;
 }
 
+// Thrift-related interfaces removed
+/*
 export interface ThriftItem {
   id: number;
   name: string;
@@ -199,3 +207,4 @@ export interface ThriftSocialLink {
   created_at: string;
   updated_at: string;
 }
+*/

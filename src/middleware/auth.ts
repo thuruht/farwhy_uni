@@ -53,15 +53,18 @@ export function authMiddleware(allowedRoles: string[] = ['admin']) {
     
     if (cookieMatch) {
       token = cookieMatch[1];
+      console.log(`[AUTH] Found sessionToken cookie: ${token.substring(0, 10)}...`);
     } else {
       // Fallback to Authorization header
       const authHeader = c.req.header('authorization');
       if (authHeader && authHeader.startsWith('Bearer ')) {
         token = authHeader.substring(7);
+        console.log(`[AUTH] Using Bearer token: ${token.substring(0, 10)}...`);
       }
     }
     
     if (!token) {
+      console.log(`[AUTH] No authentication token found`);
       return c.json({ success: false, error: 'Authentication required' }, 401);
     }
     
@@ -70,8 +73,11 @@ export function authMiddleware(allowedRoles: string[] = ['admin']) {
     // Try JWT verification first
     try {
       user = await verifyJWT(token, JWT_SECRET);
+      if (user) {
+        console.log(`[AUTH] JWT verification successful: ${JSON.stringify(user)}`);
+      }
     } catch (e) {
-      console.log('JWT verification failed, trying KV fallback');
+      console.log(`[AUTH] JWT verification failed, trying KV fallback: ${e}`);
     }
     
     // Fallback to KV session check
@@ -80,13 +86,15 @@ export function authMiddleware(allowedRoles: string[] = ['admin']) {
         const sessionData = await SESSIONS_KV.get(token);
         if (sessionData) {
           user = JSON.parse(sessionData);
+          console.log(`[AUTH] KV session check successful: ${JSON.stringify(user)}`);
         }
       } catch (e) {
-        console.log('KV session check failed');
+        console.log(`[AUTH] KV session check failed: ${e}`);
       }
     }
     
     if (!user) {
+      console.log(`[AUTH] Authentication failed: no valid user found for token`);
       return c.json({ success: false, error: 'Invalid or expired token' }, 401);
     }
     

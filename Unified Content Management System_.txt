@@ -1,0 +1,575 @@
+﻿System Architecture and Implementation Specification for the FarWhy Unified Content Platform
+
+
+
+
+Section 1: Analysis of the farewellcafe.com Digital Ecosystem and Core Philosophy
+
+
+An effective technical solution must be rooted in a deep understanding of the project's context, operational realities, and underlying ethos. The farewellcafe.com project is more than a simple website; it is the digital extension of a vibrant, community-focused DIY music venue in Kansas City.1 This analysis deconstructs the key elements of its existing digital presence to establish a foundational context that will govern all subsequent architectural and implementation decisions.
+
+
+1.1 The Dual-Venue Paradigm: "Farewell" and "Howdy"
+
+
+The most significant structural feature of the current farewellcafe.com website is its function as a unified portal for two distinct but related venues: "Farewell" and its sister space, "Howdy".2 The user interface prominently features a "switch modes" function, allowing visitors to toggle between event listings and content specific to each venue.2 This is not a superficial feature but a core element of the user experience that reflects the operational reality of the organization, which hosts approximately 250 shows annually across both spaces.2
+This dual-venue model must be treated as a first-class citizen within the new system's data architecture. A simple boolean field or hardcoded logic would be insufficient and fail to provide future scalability. The proposed architecture will therefore be built around a foundational Venues data model. All relevant content types—including Events, Operating Hours, and potentially venue-specific Menu Items—will be linked to a specific venue via a foreign key relationship. This approach not only accurately models the current "Farewell" and "Howdy" structure but also provides the flexibility to add new venues or spaces in the future without requiring a fundamental rewrite of the backend logic or database schema. This design ensures the platform can evolve alongside the organization itself.
+
+
+1.2 Deconstructing the "DIY Ethos" as an Architectural Driver
+
+
+The identity of Farewell is deeply intertwined with a "do-it-yourself" (DIY) ethos. The venue's "About Us" page details its history, from its origins in an abandoned building without basic amenities to its growth fueled by friendship, community, and a love for music.2 A feature by local NPR affiliate KCUR reinforces this identity, describing Farewell as a "charmingly grungy music venue, bar and coffee shop" born from necessity and a commitment to supporting artists.1
+This philosophy extends directly to its technical implementation. The site's developer, "jojo" of NTApKC, explicitly champions a philosophy of "No templates, no WordPress (unless that's what you want), and no bullshit".3 This rejection of common off-the-shelf solutions 4 in favor of custom, "forward-looking, platform-independent, and cloud native" systems is a technical manifestation of the venue's DIY spirit.3 The choice of a modern, serverless stack is not merely a matter of technical preference but a deliberate alignment with the venue's core values of independence, control, and resourcefulness.
+Consequently, the generated system must be lean, modular, and avoid the bloat of monolithic frameworks. The architecture will prioritize control, flexibility, and the low overhead promised by modern cloud infrastructure.3 The implementation should consist of clean, well-documented, and easily modifiable code, empowering the project owner to manage and extend their own digital platform in the true spirit of DIY.
+
+
+1.3 Preserving the Brand Aesthetic: Austin Chapman & "jojo"
+
+
+The visual identity of farewellcafe.com is a distinct collaboration. The site credits Austin Chapman for the "swell graphics and general layout," which reflects his stated passion for bringing "character, warmth and just a sprinkle of nostalgic style to modern design projects".2 This is contrasted with the more experimental elements, such as animations and "bitcrushed" graphics, attributed to the developer, "jojo".2
+The new administrative dashboard, while a backend tool, must feel like an organic part of this established digital ecosystem. Its design will adopt the core visual language of the public-facing site, including its typography and color palette. However, it will prioritize function, clarity, and task efficiency over the experimental animations of the main site. To achieve this balance of custom aesthetics and rapid development, the use of a utility-first CSS framework like TailwindCSS is mandated. This approach allows for the precise implementation of a custom design system without the constraints and overhead of a pre-built component library, aligning perfectly with the project's bespoke nature.
+
+
+1.4 Content and Data Model Inventory
+
+
+A comprehensive inventory of all content to be managed is the cornerstone of a robust CMS. This inventory translates the project's abstract requirements into a concrete database schema, ensuring consistency across the entire stack—from the database to the API to the frontend components. The following table defines the single source of truth for the application's data structure.
+
+
+Table 1: Content & Data Model Inventory
+	
+
+	
+
+	
+
+	Table Name
+	Field Name
+	Data Type
+	Notes & Constraints
+	Venues
+	id
+	INTEGER
+	Primary Key, Auto-increment
+	
+
+	name
+	TEXT
+	NOT NULL. e.g., "Farewell", "Howdy"
+	
+
+	address
+	TEXT
+	Full street address.
+	
+
+	created_at
+	DATETIME
+	Default to current timestamp.
+	
+
+	updated_at
+	DATETIME
+	Updates on change.
+	Events
+	id
+	INTEGER
+	Primary Key, Auto-increment
+	
+
+	title
+	TEXT
+	NOT NULL. The name of the event/headliner.
+	
+
+	event_date
+	DATETIME
+	NOT NULL. Includes date and start time.
+	
+
+	description
+	TEXT
+	Full event details, supporting bands, etc.
+	
+
+	price
+	TEXT
+	e.g., "$10", "PWYC", "$5-10 sliding scale".
+	
+
+	age_restriction
+	TEXT
+	e.g., "All Ages", "21+".
+	
+
+	is_published
+	INTEGER
+	Boolean (0 or 1). Default 0.
+	
+
+	venue_id
+	INTEGER
+	NOT NULL. Foreign Key referencing Venues.id.
+	
+
+	created_at
+	DATETIME
+	Default to current timestamp.
+	
+
+	updated_at
+	DATETIME
+	Updates on change.
+	Flyers
+	id
+	INTEGER
+	Primary Key, Auto-increment
+	
+
+	event_id
+	INTEGER
+	NOT NULL. Foreign Key referencing Events.id.
+	
+
+	image_url
+	TEXT
+	NOT NULL. URL to the flyer image (e.g., in R2).
+	
+
+	alt_text
+	TEXT
+	Accessibility text for the image.
+	
+
+	created_at
+	DATETIME
+	Default to current timestamp.
+	BlogPosts
+	id
+	INTEGER
+	Primary Key, Auto-increment
+	
+
+	title
+	TEXT
+	NOT NULL.
+	
+
+	slug
+	TEXT
+	NOT NULL, UNIQUE. URL-friendly identifier.
+	
+
+	content
+	TEXT
+	NOT NULL. Full post content (Markdown supported).
+	
+
+	author
+	TEXT
+	Name of the post's author.
+	
+
+	is_published
+	INTEGER
+	Boolean (0 or 1). Default 0.
+	
+
+	published_at
+	DATETIME
+	Timestamp for when the post goes live.
+	
+
+	created_at
+	DATETIME
+	Default to current timestamp.
+	
+
+	updated_at
+	DATETIME
+	Updates on change.
+	MenuCategories
+	id
+	INTEGER
+	Primary Key, Auto-increment
+	
+
+	name
+	TEXT
+	NOT NULL, UNIQUE. e.g., "Beer", "Coffee", "Cocktails".
+	
+
+	display_order
+	INTEGER
+	For sorting categories on the menu.
+	MenuItems
+	id
+	INTEGER
+	Primary Key, Auto-increment
+	
+
+	name
+	TEXT
+	NOT NULL. e.g., "PBR", "Latte".
+	
+
+	description
+	TEXT
+	Optional details.
+	
+
+	price
+	TEXT
+	NOT NULL. e.g., "$3", "$4.50".
+	
+
+	category_id
+	INTEGER
+	NOT NULL. Foreign Key referencing MenuCategories.id.
+	
+
+	is_available
+	INTEGER
+	Boolean (0 or 1). Default 1.
+	SiteSettings
+	key
+	TEXT
+	Primary Key, UNIQUE. e.g., "hours_farewell", "menu_disclaimer".
+	
+
+	value
+	TEXT
+	The setting's value.
+	
+
+	description
+	TEXT
+	Human-readable explanation of the setting.
+	
+
+Section 2: Architectural Blueprint for a Unified Serverless CMS
+
+
+The architectural design will leverage the Cloudflare developer platform to create a modern, secure, and highly performant serverless system. This approach aligns with the project's core philosophy of using cost-effective, scalable, and forward-looking technologies.3 The backend will be consolidated into a single, unified Cloudflare Worker, which will serve as the brain of the entire content management system.
+
+
+2.1 The Unified Cloudflare Worker with Hono
+
+
+A single Cloudflare Worker will function as the application's comprehensive API backend. This serverless function will be responsible for handling all API routing, authentication, request validation, business logic, and database interactions. To manage the routing logic within the worker, the Hono framework will be utilized. Hono is an ideal choice due to its lightweight footprint, exceptional performance, and design focus on edge computing environments. Its minimalist nature avoids unnecessary dependencies and complexity, perfectly suiting the project's DIY ethos.
+Security will be a paramount concern. The worker will implement a robust authentication mechanism to protect all administrative endpoints (i.e., any route that creates, updates, or deletes data). This can be achieved using standards-based JSON Web Tokens (JWT) or by integrating with Cloudflare's own Zero Trust platform, Cloudflare Access, to secure the entire admin dashboard.
+
+
+2.2 Hybrid Data Persistence: Cloudflare D1 and KV
+
+
+The system will employ a hybrid data persistence strategy, using the most appropriate Cloudflare storage solution for each type of data. This is a best practice within the Cloudflare ecosystem that optimizes for performance, query capability, and cost-effectiveness.3
+* Cloudflare D1: As a SQL database built on the highly reliable SQLite engine, D1 is the perfect solution for the project's structured, relational data. All content models with complex relationships and query requirements—specifically the Venues, Events, Flyers, BlogPosts, MenuCategories, and MenuItems tables—will be stored in D1. This allows for powerful and flexible data retrieval, such as fetching all upcoming events for a specific venue within a given date range, or joining menu items with their respective categories.
+* Cloudflare KV: As a global, low-latency key-value store, KV is optimized for high-read, low-write scenarios involving simple data structures. It will be used to store site-wide configuration and settings that do not require relational querying. This includes the SiteSettings defined in the data model, such as operating hours for each venue, a general menu disclaimer, or other simple key-value pairs that can be managed through the admin dashboard. Storing this data in KV ensures it can be accessed with minimal latency from anywhere in the world.
+
+
+2.3 Dynamic Content Generation: Preserving User-Facing Features
+
+
+The current farewellcafe.com website provides significant value to its users by offering event data in multiple formats, including a downloadable .ics file for easy import into personal calendar applications and a link to a public Google Calendar.2 It is critical that this functionality is preserved and enhanced in the new system.
+The Cloudflare Worker will be designed with dedicated API endpoints, such as /api/events.ics and /api/events/google-calendar, that dynamically generate these outputs. When a user requests one of these endpoints, the worker will query the D1 database for the latest event information, format it according to the iCalendar specification or as a Google Calendar link, and return the appropriate response. This server-side generation ensures that the calendar data is always perfectly synchronized with the content managed in the admin dashboard, providing a seamless and reliable experience for the venue's patrons.
+
+
+2.4 API Specification
+
+
+A precise and unambiguous API contract is essential for decoupling the frontend and backend development and for providing the LLM with a clear set of implementation instructions. The following RESTful API specification details every endpoint required to power the administrative dashboard and any future public-facing data consumers.
+
+
+Table 2: API Endpoint Specification
+	
+
+	
+
+	
+
+	
+
+	HTTP Method
+	Path
+	Description
+	Authentication
+	Request Body / Response
+	POST
+	/api/login
+	Authenticates a user.
+	Public
+	Body: { email, password }. Response: { token }.
+	GET
+	/api/venues
+	Get all venues.
+	Required
+	Response: Array<Venue>.
+	GET
+	/api/events
+	Get all events, with query params for filtering.
+	Public
+	Params: ?venue_id=&status=upcoming&sort=asc. Response: Array<Event>.
+	POST
+	/api/events
+	Create a new event.
+	Required
+	Body: EventData. Response: Event.
+	GET
+	/api/events/:id
+	Get a single event by ID.
+	Public
+	Response: Event.
+	PUT
+	/api/events/:id
+	Update an existing event.
+	Required
+	Body: Partial<EventData>. Response: Event.
+	DELETE
+	/api/events/:id
+	Delete an event.
+	Required
+	Response: { success: true }.
+	POST
+	/api/events/:id/flyer
+	Add a flyer to an event.
+	Required
+	Body: { imageUrl, altText }. Response: Flyer.
+	DELETE
+	/api/flyers/:id
+	Delete a flyer.
+	Required
+	Response: { success: true }.
+	GET
+	/api/blog
+	Get all blog posts, with query params.
+	Public
+	Params: ?published=true. Response: Array<BlogPost>.
+	POST
+	/api/blog
+	Create a new blog post.
+	Required
+	Body: BlogPostData. Response: BlogPost.
+	GET
+	/api/blog/:slug
+	Get a single blog post by slug.
+	Public
+	Response: BlogPost.
+	PUT
+	/api/blog/:slug
+	Update an existing blog post.
+	Required
+	Body: Partial<BlogPostData>. Response: BlogPost.
+	DELETE
+	/api/blog/:slug
+	Delete a blog post.
+	Required
+	Response: { success: true }.
+	GET
+	/api/menu
+	Get the full menu (categories and items).
+	Public
+	Response: Array<MenuCategoryWithItems>.
+	POST
+	/api/menu/categories
+	Create a new menu category.
+	Required
+	Body: { name, displayOrder }. Response: MenuCategory.
+	PUT
+	/api/menu/categories/:id
+	Update a menu category.
+	Required
+	Body: { name, displayOrder }. Response: MenuCategory.
+	DELETE
+	/api/menu/categories/:id
+	Delete a menu category.
+	Required
+	Response: { success: true }.
+	POST
+	/api/menu/items
+	Create a new menu item.
+	Required
+	Body: MenuItemData. Response: MenuItem.
+	PUT
+	/api/menu/items/:id
+	Update a menu item.
+	Required
+	Body: Partial<MenuItemData>. Response: MenuItem.
+	DELETE
+	/api/menu/items/:id
+	Delete a menu item.
+	Required
+	Response: { success: true }.
+	GET
+	/api/settings
+	Get all site settings from KV.
+	Required
+	Response: Array<SiteSetting>.
+	PUT
+	/api/settings
+	Update multiple site settings in KV.
+	Required
+	Body: Array<{ key, value }>. Response: { success: true }.
+	GET
+	/api/events.ics
+	Dynamically generate an iCalendar file.
+	Public
+	Response: text/calendar content.
+	
+
+Section 3: Designing the Administrative Dashboard Interface
+
+
+This section translates the architectural blueprint into a functional, intuitive, and efficient user interface (UI) and user experience (UX) for the administrative dashboard. The design is heavily informed by established best practices for data management interfaces, with a specific focus on filtering, modal windows, and task-oriented workflows.8 The primary goal is to create a tool that is immediately understandable and saves time for its users.
+
+
+3.1 Information Architecture for a Task-Oriented Workflow
+
+
+The operators of Farewell are a small, dedicated team who juggle numerous responsibilities, from running shows to managing the bar and making repairs.1 They are not full-time content editors, and the dashboard must reflect this reality. It cannot be a complex system that requires extensive training; it must be a ruthlessly efficient tool that streamlines their administrative tasks.
+To this end, the dashboard's information architecture will be structured around tasks, not abstract data models. The primary navigation will be a simple, always-visible sidebar 10, providing immediate access to the main content areas: "Events," "Blog," "Menu," and "Site Settings." The default view upon login will be the "Events" list, as this is the most critical and frequently updated section of the site. This task-oriented design minimizes clicks and cognitive load, allowing a user to log in, add a new show, and log out in the shortest possible time.
+
+
+3.2 UI Component Design: Lists, Filters, and Modals
+
+
+The core of the dashboard will be built from a consistent set of UI components designed for clarity and efficiency.
+* List Views: Each content type will be presented in a list view (e.g., a table of all events or a list of blog posts). These views will be powerful yet simple to use, incorporating several best practices:
+   * Advanced Filtering: A dedicated filter panel, likely implemented as a collapsible sidebar to save screen real estate 10, will provide filtering options relevant to the specific content type. For the "Events" list, this will include filtering by venue ("Farewell" or "Howdy"), a date range, and publication status.13 Filters will use clear, intuitive controls like multi-select checkboxes and date pickers.16
+   * Dynamic Updates: As a user applies or removes filters, the content list will update immediately without requiring a full page reload, providing instant feedback.10
+   * Clear State Indication: All currently applied filters will be displayed as dismissible "chips" or tags directly above the content list. A prominent "Clear All" button will allow the user to reset the view to its default state with a single click.11
+* Content Creation & Editing Forms: To maintain user context and accelerate workflows, all content creation and editing actions will take place within modal windows.17 This prevents the user from losing their place in a long, filtered list. These modals will adhere strictly to established UX best practices:
+   * Clarity and Brevity: Each modal will have a clear, action-oriented title (e.g., "Create New Event" or "Edit Menu Item").18 The body will contain only the necessary form fields, using a logical visual hierarchy to guide the user's eye.17
+   * Prominent Calls to Action (CTAs): The primary action button (e.g., "Save Event") will be visually distinct—through color, size, or placement—from the secondary "Cancel" button, making the user's path clear.17
+   * Effortless Dismissal: Users will have multiple, intuitive ways to close a modal without completing the action: clicking a visible 'X' icon, clicking the "Cancel" button, pressing the Escape key on their keyboard, or clicking on the dark overlay surrounding the modal.18
+
+
+3.3 The Content Ingestion Helper: A Smart Workflow Solution
+
+
+The user query specified a "one-time migration plan" for existing content. However, a deeper analysis of the venue's operational reality reveals a more persistent challenge. The website notes that event flyers are "variously sourced" 2, implying they arrive from bands, promoters, and booking agents in an ad-hoc fashion, likely via email or direct messages. The true bottleneck is not the initial data import but the ongoing, manual, and repetitive task of transcribing information from these disparate source materials into the CMS.
+A simple migration script, while necessary, is an incomplete solution. The system must address this continuous workflow challenge. Therefore, the architecture will include a high-value, intelligent feature: the Flyer Ingestion Helper.
+This tool will be integrated directly into the "Add Event" modal. The workflow will be as follows:
+1. The user clicks "Add Event" to open the creation modal.
+2. Inside the modal, there is an option to upload a flyer image.
+3. Upon upload, a client-side Optical Character Recognition (OCR) library (such as Tesseract.js) or a lightweight AI function will process the image.
+4. The system will analyze the extracted text to identify and pre-fill key fields in the form, such as the "Event Title," "Date," and potentially the "Description" with the names of supporting bands.
+5. The user's task is then reduced from tedious data entry to simple review and confirmation, saving valuable time and reducing the potential for transcription errors.
+This feature directly leverages the developer's stated interest in integrating AI and cloud intelligence 3 to solve a real-world user problem, transforming a simple CMS into a smart, time-saving assistant for the venue operators.
+
+
+Section 4: The Definitive LLM Implementation Prompt
+
+
+The following multi-part prompt synthesizes all preceding analysis and specifications. It is designed to be provided directly to an advanced LLM code assistant to generate the complete serverless CMS and administrative dashboard for the FarWhy project.
+________________
+
+
+Part 1: Persona, Context, and Core Mission
+
+
+Persona: You are an expert full-stack developer specializing in modern, serverless web architectures. You write clean, modular, efficient, and well-documented code.
+Project Context: You are tasked with building a complete, custom Content Management System (CMS) from the ground up for a DIY music venue in Kansas City. The project is called "FarWhy". The venue operates two distinct spaces, "Farewell" and "Howdy," and the system must treat this duality as a core concept. The goal is to create a secure administrative dashboard for managing all site content and a unified backend API to serve that content. The project's philosophy is rooted in a "DIY ethos," favoring custom, lean, and modern solutions over monolithic, off-the-shelf platforms.
+
+
+Part 2: Technical Stack, Constraints, and Environment
+
+
+You must adhere strictly to the following technology stack. Do not use any other frameworks, libraries, or platforms unless explicitly instructed.
+* Backend:
+   * Runtime: Cloudflare Worker
+   * Routing: Hono
+   * Database (Relational): Cloudflare D1
+   * Database (Key-Value): Cloudflare KV
+   * Deployment: wrangler.toml configuration
+* Frontend (Admin Dashboard):
+   * Framework: SvelteKit
+   * Styling: TailwindCSS (utility-first)
+   * Icons: lucide-svelte
+* Migration Script:
+   * Runtime: Node.js
+   * Libraries: cheerio for HTML parsing, @cloudflare/wrangler for D1 client access.
+Environment Configuration: Create a wrangler.toml file. Define bindings for the D1 database (DB), the KV namespace (SETTINGS), and an R2 bucket for image uploads (ASSETS). Also include a secret for JWT authentication (JWT_SECRET).
+
+
+Part 3: Data Models and Cloudflare D1/KV Schema
+
+
+Implement the complete database schema based on the data model inventory provided below. Generate a SQL migration file (/migrations/0001_initial_schema.sql) containing the CREATE TABLE statements for all tables specified for Cloudflare D1.
+(Embed Table 1: Content & Data Model Inventory here)
+For Cloudflare KV, the keys will be strings as defined in the SiteSettings table (e.g., hours_farewell, menu_disclaimer). The values will be simple text.
+
+
+Part 4: Cloudflare Worker API Implementation
+
+
+Using the Hono framework, create a single Cloudflare Worker (/src/index.ts) that implements the entire backend API. The API must conform exactly to the specification provided in the table below.
+(Embed Table 2: API Endpoint Specification here)
+Implementation Details:
+* Authentication: Implement JWT-based authentication. Create a /api/login endpoint that validates credentials (hardcoded for now) and issues a token. Create Hono middleware to protect all routes marked as "Required" in the API specification. The middleware must validate the Authorization: Bearer <token> header.
+* Data Validation: Use a library like Zod to validate the shape and types of all incoming request bodies for POST and PUT requests.
+* Database Logic: Write clean, parameterized SQL queries for all interactions with the D1 database.
+* Special Handlers: Implement the logic for the /api/events.ics endpoint. It must query the D1 database for all upcoming events and generate a valid text/calendar iCalendar file as the response.
+
+
+Part 5: SvelteKit Frontend Implementation for the Admin Dashboard
+
+
+Create a new SvelteKit application for the administrative dashboard. All admin routes should be grouped under /src/routes/admin.
+Key Components and Routes to Implement:
+1. Layout and Navigation (/src/routes/admin/+layout.svelte):
+   * Create a main layout with a persistent vertical sidebar on the left and a content area on the right.
+   * The sidebar must contain navigation links to: /admin/events, /admin/blog, /admin/menu, and /admin/settings. Use icons from lucide-svelte for each link.
+2. Authentication (/src/routes/login/+page.svelte, /src/hooks.server.ts):
+   * Create a simple login page with email and password fields. On submit, it should call the /api/login endpoint and store the returned JWT in a secure httpOnly cookie.
+   * Implement a server hook that checks for the JWT on all requests to /admin/**. If the token is missing or invalid, redirect the user to /login.
+3. Events Management (/src/routes/admin/events/+page.svelte):
+   * This page will list all events in a table.
+   * Implement the Advanced Filtering Panel as a collapsible sidebar. Include filters for Venue (dropdown), Status (Published/Draft), and a Date Range picker.
+   * The table should update dynamically as filters are changed. Applied filters must be shown as dismissible "chips" above the table.
+   * Implement a "Create Event" button that opens a modal window.
+   * Each row in the table should have "Edit" and "Delete" buttons. "Edit" opens the same modal, pre-filled with data. "Delete" prompts for confirmation before making the API call.
+4. Event Creation/Editing Modal (/src/lib/components/EventModal.svelte):
+   * Create a modal component for creating and editing events. It must be dismissible via an 'X' button, an explicit "Cancel" button, and the Escape key.
+   * The form should contain fields for all Event properties: Title, Date/Time, Price, Age Restriction, Description, Venue (dropdown), and a toggle for "Is Published".
+   * Implement the Flyer Ingestion Helper:
+      * Include a file input to upload a flyer image.
+      * On upload, use the Tesseract.js library to perform client-side OCR on the image.
+      * Attempt to parse the extracted text to pre-fill the Title and Date fields of the form. The user can then correct or complete the fields.
+5. Implement Other Management Sections:
+   * Create similar list/filter/modal-based management interfaces for Blog Posts (/admin/blog), the Menu (/admin/menu), and Site Settings (/admin/settings).
+   * The Menu interface should allow for managing both MenuCategories and MenuItems, including reordering categories.
+   * The Site Settings interface should fetch all keys from the /api/settings endpoint and display them as a list of labeled text inputs for easy editing.
+
+
+Part 6: One-Time Content Migration Script
+
+
+Write a standalone Node.js script named migrate.js. This script will perform a one-time migration of existing content from farewellcafe.com.
+Script Logic:
+1. Use the node-fetch and cheerio libraries to fetch and parse the HTML from http://farewellcafe.com/.
+2. Iterate through the event listings on the page. For each event, extract the title, date, and any other available details.
+3. Use the @cloudflare/wrangler D1 client to connect to the production D1 database defined in your wrangler.toml.
+4. For each extracted event, insert a new record into the Events table. Assume all existing events belong to the "Farewell" venue (which should be pre-seeded in the Venues table with ID 1).
+5. Log the progress to the console, indicating how many events were successfully parsed and inserted. The script should be idempotent, meaning it can be run multiple times without creating duplicate entries (check if an event with the same title and date already exists before inserting).
+Works cited
+1. Welcome to Farewell, a DIY punk club in the middle of Kansas City's industrial sprawl, accessed June 18, 2025, https://www.kcur.org/arts-life/2022-08-06/welcome-to-farewell-a-diy-punk-club-in-the-middle-of-kansas-citys-industrial-sprawl
+2. Howdy and Farewell - Kansas City: FAREWELL | HOWDY | KCMO, accessed June 19, 2025, http://farewellcafe.com/
+3. NexTech Applied, accessed June 18, 2025, https://ntapkc.com/
+4. Is it WordPress? How to Find Out if a Website is Built With WordPress - YouTube, accessed June 18, 2025, https://www.youtube.com/watch?v=ghZ1EEIJzlU
+5. Is there any way to check if a website is developed with Wordpress? - Reddit, accessed June 18, 2025, https://www.reddit.com/r/Wordpress/comments/bcsavk/is_there_any_way_to_check_if_a_website_is/
+6. We KC! March 9-15, 2023 Upcoming concerts/shows (Kansas City, accessed June 19, 2025, https://weheartmusic.typepad.com/blog/2023/03/wekc-march-9-15-2023-upcoming-concertsshows-kansas-city-lawrence-ks.html
+7. Austin Chapman, accessed June 18, 2025, https://austinchapmandesign.com/
+8. Modal UX design: Patterns, examples, and best practices - LogRocket Blog, accessed June 18, 2025, https://blog.logrocket.com/ux-design/modal-ux-design-patterns-examples-best-practices/
+9. Filter UI and UX 101 – An In-Depth Guide - UXPin, accessed June 18, 2025, https://www.uxpin.com/studio/blog/filter-ui-and-ux/
+10. Getting filters right: UX/UI design patterns and best practices - LogRocket Blog, accessed June 18, 2025, https://blog.logrocket.com/ux-design/filtering-ux-ui-design-patterns-best-practices/
+11. 19+ Filter UI Examples for SaaS: Design Patterns & Best Practices - Eleken, accessed June 18, 2025, https://www.eleken.co/blog-posts/filter-ux-and-ui-for-saas
+12. Modal UX Design for SaaS in 2025 - Best Practices & Examples - Userpilot, accessed June 18, 2025, https://userpilot.com/blog/modal-ux-design/
+13. Example Filter - Filtering Events by Venue and Date Range - AudienceView, accessed June 18, 2025, https://documentation.audienceview.com/unlimited/bir-example-filter---filtering-events.html
+14. Event Calendar design pattern, accessed June 18, 2025, https://ui-patterns.com/patterns/EventCalendar
+15. Venue & Organiser views and filtering - - The Events Calendar, accessed June 18, 2025, https://theeventscalendar.com/support/forums/topic/venue-organiser-views-and-filtering/
+16. Filtering UX Best Practices for your Site 2024 - Sparq.ai, accessed June 18, 2025, https://www.sparq.ai/blogs/filtering-ux-best-practices
+17. Mastering Modal UX: Best Practices & Real Product Examples - Eleken, accessed June 18, 2025, https://www.eleken.co/blog-posts/modal-ux
+18. Best Practices for Designing UI Modals Lesson - Uxcel, accessed June 18, 2025, https://app.uxcel.com/courses/ui-components-n-patterns/modals--dialogs-best-practices-166
+19. 13 Popup Design Examples: Why They Work and How to Make Your Own - Getsitecontrol, accessed June 18, 2025, https://getsitecontrol.com/blog/popup-design-examples/

@@ -20,6 +20,11 @@ function normalizeEventForDisplay(event: Event): any {
     status: event.status || 'active',
     is_featured: event.is_featured || false,
     capacity: event.capacity || null,
+    // Include new CMS fields
+    event_type: event.event_type || 'music', // Default to music
+    performers: event.performers || '[]', // Empty JSON array as default
+    tags: event.tags || '[]', // Empty JSON array as default
+    external_links: event.external_links || '{}', // Empty JSON object as default
     // Include legacy data if present
     legacy_id: event.legacy_id || null,
     created_at: event.created_at,
@@ -112,9 +117,18 @@ async function getSlideshow(c: Context<{ Bindings: Env }>) {
       title: event.title || 'Untitled Event',
       venue: event.venue || 'unknown',
       date: event.date || '',
+      time: event.event_time || 'Doors at 7pm / Music at 8pm',
       imageUrl: event.flyer_image_url || event.legacy_image_url || '',
       description: event.description || '',
-      is_featured: event.is_featured || false
+      is_featured: event.is_featured || false,
+      ticketLink: event.ticket_url || '',
+      price: event.price || '',
+      ageRestriction: event.age_restriction || 'Check with venue',
+      // Add new fields for enhanced CMS features
+      event_type: event.event_type || 'music',
+      performers: event.performers || '[]',
+      tags: event.tags || '[]',
+      external_links: event.external_links || '{}'
     }));
     
     return c.json(events);
@@ -154,8 +168,9 @@ async function createEvent(c: Context<{ Bindings: Env }>) {
     await FWHY_D1.prepare(`
       INSERT INTO events (
         id, title, date, venue, ticket_url, flyer_image_url, description, 
-        age_restriction, event_time, price, capacity, status, is_featured, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        age_restriction, event_time, price, capacity, status, is_featured,
+        event_type, performers, tags, external_links, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
     `).bind(
       newId, 
       normalizedData.title, 
@@ -169,7 +184,11 @@ async function createEvent(c: Context<{ Bindings: Env }>) {
       normalizedData.price || null,
       normalizedData.capacity || null,
       normalizedData.status || 'active',
-      normalizedData.is_featured || false
+      normalizedData.is_featured || false,
+      normalizedData.event_type || 'music',
+      normalizedData.performers || '[]',
+      normalizedData.tags || '[]',
+      normalizedData.external_links || '{}'
     ).run();
     
     return c.json({ success: true, id: newId }, 201);
@@ -194,7 +213,8 @@ async function updateEvent(c: Context<{ Bindings: Env }>) {
         title = ?, date = ?, venue = ?, ticket_url = ?, 
         flyer_image_url = ?, description = ?, age_restriction = ?, 
         event_time = ?, price = ?, capacity = ?, status = ?, 
-        is_featured = ?, updated_at = datetime('now') 
+        is_featured = ?, event_type = ?, performers = ?,
+        tags = ?, external_links = ?, updated_at = datetime('now') 
       WHERE id = ?
     `).bind(
       normalizedData.title, 
@@ -209,6 +229,10 @@ async function updateEvent(c: Context<{ Bindings: Env }>) {
       normalizedData.capacity || null,
       normalizedData.status || 'active',
       normalizedData.is_featured || false,
+      normalizedData.event_type || 'music',
+      normalizedData.performers || '[]',
+      normalizedData.tags || '[]',
+      normalizedData.external_links || '{}',
       eventId
     ).run();
     

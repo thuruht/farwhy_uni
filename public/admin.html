@@ -12,14 +12,13 @@
         <nav class="sidebar">
             <div class="sidebar-header">
                 <h2>F/H</h2>
-                <span>Admin</span>
+                <span>Admin Dashboard v2</span>
             </div>
             <ul class="sidebar-nav">
                 <li class="nav-item active" data-target="dashboard"><a href="#">Dashboard</a></li>
                 <li class="nav-item" data-target="events"><a href="#">Events</a></li>
                 <li class="nav-item" data-target="blog"><a href="#">Blog</a></li>
                 <li class="nav-item" data-target="venue"><a href="#">Venue Settings</a></li>
-                <li class="nav-item" data-target="thrift"><a href="#">Thrift Store</a></li>
                 <li class="nav-item" data-target="import"><a href="#">Import Legacy</a></li>
             </ul>
             <div class="sidebar-footer">
@@ -57,13 +56,6 @@
                         <div class="stat-content">
                             <h3>Blog Posts</h3>
                             <p id="stats-total-posts">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🛍️</div>  
-                        <div class="stat-content">
-                            <h3>Thrift Items</h3>
-                            <p id="stats-total-thrift">0</p>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -141,32 +133,6 @@
                 </div>
             </section>
 
-            <!-- Thrift Store Section -->
-            <section id="section-thrift" class="admin-section">
-                <div class="section-header">
-                    <h2>Thrift Store CMS</h2>
-                </div>
-                <div class="thrift-tabs">
-                    <button class="tab-btn active" data-section="content">Page Content</button>
-                    <button class="tab-btn" data-section="inventory">Inventory</button>
-                    <button class="tab-btn" data-section="social">Social Links</button>
-                </div>
-                <div class="thrift-content">
-                    <div id="thrift-content-editor" class="thrift-section active">
-                        <div id="content-blocks" class="content-blocks-container"></div>
-                        <button class="btn btn-secondary" id="add-content-block">+ Add Content Block</button>
-                    </div>
-                    <div id="thrift-inventory" class="thrift-section">
-                        <button class="btn btn-primary" id="add-thrift-item">+ Add Item</button>
-                        <div id="thrift-items-list" class="item-list-container"></div>
-                    </div>
-                    <div id="thrift-social" class="thrift-section">
-                        <button class="btn btn-primary" id="add-social-link">+ Add Social Link</button>
-                        <div id="social-links-list" class="item-list-container"></div>
-                    </div>
-                </div>
-            </section>
-
             <!-- Import Legacy Section -->
             <section id="section-import" class="admin-section">
                 <div class="section-header">
@@ -204,48 +170,6 @@
     <div id="toast-container" class="toast-container"></div>
 
     <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-    <script src="/jss/admin-redesigned.js"></script>
-</body>
-</html>
-                    <div id="dashboard-recent-events" class="dashboard-list"></div>
-                </div>
-            </section>
-
-            <section id="section-events" class="admin-section">
-                <div class="section-header">
-                    <h2>Event Management</h2>
-                    <button class="btn btn-primary" id="add-event-btn">+ New Event</button>
-                </div>
-                <div id="event-list" class="item-list-container"></div>
-            </section>
-
-            <section id="section-blog" class="admin-section">
-                <div class="section-header">
-                    <h2>Blog Management</h2>
-                    <button class="btn btn-primary" id="add-blog-btn">+ New Post</button>
-                </div>
-                <div id="blog-list" class="item-list-container"></div>
-            </section>
-
-            <section id="section-import" class="admin-section">
-                <h2>Import Legacy Events</h2>
-                <p>Import events from the legacy system (fygw0.kcmo.xyz).</p>
-                <button id="import-legacy-btn" class="btn">Import Now</button>
-                <div id="import-status" class="status-message-container"></div>
-            </section>
-        </main>
-    </div>
-
-    <div id="form-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close-btn">&times;</button>
-            <div id="modal-form-body">
-                <!-- Form content will be injected here -->
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-    <script src="/jss/admin-dashboard-redesigned.js"></script>
+    <script src="/jss/admin-unified.js"></script>
 </body>
 </html>

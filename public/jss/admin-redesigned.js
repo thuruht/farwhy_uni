@@ -5,7 +5,6 @@ let currentUser = null;
 let dashboardState = {
     currentSection: 'dashboard',
     currentVenue: 'farewell',
-    currentThriftSection: 'content',
     quill: null,
     stats: {}
 };
@@ -75,7 +74,6 @@ function setupNavigation() {
                 'events': 'Event Management',
                 'blog': 'Blog Management',
                 'venue': 'Venue Settings',
-                'thrift': 'Thrift Store CMS',
                 'import': 'Import Legacy Data'
             };
             
@@ -139,9 +137,6 @@ function showSection(sectionName) {
             case 'venue':
                 loadVenueSettings();
                 break;
-            case 'thrift':
-                loadThriftStore();
-                break;
             case 'import':
                 setupImportHandlers();
                 break;
@@ -163,7 +158,6 @@ async function loadDashboardStats() {
         // Update stats
         document.getElementById('stats-total-events').textContent = Array.isArray(events) ? events.length : 0;
         document.getElementById('stats-total-posts').textContent = blogData.data ? blogData.data.length : 0;
-        document.getElementById('stats-total-thrift').textContent = '0'; // TODO: Implement when thrift API is ready
         document.getElementById('stats-total-users').textContent = '1'; // TODO: Implement when user API is ready
         
         // Update recent activity
@@ -760,11 +754,6 @@ async function loadVenueSettings() {
 }
 
 // Thrift store (placeholder)
-async function loadThriftStore() {
-    // TODO: Implement thrift store when backend is ready
-    showToast('Thrift store CMS coming soon!', 'warning');
-}
-
 // Import handlers
 function setupImportHandlers() {
     const importLegacyBtn = document.getElementById('import-legacy-btn');
