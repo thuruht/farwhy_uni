@@ -47,7 +47,10 @@ function showDashboard() {
     const loginContainer = document.getElementById('login-container');
     const dashboardContainer = document.getElementById('dashboard-container');
     if (loginContainer) loginContainer.innerHTML = '';
-    if (dashboardContainer) dashboardContainer.style.display = 'grid';
+    if (dashboardContainer) {
+        // This correctly uses the CSS class to make the dashboard visible
+        dashboardContainer.classList.add('visible');
+    }
     initializeDashboard();
 }
 
