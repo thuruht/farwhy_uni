@@ -1,3 +1,5 @@
+// public/jss/admin-unified.js
+
 // ====================================================================
 // admin-unified.js - FINAL, COMPLETE, AND INTEGRATED VERSION
 // ====================================================================
@@ -24,7 +26,7 @@ let dashboardState = {
 function showLoginScreen() {
     const loginContainer = document.getElementById('login-container');
     const dashboardContainer = document.getElementById('dashboard-container');
-    if (dashboardContainer) dashboardContainer.style.display = 'none';
+    if (dashboardContainer) dashboardContainer.style.display = 'none'; // This line causes the issue
     if (!loginContainer) return;
 
     loginContainer.innerHTML = `
@@ -48,6 +50,11 @@ function showDashboard() {
     const dashboardContainer = document.getElementById('dashboard-container');
     if (loginContainer) loginContainer.innerHTML = '';
     if (dashboardContainer) {
+        // =================================================================
+        // === THE FIX: Remove the inline style to let CSS classes work ===
+        dashboardContainer.style.display = ''; 
+        // =================================================================
+        
         // This correctly uses the CSS class to make the dashboard visible
         dashboardContainer.classList.add('visible');
     }
@@ -95,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     try {
-        const authResponse = await fetch('/api/check', { credentials: 'include', cache: 'no-store' });
+        const authResponse = await fetch('/api/admin/check', { credentials: 'include', cache: 'no-store' });
         if (authResponse && authResponse.ok) {
             const authData = await authResponse.json();
             if (authData.success && authData.user) {
@@ -147,7 +154,9 @@ const api = {
         }
     },
     get: async function(endpoint) {
-        return await this._call(endpoint);
+        const res = await this._call(endpoint);
+        if (res) return await res.json();
+        return null;
     },
     post: async function(endpoint, data) {
         return await this._call(endpoint, {
@@ -170,7 +179,18 @@ const api = {
 
 function formatDate(dateString) {
     if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString();
+    try {
+      // Handles both full ISO strings and "YYYY-MM-DD"
+      const date = new Date(dateString);
+      // Add a time zone check to avoid UTC conversion issues on simple dates
+      if (dateString.length <= 10) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        return new Date(year, month - 1, day).toLocaleDateString();
+      }
+      return date.toLocaleDateString();
+    } catch (e) {
+      return dateString;
+    }
 }
 
 function showToast(message, type = 'info') {
@@ -219,7 +239,7 @@ function setupNavigation() {
     });
 
     document.getElementById('logout-btn')?.addEventListener('click', async () => {
-        await api.post('/api/logout', {});
+        await api.post('/api/admin/logout', {});
         document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         showLoginScreen();
     });
@@ -253,23 +273,13 @@ function setupModal() {
     }
 }
 
-function setupToasts() {}
-
-function showSection(sectionName) {
-    const sections = document.querySelectorAll('.admin-section');
-    sections.forEach(section => section.classList.remove('active'));
-
-    const targetSection = document.getElementById(`section-${sectionName}`);
-    if (targetSection) {
-        targetSection.classList.add('active');
-        dashboardState.currentSection = sectionName;
-        switch (sectionName) {
-            case 'dashboard': loadDashboardStats(); break;
-            case 'events': loadEvents(); break;
-            case 'blog': loadBlogPosts(); break;
-            case 'venue': loadVenueSettings(); break;
-            case 'import': setupImportHandlers(); break;
-        }
+function setupToasts() {
+    // This is a placeholder, a real implementation would create the container if it doesn't exist.
+    if (!document.getElementById('toast-container')) {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
     }
 }
 
@@ -279,23 +289,20 @@ async function loadInitialData() {
 }
 
 async function loadDashboardStats() {
-    const eventsRes = await api.get('/api/admin/events');
-    const blogRes = await api.get('/api/admin/blog/posts');
+    const events = await api.get('/api/admin/events');
+    const blogData = await api.get('/api/admin/blog/posts');
 
-    if (eventsRes) {
-        const events = await eventsRes.json();
+    if (events) {
         document.getElementById('stats-total-events').textContent = Array.isArray(events) ? events.length : 0;
     }
-     if (blogRes) {
-        const blogData = await blogRes.json();
-        document.getElementById('stats-total-posts').textContent = blogData.length || 0;
+     if (blogData) {
+        document.getElementById('stats-total-posts').textContent = blogData.data.length || 0;
     }
 }
 
 async function loadEvents() {
-    const response = await api.get('/api/admin/events');
-    if (response) {
-        const events = await response.json();
+    const events = await api.get('/api/admin/events');
+    if (events) {
         dashboardState.events = events;
         renderEvents(events);
     }
@@ -340,7 +347,7 @@ function setupEventFilters() {
 document.getElementById('add-event-btn')?.addEventListener('click', () => showEventForm());
 
 window.deleteEvent = async function(id) {
-    if (confirm('Are you sure?')) {
+    if (confirm('Are you sure? This will also delete the flyer from storage.')) {
         const res = await api.delete(`/api/admin/events/${id}`);
         if (res) { loadEvents(); showToast('Event deleted.', 'success'); }
     }
@@ -357,7 +364,7 @@ function showEventForm(id = null) {
     if (!modal || !modalBody) return;
 
     dashboardState.editingEventId = id;
-    let event = id ? dashboardState.events.find(e => e.id === id) : null;
+    let event = id ? dashboardState.events.find(e => e.id === id) : {};
 
     modalBody.innerHTML = `
         <div class="admin-form">
@@ -366,37 +373,56 @@ function showEventForm(id = null) {
                 <label>Venue *</label>
                 <select name='venue' required>
                     <option value="">-- Select Venue --</option>
-                    <option value="farewell">Farewell</option>
-                    <option value="howdy">Howdy</option>
+                    <option value="farewell" ${event?.venue === 'farewell' ? 'selected' : ''}>Farewell</option>
+                    <option value="howdy" ${event?.venue === 'howdy' ? 'selected' : ''}>Howdy</option>
                 </select>
                 <label>Title *</label>
-                <input name='title' required placeholder="Event title">
+                <input name='title' required placeholder="Event title" value="${event?.title || ''}">
                 <label>Date & Time *</label>
-                <input name='date' type='datetime-local' required>
+                <input name='date' type='datetime-local' required value="${event?.date ? new Date(event.date).toISOString().slice(0, 16) : ''}">
                 <label>Description</label>
-                <textarea name='description' rows="4"></textarea>
+                <textarea name='description' rows="4">${event?.description || ''}</textarea>
                 <label>Price</label>
-                <input name='price' placeholder="e.g., $15, Free, Donation">
+                <input name='price' placeholder="e.g., $15, Free, Donation" value="${event?.price || ''}">
                 <label>Age Restriction</label>
-                <input name='age_restriction' placeholder="e.g. 21+">
+                <input name='age_restriction' placeholder="e.g. 21+" value="${event?.age_restriction || ''}">
                 <label>Ticket URL</label>
-                <input name='ticket_url' type="url" placeholder="https://...">
-                <div class="form-actions"><button type='submit' class='btn btn-primary'>${id ? 'Update' : 'Create'}</button></div>
+                <input name='ticket_url' type="url" placeholder="https://..." value="${event?.ticket_url || ''}">
+                <label>Flyer Image URL</label>
+                <div class="flyer-upload-group">
+                  <input name='flyer_image_url' type="url" placeholder="Upload a flyer to get a URL" value="${event?.imageUrl || ''}">
+                  <input type="file" id="flyer-upload-input" style="display:none;">
+                  <button type="button" id="flyer-upload-btn">Upload Flyer</button>
+                </div>
+                <div class="form-actions"><button type='submit' class='btn btn-primary'>${id ? 'Update Event' : 'Create Event'}</button></div>
             </form>
         </div>
     `;
     modal.classList.add('active');
+    
+    document.getElementById('flyer-upload-btn').addEventListener('click', () => {
+        document.getElementById('flyer-upload-input').click();
+    });
 
-    if (event) {
-        const form = document.getElementById('event-form');
-        form.venue.value = event.venue;
-        form.title.value = event.title;
-        form.date.value = new Date(event.date).toISOString().slice(0, 16);
-        form.description.value = event.description || '';
-        form.price.value = event.price || '';
-        form.age_restriction.value = event.age_restriction || '';
-        form.ticket_url.value = event.ticket_url || '';
-    }
+    document.getElementById('flyer-upload-input').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('flyer', file);
+        
+        showToast('Uploading flyer...', 'info');
+
+        const res = await fetch('/api/admin/events/flyer', { method: 'POST', body: formData, credentials: 'include' });
+        const result = await res.json();
+        
+        if (res.ok && result.success) {
+            document.querySelector('input[name="flyer_image_url"]').value = result.url;
+            showToast('Flyer uploaded!', 'success');
+        } else {
+            showToast(result.error || 'Flyer upload failed.', 'error');
+        }
+    });
 
     document.getElementById('event-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -413,11 +439,10 @@ function showEventForm(id = null) {
 }
 
 async function loadBlogPosts() {
-    const response = await api.get('/api/admin/blog/posts');
-    if (response) {
-        const posts = await response.json();
-        dashboardState.blogPosts = posts;
-        renderBlogPosts(posts);
+    const blogData = await api.get('/api/admin/blog/posts');
+    if (blogData && blogData.data) {
+        dashboardState.blogPosts = blogData.data;
+        renderBlogPosts(blogData.data);
     }
 }
 
@@ -448,7 +473,7 @@ window.editBlogPost = (id) => {
 
 window.deleteBlogPost = async (id) => {
     if (confirm('Are you sure?')) {
-        const res = await api.delete(`/api/admin/blog/${id}`);
+        const res = await api.delete(`/api/admin/blog/posts/${id}`);
         if(res) { loadBlogPosts(); showToast('Post deleted.', 'success'); }
     }
 }
@@ -466,13 +491,13 @@ function showBlogForm(id = null) {
             <h3>${id ? 'Edit Blog Post' : 'New Blog Post'}</h3>
             <form id='blog-form'>
                 <label>Title *</label>
-                <input name='title' required>
+                <input name='title' required value="${post?.title || ''}">
                 <label>Date</label>
-                <input name='date' type='date'>
+                <input name='date' type='date' value="${post?.date ? new Date(post.date).toISOString().split('T')[0] : ''}">
                 <label>Content *</label>
                 <div id='quill-editor' style='height:250px; background:white;'></div>
                 <div class="form-actions">
-                    <button type='submit' class='btn btn-primary'>${id ? 'Update' : 'Create'}</button>
+                    <button type='submit' class='btn btn-primary'>${id ? 'Update Post' : 'Create Post'}</button>
                 </div>
             </form>
         </div>
@@ -483,9 +508,6 @@ function showBlogForm(id = null) {
     dashboardState.quill = quill;
 
     if (post) {
-        const form = document.getElementById('blog-form');
-        form.title.value = post.title;
-        form.date.value = post.date ? new Date(post.date).toISOString().split('T')[0] : '';
         quill.root.innerHTML = post.content || '';
     }
 
@@ -496,7 +518,7 @@ function showBlogForm(id = null) {
             date: e.target.date.value,
             content: dashboardState.quill.root.innerHTML
         };
-        const url = id ? `/api/admin/blog/${id}` : '/api/admin/blog/posts';
+        const url = id ? `/api/admin/blog/posts/${id}` : '/api/admin/blog/posts';
         const method = id ? 'put' : 'post';
         const response = await api[method](url, data);
         if(response) {
@@ -527,5 +549,23 @@ function setupImportHandlers() {
                 if(statusDiv) statusDiv.textContent = 'Import failed.';
             }
         };
+    }
+}
+
+function showSection(sectionName) {
+    const sections = document.querySelectorAll('.admin-section');
+    sections.forEach(section => section.classList.remove('active'));
+
+    const targetSection = document.getElementById(`section-${sectionName}`);
+    if (targetSection) {
+        targetSection.classList.add('active');
+        dashboardState.currentSection = sectionName;
+        switch (sectionName) {
+            case 'dashboard': loadDashboardStats(); break;
+            case 'events': loadEvents(); break;
+            case 'blog': loadBlogPosts(); break;
+            case 'venue': loadVenueSettings(); break;
+            case 'import': setupImportHandlers(); break;
+        }
     }
 }
