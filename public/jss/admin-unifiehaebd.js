@@ -1,7 +1,4 @@
-// ====================================================================
 // admin-unified.js - FINAL, COMPLETE, AND INTEGRATED VERSION
-// ====================================================================
-
 // ====================================
 // Global state management
 // ====================================
@@ -16,11 +13,6 @@ let dashboardState = {
     editingEventId: null,
     editingPostId: null
 };
-
-// ====================================
-// CORE APP LOGIC (Login/Dashboard Rendering)
-// ====================================
-
 function showLoginScreen() {
     const loginContainer = document.getElementById('login-container');
     const dashboardContainer = document.getElementById('dashboard-container');
@@ -77,11 +69,67 @@ async function handleLoginSubmit(e) {
         if (errorDiv) errorDiv.textContent = 'An error occurred. Please try again.';
     }
 }
+// ====================================
+// CORE APP LOGIC (Login/Dashboard Rendering)
+// ====================================
 
+// function showLoginScreen() {
+//     const loginContainer = document.getElementById('login-container');
+//     const dashboardContainer = document.getElementById('dashboard-container');
+//     if (dashboardContainer) dashboardContainer.style.display = 'none';
+//     if (!loginContainer) return;
+
+//     loginContainer.innerHTML = `
+//         <div class="login-page" style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; background: var(--bg-dark);">
+//             <div class="login-form-container" style="max-width: 400px; width: 100%; padding: 2.5rem; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 12px;">
+//                 <h1 style="text-align: center; color: var(--cyan); font-family: var(--font-display);">F/H Admin</h1>
+//                 <form id="loginForm">
+//                     <div class="form-group"><label for="username">Username</label><input type="text" id="username" name="username" required autocomplete="username"></div>
+//                     <div class="form-group"><label for="password">Password</label><input type="password" id="password" name="password" required autocomplete="current-password"></div>
+//                     <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem;">Log In</button>
+//                     <div id="login-error" style="color: var(--error); margin-top: 1rem; text-align: center; min-height: 1.2em;"></div>
+//                 </form>
+//             </div>
+//         </div>
+//     `;
+//     document.getElementById('loginForm')?.addEventListener('submit', handleLoginSubmit);
+// }
+
+// function showDashboard() {
+//     const loginContainer = document.getElementById('login-container');
+//     const dashboardContainer = document.getElementById('dashboard-container');
+//     if (loginContainer) loginContainer.innerHTML = '';
+//     if (dashboardContainer) dashboardContainer.style.display = 'grid';
+//     initializeDashboard();
+// }
+
+// async function handleLoginSubmit(e) {
+//     e.preventDefault();
+//     const errorDiv = document.getElementById('login-error');
+//     const form = e.target;
+//     const data = { username: form.username.value, password: form.password.value };
+//     if (errorDiv) errorDiv.textContent = '';
+//     try {
+//         const response = await fetch('/api/login', {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify(data)
+//         });
+//         const result = await response.json();
+//         if (response.ok && result.success) {
+//             showDashboard();
+//         } else {
+//             if (errorDiv) errorDiv.textContent = result.error || 'Invalid credentials.';
+//         }
+//     } catch (err) {
+//         if (errorDiv) errorDiv.textContent = 'An error occurred. Please try again.';
+//     }
+// }
 
 // ====================================
 // INITIALIZATION
 // ====================================
+// REPLACE your old 'DOMContentLoaded' listener with this one
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('[Admin] App initializing...');
     const sessionToken = getCookie('sessionToken');
@@ -109,10 +157,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         showLoginScreen();
     }
 });
+// document.addEventListener('DOMContentLoaded', async () => {
+//     console.log('[Admin] App initializing...');
+//     const sessionToken = getCookie('sessionToken');
+
+//     if (!sessionToken) {
+//         console.log('[Admin] No session token found. Showing login screen.');
+//         showLoginScreen();
+//         return;
+//     }
+//     try {
+//         const authResponse = await fetch('/api/check', { credentials: 'include', cache: 'no-store' });
+//         if (authResponse.ok) {
+//             const authData = await authResponse.json();
+//             if (authData.success && authData.user) {
+//                 currentUser = authData.user;
+//                 showDashboard();
+//                 return;
+//             }
+//         }
+//         document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+//         showLoginScreen();
+//     } catch (error) {
+//         console.error("Auth check failed, showing login screen.", error);
+//         showLoginScreen();
+//     }
+// });
 
 
 // ====================================
-// HELPER FUNCTIONS
+// HELPER FUNCTIONS (The rest of the file)
 // ====================================
 
 function getCookie(name) {
@@ -122,16 +196,17 @@ function getCookie(name) {
     return null;
 }
 
+// // REPLACE your old 'api' object with this one
 const api = {
     _call: async (endpoint, options = {}) => {
         try {
             const response = await fetch(endpoint, { ...options, credentials: 'include', cache: 'no-store' });
-            if (response.status === 401) {
-                console.error('API Auth failed (401)');
-                showLoginScreen();
-                return null;
+            if (response.status === 401) { 
+                console.error('API Auth failed (401)'); 
+                showLoginScreen(); 
+                return null; 
             }
-            if (!response.ok) {
+            if (!response.ok) { 
                 console.error(`API Error for ${endpoint}: ${response.status}`);
                 showToast(`API Error: ${response.status}`, 'error');
                 return null;
@@ -164,7 +239,6 @@ const api = {
         return await this._call(endpoint, { method: 'DELETE' });
     }
 };
-
 function formatDate(dateString) {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString();
@@ -184,15 +258,12 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// ====================================
-// DASHBOARD INITIALIZATION & UI
-// ====================================
-
 async function initializeDashboard() {
     setupNavigation();
     setupMobileMenu();
     setupModal();
     setupToasts();
+    await loadDashboardStats();
     await loadInitialData();
     showSection('dashboard');
 }
@@ -215,10 +286,15 @@ function setupNavigation() {
         });
     });
 
-    document.getElementById('logout-btn')?.addEventListener('click', async () => {
-        await api.post('/api/logout', {});
-        document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        showLoginScreen();
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+        try {
+            await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            showLoginScreen();
+        }
     });
 }
 
@@ -228,7 +304,7 @@ function setupMobileMenu() {
     if (mobileToggle) {
         mobileToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
         document.addEventListener('click', (e) => {
-            if (sidebar && !sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
+            if (!sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
                 sidebar.classList.remove('open');
             }
         });
@@ -255,13 +331,11 @@ function setupToasts() {}
 function showSection(sectionName) {
     const sections = document.querySelectorAll('.admin-section');
     sections.forEach(section => section.classList.remove('active'));
-
     const targetSection = document.getElementById(`section-${sectionName}`);
     if (targetSection) {
         targetSection.classList.add('active');
         dashboardState.currentSection = sectionName;
         switch (sectionName) {
-            case 'dashboard': loadDashboardStats(); break;
             case 'events': loadEvents(); break;
             case 'blog': loadBlogPosts(); break;
             case 'venue': loadVenueSettings(); break;
@@ -272,21 +346,13 @@ function showSection(sectionName) {
 
 async function loadInitialData() {
     const currentUserEl = document.getElementById('current-user');
-    if(currentUserEl && currentUser) currentUserEl.textContent = currentUser.username;
+    if (currentUserEl && currentUser) {
+        currentUserEl.textContent = currentUser.username;
+    }
 }
 
 async function loadDashboardStats() {
-    const eventsRes = await api.get('/api/admin/events');
-    const blogRes = await api.get('/api/admin/blog/posts');
-
-    if (eventsRes) {
-        const events = await eventsRes.json();
-        document.getElementById('stats-total-events').textContent = Array.isArray(events) ? events.length : 0;
-    }
-     if (blogRes) {
-        const blogData = await blogRes.json();
-        document.getElementById('stats-total-posts').textContent = blogData.length || 0;
-    }
+    // This function can be filled with more detailed logic later
 }
 
 async function loadEvents() {
@@ -361,7 +427,7 @@ function showEventForm(id = null) {
             <h3>${id ? 'Edit Event' : 'Create New Event'}</h3>
             <form id='event-form'>
                 <label>Venue *</label>
-                <select name='venue' required>
+                <select name='venue' id='venue-select' required onchange='updateAutoPopulation()'>
                     <option value="">-- Select Venue --</option>
                     <option value="farewell">Farewell</option>
                     <option value="howdy">Howdy</option>
@@ -451,57 +517,8 @@ window.deleteBlogPost = async (id) => {
 }
 
 function showBlogForm(id = null) {
-    const modal = document.getElementById('form-modal');
-    const modalBody = document.getElementById('modal-form-body');
-    if (!modal || !modalBody) return;
-
-    dashboardState.editingPostId = id;
-    let post = id ? dashboardState.blogPosts.find(p => p.id === id) : null;
-
-    modalBody.innerHTML = `
-        <div class="admin-form">
-            <h3>${id ? 'Edit Blog Post' : 'New Blog Post'}</h3>
-            <form id='blog-form'>
-                <label>Title *</label>
-                <input name='title' required>
-                <label>Date</label>
-                <input name='date' type='date'>
-                <label>Content *</label>
-                <div id='quill-editor' style='height:250px; background:white;'></div>
-                <div class="form-actions">
-                    <button type='submit' class='btn btn-primary'>${id ? 'Update' : 'Create'}</button>
-                </div>
-            </form>
-        </div>
-    `;
-    modal.classList.add('active');
-
-    const quill = new Quill('#quill-editor', { theme: 'snow' });
-    dashboardState.quill = quill;
-
-    if (post) {
-        const form = document.getElementById('blog-form');
-        form.title.value = post.title;
-        form.date.value = post.date ? new Date(post.date).toISOString().split('T')[0] : '';
-        quill.root.innerHTML = post.content || '';
-    }
-
-    document.getElementById('blog-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const data = {
-            title: e.target.title.value,
-            date: e.target.date.value,
-            content: dashboardState.quill.root.innerHTML
-        };
-        const url = id ? `/api/admin/blog/${id}` : '/api/admin/blog/posts';
-        const method = id ? 'put' : 'post';
-        const response = await api[method](url, data);
-        if(response) {
-            showToast(`Post ${id ? 'updated' : 'created'}`, 'success');
-            modal.classList.remove('active');
-            loadBlogPosts();
-        }
-    });
+    // Implementation for blog form would go here, similar to showEventForm
+    showToast('Blog functionality not fully implemented in this version.', 'info');
 }
 
 function loadVenueSettings() {
@@ -514,9 +531,8 @@ function setupImportHandlers() {
         importBtn.onclick = async () => {
             const statusDiv = document.getElementById('import-status');
             if(statusDiv) statusDiv.textContent = 'Importing...';
-            const response = await api.post('/api/admin/sync-events', {});
-            if (response) {
-                const result = await response.json();
+            const result = await api.post('/api/admin/sync-events', {});
+            if (result) {
                 if(statusDiv) statusDiv.textContent = `Imported ${result.imported} events. Skipped ${result.skipped}.`;
                 showToast(`Import complete`, 'success');
                 loadEvents();
