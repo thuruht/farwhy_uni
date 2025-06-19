@@ -12,7 +12,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: 0;
+  opacity: 0.9;
   visibility: hidden;
   transition: opacity 0.3s, visibility 0.3s;
   
