@@ -1,0 +1,19 @@
+
+
+-Merge the Farewell and Howdy show calendars and make that calendar able to be edited manually in dash. FIRST PRIORITY. UPDATE AARON WHEN DONE.
+
+-event creation requests: Auto-populate “All ages” when Howdy is selected and “21+ unless with parent or legal guardian” when Farewell is selected. Auto-populate “Doors at 7pm / Music at 8pm” for the time section (but allow to be edited if needed). Leave suggested price box blank. Add box for URL in case there is a ticket link.
+
+-Make the YouTube video/featured section on the front page a carousel we can add multiple videos to.
+
+ -make the current popup on more of the  menu (for drinks at farewell) editable from dash
+
+ -make blog editable from dash
+
+-Maybe if it’s easy enough and we have the storage space available, we could have a page that’s an image gallery from some of our biggest/coolest shows.
+
+-Make a show history/archive page with lots of storage space. (Fugazi archive inspiration.)
+
+-Update “hours” section with editable hours text for both venues. Add a link to Howdy DIY Thrift (the popup thrift store for punks and queer folk) IG page / howdy.farewellcafe.com (to be built as separate SPA CMS) and note that their hours change weekly and to check there for that week’s hours..
+
+-Not sure if Max wants to set up a webstore for the Farewell and Howdy t-shirts and stickers, but we should include photos of them, prices, and let people know they can buy them at the bar.
