@@ -75,13 +75,6 @@ function generateSessionToken(): string {
 async function hashPassword(password: string, salt?: string): Promise<string> {
   console.log(`[AUTH] Hashing password with salt: ${salt || 'default-salt'}`);
   
-  // Hard-coded password for development/emergency access
-  // This is a fallback mechanism in case the regular authentication fails
-  if (password === 'farewellhowdy2025') {
-    console.log('[AUTH] Using emergency password');
-    return 'e9c5f213a0a6b35995d0aa243241f185911e07f3fd21353d0b985be00351cc73'; // Hard-coded hash for emergency password
-  }
-  
   const encoder = new TextEncoder();
   const data = encoder.encode(password + (salt || 'default-salt'));
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -125,7 +118,7 @@ async function getUserByUsername(db: D1Database, username: string): Promise<User
       id: row.id,
       username: row.username,
       password_hash: row.password_hash,
-      role: row.role as 'admin' | 'thrift' | 'user',
+      role: row.role as 'admin' | 'user',
       isAdmin: row.role === 'admin',
       authMethod: 'jwt'
     };
@@ -135,164 +128,148 @@ async function getUserByUsername(db: D1Database, username: string): Promise<User
   }
 }
 
-export async function handleAuth(c: Context<{ Bindings: Env }>, mode: 'login' | 'logout') {
-  const { SESSIONS_KV, FWHY_D1, ADMIN_PASSWORD_HASH, ADMIN_USERNAME, JWT_SECRET } = c.env;
+export type AuthAction = 'login' | 'logout' | 'check';
+
+export async function handleAuth(c: Context<{ Bindings: Env }>, action: AuthAction): Promise<Response> {
+  const { JWT_SECRET } = c.env;
   
-  console.log(`[AUTH] Mode: ${mode}, Env username: ${ADMIN_USERNAME}, Has password hash: ${!!ADMIN_PASSWORD_HASH}, Has JWT secret: ${!!JWT_SECRET}`);
+  console.log(`[AUTH] Handling ${action} action`);
   
-  if (mode === 'login') {
-    try {
-      const body = await c.req.json();
-      const { username, password } = body;
-      console.log(`[AUTH] Login attempt for username: ${username}`);
-      
-      if (!username || !password) {
-        console.log('[AUTH] Missing username or password');
-        return c.json({ success: false, error: 'Username and password required' }, 400);
-      }
-      
-      // Emergency admin access - hard-coded credentials as last resort
-      if (username === 'admin' && password === 'farewellhowdy2025') {
-        console.log('[AUTH] Using emergency admin credentials');
-        
-        const payload = {
-          user: 'admin',
-          role: 'admin',
-          iat: Math.floor(Date.now() / 1000),
-          exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
-        };
-        
-        const jwtToken = await createJWT(payload, JWT_SECRET || 'emergency-jwt-secret');
-        const sessionToken = generateSessionToken();
-        await SESSIONS_KV.put(sessionToken, JSON.stringify(payload), { expirationTtl: 60 * 60 * 24 });
-        
-        const cookieOptions = [
-          `sessionToken=${jwtToken}`,
-          'HttpOnly',
-          'Path=/',
-          'SameSite=Strict',
-          'Secure'
-        ].join('; ');
-        
-        c.header('Set-Cookie', cookieOptions);
-        
-        return c.json({ 
-          success: true, 
-          token: jwtToken,
-          user: {
-            username: 'admin',
-            role: 'admin'
-          },
-          message: 'Emergency login successful' 
-        });
-      }
-      
-      let user: User | null = null;
-      let isValid = false;
-      
-      // First try to check database for user, but gracefully fall back if table doesn't exist
-      try {
-        user = await getUserByUsername(FWHY_D1, username);
-        console.log(`[AUTH] Database lookup: ${user ? 'User found' : 'User not found'}`);
-        if (user) {
-          isValid = await verifyPassword(password, user.password_hash!);
-          console.log(`[AUTH] Password verification from DB: ${isValid ? 'Success' : 'Failed'}`);
-        }
-      } catch (error) {
-        console.log('[AUTH] Database user lookup failed, falling back to environment variables:', error);
-        user = null; // Continue to fallback
-      }
-      
-      // Fallback to environment variables if database lookup failed or user not found
-      if (!user) {
-        if (username === ADMIN_USERNAME) {
-          console.log('[AUTH] Username matches env variable, checking password');
-          isValid = await verifyPassword(password, ADMIN_PASSWORD_HASH);
-          console.log(`[AUTH] Password verification from env: ${isValid ? 'Success' : 'Failed'}`);
-          if (isValid) {
-            user = {
-              username: ADMIN_USERNAME,
-              role: 'admin',
-              isAdmin: true,
-              authMethod: 'jwt'
-            };
-          }
-        } else {
-          console.log('[AUTH] Username does not match env variable');
-        }
-      }
-      
-      if (!user || !isValid) {
-        console.log('[AUTH] Authentication failed');
-        return c.json({ success: false, error: 'Invalid credentials' }, 401);
-      }
-      
-      // Create JWT token with role information
-      const payload = {
-        user: user.username,
-        role: user.role,
-        id: user.id,
-        iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
-      };
-      
-      console.log(`[AUTH] Creating JWT with payload:`, payload);
-      const jwtToken = await createJWT(payload, JWT_SECRET);
-      
-      // Also store in KV as fallback
-      const sessionToken = generateSessionToken();
-      await SESSIONS_KV.put(sessionToken, JSON.stringify(payload), { expirationTtl: 60 * 60 * 24 });
-      console.log(`[AUTH] Session token stored in KV: ${sessionToken.substring(0, 8)}...`);
-      
-      // Set secure HTTP-only cookie with JWT
-      const cookieOptions = [
-        `sessionToken=${jwtToken}`,
-        'HttpOnly',
-        'Path=/',
-        'SameSite=Strict',
-        'Secure' // Only over HTTPS
-      ].join('; ');
-      
-      c.header('Set-Cookie', cookieOptions);
-      console.log(`[AUTH] Login successful, cookie set`);
-      
-      return c.json({ 
-        success: true, 
-        token: jwtToken,
-        user: {
-          username: user.username,
-          role: user.role
-        },
-        message: 'Login successful' 
-      });
-    } catch (error) {
-      console.error('[AUTH] Unexpected error during login:', error);
-      return c.json({ success: false, error: 'Login failed due to server error' }, 500);
-    }
-  } else if (mode === 'logout') {
-    // Clear the JWT cookie
-    const cookieOptions = [
-      'sessionToken=',
-      'HttpOnly',
-      'Path=/',
-      'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
-      'SameSite=Strict'
-    ].join('; ');
-    
-    c.header('Set-Cookie', cookieOptions);
-    
-    // Also clean up KV if using fallback
-    const cookie = c.req.header('cookie') || '';
-    const match = cookie.match(/sessionToken=([^;]+)/);
-    if (match) {
-      // If it's a UUID (legacy session), delete from KV
-      if (match[1].includes('-')) {
-        await SESSIONS_KV.delete(match[1]);
-      }
-    }
-    
-    return c.json({ success: true, message: 'Logout successful' });
+  switch (action) {
+    case 'login':
+      return handleLogin(c);
+    case 'logout':
+      return handleLogout(c);
+    case 'check':
+      return checkAuth(c);
+    default:
+      return c.json({ success: false, error: 'Invalid action' }, 400);
+  }
+}
+
+async function checkAuth(c: Context<{ Bindings: Env }>): Promise<Response> {
+  const { JWT_SECRET } = c.env;
+  const cookie = c.req.header('cookie') || '';
+  const sessionToken = cookie.match(/sessionToken=([^;]+)/)?.[1];
+  
+  if (!sessionToken) {
+    return c.json({ success: false, error: 'No session token' }, 401);
   }
   
-  return c.json({ success: false, error: 'Invalid mode' }, 400);
+  try {
+    const payload = await verifyJWT(sessionToken, JWT_SECRET);
+    if (!payload) {
+      return c.json({ success: false, error: 'Invalid session token' }, 401);
+    }
+    
+    return c.json({ 
+      success: true, 
+      user: { 
+        username: payload.username,
+        role: payload.role 
+      } 
+    });
+  } catch (error) {
+    console.error('[AUTH] Error verifying session:', error);
+    return c.json({ success: false, error: 'Session verification failed' }, 401);
+  }
+}
+
+async function handleLogin(c: Context<{ Bindings: Env }>): Promise<Response> {
+  const { FWHY_D1, JWT_SECRET, ADMIN_USERNAME, ADMIN_PASSWORD_HASH } = c.env;
+  
+  try {
+    const body = await c.req.json();
+    const { username, password } = body;
+    
+    if (!username || !password) {
+      return c.json({ success: false, error: 'Username and password required' }, 400);
+    }
+    
+    console.log(`[AUTH] Attempting login for user: ${username}`);
+    
+    // Check against environment variable credentials
+    if (username === ADMIN_USERNAME) {
+      console.log('[AUTH] Validating against environment credentials');
+      
+      // Hash the input password and compare with stored hash
+      const inputHash = await hashPassword(password);
+      if (inputHash === ADMIN_PASSWORD_HASH) {
+        console.log('[AUTH] Admin credentials valid from environment variables');
+        
+        // Create JWT token
+        const token = await createJWT({
+          username: username,
+          role: 'admin',
+          exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
+        }, JWT_SECRET);
+        
+        return c.json(
+          { success: true, message: 'Login successful' },
+          200,
+          {
+            'Set-Cookie': `sessionToken=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${24 * 60 * 60}`
+          }
+        );
+      } else {
+        console.log('[AUTH] Invalid password for admin user');
+        return c.json({ success: false, error: 'Invalid credentials' }, 401);
+      }
+    }
+    
+    // Regular DB lookup for users
+    const { results } = await FWHY_D1.prepare(
+      'SELECT * FROM users WHERE username = ?'
+    ).bind(username).all();
+    
+    if (!results || results.length === 0) {
+      console.log(`[AUTH] No user found with username: ${username}`);
+      return c.json({ success: false, error: 'Invalid credentials' }, 401);
+    }
+    
+    const user = results[0] as User;
+    console.log(`[AUTH] User found, verifying password`);
+    
+    const isValid = user.password_hash ? await verifyPassword(password, user.password_hash) : false;
+    if (!isValid) {
+      console.log(`[AUTH] Invalid password for user: ${username}`);
+      return c.json({ success: false, error: 'Invalid credentials' }, 401);
+    }
+    
+    console.log(`[AUTH] Valid credentials for user: ${username}`);
+    
+    // Create JWT token
+    const token = await createJWT({
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
+    }, JWT_SECRET);
+    
+    return c.json(
+      { success: true, message: 'Login successful' },
+      200,
+      {
+        'Set-Cookie': `sessionToken=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${24 * 60 * 60}`
+      }
+    );
+  } catch (error) {
+    console.error('[AUTH] Login error:', error);
+    return c.json({ success: false, error: 'Authentication failed' }, 500);
+  }
+}
+
+async function handleLogout(c: Context<{ Bindings: Env }>): Promise<Response> {
+  // Clear the JWT cookie
+  const cookieOptions = [
+    'sessionToken=',
+    'HttpOnly',
+    'Path=/',
+    'Expires=Thu, 01 Jan 1970 00:00:00 GMT',
+    'SameSite=Strict'
+  ].join('; ');
+  
+  c.header('Set-Cookie', cookieOptions);
+  
+  return c.json({ success: true, message: 'Logout successful' });
 }

@@ -68,12 +68,22 @@ async function listEvents(c: Context<{ Bindings: Env }>, options?: { venue?: str
       params = [options.venue];
     }
     
+    console.log(`[DEBUG] Running events query: ${query} with params:`, params);
+    
     const { results } = await FWHY_D1.prepare(query).bind(...params).all();
     
     // Normalize all events for display compatibility
     const events = (results as Event[] ?? []).map(normalizeEventForDisplay);
     
-    return c.json(events);
+    console.log(`[DEBUG] Returning ${events.length} events`);
+    
+    // Set CORS headers for cross-domain requests
+    return c.json(events, 200, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    });
   } catch (error) {
     console.error('Error listing events:', error);
     return c.json({ success: false, error: 'Failed to fetch events' }, 500);
@@ -92,10 +102,20 @@ async function getArchives(c: Context<{ Bindings: Env }>, options?: { venue?: st
       params = [options.venue];
     }
     
+    console.log(`[DEBUG] Running archives query: ${query} with params:`, params);
+    
     const { results } = await FWHY_D1.prepare(query).bind(...params).all();
     const events = (results as Event[] ?? []).map(normalizeEventForDisplay);
     
-    return c.json(events);
+    console.log(`[DEBUG] Returning ${events.length} archive events`);
+    
+    // Set CORS headers for cross-domain requests
+    return c.json(events, 200, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
+    });
   } catch (error) {
     console.error('Error fetching archives:', error);
     return c.json({ success: false, error: 'Failed to fetch archived events' }, 500);

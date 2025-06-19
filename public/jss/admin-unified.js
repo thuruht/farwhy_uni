@@ -28,62 +28,151 @@ function getCookie(name) {
     return null;
 }
 
+// Check if user is logged in
+function checkLoggedInStatus() {
+    const sessionToken = getCookie('sessionToken');
+    if (!sessionToken) {
+        console.error('No session token found, redirecting to login');
+        window.location.href = '/';
+        return false;
+    }
+    return true;
+}
+
 // API helper functions
 const api = {
     get: async (endpoint) => {
-        const response = await fetch(endpoint, {
-            credentials: 'include'
-        });
-        if (response.status === 401) {
-            console.error('Authentication failed, redirecting to login');
-            window.location.href = '/';
+        try {
+            console.log(`[Admin] GET request to ${endpoint}`);
+            const response = await fetch(endpoint, {
+                credentials: 'include',
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
+            
+            if (response.status === 401) {
+                console.error('Authentication failed (401), redirecting to login');
+                document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                window.location.href = '/';
+                return null;
+            }
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API error (${response.status}): ${errorText}`);
+                throw new Error(`API error (${response.status}): ${errorText}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error(`API GET error for ${endpoint}:`, error);
+            showToast('Error fetching data. Please try again.', 'error');
             return null;
         }
-        return response;
     },
     post: async (endpoint, data) => {
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(data)
-        });
-        if (response.status === 401) {
-            console.error('Authentication failed, redirecting to login');
-            window.location.href = '/';
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                },
+                credentials: 'include',
+                body: JSON.stringify(data)
+            });
+            
+            if (response.status === 401) {
+                console.error('Authentication failed (401), redirecting to login');
+                document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                window.location.href = '/';
+                return null;
+            }
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API error (${response.status}): ${errorText}`);
+                throw new Error(`API error (${response.status}): ${errorText}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('API POST error:', error);
+            showToast('Error saving data. Please try again.', 'error');
             return null;
         }
-        return response;
     },
     put: async (endpoint, data) => {
-        const response = await fetch(endpoint, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(data)
-        });
-        if (response.status === 401) {
-            console.error('Authentication failed, redirecting to login');
-            window.location.href = '/';
+        try {
+            const response = await fetch(endpoint, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                },
+                credentials: 'include',
+                body: JSON.stringify(data)
+            });
+            
+            if (response.status === 401) {
+                console.error('Authentication failed (401), redirecting to login');
+                document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                window.location.href = '/';
+                return null;
+            }
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API error (${response.status}): ${errorText}`);
+                throw new Error(`API error (${response.status}): ${errorText}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('API PUT error:', error);
+            showToast('Error updating data. Please try again.', 'error');
             return null;
         }
-        return response;
     },
     delete: async (endpoint) => {
-        const response = await fetch(endpoint, {
-            method: 'DELETE',
-            credentials: 'include'
-        });
-        if (response.status === 401) {
-            console.error('Authentication failed, redirecting to login');
-            window.location.href = '/';
+        try {
+            const response = await fetch(endpoint, {
+                method: 'DELETE',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                },
+                credentials: 'include'
+            });
+            
+            if (response.status === 401) {
+                console.error('Authentication failed (401), redirecting to login');
+                document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                window.location.href = '/';
+                return null;
+            }
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API error (${response.status}): ${errorText}`);
+                throw new Error(`API error (${response.status}): ${errorText}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('API DELETE error:', error);
+            showToast('Error deleting data. Please try again.', 'error');
             return null;
         }
-        return response;
     }
 };
 
@@ -98,28 +187,113 @@ function formatDate(dateString) {
 // Initialization & Authentication
 // ====================================
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('[Admin] Dashboard initializing...');
+    
     // Check authentication first
     const sessionToken = getCookie('sessionToken');
     if (!sessionToken) {
-        console.log('No session token found, redirecting to login');
+        console.error('[Admin] No session token found, redirecting to login');
         window.location.href = '/';
         return;
     }
 
     try {
-        // Validate session and get user info
-        const response = await api.get('/api/events');
-        if (!response || !response.ok) {
-            throw new Error('Authentication failed');
+        // First, try to check auth directly with /api/check
+        console.log('[Admin] Checking authentication with /api/check...');
+        let authResponse;
+        try {
+            authResponse = await fetch('/api/check', {
+                credentials: 'include',
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            });
+            
+            if (authResponse.ok) {
+                const authData = await authResponse.json();
+                if (authData.success && authData.user) {
+                    console.log('[Admin] Auth check successful:', authData.user);
+                    currentUser = authData.user;
+                    document.getElementById('current-user').textContent = currentUser.username;
+                    
+                    // Initialize the dashboard
+                    initializeApp();
+                    return;
+                }
+            }
+        } catch (e) {
+            console.log('[Admin] Auth check endpoint failed, falling back to events endpoint');
         }
         
-        // Initialize dashboard
-        await initializeDashboard();
+        // Fallback - validate session by checking if we can access a protected endpoint
+        console.log('[Admin] Falling back to events endpoint check...');
+        const response = await fetch('/api/events', {
+            credentials: 'include',
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        });
+        
+        if (!response) {
+            console.error('[Admin] Authentication check failed - no response');
+            document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.href = '/';
+            return;
+        }
+        
+        if (response.status === 401) {
+            console.error('[Admin] Authentication check failed with status 401');
+            document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.href = '/';
+            return;
+        }
+        
+        if (!response.ok) {
+            console.error(`[Admin] API error: ${response.status}`);
+            showToast('Error communicating with server', 'error');
+        } else {
+            console.log('[Admin] Authentication successful via events endpoint');
+            
+            // Try to extract username from cookie
+            const sessionToken = getCookie('sessionToken');
+            let username = 'anmid'; // Default to anmid instead of admin
+            
+            if (sessionToken) {
+                try {
+                    // Simple JWT parsing
+                    const payload = JSON.parse(atob(sessionToken.split('.')[1]));
+                    if (payload && payload.username) {
+                        username = payload.username;
+                    }
+                } catch (e) {
+                    console.error('Error parsing JWT:', e);
+                }
+            }
+            
+            // Set user information
+            currentUser = { username, role: 'admin' };
+            document.getElementById('current-user').textContent = currentUser.username;
+            
+            // Initialize the dashboard
+            initializeApp();
+        }
     } catch (error) {
-        console.error('Authentication error:', error);
-        // Clear session cookie and redirect to login
-        document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        window.location.href = '/';
+        console.error('[Admin] Error during initialization:', error);
+        showToast('Error loading dashboard. Please try again.', 'error');
+        
+        // If it's a connection error, don't redirect immediately
+        if (error.name !== 'TypeError' && error.name !== 'AbortError') {
+            setTimeout(() => {
+                document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                window.location.href = '/';
+            }, 3000); // Give them time to see the error message
+        }
     }
 });
 
@@ -1111,5 +1285,37 @@ function setupImportHandlers() {
             status.textContent = 'Blog import functionality coming soon...';
             showToast('Blog import will be implemented soon', 'info');
         });
+    }
+}
+
+// Add function to check auth status
+async function checkAuthStatus() {
+    try {
+        const response = await fetch('/api/check', {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Auth check failed');
+        }
+        
+        const data = await response.json();
+        if (data.success && data.user) {
+            currentUser = data.user;
+            document.getElementById('current-user').textContent = currentUser.username;
+            return true;
+        }
+        
+        return false;
+    } catch (error) {
+        console.error('Auth check error:', error);
+        return false;
     }
 }

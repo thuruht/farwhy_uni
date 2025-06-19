@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (cache.has(cacheKey)) {
         const cached = cache.get(cacheKey);
         if (now - cached.timestamp < CACHE_EXPIRY_MS) {
-          // Return cached data
+          console.log(`Using cached flyer data for ${cacheKey}`);
           return cached.data;
         } else {
           // Expired
@@ -146,16 +146,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      const url = showPast
-        ? `${BASE_URL}/archives?type=${state}`
-        : `${BASE_URL}/list/${state}`;
+      // Try both endpoint formats - direct and /api prefixed
+      const urls = showPast
+        ? [`${BASE_URL}/archives?type=${state}`, `${BASE_URL}/api/archives?type=${state}`]
+        : [`${BASE_URL}/list/${state}`, `${BASE_URL}/api/list/${state}`];
 
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch flyers: ${response.statusText}`);
+      let data = [];
+      let successUrl = null;
+      
+      // Try each URL until one works
+      for (const url of urls) {
+        try {
+          console.log(`Trying to fetch flyers from: ${url}`);
+          const controller = new AbortController();
+          // Set a timeout for the fetch
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          
+          const response = await fetch(url, {
+            signal: controller.signal,
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache'
+            }
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (response.ok) {
+            data = await response.json();
+            successUrl = url;
+            console.log(`Successfully fetched ${data.length} flyers from ${url}`);
+            break; // Exit the loop if successful
+          }
+        } catch (err) {
+          console.warn(`Failed to fetch from ${url}:`, err);
+          // Continue to the next URL
+        }
       }
 
-      const data = await response.json();
+      if (data.length === 0) {
+        console.warn('No flyers found from any endpoint. Check network connectivity and endpoints.');
+      } else {
+        console.log(`Using data from ${successUrl}`);
+      }
+
       // Store in cache
       cache.set(cacheKey, { data, timestamp: now });
       return data;

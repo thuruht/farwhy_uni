@@ -144,7 +144,7 @@ function serveLoginPage(c: Context<{ Bindings: Env }>) {
 </head>
 <body data-state="farewell">
   <div class="admin-header"><h1>administration!</h1></div>
-  <main><div class="login-container"><div class="login-title">log in</div><form id="loginForm"><div class="form-group"><label for="username">username:</label><input type="text" id="username" name="username" required autocomplete="username" placeholder="enter username"></div><div class="form-group"><label for="password">pass:</label><input type="password" id="password" name="password" required autocomplete="current-password" placeholder="enter password"></div><button type="submit" class="login-btn">let me in</button><div id="error" class="error"></div></form></div></main>
+  <main><div class="login-container"><div class="login-title">log in</div><form id="loginForm"><div class="form-group"><label for="username">username:</label><input type="text" id="username" name="username" required autocomplete="username" placeholder="anmid"></div><div class="form-group"><label for="password">pass:</label><input type="password" id="password" name="password" required autocomplete="current-password" placeholder="enter password"></div><button type="submit" class="login-btn">let me in</button><div id="error" class="error"></div></form></div></main>
   <script>
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -180,9 +180,15 @@ publicApi.use('*', cors());
 publicApi.get('/events', (c) => handleEvents(c, 'list'));
 publicApi.get('/events/slideshow', (c) => handleEvents(c, 'slideshow'));
 
-// Legacy endpoints
-publicApi.get('/list/:state', (c) => handleEvents(c, 'list', { venue: c.req.param('state') }));
-publicApi.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.query('type') }));
+// Legacy endpoints - ensure these work reliably
+publicApi.get('/list/:state', (c) => {
+  console.log(`[DEBUG] API Legacy endpoint: /list/${c.req.param('state')}`);
+  return handleEvents(c, 'list', { venue: c.req.param('state') });
+});
+publicApi.get('/archives', (c) => {
+  console.log(`[DEBUG] API Legacy endpoint: /archives?type=${c.req.query('type')}`);
+  return handleEvents(c, 'archives', { venue: c.req.query('type') });
+});
 
 // Blog endpoints
 publicApi.get('/blog/posts', (c) => handleBlog(c.req.raw, c.env));
@@ -191,6 +197,16 @@ publicApi.get('/blog/featured', (c) => handleBlog(c.req.raw, c.env));
 // Mount public API
 app.route('/api', publicApi);
 
+// Also add legacy endpoints at the root level for backward compatibility
+app.get('/list/:state', (c) => {
+  console.log(`[DEBUG] Root Legacy endpoint: /list/${c.req.param('state')}`);
+  return handleEvents(c, 'list', { venue: c.req.param('state') });
+});
+app.get('/archives', (c) => {
+  console.log(`[DEBUG] Root Legacy endpoint: /archives?type=${c.req.query('type')}`);
+  return handleEvents(c, 'archives', { venue: c.req.query('type') });
+});
+
 // --- ADMIN API ROUTES ---
 const adminApi = new Hono<{ Bindings: Env }>();
 adminApi.use('*', cors());
@@ -198,6 +214,7 @@ adminApi.use('*', cors());
 // Auth endpoints (public)
 adminApi.post('/login', (c) => handleAuth(c, 'login'));
 adminApi.post('/logout', (c) => handleAuth(c, 'logout'));
+adminApi.get('/check', (c) => handleAuth(c, 'check'));
 
 // Protected endpoints
 adminApi.get('/events', authMiddleware(['admin']), (c) => handleEvents(c, 'list'));
@@ -239,12 +256,9 @@ app.use('*', async (c, next) => {
     }
   }
   
-  // Admin domain handling
-  if (host.includes('admin.farewellcafe.com')) {
-    console.log(`[DEBUG] Admin domain detected: ${host}, Path: ${c.req.path}`);
-    // Admin login flow - check for existing session
-    const cookie = c.req.header('cookie') || '';
-    const hasSession = cookie.includes('sessionToken=');
+  // Admin domain handling - improved routing to ensure admin dashboard works
+  if (host.includes('admin.farewellcafe.com') || c.req.path === '/admin') {
+    console.log(`[DEBUG] Admin domain/path detected: ${host}, Path: ${c.req.path}`);
     
     // Handle /api/ paths - these should be passed to the next middleware
     if (c.req.path.startsWith('/api/')) {
@@ -252,60 +266,76 @@ app.use('*', async (c, next) => {
       return next();
     }
     
-    // Handle /admin path specifically
-    if (c.req.path === '/admin' || c.req.path === '/') {
-      console.log(`[DEBUG] Admin dashboard path: ${c.req.path}`);
-      if (hasSession) {
-        // If user has a session, serve admin dashboard
-        console.log(`[DEBUG] Session found, serving admin dashboard for ${c.req.path} path`);
-        try {
+    const cookie = c.req.header('cookie') || '';
+    const sessionToken = cookie.match(/sessionToken=([^;]+)/)?.[1];
+    
+    // Handle login page explicitly
+    if (c.req.path === '/login.html' || c.req.path === '/login') {
+      console.log('[DEBUG] Serving login page explicitly');
+      return serveLoginPage(c);
+    }
+    
+    // For /admin path, check if user has a valid session
+    if (sessionToken) {
+      try {
+        // Simple JWT format validation
+        const isValidFormat = sessionToken.split('.').length === 3;
+        console.log(`[DEBUG] JWT format check: ${isValidFormat}`);
+        
+        if (isValidFormat) {
+          console.log(`[DEBUG] Session valid, serving admin dashboard`);
           const asset = await c.env.ASSETS.fetch(new Request('http://localhost/admin.html'));
           return new Response(asset.body, {
             headers: {
               ...asset.headers,
+              'Content-Type': 'text/html; charset=utf-8',
               'Cache-Control': 'no-store, must-revalidate',
               'Pragma': 'no-cache',
               'Expires': '0'
             }
           });
-        } catch (e) {
-          console.error('[ERROR] Admin dashboard not found', e);
-          return serveLoginPage(c);
         }
-      } else {
-        // No session, serve login page
-        console.log(`[DEBUG] No session found, serving login page for ${c.req.path} path`);
-        return serveLoginPage(c);
+      } catch (e) {
+        console.error('[ERROR] Session validation error:', e);
       }
     }
     
-    // For admin dashboard paths
-    if (hasSession) {
-      // If user has a session, serve admin dashboard
-      console.log(`[DEBUG] Session found, serving admin dashboard`);
+    // If we get here, the session is invalid or missing - redirect to login
+    console.log(`[DEBUG] No valid session found, redirecting to login`);
+    return c.redirect('/login');
+  }
+  
+  // Public site handling
+  if (!c.req.path.startsWith('/api/') && !c.req.path.startsWith('/admin') && c.req.path !== '/login') {
+    // Special case for root path (/) and other public endpoints
+    if (c.req.path === '/' || c.req.path === '/index.html') {
+      console.log(`[DEBUG] Serving public site index.html`);
       try {
-        const asset = await c.env.ASSETS.fetch(new Request('http://localhost/admin.html'));
+        const asset = await c.env.ASSETS.fetch(new Request('http://localhost/index.html'));
         return new Response(asset.body, {
           headers: {
             ...asset.headers,
-            'Cache-Control': 'no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'public, max-age=3600'
           }
         });
       } catch (e) {
-        console.error('[ERROR] Admin dashboard not found', e);
-        return serveLoginPage(c);
+        console.error('[ERROR] Failed to serve index.html:', e);
+        return c.text('Something went wrong', 500);
       }
-    } else {
-      // No session, serve login page
-      console.log(`[DEBUG] No session found, serving login page`);
-      return serveLoginPage(c);
+    }
+    
+    // Try to serve other public pages from the assets
+    try {
+      console.log(`[DEBUG] Attempting to serve public asset: ${c.req.path}`);
+      const asset = await c.env.ASSETS.fetch(c.req.raw);
+      return asset;
+    } catch (e) {
+      console.error(`[ERROR] Public asset not found: ${c.req.path}`, e);
     }
   }
   
-  // Public domain fallback
-  console.log(`[DEBUG] Public domain request: ${c.req.path}`);
+  // If we reach here, pass to the next middleware (which includes the API routes)
   return next();
 });
 
@@ -349,21 +379,42 @@ app.get('/admin', async (c) => {
   const hasSession = cookie.includes('sessionToken=');
   
   if (hasSession) {
-    console.log(`[DEBUG] Admin dashboard route - session found, serving admin dashboard`);
+    // Validate the token before serving the dashboard
     try {
-      const asset = await c.env.ASSETS.fetch(new Request('http://localhost/admin.html'));
-      return new Response(asset.body, {
-        headers: {
-          ...asset.headers,
-          'Cache-Control': 'no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
+      const sessionToken = cookie.match(/sessionToken=([^;]+)/)?.[1];
+      if (sessionToken) {
+        // Try to validate JWT
+        let isValid = false;
+        try {
+          // Simple check - don't need to fully validate, just check format
+          isValid = sessionToken.split('.').length === 3;
+          console.log(`[DEBUG] JWT format check: ${isValid}`);
+        } catch (e) {
+          console.error('[DEBUG] JWT validation error:', e);
         }
-      });
+
+        // If valid format, serve admin dashboard
+        if (isValid) {
+          console.log(`[DEBUG] Session seems valid, serving admin dashboard`);
+          const asset = await c.env.ASSETS.fetch(new Request('http://localhost/admin.html'));
+          return new Response(asset.body, {
+            headers: {
+              ...asset.headers,
+              'Content-Type': 'text/html; charset=utf-8',
+              'Cache-Control': 'no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          });
+        }
+      }
     } catch (e) {
-      console.error('[ERROR] Admin dashboard not found', e);
-      return serveLoginPage(c);
+      console.error('[ERROR] Session validation error:', e);
     }
+    
+    // If we get here, the session is invalid
+    console.log(`[DEBUG] Admin dashboard route - session validation failed, serving login page`);
+    return serveLoginPage(c);
   } else {
     console.log(`[DEBUG] Admin dashboard route - no session, redirecting to login`);
     return serveLoginPage(c);
@@ -371,12 +422,55 @@ app.get('/admin', async (c) => {
 });
 
 // Direct route for admin.farewellcafe.com root path
-app.get('/', (c) => {
+app.get('/', async (c) => {
   const host = c.req.header('host') || '';
   if (host.includes('admin.')) {
     console.log(`[DEBUG] Admin domain root route: ${host}`);
+    
+    // Check if user has an active session
+    const cookie = c.req.header('cookie') || '';
+    const hasSession = cookie.includes('sessionToken=');
+    
+    if (hasSession) {
+      // Validate the token before serving the dashboard
+      try {
+        const sessionToken = cookie.match(/sessionToken=([^;]+)/)?.[1];
+        if (sessionToken) {
+          // Try to validate JWT
+          let isValid = false;
+          try {
+            // Simple check - don't need to fully validate, just check format
+            isValid = sessionToken.split('.').length === 3;
+            console.log(`[DEBUG] JWT format check: ${isValid}`);
+          } catch (e) {
+            console.error('[DEBUG] JWT validation error:', e);
+          }
+
+          // If valid format, serve admin dashboard
+          if (isValid) {
+            console.log(`[DEBUG] Root path with valid session, serving admin dashboard`);
+            const asset = await c.env.ASSETS.fetch(new Request('http://localhost/admin.html'));
+            return new Response(asset.body, {
+              headers: {
+                ...asset.headers,
+                'Content-Type': 'text/html; charset=utf-8',
+                'Cache-Control': 'no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.error('[ERROR] Session validation error in root path:', e);
+      }
+    }
+    
+    // No valid session, serve login page
     return serveLoginPage(c);
   }
+  
+  // Public domain handling
   return c.env.ASSETS.fetch(c.req.raw);
 });
 
