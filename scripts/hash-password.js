@@ -1,27 +1,21 @@
 #!/usr/bin/env node
-// scripts/hash-password.js
-// Utility to generate password hash for ADMIN_PASSWORD_HASH secret
+// scripts/hash-password.js - CORRECTED VERSION
+// Generates a password hash that is compatible with the server's auth handler.
 
 const crypto = require('crypto');
 
-async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
+const password = process.argv[2];
 
-if (process.argv.length < 3) {
-  console.log('Usage: node scripts/hash-password.js <password>');
+if (!password) {
+  console.error('ERROR: Please provide a password as an argument.');
+  console.error("Usage: node scripts/hash-password.js 'YourPasswordHere'");
   process.exit(1);
 }
 
-const password = process.argv[2];
+// This salt MUST match the one used in src/handlers/auth.ts
+const salt = 'default-salt';
 
-// Node.js version using built-in crypto
-const hash = crypto.createHash('sha256').update(password).digest('hex');
-console.log('Hashed password:', hash);
-console.log('');
-console.log('Set this as a secret with:');
-console.log(`echo "${hash}" | npx wrangler secret put ADMIN_PASSWORD_HASH`);
+// This logic now matches the server-side hashing logic exactly.
+const hash = crypto.createHash('sha256').update(password + salt).digest('hex');
+
+console.log(hash);
