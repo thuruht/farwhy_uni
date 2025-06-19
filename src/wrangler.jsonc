@@ -1,0 +1,35 @@
+{
+  "name": "farewell-unified",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-06-18",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./public"
+  },
+  "d1_databases": [
+    {
+      "binding": "FWHY_D1",
+      "database_name": "farewell-db",
+      "database_id": "76dc7b30-005a-4268-afa0-10b2fe242253"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "FWHY_IMAGES",
+      "bucket_name": "fwhy-images"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "SESSIONS_KV",
+      "id": "2038b95e785545af8486bc353c3cbe62",
+      "preview_id": "2038b95e785545af8486bc353c3cbe62"
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production"
+  }
+}
