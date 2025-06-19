@@ -1,4 +1,3 @@
-
 let currentUser = null;
 let dashboardState = {
     currentSection: 'dashboard',
@@ -285,10 +284,12 @@ async function loadDashboardStats() {
     const blogData = await api.get('/api/admin/blog/posts');
 
     if (events) {
-        document.getElementById('stats-total-events').textContent = Array.isArray(events) ? events.length : 0;
-    }
+        const totalEventsEl = document.getElementById('stats-total-events');
+        if (totalEventsEl) totalEventsEl.textContent = Array.isArray(events) ? events.length : 0;
      if (blogData) {
-        document.getElementById('stats-total-posts').textContent = blogData.data.length || 0;
+        const statsTotalPostsEl = document.getElementById('stats-total-posts');
+        if (statsTotalPostsEl) statsTotalPostsEl.textContent = blogData.data.length || 0;
+    }
     }
 }
 
@@ -297,10 +298,19 @@ async function loadEvents() {
     if (events) {
         dashboardState.events = events;
         renderEvents(events);
+        
+        // Add the event listener here after the events section is loaded
+        const addEventBtn = document.getElementById('add-event-btn');
+        if (addEventBtn) {
+            // Remove any existing listeners to prevent duplicates
+            const newAddEventBtn = addEventBtn.cloneNode(true);
+            newAddEventBtn.addEventListener('click', () => showEventForm());
+            addEventBtn.replaceWith(newAddEventBtn);
+            console.log('New Event button listener attached');
+            newAddEventBtn.addEventListener('click', () => showEventForm());
+        }
     }
 }
-
-function renderEvents(events) {
     const eventList = document.getElementById('event-list');
     if (!eventList) return;
     if (!Array.isArray(events) || events.length === 0) {
@@ -336,7 +346,7 @@ function setupEventFilters() {
     if (searchInput) searchInput.oninput = applyFilters;
 }
 
-document.getElementById('add-event-btn')?.addEventListener('click', () => showEventForm());
+// Event handlers are now set up in loadEvents() function
 
 window.deleteEvent = async function(id) {
     if (confirm('Are you sure? This will also delete the flyer from storage.')) {
@@ -382,7 +392,7 @@ function showEventForm(id = null) {
                 <input name='ticket_url' type="url" placeholder="https://..." value="${event?.ticket_url || ''}">
                 <label>Flyer Image URL</label>
                 <div class="flyer-upload-group">
-                  <input name='flyer_image_url' type="url" placeholder="Upload a flyer to get a URL" value="${event?.imageUrl || ''}">
+                  <input name='flyer_image_url' type="url" placeholder="Upload a flyer to get a URL" value="${event?.imageUrl || event?.flyer_image_url || ''}">
                   <input type="file" id="flyer-upload-input" style="display:none;">
                   <button type="button" id="flyer-upload-btn">Upload Flyer</button>
                 </div>
@@ -431,10 +441,20 @@ function showEventForm(id = null) {
 }
 
 async function loadBlogPosts() {
-    const blogData = await api.get('/api/admin/blog/posts');
-    if (blogData && blogData.data) {
-        dashboardState.blogPosts = blogData.data;
-        renderBlogPosts(blogData.data);
+    const result = await api.get('/api/admin/blog/posts');
+    if (result && result.data) {
+        dashboardState.blogPosts = result.data;
+        renderBlogPosts(result.data);
+        
+        // Add the event listener here after the blog section is loaded
+        const addBlogBtn = document.getElementById('add-blog-btn');
+        if (addBlogBtn) {
+            // Remove any existing listeners to prevent duplicates
+            addBlogBtn.replaceWith(addBlogBtn.cloneNode(true));
+            // Add the event listener
+            document.getElementById('add-blog-btn').addEventListener('click', () => showBlogForm());
+            console.log('New Blog Post button listener attached');
+        }
     }
 }
 
