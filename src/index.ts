@@ -1,385 +1,77 @@
-// src/index.ts
-import { Hono, Context, Next } from 'hono';
+import { Hono } from 'hono';
+import { serveStatic } from 'hono/cloudflare-workers';
 import { cors } from 'hono/cors';
-import { handleAuth } from './handlers/auth';
-import { handleEvents } from './handlers/events';
+import { timing } from 'hono/timing';
+
+import { handleLogin, handleLogout } from './handlers/auth';
+import { handleBlogPosts, handleFeaturedPost, handleAdminBlogPosts, handleAdminFeaturedPost, handleAdminCreateBlogPost, handleAdminUpdateBlogPost, handleAdminDeleteBlogPost } from './handlers/blog';
+import { handleEvents }from './handlers/events-new';
+import { handleMenu } from './handlers/menu';
 import { handleSync } from './handlers/sync';
-import { handleBlog } from './handlers/blog';
-import { authenticate } from './middleware/auth';
-import { generateUnifiedDashboardHTML } from './dashboard/unified-admin-dashboard';
+import { handleThrift } from './handlers/thrift';
+import { requireAdminAuth } from './middleware/auth';
 import { Env } from './types/env';
 
+// --- Main Application Router ---
 const app = new Hono<{ Bindings: Env }>();
 
-// Enable CORS for API routes
+// --- Middleware ---
+app.use('*', timing());
 app.use('/api/*', cors());
 
-// Handle host-based routing first
-app.use('*', async (c, next) => {
-  const host = c.req.header('host') || '';
-  console.log(`[DEBUG] Processing request for ${host} ${c.req.method} ${c.req.path}`);
-  
-  if (host.startsWith('admin.')) {
-    // First handle static assets
-    if (c.req.path.match(/^\/(css|jss|img|f)\//)) {
-      console.log('[DEBUG] Serving admin static asset');
-      try {
-        return await c.env.ASSETS.fetch(c.req.raw);
-      } catch (e) {
-        return c.text('Asset not found', 404);
-      }
-    }
-    
-    // Then handle API routes
-    if (c.req.path.startsWith('/api/')) {
-      console.log('[DEBUG] Processing admin API request');
-      return await next();
-    }
+// --- Public API Routes (for dev.farewellcafe.com) ---
+const publicApi = new Hono<{ Bindings: Env }>();
+publicApi.get('/events/slideshow', (c) => handleEvents(c, 'slideshow'));
+publicApi.get('/events', (c) => handleEvents(c, 'list'));
+publicApi.get('/events/archives', (c) => handleEvents(c, 'archives'));
+publicApi.get('/blog/posts', handleBlogPosts);
+publicApi.get('/blog/featured', handleFeaturedPost);
+publicApi.get('/menu', handleMenu);
+publicApi.get('/sync', handleSync);
+publicApi.get('/thrift', handleThrift);
+publicApi.post('/login', handleLogin); // Public login endpoint
 
-    // For authenticated users, serve the dashboard
-    const cookie = c.req.header('cookie') || '';
-    const tokenMatch = cookie.match(/sessionToken=([^;]+)/);
-    if (tokenMatch) {
-      const token = tokenMatch[1];
-      try {
-        const sessionData = await c.env.SESSIONS_KV.get(token);
-        if (sessionData) {
-          return c.html(`<!DOCTYPE html>
-<html>
-<head>
-  <title>Admin Dashboard</title>
-  <!-- Include your CSS and other head elements -->
-</head>
-<body>
-  <h1>Admin Dashboard</h1>
-  <p>You are logged in!</p>
-  <!-- Add your dashboard content -->
-</body>
-</html>`);
-        }
-      } catch (e) {
-        console.error('Session verification failed:', e);
-      }
-    }
+app.route('/api', publicApi);
 
-    // If not authenticated or session invalid, serve login page
-    return serveLoginPage(c);
+
+// --- Admin Routes (for admin.farewellcafe.com) ---
+const adminRoutes = new Hono<{ Bindings: Env }>();
+
+// Apply auth middleware to all admin routes
+adminRoutes.use('*', requireAdminAuth);
+
+// Admin API
+adminRoutes.get('/api/events', (c) => handleEvents(c, 'list', { admin: true }));
+adminRoutes.post('/api/events', (c) => handleEvents(c, 'create'));
+adminRoutes.put('/api/events/:id', (c) => handleEvents(c, 'update'));
+adminRoutes.delete('/api/events/:id', (c) => handleEvents(c, 'delete'));
+
+adminRoutes.get('/api/blog/posts', handleAdminBlogPosts);
+adminRoutes.get('/api/blog/featured', handleAdminFeaturedPost);
+adminRoutes.post('/api/blog/posts', handleAdminCreateBlogPost);
+adminRoutes.put('/api/blog/posts/:id', handleAdminUpdateBlogPost);
+adminRoutes.delete('/api/blog/posts/:id', handleAdminDeleteBlogPost);
+
+adminRoutes.post('/api/logout', handleLogout);
+
+// Serve Admin UI (HTML, CSS, JS from /public)
+adminRoutes.get('/*', serveStatic({ root: './public' }));
+adminRoutes.get('/admin', serveStatic({ path: './public/admin.html' }));
+adminRoutes.get('/admin/login', serveStatic({ path: './public/login.html' }));
+
+
+// --- Main Routing Logic based on Hostname ---
+app.all('*', async (c, next) => {
+  const host = c.req.header('host');
+
+  if (host === 'admin.farewellcafe.com') {
+    return adminRoutes.fetch(c.req.raw, c.env, c.executionCtx);
   }
-  
-  // Continue to next handler for non-admin domains
-  await next();
+
+  // Default to serving public assets
+  const staticMiddleware = serveStatic({ root: './public' });
+  return staticMiddleware(c, next);
 });
 
-// Conditional admin authentication middleware
-const requireAdminAuth = async (c: Context<{ Bindings: Env }>, next: Next) => {
-  const host = c.req.header('host') || '';
-  if (host.startsWith('admin.')) {
-    return authenticate(c, next);
-  }
-  // For non-admin domains, just continue
-  await next();
-};
-
-// Admin API routes (only for admin subdomain)
-app.post('/api/login', async (c) => {
-  const host = c.req.header('host') || '';
-  if (!host.startsWith('admin.')) {
-    return c.json({ error: 'Not found' }, 404);
-  }
-  return handleAuth(c, 'login');
-});
-
-app.post('/api/logout', async (c) => {
-  const host = c.req.header('host') || '';
-  if (!host.startsWith('admin.')) {
-    return c.json({ error: 'Not found' }, 404);
-  }
-  return handleAuth(c, 'logout');
-});
-
-// Protected admin API routes (auth required only for admin subdomain)
-app.get('/api/events', requireAdminAuth, async (c) => {
-  const host = c.req.header('host') || '';
-  if (host.startsWith('admin.')) {
-    return handleEvents(c, 'list');
-  }
-  return c.json({ error: 'Not found' }, 404);
-});
-
-app.post('/api/events', requireAdminAuth, async (c) => {
-  const host = c.req.header('host') || '';
-  if (host.startsWith('admin.')) {
-    return handleEvents(c, 'create');
-  }
-  return c.json({ error: 'Not found' }, 404);
-});
-
-app.put('/api/events/:id', requireAdminAuth, async (c) => {
-  const host = c.req.header('host') || '';
-  if (host.startsWith('admin.')) {
-    return handleEvents(c, 'update');
-  }
-  return c.json({ error: 'Not found' }, 404);
-});
-
-app.delete('/api/events/:id', requireAdminAuth, async (c) => {
-  const host = c.req.header('host') || '';
-  if (host.startsWith('admin.')) {
-    return handleEvents(c, 'delete');
-  }
-  return c.json({ error: 'Not found' }, 404);
-});
-
-app.get('/api/blog/posts', requireAdminAuth, async (c) => {
-  const host = c.req.header('host') || '';
-  if (host.startsWith('admin.')) {
-    const response = await handleBlog(c.req.raw, c.env);
-    return new Response(response.body, response);
-  }
-  return c.json({ error: 'Not found' }, 404);
-});
-
-app.post('/api/blog/posts', requireAdminAuth, async (c) => {
-  const host = c.req.header('host') || '';
-  if (host.startsWith('admin.')) {
-    const response = await handleBlog(c.req.raw, c.env);
-    return new Response(response.body, response);
-  }
-  return c.json({ error: 'Not found' }, 404);
-});
-
-// Public API routes (for dev.farewellcafe.com and other non-admin domains)
-app.get('/list/:state', (c) => handleEvents(c, 'list', { venue: c.req.param('state') }));
-app.get('/archives', (c) => handleEvents(c, 'archives'));
-app.get('/api/events/slideshow', (c) => handleEvents(c, 'slideshow'));
-
-// Serve static files and handle SPA routing for non-admin domains
-app.get('*', async (c) => {
-  const host = c.req.header('host') || '';
-  if (host.startsWith('admin.')) {
-    return serveLoginPage(c);
-  }
-  
-  try {
-    return await c.env.ASSETS.fetch(c.req.raw);
-  } catch (e) {
-    try {
-      return await c.env.ASSETS.fetch(new Request('http://localhost/index.html'));
-    } catch (e) {
-      return c.text('Not found', 404);
-    }
-  }
-});
-
-// Function to serve the login page with username field
-function serveLoginPage(c: Context<{ Bindings: Env }>) {
-  console.log('[DEBUG] Serving login page');
-  return c.html(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>admin login</title>
-  <link rel="stylesheet" href="/css/ccssss.css">
-  <link rel="stylesheet" href="/css/fleeting-journey.css">
-  <style>
-    body {
-      background: var(--header-bg);
-      font-family: var(--font-main, 'Lora', serif);
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-    }
-    .admin-header {
-      width: 100%;
-      background: var(--primary-bg-color) url('/img/bg4.png') center/cover no-repeat;
-      background-attachment: fixed;
-      border-bottom: 1px solid var(--nav-border-color);
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 212px;
-    }
-    .admin-header h1 {
-      font-family: var(--font-db, 'Lora', serif);
-      font-size: clamp(2.5rem, 8vw, 4em);
-      color: var(--secondary-bg-color);
-      -webkit-text-stroke: 1px black;
-      text-shadow: -1px -1px 0 #000,
-           1px -1px 0 #000,
-          -1px  1px 0 #000,
-           1px  1px 0 #000,
-          -8px 8px 0px var(--nav-border-color);
-      margin: 0;
-    }
-    .login-container {
-      background: var(--card-bg-color);
-      border: 2px solid var(--nav-border-color);
-      border-radius: 8px;
-      box-shadow: -5px 5px 0px rgba(0,0,0,0.08);
-      padding: 2.5rem 2rem 2rem 2rem;
-      margin: 2rem auto 0 auto;
-      max-width: 400px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .login-title {
-      font-family: var(--font-db, 'Lora', serif);
-      font-size: 2.2rem;
-      color: var(--accent-color);
-      margin-bottom: 1.5rem;
-      text-shadow: 2px 2px 4px var(--header-text-shadow);
-    }
-    .form-group {
-      width: 100%;
-      margin-bottom: 1.2rem;
-      text-align: left;
-    }
-    label {
-      font-family: var(--font-main, 'Lora', serif);
-      color: var(--accent-color);
-      font-weight: bold;
-      margin-bottom: 0.3rem;
-      display: block;
-    }
-    input {
-      width: 100%;
-      padding: 0.8rem;
-      border: 1.5px solid var(--nav-border-color);
-      border-radius: 4px;
-      font-family: var(--font-hnm11, 'Lora', serif);
-      font-size: 1rem;
-      background: rgba(255,255,255,0.95);
-      color: var(--text-color);
-      transition: border 0.2s;
-    }
-    input:focus {
-      outline: none;
-      border-color: var(--secondary-bg-color);
-      box-shadow: -3px 3px 0px rgba(0,0,0,0.08);
-    }
-    .login-btn {
-      width: 100%;
-      padding: 1rem 2rem;
-      background: var(--button-bg-color);
-      color: var(--button-text-color);
-      font-family: var(--font-main, 'Lora', serif);
-      font-weight: bold;
-      border-radius: 4px;
-      border: 2px solid var(--text-color);
-      font-size: 1.1rem;
-      margin-top: 0.5rem;
-      cursor: pointer;
-      transition: all var(--transition-speed) ease;
-    }
-    .login-btn:hover {
-      background: var(--accent-color);
-      color: white;
-      transform: translateY(-2px);
-    }
-    .error {
-      color: var(--redd);
-      margin-top: 0.7rem;
-      font-size: 1rem;
-      min-height: 1.2em;
-      text-align: center;
-      font-family: var(--font-main, 'Lora', serif);
-    }
-    @media (max-width: 600px) {
-      .login-container { padding: 1.2rem 0.5rem; }
-      .admin-header { min-height: 120px; padding: 0.5rem; }
-      .admin-header h1 { font-size: 2rem; }
-    }
-  </style>
-</head>
-<body data-state="farewell">
-  <div class="admin-header">
-    <h1>administration!</h1>
-  </div>
-  <main>
-    <div class="login-container">
-      <div class="login-title">log in</div>
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="username">username:</label>
-          <input type="text" id="username" name="username" required autocomplete="username" placeholder="enter username">
-        </div>
-        <div class="form-group">
-          <label for="password">pass:</label>
-          <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="enter password">
-        </div>
-        <button type="submit" class="login-btn">let me in</button>
-        <div id="error" class="error"></div>
-      </form>
-    </div>
-  </main>
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      try {
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: formData.get('username'),
-            password: formData.get('password')
-          })
-        });
-        const result = await response.json();
-        if (result.success) {
-          window.location.href = '/';
-        } else {
-          document.getElementById('error').textContent = result.error || 'invalid credentials';
-        }
-      } catch (err) {
-        document.getElementById('error').textContent = 'try again later.';
-      }
-    });
-  </script>
-</body>
-</html>`);
-}
-
-// Serve login page for unauthenticated users
-app.get('/login', (c) => serveLoginPage(c));
-
-// Protected dashboard route
-app.get('/', authenticate, async (c) => {
-  try {
-    const html = generateUnifiedDashboardHTML();
-    return c.html(html);
-  } catch (e) {
-    console.error('Error serving dashboard:', e);
-    return c.text('Error loading dashboard', 500);
-  }
-});
-
-// Fallback route - serve login for unauthenticated, redirect to dashboard for authenticated
-app.get('*', async (c) => {
-  // Check for authentication
-  const cookie = c.req.header('cookie') || '';
-  const tokenMatch = cookie.match(/sessionToken=([^;]+)/);
-  
-  if (tokenMatch) {
-    const token = tokenMatch[1];
-    try {
-      const sessionData = await c.env.SESSIONS_KV.get(token);
-      if (sessionData) {
-        return c.redirect('/'); // Redirect to dashboard if authenticated
-      }
-    } catch (e) {
-      console.error('Session verification failed:', e);
-    }
-  }
-  
-  return serveLoginPage(c);
-});
 
 export default app;
