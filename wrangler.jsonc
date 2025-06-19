@@ -2,7 +2,7 @@
 {
   "name": "farewell-unified",
   "main": "src/index.ts",
-  "compatibility_date": "2025-6-07",
+  "compatibility_date": "2025-06-07",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "binding": "ASSETS",
