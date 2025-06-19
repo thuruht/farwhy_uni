@@ -61,7 +61,7 @@ app.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.query('ty
 // --- Final catch-all route for serving the SPA and static assets ---
 app.get('*', async (c) => {
     const host = c.req.header('host') || '';
-
+    
     // First, try to serve a static asset (CSS, JS, fonts, images)
     try {
         const asset = await c.env.ASSETS.fetch(c.req.raw);
@@ -76,7 +76,7 @@ app.get('*', async (c) => {
     if (host.startsWith('admin.')) {
         return c.env.ASSETS.fetch(new Request(new URL('/admin.html', c.req.url)));
     }
-
+    
     // Fallback for public site
     return c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
 });

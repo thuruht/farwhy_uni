@@ -6,8 +6,8 @@
     "nodejs_compat"
   ],
   "assets": {
-    "directory": "./public",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    "directory": "./public"
   },
   "d1_databases": [
     {
@@ -27,31 +27,9 @@
       "binding": "SESSIONS_KV",
       "id": "2038b95e785545af8486bc353c3cbe62",
       "preview_id": "2038b95e785545af8486bc353c3cbe62"
-    },
-    {
-      "binding": "BLOG_KV",
-      "id": "6ee9ab6b71634a4eb3e66de82d8dfcdc",
-      "preview_id": "6ee9ab6b71634a4eb3e66de82d8dfcdc"
     }
   ],
-  // NOTE: The following secrets need to be set using 'wrangler secret put':
-  // - ADMIN_PASSWORD_HASH: Hashed admin password
-  // - JWT_SECRET: Secret key for JWT token signing
   "vars": {
     "ENVIRONMENT": "production"
-  },
-  "observability": {
-    "enabled": true,
-    "head_sampling_rate": 1
-  },
-  "tail_consumers": [
-    {
-      "service": "farewell-unified",
-      "environment": "production"
-    }
-  ],
-  "routes": [
-    { "pattern": "dev.farewellcafe.com/*", "zone_name": "farewellcafe.com" },
-    { "pattern": "admin.farewellcafe.com/*", "zone_name": "farewellcafe.com" }
-  ]
+  }
 }
