@@ -1,12 +1,4 @@
-// public/jss/admin-unified.js
 
-// ====================================================================
-// admin-unified.js - FINAL, COMPLETE, AND INTEGRATED VERSION
-// ====================================================================
-
-// ====================================
-// Global state management
-// ====================================
 let currentUser = null;
 let dashboardState = {
     currentSection: 'dashboard',
