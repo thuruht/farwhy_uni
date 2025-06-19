@@ -97,6 +97,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Manually setup modal before any auth checks
     setupModal();
     
+    // Set up global click handlers for all interactive elements
+    document.addEventListener('click', (e) => {
+        // Handle New Event button click
+        if (e.target.id === 'add-event-btn' || e.target.closest('#add-event-btn')) {
+            console.log('New Event button clicked via global handler');
+            e.preventDefault();
+            showEventForm();
+        }
+        
+        // Handle New Blog Post button click
+        if (e.target.id === 'add-blog-btn' || e.target.closest('#add-blog-btn')) {
+            console.log('New Blog button clicked via global handler');
+            e.preventDefault();
+            showBlogForm();
+        }
+        
+        // Debug clicked element for troubleshooting
+        console.log('Clicked element:', e.target);
+    });
+    
+    // Add direct event handlers for additional reliability
+    const addEventBtn = document.getElementById('add-event-btn');
+    if (addEventBtn) {
+        console.log('Found add event button, adding direct click handler');
+        addEventBtn.addEventListener('click', () => {
+            console.log('Add event button clicked via direct handler');
+            showEventForm();
+        });
+    }
+    
+    // Set up mobile menu toggle
+    const mobileToggle = document.getElementById('mobile-menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    if (mobileToggle && sidebar) {
+        console.log('Found mobile toggle, adding direct click handler');
+        mobileToggle.addEventListener('click', () => {
+            console.log('Mobile menu toggle clicked');
+            sidebar.classList.toggle('open');
+        });
+    }
+    
     const sessionToken = getCookie('sessionToken');
 
     if (!sessionToken) {
@@ -677,53 +718,4 @@ function showSection(sectionName) {
     }
 }
 
-// ====================================
-// Global click handlers for modal buttons
-// ====================================
-
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Setting up global click handlers');
-    
-    // Set up global click handlers for buttons
-    document.addEventListener('click', (e) => {
-        // Debug clicked element
-        console.log('Clicked element:', e.target, e.target.id);
-        
-        // Handle New Event button click
-        if (e.target.id === 'add-event-btn' || e.target.closest('#add-event-btn')) {
-            console.log('New Event button clicked via global handler');
-            e.preventDefault();
-            const modal = document.getElementById('form-modal');
-            console.log('Modal element when clicked:', modal);
-            showEventForm();
-        }
-        
-        // Handle New Blog Post button click
-        if (e.target.id === 'add-blog-btn' || e.target.closest('#add-blog-btn')) {
-            console.log('New Blog button clicked via global handler');
-            e.preventDefault();
-            showBlogForm();
-        }
-    });
-});
-
-// Add a DOMContentLoaded event listener to set up global click handlers
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Setting up additional global handlers');
-    
-    // Add new event button click handling
-    const addEventBtn = document.getElementById('add-event-btn');
-        });
-    }
-    
-    // Set up mobile menu toggle
-    const mobileToggle = document.getElementById('mobile-menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
-    if (mobileToggle && sidebar) {
-        console.log('Found mobile toggle, adding direct click handler');
-        mobileToggle.addEventListener('click', () => {
-            console.log('Mobile menu toggle clicked');
-            sidebar.classList.toggle('open');
-        });
-    }
-});
+// End of file
