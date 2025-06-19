@@ -63,6 +63,7 @@ declare global {
   }
   
   interface R2Object {
+    httpMetadata: any;
     body: ReadableStream;
     bodyUsed: boolean;
   }
