@@ -85,6 +85,18 @@ async function handleLoginSubmit(e) {
 // ====================================
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('[Admin] App initializing...');
+    
+    // Check if modal elements exist
+    console.log('Modal elements check:', {
+        'form-modal': document.getElementById('form-modal'),
+        'modal-form-body': document.getElementById('modal-form-body'),
+        'add-event-btn': document.getElementById('add-event-btn'),
+        'add-blog-btn': document.getElementById('add-blog-btn')
+    });
+    
+    // Manually setup modal before any auth checks
+    setupModal();
+    
     const sessionToken = getCookie('sessionToken');
 
     if (!sessionToken) {
@@ -237,30 +249,62 @@ function setupNavigation() {
 }
 
 function setupMobileMenu() {
+    console.log('Setting up mobile menu toggle');
     const mobileToggle = document.getElementById('mobile-menu-toggle');
     const sidebar = document.querySelector('.sidebar');
-    if (mobileToggle) {
-        mobileToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    
+    console.log('Mobile menu elements:', mobileToggle, sidebar);
+    
+    if (mobileToggle && sidebar) {
+        mobileToggle.addEventListener('click', (e) => {
+            console.log('Mobile menu toggle clicked');
+            e.preventDefault();
+            sidebar.classList.toggle('open');
+            console.log('Sidebar classes after toggle:', sidebar.classList);
+        });
+        
         document.addEventListener('click', (e) => {
-            if (sidebar && !sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
+            if (sidebar && 
+                sidebar.classList.contains('open') && 
+                !sidebar.contains(e.target) && 
+                !mobileToggle.contains(e.target)) {
                 sidebar.classList.remove('open');
             }
         });
+        
+        console.log('Mobile menu handlers set up successfully');
+    } else {
+        console.error('Mobile menu elements not found');
     }
 }
 
 function setupModal() {
+    console.log('Setting up modal...');
     const modal = document.getElementById('form-modal');
+    console.log('Modal element:', modal);
+    
     const closeBtn = modal?.querySelector('.modal-close-btn');
+    console.log('Modal close button:', closeBtn);
+    
     if (closeBtn) {
-        closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+        closeBtn.addEventListener('click', () => {
+            console.log('Modal close button clicked');
+            modal.classList.remove('active');
+        });
+    } else {
+        console.error('Modal close button not found');
     }
+    
     if (modal) {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
+                console.log('Modal background clicked, closing modal');
                 modal.classList.remove('active');
             }
         });
+        console.log('Modal setup complete');
+    } else {
+        console.error('Modal element not found during setup');
     }
 }
 
@@ -275,8 +319,28 @@ function setupToasts() {
 }
 
 async function loadInitialData() {
+    console.log('Loading initial data, currentUser:', currentUser);
     const currentUserEl = document.getElementById('current-user');
-    if(currentUserEl && currentUser) currentUserEl.textContent = currentUser.username;
+    const userRoleEl = document.getElementById('user-role');
+    
+    if (currentUserEl) {
+        if (currentUser && currentUser.username) {
+            currentUserEl.textContent = currentUser.username;
+            console.log('Updated current user element with:', currentUser.username);
+            
+            if (userRoleEl && currentUser.role) {
+                userRoleEl.textContent = currentUser.role;
+            }
+        } else {
+            currentUserEl.textContent = 'Not logged in';
+            console.log('No current user, displaying "Not logged in"');
+        }
+    } else {
+        console.error('Current user element not found');
+    }
+    
+    // Load dashboard stats
+    await loadDashboardStats();
 }
 
 async function loadDashboardStats() {
@@ -379,6 +443,10 @@ function showEventForm(id = null) {
         console.error('Modal elements not found!');
         return;
     }
+
+    // Explicitly add the active class and verify
+    modal.classList.add('active');
+    console.log('Modal active class added, classList:', modal.classList);
 
     dashboardState.editingEventId = id;
     let event = id ? dashboardState.events.find(e => e.id === id) : {};
@@ -508,12 +576,22 @@ window.deleteBlogPost = async (id) => {
 }
 
 function showBlogForm(id = null) {
+    console.log('showBlogForm called with id:', id);
     const modal = document.getElementById('form-modal');
     const modalBody = document.getElementById('modal-form-body');
-    if (!modal || !modalBody) return;
+    console.log('Blog modal elements:', modal, modalBody);
+    if (!modal || !modalBody) {
+        console.error('Blog modal elements not found!');
+        return;
+    }
+
+    // Explicitly add the active class and verify
+    modal.classList.add('active');
+    console.log('Blog modal active class added, classList:', modal.classList);
 
     dashboardState.editingPostId = id;
     let post = id ? dashboardState.blogPosts.find(p => p.id === id) : null;
+    console.log('Post data:', post);
 
     modalBody.innerHTML = `
         <div class="admin-form">
@@ -600,20 +678,52 @@ function showSection(sectionName) {
 }
 
 // ====================================
-// Helper Functions
+// Global click handlers for modal buttons
 // ====================================
 
-// Add direct event handlers at document level since we're using a SPA
-document.addEventListener('click', (e) => {
-    // Handle New Event button click
-    if (e.target.id === 'add-event-btn' || e.target.closest('#add-event-btn')) {
-        console.log('New Event button clicked via global handler');
-        showEventForm();
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Setting up global click handlers');
+    
+    // Set up global click handlers for buttons
+    document.addEventListener('click', (e) => {
+        // Debug clicked element
+        console.log('Clicked element:', e.target, e.target.id);
+        
+        // Handle New Event button click
+        if (e.target.id === 'add-event-btn' || e.target.closest('#add-event-btn')) {
+            console.log('New Event button clicked via global handler');
+            e.preventDefault();
+            const modal = document.getElementById('form-modal');
+            console.log('Modal element when clicked:', modal);
+            showEventForm();
+        }
+        
+        // Handle New Blog Post button click
+        if (e.target.id === 'add-blog-btn' || e.target.closest('#add-blog-btn')) {
+            console.log('New Blog button clicked via global handler');
+            e.preventDefault();
+            showBlogForm();
+        }
+    });
+});
+
+// Add a DOMContentLoaded event listener to set up global click handlers
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Setting up additional global handlers');
+    
+    // Add new event button click handling
+    const addEventBtn = document.getElementById('add-event-btn');
+        });
     }
     
-    // Handle New Blog Post button click
-    if (e.target.id === 'add-blog-btn' || e.target.closest('#add-blog-btn')) {
-        console.log('New Blog button clicked via global handler');
-        showBlogForm();
+    // Set up mobile menu toggle
+    const mobileToggle = document.getElementById('mobile-menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    if (mobileToggle && sidebar) {
+        console.log('Found mobile toggle, adding direct click handler');
+        mobileToggle.addEventListener('click', () => {
+            console.log('Mobile menu toggle clicked');
+            sidebar.classList.toggle('open');
+        });
     }
 });

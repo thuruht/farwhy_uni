@@ -1,24 +1,47 @@
 /* public/css/admin-redesigned.css */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@700&family=Lora:wght@400;700&display=swap');
+
+/* -------------------------------------------------------------------------- */
+/* 1. Color Scheme/Palette                    */
+/* -------------------------------------------------------------------------- */
 
 :root {
+    /* Solarized color palette */
+    --base03: #002b36;  /* Darkest background */
+    --base02: #073642;  /* Dark background */
+    --base01: #586e75;  /* Content */
+    --base00: #657b83;  /* Subdued content */
+    --base0: #839496;   /* Comments / Emphasized content */
+    --base1: #93a1a1;   /* Optional background */
+    --base2: #eee8d5;   /* Light background (Canvas) */
+    --base3: #fdf6e3;   /* Lightest background (Body) */
+    --yellow: #b58900;
+    --orange: #cb4b16;
+    --red: #dc322f;
+    --magenta: #d33682;
+    --violet: #6c71c4;
+    --blue: #268bd2;
+    --cyan: #2aa198;
+    --green: #859900;
+    
+    /* Admin interface specific vars */
     --font-main: 'Inter', sans-serif;
     --font-display: 'Orbitron', sans-serif;
-    --cyan: #2aa198;
-    --magenta: #d33682;
-    --blue: #268bd2;
-    --yellow: #b58900;
-    --red: #dc322f;
-    --bg-dark: #001a23;
-    --bg-light: #002b36;
-    --text-primary: #fdf6e3;
-    --text-secondary: #93a1a1;
+    --font-literary: 'Lora', serif;
+    --bg-dark: var(--base03);
+    --bg-light: var(--base02);
+    --text-primary: var(--base3);
+    --text-secondary: var(--base1);
     --border-color: rgba(42, 161, 152, 0.2);
     --shadow-color: rgba(0, 0, 0, 0.4);
-    --success: #009600;
-    --warning: #ff9800;
-    --error: #dc322f;
+    --success: #859900;
+    --warning: var(--orange);
+    --error: var(--red);
 }
+
+/* -------------------------------------------------------------------------- */
+/* 2. Typography                               */
+/* -------------------------------------------------------------------------- */
 
 * {
     box-sizing: border-box;
@@ -30,6 +53,26 @@ body {
     background-color: var(--bg-dark);
     color: var(--text-primary);
     line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-main);
+    line-height: 1.2;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+.literary-heading {
+    font-family: var(--font-literary);
+    font-weight: 700;
+    color: var(--cyan);
+}
+
+.literary-text {
+    font-family: var(--font-literary);
+    font-weight: 400;
+    line-height: 1.7;
+    color: var(--text-secondary);
 }
 
 .admin-grid-container {
@@ -301,6 +344,10 @@ body {
     justify-content: center;
 }
 
+.modal-overlay.active {
+    display: flex;
+}
+
 .modal-content {
     background-color: var(--bg-light);
     border-radius: 10px;
@@ -372,7 +419,16 @@ body {
     to { opacity: 0; }
 }
 
-/* Responsive adjustments */
+/* Mobile menu toggle styles */
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
 @media (max-width: 768px) {
     .admin-grid-container {
         grid-template-columns: 1fr;
@@ -380,14 +436,15 @@ body {
     
     .sidebar {
         position: fixed;
-        left: -240px;
         top: 0;
+        left: -240px;
         height: 100vh;
+        width: 240px;
         z-index: 100;
         transition: left 0.3s ease;
     }
     
-    .sidebar.active {
+    .sidebar.open {
         left: 0;
     }
     
