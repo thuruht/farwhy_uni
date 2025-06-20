@@ -190,3 +190,24 @@ The application uses Cloudflare R2 for storing media files:
 4. **Event/Blog Form Submissions**:
    - Form visibility works correctly
    - Submission handling needs to be fixed to properly parse API responses
+
+## Event Management
+
+### Event Table Layout
+
+The event management section displays events in a table format with the following columns:
+
+1. **Image** - Displays the event flyer thumbnail (70x70px)
+2. **Title** - The event title
+3. **Date** - Formatted event date
+4. **Venue** - Shows which venue (Farewell or Howdy) the event is for
+5. **Actions** - Edit and Delete buttons
+
+The table uses a responsive design that ensures proper alignment of all elements on both desktop and mobile devices. Images are contained within their cells and don't overflow into other columns.
+
+### Event Filtering
+
+You can filter events by:
+
+- Venue (Farewell or Howdy)
+- Search by title or content

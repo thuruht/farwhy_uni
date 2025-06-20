@@ -788,17 +788,17 @@ function renderEvents(events) {
     }
     eventList.innerHTML = `<table class="admin-table"><thead><tr><th>Image</th><th>Title</th><th>Date</th><th>Venue</th><th>Actions</th></tr></thead><tbody>` +
         events.map(ev => `<tr class="event-row venue-${ev.venue || 'unknown'}">
-            <td>
-              <div class="event-list-thumbnail">
+            <td style="width: 80px; vertical-align: middle;">
+              <div class="event-list-thumbnail" style="display: inline-block;">
                 ${ev.flyer_image_url || ev.imageUrl ? 
-                  `<img src="${ev.flyer_image_url || ev.imageUrl}" alt="${ev.title || 'Event'} flyer">` : 
+                  `<img src="${ev.flyer_image_url || ev.imageUrl}" alt="${ev.title || 'Event'} flyer" style="max-width: 70px; max-height: 70px; object-fit: cover;">` : 
                   `<span class="no-image">📷</span>`}
               </div>
             </td>
-            <td><strong>${ev.title || 'Untitled'}</strong></td>
-            <td>${formatDate(ev.date)}</td>
-            <td><span class="venue-tag venue-${ev.venue}">${ev.venue || 'N/A'}</span></td>
-            <td class='admin-table-actions'>
+            <td style="vertical-align: middle;"><strong>${ev.title || 'Untitled'}</strong></td>
+            <td style="vertical-align: middle;">${formatDate(ev.date)}</td>
+            <td style="vertical-align: middle;"><span class="venue-tag venue-${ev.venue}">${ev.venue || 'N/A'}</span></td>
+            <td class='admin-table-actions' style="vertical-align: middle;">
                 <button onclick='editEvent("${ev.id}")'>Edit</button>
                 <button onclick='deleteEvent("${ev.id}")'>Delete</button>
             </td>
@@ -1501,15 +1501,26 @@ document.head.appendChild(style);
 // Patch event table column layout
 const eventTableStyle = document.createElement('style');
 eventTableStyle.textContent = `
-.admin-table th, .admin-table td {
-  padding: 0.5em 0.7em;
-  text-align: left;
-  vertical-align: middle;
+.admin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 1rem;
 }
-.admin-table th { white-space: nowrap; }
-.admin-table td img { max-width: 60px; max-height: 60px; display: block; }
-.admin-table td { max-width: 180px; overflow-wrap: break-word; }
-.admin-table tr > td:first-child, .admin-table tr > th:first-child { width: 70px; }
+.admin-table th, .admin-table td {
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: middle !important;
+}
+.admin-table th { 
+  white-space: nowrap; 
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+.admin-table td { 
+  max-width: 200px; 
+  overflow-wrap: break-word; 
+}
 `;
 document.head.appendChild(eventTableStyle);
 
