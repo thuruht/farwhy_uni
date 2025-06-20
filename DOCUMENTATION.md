@@ -97,12 +97,23 @@ The admin dashboard follows a Single Page Application (SPA) pattern:
 4. **Section Management**:
    - Show/hide different dashboard sections with `showSection()`
    - Modal handling via global event handlers
+   - Navigation between sections through the sidebar menu
+   - Each section loads its content dynamically when activated
+   - Sections include: dashboard, events, blog, venue, and import
 
-5. **Event Handlers**:
+5. **Key Functions**:
+   - `showSection(sectionName)`: Displays the specified section and loads its content
+   - `loadDashboardStats()`: Fetches and displays dashboard statistics
+   - `loadEvents()`: Fetches and displays the event list
+   - `loadBlogPosts()`: Fetches and displays blog posts
+   - `loadVenueSettings()`: Displays venue configuration options
+   - `setupImportHandlers()`: Sets up handlers for importing legacy events
+
+6. **Event Handlers**:
    - Global click handlers for modal buttons and actions
    - Form submission handlers for events and blog posts
 
-6. **Form Processing**:
+7. **Form Processing**:
    - Create and edit forms for events and blog posts
    - Form submission with validation and API calls
 

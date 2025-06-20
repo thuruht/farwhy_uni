@@ -551,6 +551,39 @@ async function initializeDashboard() {
     console.log('initializeDashboard completed');
 }
 
+function showSection(sectionName) {
+    console.log(`Showing section: ${sectionName}`);
+    const sections = document.querySelectorAll('.admin-section');
+    sections.forEach(section => section.classList.remove('active'));
+
+    const targetSection = document.getElementById(`section-${sectionName}`);
+    if (targetSection) {
+        targetSection.classList.add('active');
+        dashboardState.currentSection = sectionName;
+        
+        // Call appropriate loading function based on section
+        switch (sectionName) {
+            case 'dashboard': 
+                loadDashboardStats(); 
+                break;
+            case 'events': 
+                loadEvents(); 
+                break;
+            case 'blog': 
+                loadBlogPosts(); 
+                break;
+            case 'venue': 
+                loadVenueSettings(); 
+                break;
+            case 'import': 
+                setupImportHandlers(); 
+                break;
+        }
+    } else {
+        console.error(`Section not found: section-${sectionName}`);
+    }
+}
+
 function setupNavigation() {
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
     const sectionIndicator = document.getElementById('section-indicator');
