@@ -86,6 +86,9 @@ async function handleLoginSubmit(e) {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('[Admin] App initializing...');
 
+    // Setup debug panel first
+    setupDebugPanel();
+
     // Check if modal elements exist
     console.log('Modal elements check:', {
         'form-modal': document.getElementById('form-modal'),
@@ -921,16 +924,5 @@ function setupDebugPanel() {
         debugContent.scrollTop = debugContent.scrollHeight;
     }
 }
-
-// Add the debug panel setup to initialization
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('[Admin] App initializing...');
-    
-    // Setup debug panel first
-    setupDebugPanel();
-    
-    // Rest of initialization code
-    // ...existing code...
-});
 
 // End of file
