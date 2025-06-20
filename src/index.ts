@@ -79,8 +79,7 @@ const adminApi = new Hono<{ Bindings: Env }>();
 // Unprotected admin actions
 adminApi.post('/login', (c) => handleAuth(c, 'login'));
 adminApi.post('/logout', (c) => handleAuth(c, 'logout'));
-adminApi.get('/check', (c) => handleAuth(c, 'check')); // Add check endpoint for auth status
-adminApi.get('/check', (c) => handleAuth(c, 'check')); // Add check endpoint for auth status
+adminApi.get('/check', (c) => handleAuth(c, 'check')); // Auth status check endpoint
 
 // Protected admin actions are grouped and have middleware applied
 const protectedAdminApi = new Hono<{ Bindings: Env }>();
@@ -101,6 +100,8 @@ protectedAdminApi.post('/events', (c) => handleEvents(c, 'create'));
 protectedAdminApi.put('/events/:id', (c) => handleEvents(c, 'update'));
 protectedAdminApi.delete('/events/:id', (c) => handleEvents(c, 'delete'));
 protectedAdminApi.post('/events/flyer', (c) => handleEvents(c, 'upload-flyer'));
+// Add sync-events endpoint for legacy import
+protectedAdminApi.post('/events/sync', handleSync);
 
 // Mount the protected routes under the /admin path
 adminApi.route('/admin', protectedAdminApi);
@@ -116,37 +117,6 @@ app.route('/api', adminApi);
 // --- Root-level legacy routes for backward compatibility ---
 app.get('/list/:state', (c) => handleEvents(c, 'list', { venue: c.req.param('state') }));
 app.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.query('type') }));
-
-// --- NEW: Flyer/Image serving route from R2 ---
-app.get('/images/*', async (c) => {
-    try {
-        const key = c.req.path.substring('/images/'.length);
-        const object = await c.env.FWHY_IMAGES.get(key);
-
-        if (object === null) {
-            return new Response('Object Not Found', { status: 404 });
-        }
-
-        const headers = new Headers();
-        // Manually set HTTP metadata headers if present
-        if (object.httpMetadata) {
-            for (const [key, value] of Object.entries(object.httpMetadata)) {
-                if (typeof value === 'string') {
-                    headers.set(key, value);
-                }
-            }
-        }
-        if ('httpEtag' in object && typeof object.httpEtag === 'string' && object.httpEtag) {
-            headers.set('etag', object.httpEtag);
-        }
-        headers.set('cache-control', 'public, max-age=31536000'); // Cache for 1 year
-
-        return new Response(object.body, { headers });
-    } catch (e) {
-        console.error("Error serving image from R2:", e);
-        return new Response('Error serving file', { status: 500 });
-    }
-});
 
 
 // --- Final catch-all route for serving the SPA and static assets ---

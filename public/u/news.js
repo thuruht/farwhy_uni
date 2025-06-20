@@ -1,4 +1,4 @@
-const API_BASE = '/api/blog';
+const API_BASE = '/api';
 let editingPostId = null;
 
 // DOM Elements
@@ -155,27 +155,25 @@ document.addEventListener('mousemove', resetAuthTimer);
 document.addEventListener('keydown', resetAuthTimer);
 
 async function fetchApi(endpoint, options = {}, isRetry = false) {
+    // Determine the proper URL based on whether this is an admin or public endpoint
+    const isAdminEndpoint = endpoint.startsWith('/admin/');
     const url = `${API_BASE}${endpoint}`;
     const headers = {
         'Content-Type': 'application/json',
         ...options.headers,
     };
 
-    if (sessionToken && !options.excludeAuth) {
-        headers['Authorization'] = `Bearer ${sessionToken}`;
-    }
-
     try {
         const response = await fetch(url, {
             ...options,
+            credentials: 'include', // Always include credentials
             headers: headers
         });
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             if (response.status === 401 && !isRetry) {
-                sessionStorage.removeItem("sessionToken");
-                sessionToken = null;
+                // Just trigger UI update if session expired
                 updateView();
                 alert("Session expired - please login again");
             }
@@ -201,36 +199,30 @@ async function uploadImage(file, progressElement) {
     progressElement.value = 0;
 
     try {
-        const { data: uploadData } = await fetchApi('/upload', {
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        const response = await fetch('/api/admin/blog/upload-image', {
             method: 'POST',
-            body: JSON.stringify({ filename: file.name })
+            body: formData,
+            credentials: 'include'
         });
-
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('PUT', uploadData.signedUrl);
-            xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
-
-            xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable) {
-                    progressElement.value = (event.loaded / event.total) * 100;
-                }
-            };
-
-            xhr.onload = () => {
-                progressElement.style.display = 'none';
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    resolve(uploadData.key);
-                } else {
-                    reject(new Error('Upload failed'));
-                }
-            };
-
-            xhr.onerror = () => reject(new Error('Network error'));
-            xhr.send(file);
-        });
+        
+        if (!response.ok) {
+            throw new Error(`Upload failed: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        progressElement.style.display = 'none';
+        
+        if (result.success) {
+            return result.imageUrl;
+        } else {
+            throw new Error(result.error || 'Upload failed');
+        }
     } catch (error) {
         console.error('Upload failed:', error);
+        progressElement.style.display = 'none';
         throw error;
     }
 }
@@ -265,7 +257,7 @@ function updateView() {
 
 async function loadPublicPosts() {
     try {
-        const { data: posts } = await fetchApi('/posts', { method: 'GET', excludeAuth: true });
+        const { data: posts } = await fetchApi('/blog/posts', { method: 'GET', excludeAuth: true });
         publicPostsListEl.innerHTML = posts.length ? posts.map(post => `
             <article class="post-item-public">
                 <h3>${post.title.replace(/</g, '&lt;')}</h3>
@@ -281,7 +273,7 @@ async function loadPublicPosts() {
 
 async function loadPublicFeatured() {
     try {
-        const { data: featured } = await fetchApi('/featured', { method: 'GET', excludeAuth: true });
+        const { data: featured } = await fetchApi('/blog/featured', { method: 'GET', excludeAuth: true });
         publicFeaturedContentEl.innerHTML = `
             <p>${featured.text.replace(/</g, '&lt;')}</p>
             ${featured.youtubeUrl ? createYouTubeEmbed(featured.youtubeUrl) : ''}
@@ -293,7 +285,7 @@ async function loadPublicFeatured() {
 
 async function loadAdminPosts() {
     try {
-        const { data: posts } = await fetchApi('/posts');
+        const { data: posts } = await fetchApi('/admin/blog/posts');
         adminPostsListEl.innerHTML = posts.length ? posts.map(post => `
             <div class="post-item-admin" data-post-id="${post.id}">
                 <strong>${post.title.replace(/</g, '&lt;')}</strong>
@@ -312,7 +304,7 @@ async function loadAdminPosts() {
 
 async function loadAdminFeatured() {
     try {
-        const { data: featured } = await fetchApi('/featured');
+        const { data: featured } = await fetchApi('/blog/featured');
         currentFeaturedTextEl.textContent = featured.text || 'No text set';
         featuredTextEl.value = featured.text || '';
         // Parse YouTube URLs into array
@@ -418,7 +410,7 @@ featuredForm.addEventListener('submit', async (e) => {
             ytArr = youtubeUrlInput.value.split(',').map(u => u.trim()).filter(Boolean);
         }
         youtubeUrlInput.value = ytArr.join(','); // keep input in sync for backend
-        await fetchApi('/featured', {
+        await fetchApi('/admin/blog/featured', {
             method: 'POST',
             body: JSON.stringify({
                 text: featuredTextEl.value.trim(),
@@ -446,10 +438,7 @@ adminPostsListEl.addEventListener('click', async (e) => {
     if (e.target.classList.contains('delete-btn')) {
         if (confirm('Delete this post?')) {
             try {
-                await fetchApi('/posts', {
-                    method: 'DELETE',
-                    body: JSON.stringify({ id: parseInt(postId, 10) })
-                });
+                await fetchApi(`/admin/blog/posts/${postId}`, { method: 'DELETE' });
                 loadAdminPosts();
             } catch (err) {
                 alert(`Delete failed: ${err.message}`);
@@ -457,8 +446,7 @@ adminPostsListEl.addEventListener('click', async (e) => {
         }
     } else if (e.target.classList.contains('edit-btn')) {
         try {
-            const { data: posts } = await fetchApi('/posts');
-            const post = posts.find(p => p.id === parseInt(postId, 10));
+            const { data: post } = await fetchApi(`/admin/blog/posts/${postId}`);
             if (post) {
                 postIdInput.value = post.id;
                 postTitleEl.value = post.title;
@@ -495,4 +483,86 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     updateView();
+});
+
+// Clear the post form for a new post
+function clearPostForm() {
+    postIdInput.value = '';
+    postTitleEl.value = '';
+    postEditor.root.innerHTML = '';
+    postImageUrlInput.value = '';
+    postImagePreviewEl.src = '';
+    postImageUrlDisplayEl.textContent = '';
+    formHeadingEl.textContent = 'Create New Post';
+    submitPostBtn.textContent = 'Submit Post';
+    cancelEditBtn.style.display = 'none';
+}
+
+// Post form submission handler
+postForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const submitButton = postForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    
+    try {
+        const postId = postIdInput.value;
+        const method = postId ? 'PUT' : 'POST';
+        const endpoint = postId ? `/admin/blog/posts/${postId}` : '/admin/blog/posts';
+        
+        // Get the content from Quill editor
+        const content = postEditor.root.innerHTML;
+        
+        const postData = {
+            title: postTitleEl.value.trim(),
+            content: content,
+            image_url: postImageUrlInput.value || null
+        };
+        
+        await fetchApi(endpoint, {
+            method,
+            body: JSON.stringify(postData)
+        });
+        
+        alert(postId ? 'Post updated!' : 'Post created!');
+        loadAdminPosts();
+        clearPostForm();
+    } catch (err) {
+        alert(`Error: ${err.message}`);
+    } finally {
+        submitButton.disabled = false;
+    }
+});
+
+// Cancel edit button handler
+cancelEditBtn.addEventListener('click', () => {
+    clearPostForm();
+});
+
+// Image upload handler
+postImageUploadInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    try {
+        const imageUrl = await uploadImage(file, postUploadProgressEl);
+        if (imageUrl) {
+            postImageUrlInput.value = imageUrl;
+            postImagePreviewEl.src = imageUrl;
+            postImagePreviewEl.style.display = 'block';
+            postImageUrlDisplayEl.textContent = imageUrl.split('/').pop();
+            removePostImageBtn.style.display = 'inline-block';
+        }
+    } catch (err) {
+        alert(`Image upload failed: ${err.message}`);
+    }
+});
+
+// Remove image button handler
+removePostImageBtn.addEventListener('click', () => {
+    postImageUrlInput.value = '';
+    postImagePreviewEl.src = '';
+    postImagePreviewEl.style.display = 'none';
+    postImageUrlDisplayEl.textContent = '';
+    removePostImageBtn.style.display = 'none';
 });

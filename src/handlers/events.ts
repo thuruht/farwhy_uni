@@ -230,9 +230,10 @@ async function updateEvent(c: Context<{ Bindings: Env }>) {
     const eventData: Partial<Event> = await c.req.json();
 
     // Fetch the current event to check if the flyer URL is changing
-    const currentEvent: Event | null = await FWHY_D1.prepare("SELECT flyer_image_url FROM events WHERE id = ?")
+    const result = await FWHY_D1.prepare("SELECT flyer_image_url FROM events WHERE id = ?")
       .bind(eventId)
       .first();
+    const currentEvent = result as any;
 
     // If the flyer URL is being updated and is different from the old one, delete the old flyer
     if (currentEvent && currentEvent.flyer_image_url && currentEvent.flyer_image_url !== eventData.flyer_image_url) {
@@ -283,9 +284,10 @@ async function deleteEvent(c: Context<{ Bindings: Env }>) {
 
   try {
     // First, find the event to get its flyer URL
-    const event: Event | null = await FWHY_D1.prepare("SELECT flyer_image_url FROM events WHERE id = ?")
+    const result = await FWHY_D1.prepare("SELECT flyer_image_url FROM events WHERE id = ?")
         .bind(eventId)
         .first();
+    const event = result as any;
 
     // If the event exists and has a flyer, delete it from R2
     if (event && event.flyer_image_url) {
@@ -302,40 +304,58 @@ async function deleteEvent(c: Context<{ Bindings: Env }>) {
   }
 }
 
-async function uploadFlyer(c: Context<{ Bindings: Env }>) {
-  const { FWHY_IMAGES } = c.env;
-
+// Function to handle flyer uploads for events
+async function uploadFlyer(c: Context<{ Bindings: Env }>): Promise<Response> {
   try {
+    // Check for multipart form data
     const formData = await c.req.formData();
     const file = formData.get('flyer') as File;
-
+    
     if (!file) {
-      return c.json({ success: false, error: 'No file uploaded' }, 400);
+      return c.json({ success: false, error: 'No flyer file provided' }, 400);
     }
-
-    const fileName = `flyers/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
-    const arrayBuffer = await file.arrayBuffer();
-
-    const contentType = file.type || 'image/jpeg';
-
-    await FWHY_IMAGES.put(fileName, arrayBuffer, {
+    
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      return c.json({ 
+        success: false, 
+        error: 'Invalid file type. Supported formats: JPG, PNG, GIF, WebP' 
+      }, 400);
+    }
+    
+    // Get file data
+    const fileData = await file.arrayBuffer();
+    
+    // Generate a unique filename with timestamp and random string
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 10);
+    const fileExtension = file.name.split('.').pop() || 'jpg';
+    const filename = `flyers/${timestamp}-${randomString}.${fileExtension}`;
+    
+    // Upload to R2
+    await c.env.FWHY_IMAGES.put(filename, fileData, {
       httpMetadata: {
-        contentType: contentType,
-        cacheControl: 'public, max-age=31536000'
+        contentType: file.type,
       }
     });
-
-    // This URL will be served by the new /images/* route in index.ts
-    const flyerUrl = `https://dev.farewellcafe.com/images/${fileName}`;
-
-    return c.json({
-      success: true,
-      url: flyerUrl,
-      fileName: fileName // The R2 key
+    
+    // Construct the public URL
+    const imageUrl = `/images/${filename}`;
+    
+    return c.json({ 
+      success: true, 
+      imageUrl,
+      url: imageUrl,  // For backward compatibility
+      message: 'Flyer uploaded successfully' 
     });
+    
   } catch (error) {
-    console.error('Error uploading flyer:', error);
-    return c.json({ success: false, error: 'Upload failed' }, 500);
+    console.error('[Flyer Upload]', error);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to upload flyer' 
+    }, 500);
   }
 }
 
@@ -389,4 +409,4 @@ export async function handleEvents(
   }
 }
 
-export { createEvent, updateEvent, deleteEvent, migrateLegacyEvent, normalizeEventForDisplay };
+export { createEvent, updateEvent, deleteEvent, uploadFlyer, migrateLegacyEvent, normalizeEventForDisplay };

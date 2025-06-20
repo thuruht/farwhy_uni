@@ -915,7 +915,7 @@ function showEventForm(id = null) {
             if (res) {
                 const result = await res.json();
                 if (result.success) {
-                    document.querySelector('input[name="flyer_image_url"]').value = result.url;
+                    document.querySelector('input[name="flyer_image_url"]').value = result.imageUrl;
                     showToast('Flyer uploaded!', 'success');
                 } else {
                     showToast(result.error || 'Flyer upload failed.', 'error');
@@ -1412,242 +1412,112 @@ function showBlogForm(id = null) {
     });
 }
 
-function loadVenueSettings() {
-    console.log('Loading venue settings');
-    
-    // Set up tab buttons
-    const tabButtons = document.querySelectorAll('.venue-tabs .tab-btn');
-    const addMenuBtn = document.getElementById('add-menu-btn');
-    const menuList = document.getElementById('menu-list');
-    
-    // Add event listeners to tab buttons
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const venue = button.getAttribute('data-venue');
-            console.log('Venue tab clicked:', venue);
-            
-            // Update active tab
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            
-            // Update content based on selected venue
-            loadVenueContent(venue);
-        });
-    });
-    
-    // Initialize menu list
-    if (menuList) {
-        // Only Farewell has a menu
-        const currentVenue = document.querySelector('.tab-btn.active')?.getAttribute('data-venue') || 'farewell';
-        console.log('Loading menu for venue:', currentVenue);
-        
-        loadVenueContent(currentVenue);
-    }
-}
-
-function loadVenueContent(venue) {
-    console.log('Loading venue content for:', venue);
-    const menuList = document.getElementById('menu-list');
-    const hoursEditor = document.getElementById('hours-editor');
-    const addMenuBtn = document.getElementById('add-menu-btn');
-    
-    if (!menuList) return;
-    
-    // Toggle menu button visibility
-    if (addMenuBtn) {
-        addMenuBtn.style.display = venue === 'farewell' ? 'block' : 'none';
-    }
-    
-    if (venue === 'farewell') {
-        menuList.innerHTML = '<div class="loading-indicator">Loading menu data...</div>';
-        
-        // Attempt to fetch current menu data
-        fetch('/menu')
-            .then(response => {
-                console.log('Menu fetch response:', response.status);
-                if (!response.ok) {
-                    throw new Error('Failed to load menu data');
-                }
-                return response.text();
-            })
-            .then(html => {
-                console.log('Menu data loaded, parsing...');
-                
-                // Extract menu sections from the HTML
-                // This is a simple placeholder implementation
-                menuList.innerHTML = `
-                    <div class="menu-section">
-                        <h4>Menu Preview</h4>
-                        <p>The menu is currently stored as a static HTML file.</p>
-                        <p>To edit the menu, you need to:</p>
-                        <ol>
-                            <li>Edit the file at /public/menu/index.html</li>
-                            <li>Deploy the changes</li>
-                        </ol>
-                        <p>Full menu editing capability is coming soon.</p>
-                        <a href="/menu" target="_blank" class="btn btn-secondary">View Current Menu</a>
-                    </div>
-                `;
-            })
-            .catch(error => {
-                console.error('Error loading menu:', error);
-                menuList.innerHTML = `
-                    <div class="error-message">
-                        <p>Error loading menu data: ${error.message}</p>
-                        <p>The menu is stored as a static HTML file at /public/menu/index.html</p>
-                    </div>
-                `;
-            });
-    } else {
-        menuList.innerHTML = `<div class="info-message">Howdy does not have a menu.</div>`;
-    }
-    
-    // Set up add menu button
-    if (addMenuBtn) {
-        console.log('Found add menu button');
-        // Clone and replace to avoid multiple event listeners
-        const newAddMenuBtn = addMenuBtn.cloneNode(true);
-        addMenuBtn.parentNode.replaceChild(newAddMenuBtn, addMenuBtn);
-        
-        newAddMenuBtn.addEventListener('click', () => {
-            console.log('Add menu button clicked');
-            showToast('Add menu section feature coming soon', 'info');
-        });
-    } else {
-        console.log('No add menu button found');
-    }
-}
-
-function setupImportHandlers() {
-    console.log('Setting up import handlers');
-    
-    const importLegacyBtn = document.getElementById('import-legacy-btn');
-    const importBlogBtn = document.getElementById('import-blog-btn');
-    
-    if (importLegacyBtn) {
-        console.log('Found import legacy button');
-        importLegacyBtn.onclick = async () => {
-            const statusDiv = document.getElementById('import-status');
-            if (statusDiv) statusDiv.innerHTML = '<p class="status-running">Importing events...</p>';
-            
+// Patch blog image upload to update input and preview
+function patchBlogImageUpload() {
+    document.body.addEventListener('change', async function(e) {
+        if (e.target && e.target.id === 'blog-image-upload-input') {
+            const file = e.target.files[0];
+            if (!file) return;
+            const btn = document.getElementById('blog-image-upload-btn');
+            const urlInput = document.querySelector('input[name="image_url"]');
+            const preview = document.getElementById('blog-image-preview');
+            if (btn) { btn.disabled = true; btn.textContent = 'Uploading...'; }
             try {
-                const response = await api.post('/api/admin/sync-events', {});
-                if (response && response.success) {
-                    if (statusDiv) statusDiv.innerHTML = `<p class="status-success">Successfully imported ${response.count || 'all'} events!</p>`;
-                    showToast(`Successfully imported ${response.count || 'all'} events!`, 'success');
-                    
-                    // Refresh events list if we're on that section
-                    if (dashboardState.currentSection === 'events') {
-                        loadEvents();
+                const formData = new FormData();
+                formData.append('image', file);
+                const res = await api._call('/api/admin/blog/upload-image', { method: 'POST', body: formData, headers: {} });
+                if (res) {
+                    const result = await res.json();
+                    if (result.success && result.imageUrl) {
+                        if (urlInput) urlInput.value = result.imageUrl;
+                        if (preview) {
+                            preview.innerHTML = `<img src="${result.imageUrl}" alt="Featured image">`;
+                            preview.classList.add('has-image');
+                        }
+                        showToast('Image uploaded!', 'success');
+                    } else {
+                        showToast(result.error || 'Image upload failed.', 'error');
                     }
                 } else {
-                    if (statusDiv) statusDiv.innerHTML = `<p class="status-error">${response?.error || 'Import failed'}</p>`;
-                    showToast(response?.error || 'Import failed', 'error');
+                    showToast('Image upload failed.', 'error');
                 }
-            } catch (error) {
-                console.error('Import error:', error);
-                if (statusDiv) statusDiv.innerHTML = '<p class="status-error">Import failed. Please try again.</p>';
-                showToast('Failed to import legacy events', 'error');
+            } catch (err) {
+                showToast('Error uploading image', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Upload Image'; }
             }
-        };
-    } else {
-        console.log('Import legacy button not found');
-    }
-    
-    if (importBlogBtn) {
-        console.log('Found import blog button');
-        importBlogBtn.addEventListener('click', async () => {
-            const statusDiv = document.getElementById('import-blog-status');
-            if (statusDiv) statusDiv.innerHTML = '<p class="status-running">Importing blog posts...</p>';
-            
-            try {
-                // Simulate API call with a delay
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                if (statusDiv) statusDiv.innerHTML = '<p class="status-success">Successfully imported 5 blog posts!</p>';
-                showToast('Successfully imported blog posts', 'success');
-                
-                // Refresh blog list if we're on that section
-                if (dashboardState.currentSection === 'blog') {
-                    loadBlogPosts();
-                }
-            } catch (error) {
-                console.error('Import error:', error);
-                if (statusDiv) statusDiv.innerHTML = '<p class="status-error">Import failed. Please try again.</p>';
-                showToast('Failed to import blog posts', 'error');
-            }
-        });
-    } else {
-        console.log('Import blog button not found');
-    }
-}
-
-// Make stat cards clickable for navigation
-function setupStatCardNavigation() {
-    const statCards = document.querySelectorAll('.stat-card');
-    const navMap = [
-        { section: 'events', selector: '#stats-total-events' },
-        { section: 'blog', selector: '#stats-total-posts' },
-        { section: 'venue', selector: '#stats-total-users' } // Example: users could go to venue or user mgmt
-    ];
-    statCards.forEach((card, idx) => {
-        card.style.cursor = 'pointer';
-        card.tabIndex = 0;
-        card.setAttribute('role', 'button');
-        card.setAttribute('aria-label', `Go to ${navMap[idx]?.section || 'section'}`);
-        card.addEventListener('click', () => {
-            const section = navMap[idx]?.section;
-            if (section) showSection(section);
-        });
-        card.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                const section = navMap[idx]?.section;
-                if (section) showSection(section);
-            }
-        });
-    });
-}
-
-// Call this after dashboard loads
-function showSection(sectionName) {
-    console.log(`Attempting to show section: ${sectionName}`);
-    const sections = document.querySelectorAll('.admin-section');
-    console.log(`Found ${sections.length} admin sections`);
-    
-    sections.forEach(section => {
-        section.classList.remove('active');
-        console.log(`Removed 'active' class from section: ${section.id}`);
-    });
-
-    const targetSection = document.getElementById(`section-${sectionName}`);
-    if (targetSection) {
-        console.log(`Found target section: section-${sectionName}`);
-        targetSection.classList.add('active');
-        console.log(`Added 'active' class to section-${sectionName}`);
-        
-        dashboardState.currentSection = sectionName;
-        switch (sectionName) {
-            case 'dashboard': loadDashboardStats(); break;
-            case 'events': loadEvents(); break;
-            case 'blog': loadBlogPosts(); break;
-            case 'venue': loadVenueSettings(); break;
-            case 'import': setupImportHandlers(); break;
         }
-    } else {
-        console.error(`Section not found: section-${sectionName}`);
-    }
+    });
+}
+patchBlogImageUpload();
 
-    // After switching, close sidebar on mobile
+// Patch blog form input styles for visibility
+const style = document.createElement('style');
+style.textContent = `
+#blog-form input, #blog-form textarea {
+  background: #fff !important;
+  color: #222 !important;
+  border: 1px solid #bbb;
+}
+#blog-form input:focus, #blog-form textarea:focus {
+  border-color: #333;
+}
+`;
+document.head.appendChild(style);
+
+// Patch event table column layout
+const eventTableStyle = document.createElement('style');
+eventTableStyle.textContent = `
+.admin-table th, .admin-table td {
+  padding: 0.5em 0.7em;
+  text-align: left;
+  vertical-align: middle;
+}
+.admin-table th { white-space: nowrap; }
+.admin-table td img { max-width: 60px; max-height: 60px; display: block; }
+.admin-table td { max-width: 180px; overflow-wrap: break-word; }
+.admin-table tr > td:first-child, .admin-table tr > th:first-child { width: 70px; }
+`;
+document.head.appendChild(eventTableStyle);
+
+// Make sure sidebar toggle is working on mobile
+const mobileToggle = document.getElementById('mobile-menu-toggle');
+if (mobileToggle) {
+  console.log('Adding additional mobile toggle listener for safety');
+  mobileToggle.addEventListener('click', (e) => {
+    e.preventDefault();
     const sidebar = document.querySelector('.sidebar');
-    if (sidebar && window.innerWidth <= 768) {
-        sidebar.classList.remove('open');
+    if (sidebar) {
+      sidebar.classList.toggle('open');
+      console.log('Toggled sidebar open class:', sidebar.classList.contains('open'));
     }
+  });
 }
 
-// Patch initializeDashboard to call stat card nav setup
-const origInitDashboard = initializeDashboard;
-initializeDashboard = async function() {
-    await origInitDashboard.apply(this, arguments);
-    setupStatCardNavigation();
-};
+// Patch import events feedback
+const importBtn = document.getElementById('import-legacy-btn');
+if (importBtn) {
+  importBtn.addEventListener('click', async () => {
+    importBtn.disabled = true;
+    importBtn.textContent = 'Importing...';
+    const status = document.getElementById('import-status');
+    try {
+      const res = await api.post('/api/admin/events/sync', {});
+      if (res && res.success) {
+        if (status) status.textContent = 'Import successful!';
+        showToast('Events imported!', 'success');
+      } else {
+        if (status) status.textContent = res?.error || 'Import failed.';
+        showToast('Import failed.', 'error');
+      }
+    } catch (err) {
+      if (status) status.textContent = 'Error importing events.';
+      showToast('Error importing events.', 'error');
+    } finally {
+      importBtn.disabled = false;
+      importBtn.textContent = 'Import Events';
+    }
+  });
+}
 
 // End of file

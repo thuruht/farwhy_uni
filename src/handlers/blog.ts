@@ -138,7 +138,7 @@ export async function createPost(c: Context<{ Bindings: Env }>): Promise<Respons
             id: crypto.randomUUID(),
             title: postData.title,
             content: postData.content,
-            image_url: postData.imageUrl || null,
+            image_url: postData.imageUrl || postData.image_url || null, // Handle both field naming conventions
             status: postData.status || 'published',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -180,6 +180,8 @@ export async function updatePostById(c: Context<{ Bindings: Env }>): Promise<Res
         posts[postIndex] = {
             ...posts[postIndex],
             ...updateData,
+            // Ensure consistent field naming
+            image_url: updateData.image_url || updateData.imageUrl || posts[postIndex].image_url,
             id: postId, // Ensure ID is not overwritten
             updated_at: new Date().toISOString()
         };
@@ -216,9 +218,18 @@ export async function deletePostById(c: Context<{ Bindings: Env }>): Promise<Res
 export async function setFeaturedContent(c: Context<{ Bindings: Env }>): Promise<Response> {
     try {
         const featuredData = await c.req.json<any>();
+        // Normalize YouTube URLs - could be array, comma-separated string, or single string
+        let youtubeUrls = '';
+        if (Array.isArray(featuredData.youtubeUrl)) {
+            youtubeUrls = featuredData.youtubeUrl.join(',');
+        } else if (featuredData.youtubeUrl && typeof featuredData.youtubeUrl === 'string') {
+            // Use as is if it's already a string
+            youtubeUrls = featuredData.youtubeUrl;
+        }
+        
         const featured = {
             text: featuredData.text || '',
-            youtubeUrl: featuredData.youtubeUrl || '',
+            youtubeUrl: youtubeUrls,
             updated_at: new Date().toISOString()
         };
         await c.env.BLOG_KV.put('blog:featured', JSON.stringify(featured));
