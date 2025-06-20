@@ -80,6 +80,7 @@ const adminApi = new Hono<{ Bindings: Env }>();
 adminApi.post('/login', (c) => handleAuth(c, 'login'));
 adminApi.post('/logout', (c) => handleAuth(c, 'logout'));
 adminApi.get('/check', (c) => handleAuth(c, 'check')); // Add check endpoint for auth status
+adminApi.get('/check', (c) => handleAuth(c, 'check')); // Add check endpoint for auth status
 
 // Protected admin actions are grouped and have middleware applied
 const protectedAdminApi = new Hono<{ Bindings: Env }>();
@@ -93,6 +94,13 @@ protectedAdminApi.put('/blog/posts/:id', updatePostById);
 protectedAdminApi.delete('/blog/posts/:id', deletePostById);
 protectedAdminApi.post('/blog/featured', setFeaturedContent);
 protectedAdminApi.post('/blog/upload-image', uploadBlogImage); // New endpoint for blog image uploads
+
+// Event management endpoints (admin)
+protectedAdminApi.get('/events', (c) => handleEvents(c, 'list'));
+protectedAdminApi.post('/events', (c) => handleEvents(c, 'create'));
+protectedAdminApi.put('/events/:id', (c) => handleEvents(c, 'update'));
+protectedAdminApi.delete('/events/:id', (c) => handleEvents(c, 'delete'));
+protectedAdminApi.post('/events/flyer', (c) => handleEvents(c, 'upload-flyer'));
 
 // Mount the protected routes under the /admin path
 adminApi.route('/admin', protectedAdminApi);

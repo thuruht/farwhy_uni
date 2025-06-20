@@ -1,5 +1,4 @@
 const API_BASE = '/api/blog';
-let sessionToken = sessionStorage.getItem("sessionToken");
 let editingPostId = null;
 
 // DOM Elements
@@ -52,36 +51,104 @@ if (editorContainer) {
     });
 }
 
-function createYouTubeEmbed(url) {
-    try {
-        const videoId = new URL(url).searchParams.get('v');
-        if (!videoId) return '';
-        return `<div class="embed-container" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
-                  <iframe src="https://www.youtube.com/embed/${videoId}" 
+// Remove sessionStorage-based sessionToken, use cookie-based session
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+
+function isLoggedIn() {
+    return !!getCookie('sessionToken');
+}
+
+function createYouTubeEmbed(urls) {
+    if (!urls) return '';
+    // Support comma-separated or array of URLs
+    let urlArr = Array.isArray(urls) ? urls : (typeof urls === 'string' ? urls.split(',').map(u => u.trim()).filter(Boolean) : []);
+    urlArr = urlArr.filter(Boolean);
+    if (urlArr.length === 0) return '';
+    if (urlArr.length === 1) {
+        // Single video
+        try {
+            const videoId = new URL(urlArr[0]).searchParams.get('v');
+            if (!videoId) return '';
+            return `<div class="embed-container" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
+                <iframe src="https://www.youtube.com/embed/${videoId}" 
                     style="position:absolute;top:0;left:0;width:100%;height:100%;" 
                     frameborder="0" 
                     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
                     allowfullscreen></iframe>
                 </div>`;
-    } catch {
-        return '<p>Invalid YouTube URL</p>';
+        } catch {
+            return '<p>Invalid YouTube URL</p>';
+        }
     }
+    // Carousel for multiple videos
+    let carouselId = 'yt-carousel-' + Math.random().toString(36).slice(2, 8);
+    let slides = urlArr.map((url, i) => {
+        try {
+            const videoId = new URL(url).searchParams.get('v');
+            if (!videoId) return '';
+            return `<div class="yt-slide" style="display:${i === 0 ? 'block' : 'none'};">\
+                <iframe src="https://www.youtube.com/embed/${videoId}" 
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen></iframe>
+                </div>`;
+        } catch {
+            return '<p>Invalid YouTube URL</p>';
+        }
+    }).join('');
+    // Carousel controls
+    let controls = `<button class="yt-prev" onclick="window.ytCarouselNav('${carouselId}', -1)">Prev</button>
+        <button class="yt-next" onclick="window.ytCarouselNav('${carouselId}', 1)">Next</button>`;
+    // Wrapper
+    return `<div id="${carouselId}" class="yt-carousel" style="position:relative;max-width:100%;height:0;padding-bottom:56.25%;overflow:hidden;">
+        ${slides}
+        <div class="yt-controls" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:2;">${controls}</div>
+    </div>`;
 }
+
+// Carousel navigation logic (global for inline onclick)
+window.ytCarouselNav = function(carouselId, dir) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+    const slides = carousel.querySelectorAll('.yt-slide');
+    let active = Array.from(slides).findIndex(s => s.style.display !== 'none');
+    slides[active].style.display = 'none';
+    let next = (active + dir + slides.length) % slides.length;
+    slides[next].style.display = 'block';
+};
 
 let inactivityTimer;
 
 function resetAuthTimer() {
     clearTimeout(inactivityTimer);
-    if (sessionToken) {
+    if (isLoggedIn()) {
         inactivityTimer = setTimeout(handleLogout, 1800000);
     }
 }
 
+async function checkAuth() {
+    try {
+        const res = await fetch('/api/check', { credentials: 'include', cache: 'no-store' });
+        if (res.ok) {
+            const data = await res.json();
+            return data.success && data.user;
+        }
+    } catch (e) {}
+    return false;
+}
+
 function handleLogout() {
-    sessionStorage.removeItem("sessionToken");
-    sessionToken = null;
-    // Redirect to main admin logout
-    window.location.href = '/api/admin/logout';
+    fetch('/api/logout', { method: 'POST', credentials: 'include' })
+        .then(() => {
+            // Clear UI and redirect to login or public view
+            updateView();
+        });
 }
 
 document.addEventListener('mousemove', resetAuthTimer);
@@ -182,11 +249,10 @@ async function deleteR2Image(key) {
 }
 
 function updateView() {
-    const isLoggedIn = !!sessionToken;
-    document.getElementById('admin-view').style.display = isLoggedIn ? 'block' : 'none';
-    document.getElementById('public-view').style.display = isLoggedIn ? 'none' : 'block';
-    
-    if (isLoggedIn) {
+    const loggedIn = isLoggedIn();
+    document.getElementById('admin-view').style.display = loggedIn ? 'block' : 'none';
+    document.getElementById('public-view').style.display = loggedIn ? 'none' : 'block';
+    if (loggedIn) {
         loadAdminPosts();
         loadAdminFeatured();
         resetAuthTimer();
@@ -249,7 +315,9 @@ async function loadAdminFeatured() {
         const { data: featured } = await fetchApi('/featured');
         currentFeaturedTextEl.textContent = featured.text || 'No text set';
         featuredTextEl.value = featured.text || '';
-        youtubeUrlInput.value = featured.youtubeUrl || '';
+        // Parse YouTube URLs into array
+        let ytArr = (featured.youtubeUrl || '').split(',').map(u => u.trim()).filter(Boolean);
+        renderYoutubeList(ytArr);
         currentFeaturedYoutubeEl.textContent = featured.youtubeUrl || 'No video URL set';
         currentFeaturedPreviewEl.innerHTML = featured.youtubeUrl ? createYouTubeEmbed(featured.youtubeUrl) : '';
     } catch (err) {
@@ -257,87 +325,99 @@ async function loadAdminFeatured() {
     }
 }
 
-function clearPostForm() {
-    postForm.reset();
-    postIdInput.value = '';
-    postEditor.root.innerHTML = '';
-    postImagePreviewEl.style.display = 'none';
-    postImageUrlInput.value = '';
-    postImageUrlDisplayEl.textContent = '';
-    removePostImageBtn.style.display = 'none';
-    formHeadingEl.textContent = 'Create New Post';
-    submitPostBtn.textContent = 'Submit Post';
-    cancelEditBtn.style.display = 'none';
+// --- Featured YouTube admin UI logic ---
+const youtubeListContainer = document.createElement('div');
+youtubeListContainer.id = 'youtube-list-container';
+youtubeUrlInput.parentNode.insertBefore(youtubeListContainer, youtubeUrlInput.nextSibling);
+
+youtubeUrlInput.style.display = 'none'; // Hide original input
+
+function renderYoutubeList(urlArr) {
+    youtubeListContainer.innerHTML = '';
+    if (!Array.isArray(urlArr)) urlArr = [];
+    // Textarea for manual editing
+    const textarea = document.createElement('textarea');
+    textarea.id = 'youtube-list-textarea';
+    textarea.rows = Math.max(3, urlArr.length);
+    textarea.style.width = '100%';
+    textarea.placeholder = 'One YouTube URL per line';
+    textarea.value = urlArr.join('\n');
+    youtubeListContainer.appendChild(textarea);
+    // List with controls
+    const list = document.createElement('ul');
+    list.style.listStyle = 'none';
+    list.style.padding = '0';
+    urlArr.forEach((url, i) => {
+        const li = document.createElement('li');
+        li.style.display = 'flex';
+        li.style.alignItems = 'center';
+        li.style.marginBottom = '4px';
+        const urlSpan = document.createElement('span');
+        urlSpan.textContent = url;
+        urlSpan.style.flex = '1';
+        urlSpan.style.overflowWrap = 'anywhere';
+        li.appendChild(urlSpan);
+        // Move Up
+        const upBtn = document.createElement('button');
+        upBtn.textContent = '↑';
+        upBtn.title = 'Move Up';
+        upBtn.disabled = i === 0;
+        upBtn.style.marginLeft = '4px';
+        upBtn.onclick = () => {
+            if (i > 0) {
+                [urlArr[i-1], urlArr[i]] = [urlArr[i], urlArr[i-1]];
+                renderYoutubeList(urlArr);
+            }
+        };
+        li.appendChild(upBtn);
+        // Move Down
+        const downBtn = document.createElement('button');
+        downBtn.textContent = '↓';
+        downBtn.title = 'Move Down';
+        downBtn.disabled = i === urlArr.length - 1;
+        downBtn.style.marginLeft = '2px';
+        downBtn.onclick = () => {
+            if (i < urlArr.length - 1) {
+                [urlArr[i+1], urlArr[i]] = [urlArr[i], urlArr[i+1]];
+                renderYoutubeList(urlArr);
+            }
+        };
+        li.appendChild(downBtn);
+        // Remove
+        const rmBtn = document.createElement('button');
+        rmBtn.textContent = '✕';
+        rmBtn.title = 'Remove';
+        rmBtn.style.marginLeft = '2px';
+        rmBtn.onclick = () => {
+            urlArr.splice(i, 1);
+            renderYoutubeList(urlArr);
+        };
+        li.appendChild(rmBtn);
+        list.appendChild(li);
+    });
+    youtubeListContainer.appendChild(list);
+    // Sync textarea and list
+    textarea.oninput = () => {
+        const lines = textarea.value.split('\n').map(u => u.trim()).filter(Boolean);
+        renderYoutubeList(lines);
+    };
 }
 
-postImageUploadInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            postImagePreviewEl.src = event.target.result;
-            postImagePreviewEl.style.display = 'block';
-            postImageUrlDisplayEl.textContent = file.name;
-            removePostImageBtn.style.display = 'inline-block';
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-removePostImageBtn.addEventListener('click', async () => {
-    if (postImageUrlInput.value) {
-        if (confirm('Delete current image?')) {
-            await deleteR2Image(postImageUrlInput.value);
-        }
-    }
-    postImageUploadInput.value = '';
-    postImagePreviewEl.src = '';
-    postImagePreviewEl.style.display = 'none';
-    postImageUrlInput.value = '';
-    postImageUrlDisplayEl.textContent = '';
-    removePostImageBtn.style.display = 'none';
-});
-
-postForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    submitPostBtn.disabled = true;
-
-    const postData = {
-        title: postTitleEl.value.trim(),
-        content: postEditor.root.innerHTML,
-        imageUrl: postImageUrlInput.value || null
-    };
-
-    if (postIdInput.value) postData.id = parseInt(postIdInput.value, 10);
-
-    try {
-        if (postImageUploadInput.files[0]) {
-            const newKey = await uploadImage(postImageUploadInput.files[0], postUploadProgressEl);
-            postData.imageUrl = newKey;
-        }
-
-        const method = postIdInput.value ? 'PUT' : 'POST';
-        await fetchApi('/posts', {
-            method,
-            body: JSON.stringify(postData)
-        });
-
-        alert(`Post ${postIdInput.value ? 'updated' : 'created'} successfully!`);
-        clearPostForm();
-        loadAdminPosts();
-    } catch (err) {
-        alert(`Error: ${err.message}`);
-    } finally {
-        submitPostBtn.disabled = false;
-    }
-});
-
+// On admin featured form submit, use textarea value (one per line, joined as comma-separated)
 featuredForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const submitButton = featuredForm.querySelector('button[type="submit"]');
     submitButton.disabled = true;
-
     try {
+        // Get URLs from textarea if present
+        let ytArr = [];
+        const textarea = document.getElementById('youtube-list-textarea');
+        if (textarea) {
+            ytArr = textarea.value.split('\n').map(u => u.trim()).filter(Boolean);
+        } else if (youtubeUrlInput.value) {
+            ytArr = youtubeUrlInput.value.split(',').map(u => u.trim()).filter(Boolean);
+        }
+        youtubeUrlInput.value = ytArr.join(','); // keep input in sync for backend
         await fetchApi('/featured', {
             method: 'POST',
             body: JSON.stringify({
@@ -356,18 +436,8 @@ featuredForm.addEventListener('submit', async (e) => {
 });
 
 loginBtn.addEventListener('click', () => {
-    // Redirect to main admin login instead of using modal
     window.location.href = '/admin/login';
 });
-
-// Remove the modal-based login handlers since we're redirecting to main admin
-// cancelLoginBtn.addEventListener('click', () => {
-//     loginModal.classList.remove('active');
-// });
-
-// loginForm.addEventListener('submit', async (e) => {
-//     // This is now handled by the main admin login page
-// });
 
 logoutBtn.addEventListener('click', handleLogout);
 

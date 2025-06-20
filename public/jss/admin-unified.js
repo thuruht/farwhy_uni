@@ -244,7 +244,7 @@ async function handleLoginSubmit(e) {
     console.log('Login data:', { username: form.username.value, password: '********' });
     if (errorDiv) errorDiv.textContent = '';
     try {
-        const response = await fetch('/api/admin/login', {
+        const response = await fetch('/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             showLoginScreen();
         } else {
             console.log('[Admin] Session token found, checking validity...');
-            const authResponse = await fetch('/api/admin/check', { credentials: 'include', cache: 'no-store' });
+            const authResponse = await fetch('/api/check', { credentials: 'include', cache: 'no-store' });
             if (authResponse && authResponse.ok) {
                 const authData = await authResponse.json();
                 if (authData.success && authData.user) {
@@ -570,7 +570,7 @@ function setupNavigation() {
     });
 
     document.getElementById('logout-btn')?.addEventListener('click', async () => {
-        await api.post('/api/admin/logout', {});
+        await api.post('/api/logout', {});
         document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         showLoginScreen();
     });
