@@ -86,6 +86,17 @@ async function handleLoginSubmit(e) {
 // ====================================
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('[Admin] App initializing...');
+    
+    // Inspect dashboard container
+    const dashboardContainer = document.getElementById('dashboard-container');
+    console.log('Dashboard container:', dashboardContainer);
+    if (dashboardContainer) {
+        console.log('Dashboard container computed style:', window.getComputedStyle(dashboardContainer).display);
+    }
+
+    // Check if admin sections exist
+    const sections = document.querySelectorAll('.admin-section');
+    console.log(`Found ${sections.length} admin sections:`, Array.from(sections).map(s => s.id));
 
     // Check if modal elements exist
     console.log('Modal elements check:', {
