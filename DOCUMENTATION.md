@@ -36,9 +36,9 @@ The application uses Cloudflare D1 as its database. Key tables include:
 - `users` - Admin user accounts
   - Fields: id, username, password_hash, role, created_at, updated_at
 - `events` - Event listings for Farewell and Howdy venues
-  - Contains 39 events as of latest check
+  - Contains approximately 39 events as of latest check
 - `blog_posts` - Blog content
-  - Currently empty
+  - Currently contains new test posts created during debugging
 
 ## Authentication
 
@@ -80,12 +80,31 @@ The admin dashboard uses session-based authentication with a JWT stored in cooki
 
 The admin dashboard follows a Single Page Application (SPA) pattern:
 
-1. **Core App Logic**: Login/logout and dashboard rendering
-2. **Initialization**: Setup handlers, load data, initialize UI
-3. **API Communication**: Wrapper for fetch with error handling
-4. **Section Management**: Show/hide different dashboard sections
-5. **Event Handlers**: Global click handlers for modal buttons and actions
-6. **Form Processing**: Create and edit forms for events and blog posts
+1. **Core App Logic**: 
+   - Login/logout and dashboard rendering
+   - State management through the `dashboardState` object
+
+2. **Initialization**: 
+   - Setup handlers via `setupEventListeners()` function
+   - Load data with `loadInitialData()`, `loadEvents()`, and `loadBlogPosts()`
+   - Initialize UI components
+
+3. **API Communication**: 
+   - Wrapper for fetch with error handling via the `api` object
+   - Support for GET, POST, PUT, and DELETE methods
+   - Error handling and authentication checks
+
+4. **Section Management**: 
+   - Show/hide different dashboard sections with `showSection()`
+   - Modal handling via global event handlers
+
+5. **Event Handlers**: 
+   - Global click handlers for modal buttons and actions
+   - Form submission handlers for events and blog posts
+
+6. **Form Processing**: 
+   - Create and edit forms for events and blog posts
+   - Form submission with validation and API calls
 
 ## CSS Organization
 
@@ -98,52 +117,20 @@ The CSS is organized into sections:
 5. **Modal Styles**: Dialog boxes and forms
 6. **Responsive Design**: Mobile adaptations
 
-## Key JavaScript Functions
+## Known Issues and Solutions
 
-- `showLoginScreen()`: Displays the login form
-- `showDashboard()`: Renders the main dashboard after login
-- `initializeDashboard()`: Sets up dashboard components
-- `setupModal()`: Initializes modal dialog functionality
-- `loadEvents()`: Fetches and displays events
-- `showEventForm()`: Displays the event creation/editing form
-- `loadBlogPosts()`: Fetches and displays blog posts
-- `showBlogForm()`: Displays the blog post creation/editing form
+1. **Modal Display**:
+   - Fixed by adding `.modal-overlay.active` CSS rule
+   - Enhanced with debugging logs for visibility tracking
 
-## Mobile Responsiveness
+2. **Mobile Menu Toggle**:
+   - Fixed by adding CSS for `.sidebar.open`
+   - Added event listeners for toggle button
 
-The admin dashboard is responsive with:
+3. **API Response Handling**:
+   - The `api.post` and `api.put` methods need to properly parse JSON responses
+   - Issue: They return the response object instead of the parsed JSON
 
-- A collapsible sidebar that transforms into a mobile menu
-- Fluid layouts that adapt to screen size
-- Touch-friendly controls
-- Mobile-optimized forms
-
-## Troubleshooting
-
-Common issues and solutions:
-
-1. **Modal Not Appearing**:
-   - Ensure the CSS includes `.modal-overlay.active { display: flex; }`
-   - Check that `modal.classList.add('active')` is being called
-
-2. **Mobile Menu Not Working**:
-   - Verify CSS includes proper `.sidebar.open` styling
-   - Confirm the mobile toggle click handler is attached
-
-3. **User Information Not Displaying**:
-   - Check network requests to ensure authentication is successful
-   - Verify the `currentUser` object is properly populated
-
-## Development
-
-To run the project locally:
-
-```bash
-npx wrangler dev --local
-```
-
-To query the database:
-
-```bash
-npx wrangler d1 execute farewell-db --command "SELECT * FROM users;" --remote
-```
+4. **Event/Blog Form Submissions**:
+   - Form visibility works correctly
+   - Submission handling needs to be fixed to properly parse API responses

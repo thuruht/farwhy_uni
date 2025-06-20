@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Farewell/Howdy - Literary Admin Theme</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Switch the CSS file to our new literary theme -->
+    <link rel="stylesheet" href="/css/literary-admin.css">
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <!-- Debug console output helper -->
+    <script>
+        window.debugMode = true;
+        console.originalLog = console.log;
+        console.log = function() {
+            if (window.debugMode) {
+                // Add to debug console
+                const debugConsole = document.getElementById('debug-console');
+                if (debugConsole) {
+                    const args = Array.from(arguments);
+                    const message = args.map(arg => 
+                        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+                    ).join(' ');
+                    
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'debug-log';
+                    logEntry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+                    debugConsole.appendChild(logEntry);
+                    debugConsole.scrollTop = debugConsole.scrollHeight;
+                }
+                // Also output to original console
+                console.originalLog.apply(console, arguments);
+            }
+        };
+    </script>
+</head>
+<body>
+    <div id="dashboard-container" class="admin-grid-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>F/H Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-target="dashboard">Dashboard</a>
+                <a href="#" class="nav-item" data-target="events">Events</a>
+                <a href="#" class="nav-item" data-target="blog">Blog</a>
+                <a href="#" class="nav-item" data-target="venue">Venue Settings</a>
+                <a href="#" class="nav-item" data-target="import">Import</a>
+                <a href="#" class="nav-item" data-target="debug">Debug Console</a>
+                <a href="#" id="logout-btn" class="nav-item">Logout</a>
+            </nav>
+            <div class="user-info">
+                <span id="current-user">Loading...</span>
+                <small id="user-role">admin</small>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-left">
+                    <button class="mobile-menu-toggle" id="mobile-menu-toggle">☰</button>
+                    <h1 id="main-title">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <span class="breadcrumb" id="breadcrumb">Home / Dashboard</span>
+                </div>
+            </header>
+            <section id="section-dashboard" class="admin-section active">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-icon">🎪</div><div class="stat-content"><h3>Total Events</h3><p id="stats-total-events">0</p></div></div>
+                    <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-content"><h3>Blog Posts</h3><p id="stats-total-posts">0</p></div></div>
+                    <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-content"><h3>Total Users</h3><p id="stats-total-users">1</p></div></div>
+                </div>
+                <div class="recent-activity"><h3>Recent Activity</h3><div id="recent-activity-list" class="activity-feed"></div></div>
+            </section>
+            <section id="section-events" class="admin-section">
+                <div class="section-header"><h2>Event Management</h2><button class="btn btn-primary" id="add-event-btn">+ New Event</button></div>
+                <div class="filters-bar">
+                    <label for="event-venue-filter">Filter by venue:</label>
+                    <select id="event-venue-filter" aria-label="Filter events by venue">
+                        <option value="">All Venues</option>
+                        <option value="farewell">Farewell</option>
+                        <option value="howdy">Howdy</option>
+                    </select>
+                    <input type="text" id="event-search" placeholder="Search events..." aria-label="Search events">
+                </div>
+                <div id="event-list" class="item-list-container"></div>
+            </section>
+            <section id="section-blog" class="admin-section">
+                <div class="section-header"><h2>Blog Management</h2><button class="btn btn-primary" id="add-blog-btn">+ New Post</button></div>
+                <div class="filters-bar">
+                    <label for="blog-status-filter">Filter by status:</label>
+                    <select id="blog-status-filter" aria-label="Filter blog posts by status">
+                        <option value="">All Posts</option>
+                        <option value="published">Published</option>
+                        <option value="draft">Draft</option>
+                    </select>
+                    <input type="text" id="blog-search" placeholder="Search posts..." aria-label="Search blog posts">
+                </div>
+                <div id="blog-list" class="item-list-container"></div>
+            </section>
+            <section id="section-venue" class="admin-section">
+                <div class="section-header"><h2>Venue Settings</h2></div>
+                <div class="venue-tabs"><button class="tab-btn active" data-venue="farewell">Farewell Cafe</button><button class="tab-btn" data-venue="howdy">Howdy</button></div>
+                <div class="venue-content"><div class="venue-section"><h3>Menu Management</h3><button class="btn btn-secondary" id="add-menu-btn">+ Add Menu Section</button><div id="menu-list" class="menu-container"></div></div><div class="venue-section"><h3>Business Hours</h3><div id="hours-editor" class="hours-container"></div></div></div>
+            </section>
+            <section id="section-import" class="admin-section">
+                <div class="section-header"><h2>Import Legacy Data</h2></div>
+                <div class="import-options"><div class="import-card"><h3>Legacy Events</h3><p>Import events from the legacy system (fygw0.kcmo.xyz).</p><button id="import-legacy-btn" class="btn btn-primary">Import Events</button><div id="import-status" class="status-message-container"></div></div><div class="import-card"><h3>Legacy Blog Posts</h3><p>Import blog posts from previous system.</p><button id="import-blog-btn" class="btn btn-secondary">Import Blog</button><div id="import-blog-status" class="status-message-container"></div></div></div>
+            </section>
+            <section id="section-debug" class="admin-section">
+                <div class="section-header"><h2>Debug Console</h2></div>
+                <div class="debug-container">
+                    <div class="debug-controls">
+                        <button id="clear-debug" class="btn btn-secondary">Clear Console</button>
+                        <button id="test-event-form" class="btn btn-primary">Test Event Form</button>
+                        <button id="test-blog-form" class="btn btn-primary">Test Blog Form</button>
+                        <button id="test-toast" class="btn btn-primary">Test Toast</button>
+                        <label><input type="checkbox" id="debug-toggle" checked> Debug Mode</label>
+                    </div>
+                    <div id="debug-console" class="debug-output"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Forms -->
+    <div id="form-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-btn">&times;</button>
+            <div id="modal-form-body">
+                <!-- Dynamic form content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Login container for the login screen -->
+    <div id="login-container"></div>
+
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    <script>
+        // Minimal script for the debug page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Debug console setup
+            document.getElementById('clear-debug').addEventListener('click', function() {
+                document.getElementById('debug-console').innerHTML = '';
+            });
+            
+            document.getElementById('debug-toggle').addEventListener('change', function(e) {
+                window.debugMode = e.target.checked;
+            });
+            
+            // Add CSS debug info
+            const style = window.getComputedStyle(document.documentElement);
+            console.log('Literary Admin Theme loaded');
+            console.log('Primary color:', style.getPropertyValue('--accent-color'));
+            console.log('Font main:', style.getPropertyValue('--font-main'));
+            
+            // Test various components
+            document.getElementById('test-event-form').addEventListener('click', function() {
+                console.log('Testing event form');
+                const modal = document.getElementById('form-modal');
+                const modalBody = document.getElementById('modal-form-body');
+                
+                modalBody.innerHTML = `
+                    <div class="admin-form">
+                        <h3>Test Event Form</h3>
+                        <form id='test-event-form'>
+                            <label>Venue *</label>
+                            <select name='venue' required id="test-venue-select">
+                                <option value="">-- Select Venue --</option>
+                                <option value="farewell">Farewell</option>
+                                <option value="howdy">Howdy</option>
+                            </select>
+                            <label>Title *</label>
+                            <input name='title' required placeholder="Event title" value="">
+                            <label>Date & Time *</label>
+                            <input name='date' type='datetime-local' required value="">
+                            <label>Description</label>
+                            <textarea name='description' rows="4"></textarea>
+                            <label>Age Restriction</label>
+                            <input name='age_restriction' id="test-age-restriction" placeholder="e.g. 21+" value="">
+                            <div class="form-actions"><button type='submit' class='btn btn-primary'>Test Submit</button></div>
+                        </form>
+                    </div>
+                `;
+                
+                modal.classList.add('active');
+                
+                // Set up venue change handler for auto-population
+                const venueSelect = document.querySelector('#test-venue-select');
+                const ageRestrictionInput = document.querySelector('#test-age-restriction');
+                
+                venueSelect.addEventListener('change', (e) => {
+                    const venue = e.target.value;
+                    console.log(`Venue changed to: ${venue}`);
+                    
+                    // Auto-populate age restriction based on venue
+                    if (venue === 'farewell') {
+                        ageRestrictionInput.value = '21+ unless with parent or legal guardian';
+                    } else if (venue === 'howdy') {
+                        ageRestrictionInput.value = 'All ages';
+                    }
+                    
+                    console.log(`Auto-populated age restriction: ${ageRestrictionInput.value}`);
+                });
+                
+                document.getElementById('test-event-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('Form submitted');
+                    const formData = new FormData(e.target);
+                    const data = Object.fromEntries(formData.entries());
+                    console.log('Form data:', data);
+                    showToast('Test form submitted!', 'success');
+                    modal.classList.remove('active');
+                });
+            });
+            
+            document.getElementById('test-blog-form').addEventListener('click', function() {
+                console.log('Testing blog form');
+                const modal = document.getElementById('form-modal');
+                const modalBody = document.getElementById('modal-form-body');
+                
+                modalBody.innerHTML = `
+                    <div class="admin-form">
+                        <h3>Test Blog Form</h3>
+                        <form id='test-blog-form'>
+                            <label>Title *</label>
+                            <input name='title' required value="">
+                            <label>Date</label>
+                            <input name='date' type='date' value="">
+                            <label>Content *</label>
+                            <div id='quill-editor' style='height:250px; background:white;'></div>
+                            <div class="form-actions">
+                                <button type='submit' class='btn btn-primary'>Test Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                
+                modal.classList.add('active');
+                
+                const quill = new Quill('#quill-editor', { theme: 'snow' });
+                
+                document.getElementById('test-blog-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    console.log('Blog form submitted');
+                    
+                    // Get form data
+                    const formData = new FormData(e.target);
+                    const data = {
+                        title: formData.get('title'),
+                        date: formData.get('date'),
+                        content: quill.root.innerHTML
+                    };
+                    
+                    console.log('Blog form data:', data);
+                    showToast('Test blog form submitted!', 'success');
+                    modal.classList.remove('active');
+                });
+            });
+            
+            document.getElementById('test-toast').addEventListener('click', function() {
+                const types = ['success', 'error', 'warning', 'info'];
+                const randomType = types[Math.floor(Math.random() * types.length)];
+                showToast(`This is a ${randomType} toast notification!`, randomType);
+            });
+            
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (item.id === 'logout-btn') return;
+                
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = this.getAttribute('data-target');
+                    console.log(`Navigating to ${target}`);
+                    
+                    // Update active navigation item
+                    document.querySelectorAll('.nav-item').forEach(navItem => {
+                        navItem.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Show the corresponding section
+                    document.querySelectorAll('.admin-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    document.getElementById(`section-${target}`).classList.add('active');
+                    
+                    // Update title and breadcrumb
+                    document.getElementById('main-title').textContent = target.charAt(0).toUpperCase() + target.slice(1);
+                    document.getElementById('breadcrumb').textContent = `Home / ${target.charAt(0).toUpperCase() + target.slice(1)}`;
+                });
+            });
+            
+            // Mobile menu toggle
+            document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('open');
+            });
+            
+            // Modal close button
+            document.querySelector('.modal-close-btn').addEventListener('click', function() {
+                document.getElementById('form-modal').classList.remove('active');
+            });
+            
+            // Toast function
+            window.showToast = function(message, type = 'info') {
+                const toastContainer = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                toastContainer.appendChild(toast);
+                
+                // Remove toast after animation
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            };
+            
+            console.log('Debug page initialized successfully');
+        });
+    </script>
+</body>
+</html>
