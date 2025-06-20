@@ -1581,6 +1581,33 @@ function setupImportHandlers() {
     }
 }
 
+// Make stat cards clickable for navigation
+function setupStatCardNavigation() {
+    const statCards = document.querySelectorAll('.stat-card');
+    const navMap = [
+        { section: 'events', selector: '#stats-total-events' },
+        { section: 'blog', selector: '#stats-total-posts' },
+        { section: 'venue', selector: '#stats-total-users' } // Example: users could go to venue or user mgmt
+    ];
+    statCards.forEach((card, idx) => {
+        card.style.cursor = 'pointer';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `Go to ${navMap[idx]?.section || 'section'}`);
+        card.addEventListener('click', () => {
+            const section = navMap[idx]?.section;
+            if (section) showSection(section);
+        });
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const section = navMap[idx]?.section;
+                if (section) showSection(section);
+            }
+        });
+    });
+}
+
+// Call this after dashboard loads
 function showSection(sectionName) {
     console.log(`Attempting to show section: ${sectionName}`);
     const sections = document.querySelectorAll('.admin-section');
@@ -1608,6 +1635,19 @@ function showSection(sectionName) {
     } else {
         console.error(`Section not found: section-${sectionName}`);
     }
+
+    // After switching, close sidebar on mobile
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar && window.innerWidth <= 768) {
+        sidebar.classList.remove('open');
+    }
 }
+
+// Patch initializeDashboard to call stat card nav setup
+const origInitDashboard = initializeDashboard;
+initializeDashboard = async function() {
+    await origInitDashboard.apply(this, arguments);
+    setupStatCardNavigation();
+};
 
 // End of file
