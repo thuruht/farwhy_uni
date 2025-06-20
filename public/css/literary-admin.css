@@ -208,9 +208,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .admin-section.active {
-    display: block;
+    display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
+    animation: fade-in 0.3s ease-in-out;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .section-header {
@@ -469,10 +475,14 @@ input:focus, select:focus, textarea:focus {
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(4px);
+    transition: opacity 0.3s ease;
+    opacity: 0;
 }
 
 .modal-overlay.active {
-    display: flex;
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .modal-content {

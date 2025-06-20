@@ -76,6 +76,12 @@ function showDashboard() {
     }
     
     if (dashboardContainer) {
+        // Clear any potentially problematic inline styles
+        if (dashboardContainer.style.display === 'none') {
+            dashboardContainer.style.display = '';
+            console.log('Cleared inline display style');
+        }
+        
         // Display the dashboard container with the correct display type
         dashboardContainer.style.display = 'grid';
         console.log('Dashboard container display set to grid');
@@ -151,10 +157,10 @@ async function handleLoginSubmit(e) {
                     console.log('Set user role display to:', currentUser.role);
                 }
                 
-                // Add a small delay to ensure all DOM updates complete
+                // Slightly increased delay to ensure all DOM updates complete
                 setTimeout(() => {
                     showDashboard();
-                }, 50);
+                }, 100);
             } else {
                 if (errorDiv) errorDiv.textContent = result.error || 'Invalid credentials.';
             }
@@ -225,6 +231,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         addEventBtn.addEventListener('click', () => {
             console.log('Add event button clicked via direct handler');
             showEventForm();
+        });
+    }
+    
+    // Add direct handler for the Add Blog Post button as well
+    const addBlogBtn = document.getElementById('add-blog-btn');
+    if (addBlogBtn) {
+        console.log('Found add blog button, adding direct click handler');
+        addBlogBtn.addEventListener('click', () => {
+            console.log('Add blog button clicked via direct handler');
+            showBlogForm();
         });
     }
 
@@ -832,23 +848,44 @@ function renderBlogPosts(posts) {
         blogList.innerHTML = `<div class='status-message status-info'>No blog posts.</div>`;
         return;
     }
+    
     blogList.innerHTML = `<table class="admin-table"><thead><tr><th>Title</th><th>Date</th><th>Actions</th></tr></thead><tbody>` +
         posts.map(post => `<tr>
             <td><strong>${post.title}</strong></td>
             <td>${formatDate(post.date || post.created_at)}</td>
             <td class='admin-table-actions'>
-                <button onclick='editBlogPost("${post.id}")'>Edit</button>
-                <button onclick='deleteBlogPost("${post.id}")'>Delete</button>
+                <button class="edit-blog-btn" data-id="${post.id}">Edit</button>
+                <button class="delete-blog-btn" data-id="${post.id}">Delete</button>
             </td>
         </tr>`).join('') + `</tbody></table>`;
+    
+    // Add event listeners to the newly created buttons
+    blogList.querySelectorAll('.edit-blog-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            console.log('Edit blog button clicked for id:', id);
+            editBlogPost(id);
+        });
+    });
+    
+    blogList.querySelectorAll('.delete-blog-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            deleteBlogPost(id);
+        });
+    });
 }
 
-// THIS is the problematic listener that is now removed.
-// document.getElementById('add-blog-btn')?.addEventListener('click', () => showBlogForm());
-
 window.editBlogPost = (id) => {
+    console.log('editBlogPost called with id:', id);
     const post = dashboardState.blogPosts.find(p => p.id === id);
-    if (post) showBlogForm(id);
+    console.log('Found post:', post);
+    if (post) {
+        showBlogForm(id);
+    } else {
+        console.error('Blog post not found with id:', id);
+        showToast('Error: Blog post not found', 'error');
+    }
 };
 
 window.deleteBlogPost = async (id) => {
@@ -863,18 +900,29 @@ function showBlogForm(id = null) {
     const modal = document.getElementById('form-modal');
     const modalBody = document.getElementById('modal-form-body');
     console.log('Blog modal elements:', modal, modalBody);
+    
     if (!modal || !modalBody) {
         console.error('Blog modal elements not found!');
+        showToast('Error: Could not open blog form', 'error');
         return;
     }
 
+    // Clear any existing content and reset
+    modalBody.innerHTML = '';
+    
     // Explicitly add the active class and verify
-    modal.classList.add('active');
+    modal.classList
     console.log('Blog modal active class added, classList:', modal.classList);
+
+    // Force reflow to ensure CSS transitions work
+    void modal.offsetWidth;
+    
+    // Check computed style to verify visibility
+    console.log('Modal computed display after adding active class:', window.getComputedStyle(modal).display);
 
     dashboardState.editingPostId = id;
     let post = id ? dashboardState.blogPosts.find(p => p.id === id) : null;
-    console.log('Post data:', post);
+    console.log('Post data for form:', post);
 
     modalBody.innerHTML = `
         <div class="admin-form">
@@ -894,12 +942,38 @@ function showBlogForm(id = null) {
     `;
     // Modal class already added at the beginning of the function, don't add it twice
 
-    const quill = new Quill('#quill-editor', { theme: 'snow' });
-    dashboardState.quill = quill;
+    // Initialize Quill editor with a slight delay to ensure the DOM is ready
+    setTimeout(() => {
+        try {
+            console.log('Initializing Quill editor...');
+            if (!document.getElementById('quill-editor')) {
+                console.error('Quill editor element not found!');
+                return;
+            }
+            
+            const quill = new Quill('#quill-editor', { 
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'link'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+            
+            console.log('Quill editor initialized:', quill);
+            dashboardState.quill = quill;
 
-    if (post) {
-        quill.root.innerHTML = post.content || '';
-    }
+            if (post) {
+                console.log('Setting quill content from post');
+                quill.root.innerHTML = post.content || '';
+            }
+        } catch (error) {
+            console.error('Error initializing Quill:', error);
+        }
+    }, 100);
 
     document.getElementById('blog-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -945,61 +1019,96 @@ function loadVenueSettings() {
     const addMenuBtn = document.getElementById('add-menu-btn');
     const menuList = document.getElementById('menu-list');
     
+    // Add event listeners to tab buttons
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const venue = button.getAttribute('data-venue');
+            console.log('Venue tab clicked:', venue);
+            
+            // Update active tab
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Update content based on selected venue
+            loadVenueContent(venue);
+        });
+    });
+    
     // Initialize menu list
     if (menuList) {
         // Only Farewell has a menu
         const currentVenue = document.querySelector('.tab-btn.active')?.getAttribute('data-venue') || 'farewell';
         console.log('Loading menu for venue:', currentVenue);
         
-        if (currentVenue === 'farewell') {
-            menuList.innerHTML = '<div class="loading-indicator">Loading menu data...</div>';
-            
-            // Attempt to fetch current menu data
-            fetch('/menu')
-                .then(response => {
-                    console.log('Menu fetch response:', response.status);
-                    if (!response.ok) {
-                        throw new Error('Failed to load menu data');
-                    }
-                    return response.text();
-                })
-                .then(html => {
-                    console.log('Menu data loaded, parsing...');
-                    
-                    // Extract menu sections from the HTML
-                    // This is a simple placeholder implementation
-                    menuList.innerHTML = `
-                        <div class="menu-section">
-                            <h4>Menu Preview</h4>
-                            <p>The menu is currently stored as a static HTML file.</p>
-                            <p>To edit the menu, you need to:</p>
-                            <ol>
-                                <li>Edit the file at /public/menu/index.html</li>
-                                <li>Deploy the changes</li>
-                            </ol>
-                            <p>Full menu editing capability is coming soon.</p>
-                            <a href="/menu" target="_blank" class="btn btn-secondary">View Current Menu</a>
-                        </div>
-                    `;
-                })
-                .catch(error => {
-                    console.error('Error loading menu:', error);
-                    menuList.innerHTML = `
-                        <div class="error-message">
-                            <p>Error loading menu data: ${error.message}</p>
-                            <p>The menu is stored as a static HTML file at /public/menu/index.html</p>
-                        </div>
-                    `;
-                });
-        } else {
-            menuList.innerHTML = `<div class="info-message">Howdy does not have a menu.</div>`;
-        }
+        loadVenueContent(currentVenue);
+    }
+}
+
+function loadVenueContent(venue) {
+    console.log('Loading venue content for:', venue);
+    const menuList = document.getElementById('menu-list');
+    const hoursEditor = document.getElementById('hours-editor');
+    const addMenuBtn = document.getElementById('add-menu-btn');
+    
+    if (!menuList) return;
+    
+    // Toggle menu button visibility
+    if (addMenuBtn) {
+        addMenuBtn.style.display = venue === 'farewell' ? 'block' : 'none';
+    }
+    
+    if (venue === 'farewell') {
+        menuList.innerHTML = '<div class="loading-indicator">Loading menu data...</div>';
+        
+        // Attempt to fetch current menu data
+        fetch('/menu')
+            .then(response => {
+                console.log('Menu fetch response:', response.status);
+                if (!response.ok) {
+                    throw new Error('Failed to load menu data');
+                }
+                return response.text();
+            })
+            .then(html => {
+                console.log('Menu data loaded, parsing...');
+                
+                // Extract menu sections from the HTML
+                // This is a simple placeholder implementation
+                menuList.innerHTML = `
+                    <div class="menu-section">
+                        <h4>Menu Preview</h4>
+                        <p>The menu is currently stored as a static HTML file.</p>
+                        <p>To edit the menu, you need to:</p>
+                        <ol>
+                            <li>Edit the file at /public/menu/index.html</li>
+                            <li>Deploy the changes</li>
+                        </ol>
+                        <p>Full menu editing capability is coming soon.</p>
+                        <a href="/menu" target="_blank" class="btn btn-secondary">View Current Menu</a>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error loading menu:', error);
+                menuList.innerHTML = `
+                    <div class="error-message">
+                        <p>Error loading menu data: ${error.message}</p>
+                        <p>The menu is stored as a static HTML file at /public/menu/index.html</p>
+                    </div>
+                `;
+            });
+    } else {
+        menuList.innerHTML = `<div class="info-message">Howdy does not have a menu.</div>`;
     }
     
     // Set up add menu button
     if (addMenuBtn) {
         console.log('Found add menu button');
-        addMenuBtn.addEventListener('click', () => {
+        // Clone and replace to avoid multiple event listeners
+        const newAddMenuBtn = addMenuBtn.cloneNode(true);
+        addMenuBtn.parentNode.replaceChild(newAddMenuBtn, addMenuBtn);
+        
+        newAddMenuBtn.addEventListener('click', () => {
             console.log('Add menu button clicked');
             showToast('Add menu section feature coming soon', 'info');
         });
