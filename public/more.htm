@@ -127,12 +127,16 @@
             }
         }
 
+        // Let's debug the menu popup functionality
         function openBloop() {
-            const popup = window.open('https://farewellcafe.com/menu', 'farewell menu', 'width=1024,height=896,fullscreen=yes');
-            if (!popup) {
+            const currentDomain = window.location.origin;
+            console.log('Opening menu with domain:', currentDomain);
+            
+            const popup = window.open(`${currentDomain}/menu`, 'farewell menu', 'width=1024,height=896,fullscreen=yes');
+            if (!popup || popup.closed || typeof popup.closed === 'undefined') {
                 alert('menu pop-up blocked');
-                
-                 window.location.href = 'https://farewellcafe.com/menu';
+                console.log('Popup blocked, redirecting to:', `${currentDomain}/menu`);
+                window.location.href = `${currentDomain}/menu`;
             }
         }
         function openBleep() {

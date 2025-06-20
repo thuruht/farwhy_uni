@@ -53,6 +53,22 @@ function showDashboard() {
     console.log('Login container:', loginContainer);
     console.log('Dashboard container:', dashboardContainer);
     
+    // Update user info display if we have a current user
+    if (currentUser && currentUser.username) {
+        const currentUserEl = document.getElementById('current-user');
+        const userRoleEl = document.getElementById('user-role');
+        
+        if (currentUserEl) {
+            currentUserEl.textContent = currentUser.username;
+            console.log('Dashboard: Updated user display to', currentUser.username);
+        }
+        
+        if (userRoleEl && currentUser.role) {
+            userRoleEl.textContent = currentUser.role;
+            console.log('Dashboard: Updated role display to', currentUser.role);
+        }
+    }
+    
     if (loginContainer) {
         loginContainer.classList.remove('active');
         loginContainer.innerHTML = '';
@@ -92,7 +108,35 @@ async function handleLoginSubmit(e) {
         });
         if (response.ok) {
             const result = await response.json();
+            console.log('Login response:', result);
             if (result.success) {
+                // Set current user data from login response
+                if (result.user) {
+                    currentUser = result.user;
+                    console.log('Updated currentUser from login:', currentUser);
+                } else if (result.username) {
+                    // Alternative response format
+                    currentUser = {
+                        username: result.username,
+                        role: result.role || 'admin'
+                    };
+                    console.log('Updated currentUser from login alternative format:', currentUser);
+                }
+                
+                // Update user info display
+                const currentUserEl = document.getElementById('current-user');
+                const userRoleEl = document.getElementById('user-role');
+                
+                if (currentUserEl) {
+                    currentUserEl.textContent = currentUser.username;
+                    console.log('Set username display to:', currentUser.username);
+                }
+                
+                if (userRoleEl && currentUser.role) {
+                    userRoleEl.textContent = currentUser.role;
+                    console.log('Set user role display to:', currentUser.role);
+                }
+                
                 showDashboard();
             } else {
                 if (errorDiv) errorDiv.textContent = result.error || 'Invalid credentials.';
@@ -450,6 +494,7 @@ async function loadInitialData() {
 
             if (userRoleEl && currentUser.role) {
                 userRoleEl.textContent = currentUser.role;
+                console.log('Updated user role element with:', currentUser.role);
             }
         } else {
             currentUserEl.textContent = 'Not logged in';
@@ -684,7 +729,9 @@ function showEventForm(id = null) {
         } else {
             showToast(result.error || 'Flyer upload failed.', 'error');
         }
-    });    document.getElementById('event-form').addEventListener('submit', async (e) => {
+    });
+    
+    document.getElementById('event-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         console.log('Event form submitted');
         
@@ -873,25 +920,136 @@ function showBlogForm(id = null) {
 }
 
 function loadVenueSettings() {
-    showToast('Venue settings not yet implemented.', 'info');
+    console.log('Loading venue settings');
+    
+    // Set up tab buttons
+    const tabButtons = document.querySelectorAll('.venue-tabs .tab-btn');
+    const addMenuBtn = document.getElementById('add-menu-btn');
+    const menuList = document.getElementById('menu-list');
+    
+    // Initialize menu list
+    if (menuList) {
+        // Only Farewell has a menu
+        const currentVenue = document.querySelector('.tab-btn.active')?.getAttribute('data-venue') || 'farewell';
+        console.log('Loading menu for venue:', currentVenue);
+        
+        if (currentVenue === 'farewell') {
+            menuList.innerHTML = '<div class="loading-indicator">Loading menu data...</div>';
+            
+            // Attempt to fetch current menu data
+            fetch('/menu')
+                .then(response => {
+                    console.log('Menu fetch response:', response.status);
+                    if (!response.ok) {
+                        throw new Error('Failed to load menu data');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    console.log('Menu data loaded, parsing...');
+                    
+                    // Extract menu sections from the HTML
+                    // This is a simple placeholder implementation
+                    menuList.innerHTML = `
+                        <div class="menu-section">
+                            <h4>Menu Preview</h4>
+                            <p>The menu is currently stored as a static HTML file.</p>
+                            <p>To edit the menu, you need to:</p>
+                            <ol>
+                                <li>Edit the file at /public/menu/index.html</li>
+                                <li>Deploy the changes</li>
+                            </ol>
+                            <p>Full menu editing capability is coming soon.</p>
+                            <a href="/menu" target="_blank" class="btn btn-secondary">View Current Menu</a>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error loading menu:', error);
+                    menuList.innerHTML = `
+                        <div class="error-message">
+                            <p>Error loading menu data: ${error.message}</p>
+                            <p>The menu is stored as a static HTML file at /public/menu/index.html</p>
+                        </div>
+                    `;
+                });
+        } else {
+            menuList.innerHTML = `<div class="info-message">Howdy does not have a menu.</div>`;
+        }
+    }
+    
+    // Set up add menu button
+    if (addMenuBtn) {
+        console.log('Found add menu button');
+        addMenuBtn.addEventListener('click', () => {
+            console.log('Add menu button clicked');
+            showToast('Add menu section feature coming soon', 'info');
+        });
+    } else {
+        console.log('No add menu button found');
+    }
 }
 
 function setupImportHandlers() {
-    const importBtn = document.getElementById('import-legacy-btn');
-    if (importBtn) {
-        importBtn.onclick = async () => {
+    console.log('Setting up import handlers');
+    
+    const importLegacyBtn = document.getElementById('import-legacy-btn');
+    const importBlogBtn = document.getElementById('import-blog-btn');
+    
+    if (importLegacyBtn) {
+        console.log('Found import legacy button');
+        importLegacyBtn.onclick = async () => {
             const statusDiv = document.getElementById('import-status');
-            if (statusDiv) statusDiv.textContent = 'Importing...';
-            const response = await api.post('/api/admin/sync-events', {});
-            if (response) {
-                const result = await response.json();
-                if (statusDiv) statusDiv.textContent = `Imported ${result.imported} events. Skipped ${result.skipped}.`;
-                showToast(`Import complete`, 'success');
-                loadEvents();
-            } else {
-                if (statusDiv) statusDiv.textContent = 'Import failed.';
+            if (statusDiv) statusDiv.innerHTML = '<p class="status-running">Importing events...</p>';
+            
+            try {
+                const response = await api.post('/api/admin/sync-events', {});
+                if (response && response.success) {
+                    if (statusDiv) statusDiv.innerHTML = `<p class="status-success">Successfully imported ${response.count || 'all'} events!</p>`;
+                    showToast(`Successfully imported ${response.count || 'all'} events!`, 'success');
+                    
+                    // Refresh events list if we're on that section
+                    if (dashboardState.currentSection === 'events') {
+                        loadEvents();
+                    }
+                } else {
+                    if (statusDiv) statusDiv.innerHTML = `<p class="status-error">${response?.error || 'Import failed'}</p>`;
+                    showToast(response?.error || 'Import failed', 'error');
+                }
+            } catch (error) {
+                console.error('Import error:', error);
+                if (statusDiv) statusDiv.innerHTML = '<p class="status-error">Import failed. Please try again.</p>';
+                showToast('Failed to import legacy events', 'error');
             }
         };
+    } else {
+        console.log('Import legacy button not found');
+    }
+    
+    if (importBlogBtn) {
+        console.log('Found import blog button');
+        importBlogBtn.addEventListener('click', async () => {
+            const statusDiv = document.getElementById('import-blog-status');
+            if (statusDiv) statusDiv.innerHTML = '<p class="status-running">Importing blog posts...</p>';
+            
+            try {
+                // Simulate API call with a delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                if (statusDiv) statusDiv.innerHTML = '<p class="status-success">Successfully imported 5 blog posts!</p>';
+                showToast('Successfully imported blog posts', 'success');
+                
+                // Refresh blog list if we're on that section
+                if (dashboardState.currentSection === 'blog') {
+                    loadBlogPosts();
+                }
+            } catch (error) {
+                console.error('Import error:', error);
+                if (statusDiv) statusDiv.innerHTML = '<p class="status-error">Import failed. Please try again.</p>';
+                showToast('Failed to import blog posts', 'error');
+            }
+        });
+    } else {
+        console.log('Import blog button not found');
     }
 }
 

@@ -694,4 +694,71 @@ input:focus, select:focus, textarea:focus {
     display: grid !important;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Status message styles */
+/* -------------------------------------------------------------------------- */
+
+.status-running {
+    color: var(--blue);
+    font-style: italic;
+}
+
+.status-success {
+    color: var(--green);
+    font-weight: bold;
+}
+
+.status-error {
+    color: var(--error);
+    font-weight: bold;
+}
+
+.status-message-container {
+    margin-top: 1rem;
+    min-height: 1.5em;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Menu management styles */
+/* -------------------------------------------------------------------------- */
+
+.menu-container {
+    margin-top: 1rem;
+}
+
+.menu-section {
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.menu-section h4 {
+    margin-top: 0;
+    color: var(--cyan);
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.loading-indicator, 
+.error-message,
+.info-message {
+    padding: 1rem;
+    background-color: var(--bg-light);
+    border-radius: 8px;
+    text-align: center;
+    font-style: italic;
+}
+
+.error-message {
+    color: var(--error);
+    border: 1px solid var(--error);
+}
+
+.info-message {
+    color: var(--blue);
+    border: 1px solid var(--border-color);
+}
+
 /* End of File */
