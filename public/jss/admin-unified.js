@@ -923,7 +923,7 @@ window.editBlogPost = (id) => {
 
 window.deleteBlogPost = async (id) => {
     if (confirm('Are you sure?')) {
-        const res = await api.delete(`/api/admin/blog/posts/${id}`);
+        const res = await api.delete(`/api/admin/blog/${id}`);
         if (res) { loadBlogPosts(); showToast('Post deleted.', 'success'); }
     }
 }
@@ -1074,6 +1074,22 @@ function showBlogForm(id = null) {
                 });
             }
             
+            // Check if we already have an active Quill instance and destroy it first
+            if (dashboardState.quill) {
+                console.log('Removing existing Quill instance');
+                dashboardState.quill = null;
+                // Clear any existing Quill-related elements to prevent duplications
+                const quillContainer = document.getElementById('quill-editor');
+                // Ensure we don't have lingering toolbar elements that might cause issues
+                const quillToolbars = document.querySelectorAll('.ql-toolbar');
+                quillToolbars.forEach(toolbar => {
+                    if (toolbar.parentNode === quillContainer.parentNode) {
+                        toolbar.remove();
+                    }
+                });
+            }
+            
+            // Create a fresh Quill instance
             const quill = new Quill('#quill-editor', { 
                 theme: 'snow',
                 modules: {
@@ -1172,8 +1188,17 @@ function showBlogForm(id = null) {
                 }
                 
                 if (content) {
+                    // Use Quill's setContents or clipboard API to properly set content
+                    // First, try to set via innerHTML (safe approach)
                     quill.root.innerHTML = content;
-                    console.log('Set Quill content successfully');
+                    console.log('Set Quill content via innerHTML');
+                    
+                    // Ensure editor becomes focusable
+                    quill.root.setAttribute('contenteditable', 'true');
+                    
+                    // Force a refresh of the Quill editor
+                    quill.update();
+                    console.log('Quill editor updated and refreshed');
                 } else {
                     quill.root.innerHTML = '';
                     console.warn('Set empty Quill content');

@@ -52,6 +52,10 @@ body {
     margin: 0;
     font-family: var(--font-main);
     background-color: var(--bg-dark);
+    background-image: url('/img/bg7.png');  /* Adding a background image */
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
     color: var(--text-primary);
     line-height: 1.7;  /* Increased for literary feel */
     font-size: 16px;
@@ -85,8 +89,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .admin-grid-container {
     display: grid;
-    grid-template-columns: 280px 1fr;  /* Wider sidebar */
+    grid-template-columns: 280px 1fr;  /* Fixed sidebar width for better content area utilization */
     min-height: 100vh;
+    max-width: 100%;
+    width: 100%;
 }
 
 .sidebar {
@@ -96,6 +102,7 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     flex-direction: column;
     box-shadow: inset -5px 0 15px -5px var(--shadow-color);
+    width: 100%;
 }
 
 .sidebar-header {
@@ -171,15 +178,22 @@ h1, h2, h3, h4, h5, h6 {
 .main-content {
     padding: 2rem;
     overflow-y: auto;
+    width: 100%;
+    max-width: 100%;
+    background: rgba(253, 246, 227, 0.9) url('/img/bg7.png') center/cover no-repeat fixed;  /* Background image with semi-transparent overlay */
+    min-height: calc(100vh - 60px);  /* Account for header height */
 }
 
 .main-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 1.5rem;
+    padding: 1rem 1.5rem;
     margin-bottom: 2rem;
     border-bottom: 2px solid var(--border-color);
+    background-color: #859900; /* Lime green header */
+    color: white;
+    border-radius: 8px 8px 0 0;
 }
 
 .header-left {
@@ -197,11 +211,11 @@ h1, h2, h3, h4, h5, h6 {
 #section-indicator {
     font-size: 1.2rem;
     font-weight: bold;
-    color: var(--accent-color);
+    color: white; /* Updated for better contrast with the lime background */
 }
 
 .breadcrumb {
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.9); /* Updated for better contrast with the lime background */
     font-style: italic;
 }
 
@@ -678,7 +692,7 @@ input:focus, select:focus, textarea:focus {
     display: none;
     background: none;
     border: none;
-    color: var(--text-primary);
+    color: white; /* Updated for better contrast with the lime background */
     font-size: 1.5rem;
     cursor: pointer;
     padding: 0.5rem;
@@ -722,6 +736,8 @@ input:focus, select:focus, textarea:focus {
     .main-content {
         padding: 1rem;
         width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
     }
     
     .stats-grid {
@@ -962,6 +978,9 @@ input:focus, select:focus, textarea:focus {
     justify-content: center;
     align-items: center;
     min-height: 150px;
+    color: var(--base03);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 10;
 }
 
 .admin-header h1 {
