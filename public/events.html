@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events | FAREWELL / HOWDY</title>
+    <link rel="stylesheet" href="/css/ccssss.css">
+    <link rel="stylesheet" href="/css/fleeting-journey.css">
+    <style>
+        body {
+            background: var(--bg-dark);
+            color: var(--text);
+            font-family: var(--font-sans);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .events-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .header-section h1 {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-highlight);
+        }
+        
+        .venue-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .venue-selector button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .venue-selector button.active {
+            transform: scale(1.05);
+        }
+        
+        .venue-selector .btn-farewell {
+            background-color: var(--cyan);
+            color: var(--bg-dark);
+        }
+        
+        .venue-selector .btn-howdy {
+            background-color: var(--lima);
+            color: var(--bg-dark);
+        }
+        
+        .venue-selector .btn-all {
+            background-color: var(--text-highlight);
+            color: var(--bg-dark);
+        }
+        
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .event-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        .event-card.venue-farewell {
+            border-top: 4px solid var(--cyan);
+        }
+        
+        .event-card.venue-howdy {
+            border-top: 4px solid var(--lima);
+        }
+        
+        .event-image {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .event-card:hover .event-image img {
+            transform: scale(1.05);
+        }
+        
+        .event-venue-tag {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .venue-farewell .event-venue-tag {
+            background-color: var(--cyan);
+            color: var(--bg-dark);
+        }
+        
+        .venue-howdy .event-venue-tag {
+            background-color: var(--lima);
+            color: var(--bg-dark);
+        }
+        
+        .event-details {
+            padding: 1.5rem;
+        }
+        
+        .event-date {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .event-date i {
+            margin-right: 5px;
+        }
+        
+        .event-title {
+            font-size: 1.4rem;
+            margin: 0 0 1rem 0;
+            font-weight: bold;
+            font-family: var(--font-display);
+            color: var(--text-highlight);
+        }
+        
+        .event-description {
+            font-size: 0.9rem;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .event-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn-details {
+            padding: 0.5rem 1rem;
+            background-color: transparent;
+            border: 1px solid var(--text-muted);
+            color: var(--text-highlight);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .venue-farewell .btn-details:hover {
+            background-color: var(--cyan);
+            border-color: var(--cyan);
+            color: var(--bg-dark);
+        }
+        
+        .venue-howdy .btn-details:hover {
+            background-color: var(--lima);
+            border-color: var(--lima);
+            color: var(--bg-dark);
+        }
+        
+        .btn-tickets {
+            padding: 0.5rem 1rem;
+            background-color: var(--text-highlight);
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .venue-farewell .btn-tickets {
+            background-color: var(--cyan);
+        }
+        
+        .venue-howdy .btn-tickets {
+            background-color: var(--lima);
+        }
+        
+        .btn-tickets:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--text-highlight);
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        
+        .loading-text {
+            color: var(--text-muted);
+            font-size: 1rem;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .event-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .event-modal.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .event-modal-content {
+            position: relative;
+            background-color: var(--bg-dark);
+            margin: 5% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .event-modal.active .event-modal-content {
+            transform: translateY(0);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .close-modal:hover {
+            color: var(--text-highlight);
+        }
+        
+        /* Mobile responsiveness improvements */
+        @media (max-width: 768px) {
+            .events-container {
+                padding: 1rem;
+            }
+            
+            .header-section h1 {
+                font-size: 2.2rem;
+            }
+            
+            .venue-selector {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .venue-selector button {
+                flex: 1;
+                min-width: 100px;
+                padding: 0.6rem 0.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .events-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .event-card {
+                max-width: 100%;
+            }
+            
+            .event-modal-content {
+                margin: 0;
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                padding: 1.5rem;
+                overflow-y: auto;
+            }
+            
+            .close-modal {
+                top: 10px;
+                right: 10px;
+                font-size: 1.8rem;
+            }
+            
+            .modal-image {
+                max-height: 40vh;
+                object-fit: contain;
+            }
+            
+            .modal-title {
+                font-size: 1.5rem;
+                margin-top: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .event-actions {
+                flex-direction: column;
+                gap: 0.8rem;
+                align-items: stretch;
+            }
+            
+            .btn-details, .btn-tickets {
+                text-align: center;
+            }
+            
+            .header-section h1 {
+                font-size: 1.8rem;
+            }
+            
+            .event-image {
+                height: 180px;
+            }
+        }
+        
+        .modal-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+        }
+        
+        .modal-title {
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+            color: var(--text-highlight);
+            font-family: var(--font-display);
+        }
+        
+        .modal-date-venue {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+        
+        .modal-date-venue span {
+            display: flex;
+            align-items: center;
+        }
+        
+        .modal-date-venue i {
+            margin-right: 5px;
+        }
+        
+        .modal-description {
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .modal-details {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-details-item {
+            display: flex;
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-details-label {
+            min-width: 120px;
+            color: var(--text-muted);
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .no-events {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+        
+        .venue-farewell .modal-title {
+            color: var(--cyan);
+        }
+        
+        .venue-howdy .modal-title {
+            color: var(--lima);
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .events-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .event-modal-content {
+                width: 95%;
+                margin: 10% auto;
+                padding: 1.5rem;
+            }
+            
+            .modal-title {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .event-modal-content {
+                margin: 5% auto;
+                padding: 1rem;
+            }
+            
+            .venue-selector {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .venue-selector button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="events-container">
+        <div class="header-section">
+            <h1>Upcoming Events</h1>
+            <p>Check out what's happening at Farewell and Howdy</p>
+        </div>
+        
+        <div class="venue-selector">
+            <button class="btn-all active" data-venue="all">All Venues</button>
+            <button class="btn-farewell" data-venue="farewell">Farewell</button>
+            <button class="btn-howdy" data-venue="howdy">Howdy</button>
+        </div>
+        
+        <div id="events-container">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p class="loading-text">Loading events...</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="event-modal" class="event-modal">
+        <div class="event-modal-content">
+            <span class="close-modal" id="close-modal">&times;</span>
+            <div id="modal-content">
+                <!-- Modal content will be inserted here dynamically -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const eventsContainer = document.getElementById('events-container');
+            const venueButtons = document.querySelectorAll('.venue-selector button');
+            const eventModal = document.getElementById('event-modal');
+            const closeModal = document.getElementById('close-modal');
+            const modalContent = document.getElementById('modal-content');
+            
+            let allEvents = [];
+            let currentVenue = 'all';
+            
+            // Fetch events
+            try {
+                const response = await fetch('/api/events');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch events');
+                }
+                
+                allEvents = await response.json();
+                renderEvents(allEvents, currentVenue);
+                
+            } catch (error) {
+                console.error('Error fetching events:', error);
+                eventsContainer.innerHTML = `
+                    <div class="no-events">
+                        <h2>Error loading events</h2>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            // Handle venue filter buttons
+            venueButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    venueButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    currentVenue = button.getAttribute('data-venue');
+                    renderEvents(allEvents, currentVenue);
+                });
+            });
+            
+            // Close modal when clicking the X or outside the modal
+            closeModal.addEventListener('click', () => {
+                eventModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            });
+            
+            eventModal.addEventListener('click', (e) => {
+                if (e.target === eventModal) {
+                    eventModal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            
+            // Function to render events
+            function renderEvents(events, venue) {
+                if (!events || events.length === 0) {
+                    eventsContainer.innerHTML = `
+                        <div class="no-events">
+                            <h2>No events found</h2>
+                            <p>Check back soon for upcoming events!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Filter events by venue if necessary
+                const filteredEvents = venue === 'all' 
+                    ? events 
+                    : events.filter(event => event.venue === venue);
+                
+                if (filteredEvents.length === 0) {
+                    eventsContainer.innerHTML = `
+                        <div class="no-events">
+                            <h2>No events found for ${venue}</h2>
+                            <p>Check back soon for upcoming events!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Sort events by date (ascending)
+                filteredEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                // Render events grid
+                const eventsHTML = `
+                    <div class="events-grid">
+                        ${filteredEvents.map(event => createEventCard(event)).join('')}
+                    </div>
+                `;
+                
+                eventsContainer.innerHTML = eventsHTML;
+                
+                // Add event listeners to the details buttons
+                document.querySelectorAll('.btn-details').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const eventId = button.getAttribute('data-id');
+                        const event = filteredEvents.find(e => e.id === eventId);
+                        if (event) {
+                            showEventModal(event);
+                        }
+                    });
+                });
+            }
+            
+            // Function to create an event card
+            function createEventCard(event) {
+                const eventDate = new Date(event.date);
+                const formattedDate = eventDate.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
+                return `
+                    <div class="event-card venue-${event.venue}">
+                        <div class="event-image">
+                            <img src="${event.flyer_image_url || event.imageUrl || '/img/placeholder.png'}" 
+                                 alt="${event.title}" 
+                                 onerror="this.onerror=null; this.src='/img/placeholder.png';">
+                            <div class="event-venue-tag">${event.venue}</div>
+                        </div>
+                        <div class="event-details">
+                            <div class="event-date">
+                                <i>📅</i> ${formattedDate}
+                            </div>
+                            <h3 class="event-title">${event.title}</h3>
+                            <p class="event-description">${event.description || 'No description available.'}</p>
+                            <div class="event-actions">
+                                <a href="#" class="btn-details" data-id="${event.id}">Details</a>
+                                ${event.ticket_url ? 
+                                    `<a href="${event.ticket_url}" class="btn-tickets" target="_blank">Tickets</a>` : 
+                                    ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Function to show event modal
+            function showEventModal(event) {
+                const eventDate = new Date(event.date);
+                const formattedDate = eventDate.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
+                const eventTime = event.event_time || 'Time TBD';
+                
+                modalContent.innerHTML = `
+                    <img src="${event.flyer_image_url || event.imageUrl || '/img/placeholder.png'}" 
+                         alt="${event.title}" class="modal-image"
+                         onerror="this.onerror=null; this.src='/img/placeholder.png';">
+                    
+                    <h2 class="modal-title">${event.title}</h2>
+                    
+                    <div class="modal-date-venue">
+                        <span><i>📅</i> ${formattedDate}</span>
+                        <span><i>🏠</i> ${event.venue.charAt(0).toUpperCase() + event.venue.slice(1)}</span>
+                    </div>
+                    
+                    <div class="modal-description">
+                        ${event.description || 'No description available.'}
+                    </div>
+                    
+                    <div class="modal-details">
+                        <div class="modal-details-item">
+                            <div class="modal-details-label">Time:</div>
+                            <div>${eventTime}</div>
+                        </div>
+                        
+                        ${event.price ? `
+                        <div class="modal-details-item">
+                            <div class="modal-details-label">Price:</div>
+                            <div>${event.price}</div>
+                        </div>
+                        ` : ''}
+                        
+                        ${event.age_restriction ? `
+                        <div class="modal-details-item">
+                            <div class="modal-details-label">Age Restriction:</div>
+                            <div>${event.age_restriction}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="modal-actions">
+                        ${event.ticket_url ? 
+                            `<a href="${event.ticket_url}" class="btn-tickets" target="_blank">Buy Tickets</a>` : 
+                            ''}
+                    </div>
+                `;
+                
+                eventModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                
+                // Add venue-specific class to modal content
+                eventModal.querySelector('.event-modal-content').className = 
+                    `event-modal-content venue-${event.venue}`;
+            }
+            
+            // Create fallback default event image
+            function createDefaultEventImage() {
+                const img = new Image();
+                img.src = '/img/placeholder.png';
+                img.style.display = 'none';
+                document.body.appendChild(img);
+            }
+            
+            createDefaultEventImage();
+        });
+    </script>
+</body>
+</html>

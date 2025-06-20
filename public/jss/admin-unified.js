@@ -423,7 +423,7 @@ async function initializeDashboard() {
 
 function setupNavigation() {
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
-    const mainTitle = document.getElementById('main-title');
+    const sectionIndicator = document.getElementById('section-indicator');
     const breadcrumb = document.getElementById('breadcrumb');
 
     navItems.forEach(item => {
@@ -434,7 +434,7 @@ function setupNavigation() {
             item.classList.add('active');
             showSection(target);
             const sectionNames = { 'dashboard': 'Dashboard', 'events': 'Event Management', 'blog': 'Blog Management', 'venue': 'Venue Settings', 'import': 'Import Legacy Data' };
-            if (mainTitle) mainTitle.textContent = sectionNames[target] || target;
+            if (sectionIndicator) sectionIndicator.textContent = sectionNames[target] || target;
             if (breadcrumb) breadcrumb.textContent = `Home / ${sectionNames[target] || target}`;
         });
     });
@@ -461,6 +461,7 @@ function setupMobileMenu() {
             console.log('Sidebar classes after toggle:', sidebar.classList);
         });
 
+        // Close sidebar when clicking outside of it
         document.addEventListener('click', (e) => {
             if (sidebar &&
                 sidebar.classList.contains('open') &&
@@ -468,6 +469,18 @@ function setupMobileMenu() {
                 !mobileToggle.contains(e.target)) {
                 sidebar.classList.remove('open');
             }
+        });
+        
+        // Close sidebar when a nav item is clicked
+        const navItems = sidebar.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    setTimeout(() => {
+                        sidebar.classList.remove('open');
+                    }, 150);
+                }
+            });
         });
 
         console.log('Mobile menu handlers set up successfully');
@@ -610,8 +623,15 @@ function renderEvents(events) {
         eventList.innerHTML = `<div class='status-message status-info'>No events found.</div>`;
         return;
     }
-    eventList.innerHTML = `<table class="admin-table"><thead><tr><th>Title</th><th>Date</th><th>Venue</th><th>Actions</th></tr></thead><tbody>` +
-        events.map(ev => `<tr>
+    eventList.innerHTML = `<table class="admin-table"><thead><tr><th>Image</th><th>Title</th><th>Date</th><th>Venue</th><th>Actions</th></tr></thead><tbody>` +
+        events.map(ev => `<tr class="event-row venue-${ev.venue || 'unknown'}">
+            <td>
+              <div class="event-list-thumbnail">
+                ${ev.flyer_image_url || ev.imageUrl ? 
+                  `<img src="${ev.flyer_image_url || ev.imageUrl}" alt="${ev.title || 'Event'} flyer">` : 
+                  `<span class="no-image">📷</span>`}
+              </div>
+            </td>
             <td><strong>${ev.title || 'Untitled'}</strong></td>
             <td>${formatDate(ev.date)}</td>
             <td><span class="venue-tag venue-${ev.venue}">${ev.venue || 'N/A'}</span></td>
@@ -619,7 +639,8 @@ function renderEvents(events) {
                 <button onclick='editEvent("${ev.id}")'>Edit</button>
                 <button onclick='deleteEvent("${ev.id}")'>Delete</button>
             </td>
-        </tr>`).join('') + `</tbody></table>`;
+        </tr>
+        <tr class="event-divider"><td colspan="5"><hr/></td></tr>`).join('') + `</tbody></table>`;
     setupEventFilters();
 }
 
@@ -849,15 +870,21 @@ function renderBlogPosts(posts) {
         return;
     }
     
-    blogList.innerHTML = `<table class="admin-table"><thead><tr><th>Title</th><th>Date</th><th>Actions</th></tr></thead><tbody>` +
+    blogList.innerHTML = `<table class="admin-table"><thead><tr><th>Image</th><th>Title</th><th>Date</th><th>Actions</th></tr></thead><tbody>` +
         posts.map(post => `<tr>
+            <td class="thumbnail-cell">
+                ${post.image_url ? 
+                    `<div class="thumbnail"><img src="${post.image_url}" alt="${post.title}" loading="lazy"></div>` : 
+                    `<div class="thumbnail empty-thumbnail"><span>No Image</span></div>`}
+            </td>
             <td><strong>${post.title}</strong></td>
             <td>${formatDate(post.date || post.created_at)}</td>
             <td class='admin-table-actions'>
                 <button class="edit-blog-btn" data-id="${post.id}">Edit</button>
                 <button class="delete-blog-btn" data-id="${post.id}">Delete</button>
             </td>
-        </tr>`).join('') + `</tbody></table>`;
+        </tr>
+        <tr class="blog-divider"><td colspan="4"><hr/></td></tr>`).join('') + `</tbody></table>`;
     
     // Add event listeners to the newly created buttons
     blogList.querySelectorAll('.edit-blog-btn').forEach(btn => {
@@ -880,10 +907,16 @@ window.editBlogPost = (id) => {
     console.log('editBlogPost called with id:', id);
     const post = dashboardState.blogPosts.find(p => p.id === id);
     console.log('Found post:', post);
+    
     if (post) {
+        // Log post properties to debug
+        console.log('Post properties:', Object.keys(post));
+        console.log('Post content preview:', post.content ? post.content.substring(0, 100) + '...' : 'No content');
+        
         showBlogForm(id);
     } else {
         console.error('Blog post not found with id:', id);
+        console.log('Available posts:', dashboardState.blogPosts.map(p => ({ id: p.id, title: p.title })));
         showToast('Error: Blog post not found', 'error');
     }
 };
@@ -911,7 +944,7 @@ function showBlogForm(id = null) {
     modalBody.innerHTML = '';
     
     // Explicitly add the active class and verify
-    modal.classList
+    modal.classList.add('active');
     console.log('Blog modal active class added, classList:', modal.classList);
 
     // Force reflow to ensure CSS transitions work
@@ -921,8 +954,32 @@ function showBlogForm(id = null) {
     console.log('Modal computed display after adding active class:', window.getComputedStyle(modal).display);
 
     dashboardState.editingPostId = id;
-    let post = id ? dashboardState.blogPosts.find(p => p.id === id) : null;
-    console.log('Post data for form:', post);
+    
+    // Find the post and log its properties for debugging
+    let post = null;
+    if (id) {
+        post = dashboardState.blogPosts.find(p => p.id === id);
+        console.log('Post data for form:', post);
+        
+        if (!post) {
+            console.error('Blog post not found with id:', id);
+            showToast('Error: Blog post not found', 'error');
+            modal.classList.remove('active');
+            return;
+        }
+        
+        // Normalize post data for consistent field access
+        if (!post.title && post.post_title) post.title = post.post_title;
+        if (!post.content && post.post_content) post.content = post.post_content;
+        if (!post.date && post.post_date) post.date = post.post_date;
+        if (!post.date && post.created_at) post.date = post.created_at;
+        
+        console.log('Normalized post data:', {
+            title: post.title,
+            date: post.date,
+            contentPreview: post.content ? post.content.substring(0, 50) + '...' : 'No content'
+        });
+    }
 
     modalBody.innerHTML = `
         <div class="admin-form">
@@ -932,6 +989,15 @@ function showBlogForm(id = null) {
                 <input name='title' required value="${post?.title || ''}">
                 <label>Date</label>
                 <input name='date' type='date' value="${post?.date ? new Date(post.date).toISOString().split('T')[0] : ''}">
+                <label>Featured Image</label>
+                <div class="image-upload-group">
+                  <input name='image_url' type="url" placeholder="Upload an image or enter URL" value="${post?.image_url || ''}">
+                  <input type="file" id="blog-image-upload-input" accept="image/*" style="display:none;">
+                  <button type="button" id="blog-image-upload-btn">Upload Image</button>
+                </div>
+                <div id="blog-image-preview" class="image-preview ${post?.image_url ? 'has-image' : ''}">
+                  ${post?.image_url ? `<img src="${post.image_url}" alt="Featured image">` : ''}
+                </div>
                 <label>Content *</label>
                 <div id='quill-editor' style='height:250px; background:white;'></div>
                 <div class="form-actions">
@@ -951,6 +1017,63 @@ function showBlogForm(id = null) {
                 return;
             }
             
+            // Set up blog image upload handler for the featured image
+            const blogImageUploadBtn = document.getElementById('blog-image-upload-btn');
+            const blogImageUploadInput = document.getElementById('blog-image-upload-input');
+            const blogImagePreview = document.getElementById('blog-image-preview');
+            const blogImageUrlInput = document.querySelector('input[name="image_url"]');
+            
+            if (blogImageUploadBtn && blogImageUploadInput) {
+                blogImageUploadBtn.addEventListener('click', () => {
+                    blogImageUploadInput.click();
+                });
+                
+                blogImageUploadInput.addEventListener('change', async (e) => {
+                    if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0];
+                        
+                        try {
+                            // Show loading indicator
+                            blogImageUploadBtn.disabled = true;
+                            blogImageUploadBtn.textContent = 'Uploading...';
+                            showToast('Uploading featured image...', 'info');
+                            
+                            // Create form data and upload
+                            const formData = new FormData();
+                            formData.append('image', file);
+                            
+                            const response = await fetch('/api/admin/blog/upload-image', {
+                                method: 'POST',
+                                body: formData,
+                                credentials: 'include'
+                            });
+                            
+                            const result = await response.json();
+                            
+                            if (response.ok && result.success) {
+                                // Update the URL input with the new image URL
+                                blogImageUrlInput.value = result.imageUrl;
+                                
+                                // Update the preview
+                                blogImagePreview.innerHTML = `<img src="${result.imageUrl}" alt="Featured image">`;
+                                blogImagePreview.classList.add('has-image');
+                                
+                                showToast('Featured image uploaded successfully!', 'success');
+                            } else {
+                                showToast(result.error || 'Failed to upload image', 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error uploading featured image:', error);
+                            showToast('Error uploading image: ' + (error.message || 'Unknown error'), 'error');
+                        } finally {
+                            // Reset the button
+                            blogImageUploadBtn.disabled = false;
+                            blogImageUploadBtn.textContent = 'Upload Image';
+                        }
+                    }
+                });
+            }
+            
             const quill = new Quill('#quill-editor', { 
                 theme: 'snow',
                 modules: {
@@ -958,6 +1081,7 @@ function showBlogForm(id = null) {
                         [{ 'header': [1, 2, 3, false] }],
                         ['bold', 'italic', 'underline', 'link'],
                         [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['image'],
                         ['clean']
                     ]
                 }
@@ -966,9 +1090,94 @@ function showBlogForm(id = null) {
             console.log('Quill editor initialized:', quill);
             dashboardState.quill = quill;
 
+            // Set up custom image handler for Quill
+            const toolbar = quill.getModule('toolbar');
+            toolbar.addHandler('image', () => {
+                // Give user a choice between URL and upload
+                const useUrl = confirm('Would you like to use an image URL? Click OK for URL, Cancel for file upload.');
+                
+                if (useUrl) {
+                    // Prompt for URL
+                    const url = prompt('Enter the image URL:');
+                    if (url) {
+                        // Get the current selection
+                        const range = quill.getSelection(true);
+                        // Insert the image
+                        quill.insertEmbed(range.index, 'image', url);
+                        // Move cursor after image
+                        quill.setSelection(range.index + 1);
+                    }
+                } else {
+                    // Create a custom file input for upload
+                    const input = document.createElement('input');
+                    input.setAttribute('type', 'file');
+                    input.setAttribute('accept', 'image/*');
+                    input.click();
+                    
+                    // Listen for the file selection
+                    input.onchange = async () => {
+                        const file = input.files[0];
+                        if (file) {
+                            try {
+                                // Show a loading toast
+                                showToast('Uploading image to editor...', 'info');
+                                
+                                // Upload the file
+                                const formData = new FormData();
+                                formData.append('image', file);
+                                
+                                const res = await fetch('/api/admin/blog/upload-image', { 
+                                    method: 'POST', 
+                                    body: formData, 
+                                    credentials: 'include' 
+                                });
+                                
+                                const result = await res.json();
+                                
+                                if (res.ok && result.success) {
+                                    // Get the current selection range
+                                    const range = quill.getSelection(true);
+                                    
+                                    // Insert the image at the selection using the imageUrl from response
+                                    quill.insertEmbed(range.index, 'image', result.imageUrl);
+                                    // Move cursor after the image
+                                    quill.setSelection(range.index + 1);
+                                    
+                                    showToast('Image inserted!', 'success');
+                                } else {
+                                    showToast(result.error || 'Image upload failed.', 'error');
+                                }
+                            } catch (error) {
+                                console.error('Error uploading image to editor:', error);
+                                showToast('Image upload failed: ' + (error.message || 'Unknown error'), 'error');
+                            }
+                        }
+                    };
+                }
+            });
+
             if (post) {
                 console.log('Setting quill content from post');
-                quill.root.innerHTML = post.content || '';
+                // Try different content field names that might be present
+                let content = null;
+                
+                if (post.content) {
+                    content = post.content;
+                    console.log('Using post.content');
+                } else if (post.post_content) {
+                    content = post.post_content;
+                    console.log('Using post.post_content');
+                } else {
+                    console.warn('No content found in post');
+                }
+                
+                if (content) {
+                    quill.root.innerHTML = content;
+                    console.log('Set Quill content successfully');
+                } else {
+                    quill.root.innerHTML = '';
+                    console.warn('Set empty Quill content');
+                }
             }
         } catch (error) {
             console.error('Error initializing Quill:', error);
@@ -979,10 +1188,19 @@ function showBlogForm(id = null) {
         e.preventDefault();
         console.log('Blog form submitted');
 
+        // Disable submit button to prevent double-submission
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.textContent;
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = id ? 'Updating...' : 'Creating...';
+        }
+
         // Get form data
         const data = {
             title: e.target.title.value,
             date: e.target.date.value,
+            image_url: e.target.image_url.value || null,
             content: dashboardState.quill.root.innerHTML
         };
         console.log('Blog form data:', data);
@@ -999,7 +1217,7 @@ function showBlogForm(id = null) {
             if (response) {
                 showToast(`Post ${id ? 'updated' : 'created'}`, 'success');
                 modal.classList.remove('active');
-                loadBlogPosts();
+                await loadBlogPosts(); // Ensure blog posts are reloaded
             } else {
                 console.error('API call returned null response');
                 showToast('Failed to save blog post. Please try again.', 'error');
@@ -1007,6 +1225,12 @@ function showBlogForm(id = null) {
         } catch (error) {
             console.error('Error submitting blog form:', error);
             showToast('An error occurred while saving the blog post.', 'error');
+        } finally {
+            // Re-enable submit button regardless of outcome
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
         }
     });
 }

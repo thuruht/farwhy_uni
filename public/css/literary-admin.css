@@ -194,6 +194,12 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--accent-color);
 }
 
+#section-indicator {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
 .breadcrumb {
     color: var(--text-secondary);
     font-style: italic;
@@ -533,6 +539,14 @@ input:focus, select:focus, textarea:focus {
 .admin-form textarea {
     width: 100%;
     margin-bottom: 1.5rem;
+    min-height: 44px; /* Apple's recommended minimum touch target size */
+}
+
+.admin-form button, 
+.btn-primary, 
+.btn-secondary {
+    min-height: 44px;
+    min-width: 44px;
 }
 
 .form-actions {
@@ -667,6 +681,13 @@ input:focus, select:focus, textarea:focus {
     color: var(--text-primary);
     font-size: 1.5rem;
     cursor: pointer;
+    padding: 0.5rem;
+    height: 44px;
+    width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
 }
 
 @media (max-width: 768px) {
@@ -682,6 +703,10 @@ input:focus, select:focus, textarea:focus {
         width: 280px;
         z-index: 100;
         transition: left 0.3s ease;
+        background-color: var(--bg-light);
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        padding: 1.5rem;
+        overflow-y: auto;
     }
     
     .sidebar.open {
@@ -690,15 +715,163 @@ input:focus, select:focus, textarea:focus {
     
     .mobile-menu-toggle {
         display: block;
+        font-size: 1.8rem;
+        margin-right: 1rem;
     }
     
     .main-content {
-        padding: 1.5rem;
+        padding: 1rem;
+        width: 100%;
     }
     
     .stats-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
+    
+    .main-header {
+        padding: 0.8rem 1rem;
+    }
+    
+    .user-info {
+        padding: 1rem 0;
+        margin-top: 2rem;
+    }
+    
+    /* Responsive table styles for mobile view                    */
+    .admin-table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+    }
+    
+    .admin-table th, 
+    .admin-table td {
+        white-space: nowrap;
+        padding: 0.6rem;
+    }
+    
+    .admin-table-actions {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+    }
+    
+    .admin-table-actions button {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Event list specific mobile styles */
+    .event-list-thumbnail {
+        width: 60px;
+        height: 60px;
+    }
+    
+    /* Form responsive styles */
+    .admin-form input,
+    .admin-form select,
+    .admin-form textarea {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+    
+    /* Modal responsive styles */
+    #form-modal .admin-form {
+        padding: 1rem;
+    }
+    
+    /* Image upload groups */
+    .image-upload-group,
+    .flyer-upload-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .image-upload-group button,
+    .flyer-upload-group button {
+        width: 100%;
+    }
+    
+    /* Image preview responsive */
+    .image-preview {
+        max-height: 200px;
+    }
+    
+    /* Form actions */
+    .form-actions {
+        padding-top: 1rem;
+    }
+    
+    .form-actions button {
+        width: 100%;
+    }
+}
+
+@media screen and (orientation: portrait) {
+    .sidebar {
+        height: 100vh;
+        overflow-y: auto;
+    }
+    
+    .sidebar.open {
+        left: 0;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .main-content {
+        height: calc(100vh - 60px);
+        overflow-y: auto;
+    }
+}
+
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    .sidebar {
+        height: 100vh;
+        overflow-y: auto;
+    }
+    
+    .main-content {
+        height: calc(100vh - 60px);
+        overflow-y: auto;
+    }
+    
+    /* Adjust modal content for landscape mode on mobile */
+    .event-modal-content,
+    #form-modal .modal-content {
+        max-height: 85vh;
+        margin: 2vh auto;
+    }
+}
+
+/* Update table heading for better mobile display */
+.admin-table th {
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-light);
+    z-index: 1;
+}
+
+/* Improve event thumbnails */
+.event-list-thumbnail {
+    width: 80px;
+    height: 80px;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.1);
+}
+
+.event-list-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-image {
+    font-size: 1.5rem;
+    color: var(--text-muted);
 }
 
 /* Specific style rule for dashboard-visible class */
@@ -773,6 +946,170 @@ input:focus, select:focus, textarea:focus {
 .info-message {
     color: var(--blue);
     border: 1px solid var(--border-color);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Admin Header (New Style)                       */
+/* -------------------------------------------------------------------------- */
+
+.admin-header {
+    width: 100%;
+    background: var(--primary-bg-color) url('/img/bg4.png') center/cover no-repeat;
+    background-attachment: fixed;
+    border-bottom: 1px solid var(--nav-border-color);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 150px;
+}
+
+.admin-header h1 {
+    font-family: var(--font-db, 'Lora', serif);
+    font-size: clamp(2.5rem, 8vw, 4em);
+    color: var(--secondary-bg-color);
+    -webkit-text-stroke: 1px black;
+    text-shadow: -1px -1px 0 #000,
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000,
+        -8px 8px 0px var(--nav-border-color);
+    margin: 0;
+}
+
+/* Venue tag styling */
+.venue-tag {
+    display: inline-block;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.venue-farewell {
+    background-color: rgba(42, 161, 152, 0.2);
+    color: var(--cyan);
+    border: 1px solid var(--cyan);
+}
+
+.venue-howdy {
+    background-color: rgba(133, 153, 0, 0.2);
+    color: var(--green);
+    border: 1px solid var(--green);
+}
+
+/* Row coloring by venue */
+tr.event-row.venue-farewell {
+    background-color: rgba(42, 161, 152, 0.05);
+}
+
+tr.event-row.venue-howdy {
+    background-color: rgba(133, 153, 0, 0.05);
+}
+
+/* Divider styling */
+tr.event-divider td, tr.blog-divider td {
+    padding: 0;
+}
+
+tr.event-divider hr, tr.blog-divider hr {
+    margin: 0;
+    border: none;
+    height: 1px;
+    background-color: rgba(101, 123, 131, 0.2);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 11. Image Management Styles                 */
+/* -------------------------------------------------------------------------- */
+
+.image-upload-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.image-upload-group input[type="url"] {
+    flex: 1;
+}
+
+.image-upload-group button {
+    background-color: var(--blue);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.image-upload-group button:hover {
+    background-color: var(--cyan);
+}
+
+.image-preview {
+    width: 100%;
+    height: 200px;
+    border: 1px dashed var(--base01);
+    background-color: var(--base2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.image-preview.has-image {
+    border-style: solid;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.image-preview .no-image {
+    color: var(--base01);
+    font-size: 2rem;
+}
+
+/* Event list thumbnails */
+.event-list-thumbnail {
+    width: 70px;
+    height: 70px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: var(--base02);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.event-list-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.event-list-thumbnail .no-image {
+    color: var(--base1);
+    font-size: 1.5rem;
+}
+
+/* Quill editor image styles */
+.ql-editor img {
+    max-width: 100%;
+    height: auto;
+}
+
+.ql-snow .ql-editor img {
+    max-width: 100%;
+    height: auto;
 }
 
 /* End of File */

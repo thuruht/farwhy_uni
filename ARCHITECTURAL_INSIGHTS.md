@@ -19,6 +19,13 @@ Based on a thorough review of project documentation, we've identified several cr
    - Admin dashboard should follow the core visual language while prioritizing function
    - Custom design system implemented via utility-first CSS approach
 
+4. **Mobile-First Design**
+   - Responsive design prioritizing mobile and tablet usage
+   - Strategic breakpoints based on device capabilities rather than specific pixel values
+   - Touch-friendly interface with appropriately sized interaction targets
+   - Content remains accessible in both portrait and landscape orientations
+   - Performance optimization for mobile networks
+
 ## Database Schema
 
 The database uses a multi-tenant model with these key tables:
@@ -62,7 +69,7 @@ The platform uses a robust dual authentication system:
 From PRIORITY_GOALS.txt, we've identified these key requirements:
 
 1. **Event Creation Auto-Population**
-   - Venue "Howdy" → Auto-populate "All ages" 
+   - Venue "Howdy" → Auto-populate "All ages"
    - Venue "Farewell" → Auto-populate "21+ unless with parent or legal guardian"
    - Auto-populate "Doors at 7pm / Music at 8pm" for all events (editable)
 

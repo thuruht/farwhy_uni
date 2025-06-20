@@ -15,6 +15,8 @@ This project contains the admin dashboard and APIs for managing events, blog pos
   - Filter events by venue
 - Blog post management with rich text editor
   - Create and edit blog posts with WYSIWYG editor
+  - Upload and embed images directly in blog posts
+  - Add featured images to blog posts
 - Venue settings configuration
 - Legacy data import system
 - Authentication system with role-based access
@@ -44,13 +46,17 @@ This project contains the admin dashboard and APIs for managing events, blog pos
 
 1. Clone the repository
 2. Install dependencies:
+
    ```bash
    npm install
    ```
+
 3. Run the development server:
+
    ```bash
    npx wrangler dev --local
    ```
+
 4. Access the admin dashboard at `http://localhost:8787/admin.html`
    - Default login: username `admin` or `anmid`
 
@@ -59,6 +65,7 @@ This project contains the admin dashboard and APIs for managing events, blog pos
 The project uses Cloudflare D1 as its database. For local development, Wrangler creates a local SQLite database.
 
 To run database commands:
+
 ```bash
 # Query local database
 npx wrangler d1 execute farewell-db --command "SELECT * FROM users;"
@@ -70,6 +77,7 @@ npx wrangler d1 execute farewell-db --command "SELECT * FROM users;" --remote
 ### Deployment
 
 To deploy to Cloudflare:
+
 ```bash
 npx wrangler publish
 ```

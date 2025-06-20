@@ -8,7 +8,7 @@ This document describes the Farewell/Howdy Admin Dashboard, a web application fo
 
 The Farewell/Howdy Admin Dashboard is a Cloudflare Workers project with the following structure:
 
-```
+```bash
 /
 ├── database/
 │   └── schema.sql       # Database schema
@@ -80,29 +80,29 @@ The admin dashboard uses session-based authentication with a JWT stored in cooki
 
 The admin dashboard follows a Single Page Application (SPA) pattern:
 
-1. **Core App Logic**: 
+1. **Core App Logic**:
    - Login/logout and dashboard rendering
    - State management through the `dashboardState` object
 
-2. **Initialization**: 
+2. **Initialization**:
    - Setup handlers via `setupEventListeners()` function
    - Load data with `loadInitialData()`, `loadEvents()`, and `loadBlogPosts()`
    - Initialize UI components
 
-3. **API Communication**: 
+3. **API Communication**:
    - Wrapper for fetch with error handling via the `api` object
    - Support for GET, POST, PUT, and DELETE methods
    - Error handling and authentication checks
 
-4. **Section Management**: 
+4. **Section Management**:
    - Show/hide different dashboard sections with `showSection()`
    - Modal handling via global event handlers
 
-5. **Event Handlers**: 
+5. **Event Handlers**:
    - Global click handlers for modal buttons and actions
    - Form submission handlers for events and blog posts
 
-6. **Form Processing**: 
+6. **Form Processing**:
    - Create and edit forms for events and blog posts
    - Form submission with validation and API calls
 
@@ -116,6 +116,51 @@ The CSS is organized into sections:
 4. **Content Area**: Main content display
 5. **Modal Styles**: Dialog boxes and forms
 6. **Responsive Design**: Mobile adaptations
+
+## Mobile Responsiveness
+
+The admin dashboard and public events page have been optimized for mobile devices:
+
+### Admin Dashboard
+
+- Responsive sidebar that is accessible via a hamburger menu on small screens
+- Automatically closes the sidebar when a menu item is clicked on mobile
+- Tables are horizontally scrollable on small screens
+- Form inputs and buttons are sized appropriately for touch interaction
+- Improved modal dialogs for creating and editing content on mobile
+
+### Public Events Page
+
+- Responsive grid layout that adapts to different screen sizes
+- Card-based event display with appropriate sizing for mobile devices
+- Improved event modal for viewing event details on mobile
+- Optimized for both portrait and landscape orientations
+- Touch-friendly buttons and controls
+
+### Technical Implementation
+
+- Media queries handle layout changes at different breakpoints
+- Minimum touch target size of 44x44px for all interactive elements
+- Orientation-specific styles ensure content works in both portrait and landscape modes
+- Loading indicators provide feedback during data fetching operations
+
+## Media Storage
+
+The application uses Cloudflare R2 for storing media files:
+
+- **Event Flyers**: Uploaded via the event form and stored in `flyers/` directory in R2
+- **Blog Images**: Two types of blog images are supported:
+  1. **Featured Images**: Displayed as thumbnails in the blog list and at the top of blog posts
+  2. **Inline Images**: Embedded within blog post content via the Quill editor
+
+### Image Upload Process
+
+1. Images are uploaded via multipart form data to the `/api/admin/blog/upload-image` endpoint
+2. The server validates the file type (JPG, PNG, GIF, WebP supported)
+3. A unique filename is generated with timestamp and random string
+4. The file is stored in R2 bucket with appropriate content type
+5. A public URL is returned to the client (`/images/{path}`)
+6. The image can then be displayed or embedded in content
 
 ## Known Issues and Solutions
 

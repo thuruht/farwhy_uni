@@ -228,3 +228,60 @@ export async function setFeaturedContent(c: Context<{ Bindings: Env }>): Promise
         return c.json({ error: 'Failed to set featured content' }, 500);
     }
 }
+
+/**
+ * Handles uploading blog post images to R2
+ */
+export async function uploadBlogImage(c: Context<{ Bindings: Env }>): Promise<Response> {
+  try {
+    // Check for multipart form data
+    const formData = await c.req.formData();
+    const file = formData.get('image') as File;
+    
+    if (!file) {
+      return c.json({ success: false, error: 'No image file provided' }, 400);
+    }
+    
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      return c.json({ 
+        success: false, 
+        error: 'Invalid file type. Supported formats: JPG, PNG, GIF, WebP' 
+      }, 400);
+    }
+    
+    // Get file data
+    const fileData = await file.arrayBuffer();
+    
+    // Generate a unique filename with timestamp and random string
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(2, 10);
+    const fileExtension = file.name.split('.').pop() || 'jpg';
+    const filename = `blog/${timestamp}-${randomString}.${fileExtension}`;
+    
+    // Upload to R2
+    await c.env.FWHY_IMAGES.put(filename, fileData, {
+      httpMetadata: {
+        contentType: file.type,
+      }
+    });
+    
+    // Construct the public URL
+    // Using the /images/ path that would be handled by a route in index.ts
+    const imageUrl = `/images/${filename}`;
+    
+    return c.json({ 
+      success: true, 
+      imageUrl,
+      message: 'Image uploaded successfully' 
+    });
+    
+  } catch (error) {
+    console.error('[Blog Image Upload]', error);
+    return c.json({ 
+      success: false, 
+      error: 'Failed to upload image' 
+    }, 500);
+  }
+}

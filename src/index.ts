@@ -14,7 +14,8 @@ import {
     getPostById,
     updatePostById,
     deletePostById,
-    setFeaturedContent
+    setFeaturedContent,
+    uploadBlogImage // Added import for the new image upload handler
 } from './handlers/blog';
 import { authMiddleware } from './middleware/auth';
 import { Env } from './types/env';
@@ -26,6 +27,38 @@ const app = new Hono<{ Bindings: Env }>();
 // ====================================
 app.use('/api/*', timing());
 app.use('/api/*', cors());
+
+// --- Image serving from R2 ---
+app.get('/images/*', async (c) => {
+  const path = c.req.path.replace('/images/', '');
+  
+  try {
+    // Get the image from R2
+    const object = await c.env.FWHY_IMAGES.get(path);
+    
+    if (!object) {
+      // Return a 404 if the image doesn't exist
+      return new Response('Image not found', { status: 404 });
+    }
+    
+    // Return the image with appropriate headers
+    const headers = new Headers();
+    
+    // Set content type header if available
+    if (object.httpMetadata?.contentType) {
+      headers.set('Content-Type', object.httpMetadata.contentType);
+    }
+    
+    headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    
+    return new Response(object.body, {
+      headers
+    });
+  } catch (error) {
+    console.error('Error serving image from R2:', error);
+    return new Response('Error fetching image', { status: 500 });
+  }
+});
 
 // --- Public API Routes ---
 const publicApi = new Hono<{ Bindings: Env }>();
@@ -48,30 +81,20 @@ adminApi.post('/login', (c) => handleAuth(c, 'login'));
 adminApi.post('/logout', (c) => handleAuth(c, 'logout'));
 
 // Protected admin actions are grouped and have middleware applied
-const protectedRoutes = new Hono<{ Bindings: Env }>().use('*', authMiddleware());
-protectedRoutes.get('/check', (c) => handleAuth(c, 'check'));
-protectedRoutes.get('/events', (c) => handleEvents(c, 'list'));
-protectedRoutes.post('/events', (c) => handleEvents(c, 'create'));
-protectedRoutes.put('/events/:id', (c) => handleEvents(c, 'update'));
-protectedRoutes.delete('/events/:id', (c) => handleEvents(c, 'delete'));
-protectedRoutes.post('/events/flyer', (c) => handleEvents(c, 'upload-flyer'));
-protectedRoutes.post('/sync-events', (c) => handleSync(c));
+const protectedAdminApi = new Hono<{ Bindings: Env }>();
+protectedAdminApi.use('*', authMiddleware());
 
-// --- Protected Blog Routes ---
-// protectedRoutes.get('/blog/posts', (c) => handleBlog(c.req.raw, c.env)); // Replaced with direct handler
-// protectedRoutes.post('/blog/posts', (c) => handleBlog(c.req.raw, c.env)); // Replaced with direct handler
-// protectedRoutes.put('/blog/:id', (c) => handleBlog(c.req.raw, c.env)); // Replaced with direct handler
-// protectedRoutes.delete('/blog/:id', (c) => handleBlog(c.req.raw, c.env)); // Replaced with direct handler
-protectedRoutes.get('/blog/posts', listAllPosts);
-protectedRoutes.post('/blog/posts', createPost);
-protectedRoutes.get('/blog/posts/:id', getPostById); // Added for completeness
-protectedRoutes.put('/blog/posts/:id', updatePostById); // Corrected route for REST
-protectedRoutes.delete('/blog/posts/:id', deletePostById); // Corrected route for REST
-protectedRoutes.post('/blog/featured', setFeaturedContent);
-
+// Blog management endpoints
+protectedAdminApi.get('/blog/posts', listAllPosts);
+protectedAdminApi.post('/blog/posts', createPost);
+protectedAdminApi.get('/blog/:id', getPostById);
+protectedAdminApi.put('/blog/:id', updatePostById);
+protectedAdminApi.delete('/blog/:id', deletePostById);
+protectedAdminApi.post('/blog/featured', setFeaturedContent);
+protectedAdminApi.post('/blog/upload-image', uploadBlogImage); // New endpoint for blog image uploads
 
 // Mount the protected routes under the /admin path
-adminApi.route('/admin', protectedRoutes);
+adminApi.route('/admin', protectedAdminApi);
 
 // Mount the entire admin API router under /api
 app.route('/api', adminApi);
