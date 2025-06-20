@@ -209,6 +209,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .admin-section.active {
     display: block;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .section-header {
@@ -692,6 +694,8 @@ input:focus, select:focus, textarea:focus {
 /* Specific style rule for dashboard-visible class */
 #dashboard-container.dashboard-visible {
     display: grid !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 /* -------------------------------------------------------------------------- */

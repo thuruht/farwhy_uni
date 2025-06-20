@@ -37,7 +37,7 @@ function showLoginScreen() {
                     <div class="form-group"><label for="username">Username</label><input type="text" id="username" name="username" required autocomplete="username"></div>
                     <div class="form-group"><label for="password">Password</label><input type="password" id="password" name="password" required autocomplete="current-password"></div>
                     <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem;">Log In</button>
-                    <div id="login-error" style="color: var(--error); margin-top: 1rem; text-align: center; min-height: 1.2em;"></div>
+                    <div id="login-error" style="color: var(--error); margin-top: 1rem; text-align: center; min-height: 1.2em; font-weight: bold;"></div>
                 </form>
             </div>
         </div>
@@ -86,6 +86,13 @@ function showDashboard() {
         
         // Log the computed style to verify
         console.log('Dashboard container computed style after setting:', window.getComputedStyle(dashboardContainer).display);
+        
+        // Extra debugging to make sure dashboard elements are visible
+        console.log('Dashboard sections after display:', document.querySelectorAll('.admin-section').length);
+        console.log('Active sections:', document.querySelectorAll('.admin-section.active').length);
+        
+        // Force reflow to ensure styles are applied
+        void dashboardContainer.offsetWidth;
     }
     
     console.log('Calling initializeDashboard...');
@@ -121,6 +128,13 @@ async function handleLoginSubmit(e) {
                         role: result.role || 'admin'
                     };
                     console.log('Updated currentUser from login alternative format:', currentUser);
+                } else {
+                    // If no user data in response, create from login data
+                    currentUser = {
+                        username: data.username,
+                        role: 'admin'  // Default role
+                    };
+                    console.log('Created currentUser from login data:', currentUser);
                 }
                 
                 // Update user info display
@@ -137,7 +151,10 @@ async function handleLoginSubmit(e) {
                     console.log('Set user role display to:', currentUser.role);
                 }
                 
-                showDashboard();
+                // Add a small delay to ensure all DOM updates complete
+                setTimeout(() => {
+                    showDashboard();
+                }, 50);
             } else {
                 if (errorDiv) errorDiv.textContent = result.error || 'Invalid credentials.';
             }
@@ -145,6 +162,7 @@ async function handleLoginSubmit(e) {
             if (errorDiv) errorDiv.textContent = 'Invalid credentials.';
         }
     } catch (err) {
+        console.error('Login error:', err);
         if (errorDiv) errorDiv.textContent = 'An error occurred. Please try again.';
     }
 }
