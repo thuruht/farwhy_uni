@@ -86,9 +86,6 @@ async function handleLoginSubmit(e) {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('[Admin] App initializing...');
 
-    // Setup debug panel first
-    setupDebugPanel();
-
     // Check if modal elements exist
     console.log('Modal elements check:', {
         'form-modal': document.getElementById('form-modal'),
@@ -851,77 +848,6 @@ function showSection(sectionName) {
             case 'venue': loadVenueSettings(); break;
             case 'import': setupImportHandlers(); break;
         }
-    }
-}
-
-// ====================================
-// DEBUG PANEL
-// ====================================
-
-function setupDebugPanel() {
-    // Create debug toggle button
-    const debugToggle = document.createElement('div');
-    debugToggle.className = 'debug-toggle';
-    debugToggle.textContent = '🐛';
-    debugToggle.title = 'Toggle Debug Console';
-    document.body.appendChild(debugToggle);
-    
-    // Create debug console
-    const debugConsole = document.createElement('div');
-    debugConsole.className = 'debug-console';
-    debugConsole.innerHTML = `
-        <div class="debug-header">
-            <div class="debug-title">Debug Console</div>
-            <div class="debug-close">×</div>
-        </div>
-        <div class="debug-content"></div>
-    `;
-    document.body.appendChild(debugConsole);
-    
-    // Setup event listeners
-    debugToggle.addEventListener('click', () => {
-        debugConsole.classList.toggle('active');
-    });
-    
-    document.querySelector('.debug-close').addEventListener('click', () => {
-        debugConsole.classList.remove('active');
-    });
-    
-    // Override console methods
-    const originalLog = console.log;
-    const originalWarn = console.warn;
-    const originalError = console.error;
-    
-    console.log = function(...args) {
-        addDebugMessage('info', ...args);
-        originalLog.apply(console, args);
-    };
-    
-    console.warn = function(...args) {
-        addDebugMessage('warning', ...args);
-        originalWarn.apply(console, args);
-    };
-    
-    console.error = function(...args) {
-        addDebugMessage('error', ...args);
-        originalError.apply(console, args);
-    };
-    
-    // Helper function to add messages to debug console
-    function addDebugMessage(type, ...args) {
-        const debugContent = document.querySelector('.debug-content');
-        if (!debugContent) return;
-        
-        const message = args.map(arg => 
-            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg
-        ).join(' ');
-        
-        const logEntry = document.createElement('div');
-        logEntry.className = `debug-log ${type}`;
-        logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-        
-        debugContent.appendChild(logEntry);
-        debugContent.scrollTop = debugContent.scrollHeight;
     }
 }
 

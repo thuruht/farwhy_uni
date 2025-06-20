@@ -689,47 +689,4 @@ input:focus, select:focus, textarea:focus {
     }
 }
 
-/* -------------------------------------------------------------------------- */
-/* 12. Debug Console                              */
-/* -------------------------------------------------------------------------- */
-
-.debug-container {
-    background-color: var(--bg-light);
-    border: 2px solid var(--border-color);
-    border-radius: 10px;
-    padding: 1.5rem;
-    box-shadow: 5px 5px 0px var(--shadow-color);
-    margin-bottom: 2rem;
-}
-
-.debug-controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    align-items: center;
-}
-
-.debug-output {
-    background-color: var(--bg-dark);
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
-    height: 400px;
-    overflow-y: auto;
-    font-family: monospace;
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    line-height: 1.5;
-}
-
-.debug-log {
-    padding: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-.debug-log:last-child {
-    border-bottom: none;
-}
+/* End of File */
