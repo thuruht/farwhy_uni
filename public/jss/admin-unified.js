@@ -17,7 +17,12 @@ let dashboardState = {
 function showLoginScreen() {
     const loginContainer = document.getElementById('login-container');
     const dashboardContainer = document.getElementById('dashboard-container');
-    if (dashboardContainer) dashboardContainer.style.display = 'none'; // This line causes the issue
+    
+    if (dashboardContainer) {
+        dashboardContainer.style.display = 'none';
+        console.log('Dashboard container hidden');
+    }
+    
     if (!loginContainer) return;
 
     loginContainer.innerHTML = `
@@ -41,13 +46,9 @@ function showDashboard() {
     const dashboardContainer = document.getElementById('dashboard-container');
     if (loginContainer) loginContainer.innerHTML = '';
     if (dashboardContainer) {
-        // =================================================================
-        // === THE FIX: Remove the inline style to let CSS classes work ===
-        dashboardContainer.style.display = '';
-        // =================================================================
-
-        // This correctly uses the CSS class to make the dashboard visible
-        dashboardContainer.classList.add('visible');
+        // Display the dashboard container with the correct display type
+        dashboardContainer.style.display = 'grid';
+        console.log('Dashboard container display set to grid');
     }
     initializeDashboard();
 }
@@ -834,12 +835,21 @@ function setupImportHandlers() {
 }
 
 function showSection(sectionName) {
+    console.log(`Attempting to show section: ${sectionName}`);
     const sections = document.querySelectorAll('.admin-section');
-    sections.forEach(section => section.classList.remove('active'));
+    console.log(`Found ${sections.length} admin sections`);
+    
+    sections.forEach(section => {
+        section.classList.remove('active');
+        console.log(`Removed 'active' class from section: ${section.id}`);
+    });
 
     const targetSection = document.getElementById(`section-${sectionName}`);
     if (targetSection) {
+        console.log(`Found target section: section-${sectionName}`);
         targetSection.classList.add('active');
+        console.log(`Added 'active' class to section-${sectionName}`);
+        
         dashboardState.currentSection = sectionName;
         switch (sectionName) {
             case 'dashboard': loadDashboardStats(); break;
@@ -848,6 +858,8 @@ function showSection(sectionName) {
             case 'venue': loadVenueSettings(); break;
             case 'import': setupImportHandlers(); break;
         }
+    } else {
+        console.error(`Section not found: section-${sectionName}`);
     }
 }
 
