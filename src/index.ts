@@ -79,6 +79,7 @@ const adminApi = new Hono<{ Bindings: Env }>();
 // Unprotected admin actions
 adminApi.post('/login', (c) => handleAuth(c, 'login'));
 adminApi.post('/logout', (c) => handleAuth(c, 'logout'));
+adminApi.get('/check', (c) => handleAuth(c, 'check')); // Add check endpoint for auth status
 
 // Protected admin actions are grouped and have middleware applied
 const protectedAdminApi = new Hono<{ Bindings: Env }>();
@@ -87,9 +88,9 @@ protectedAdminApi.use('*', authMiddleware());
 // Blog management endpoints
 protectedAdminApi.get('/blog/posts', listAllPosts);
 protectedAdminApi.post('/blog/posts', createPost);
-protectedAdminApi.get('/blog/:id', getPostById);
-protectedAdminApi.put('/blog/:id', updatePostById);
-protectedAdminApi.delete('/blog/:id', deletePostById);
+protectedAdminApi.get('/blog/posts/:id', getPostById);
+protectedAdminApi.put('/blog/posts/:id', updatePostById);
+protectedAdminApi.delete('/blog/posts/:id', deletePostById);
 protectedAdminApi.post('/blog/featured', setFeaturedContent);
 protectedAdminApi.post('/blog/upload-image', uploadBlogImage); // New endpoint for blog image uploads
 

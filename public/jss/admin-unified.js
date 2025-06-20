@@ -30,19 +30,149 @@ function showLoginScreen() {
     console.log('Added active class to login container');
 
     loginContainer.innerHTML = `
-        <div class="login-page" style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; background: var(--bg-dark);">
-            <div class="login-form-container" style="max-width: 400px; width: 100%; padding: 2.5rem; background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 12px;">
-                <h1 style="text-align: center; color: var(--cyan); font-family: var(--font-display);">F/H Admin</h1>
+        <div class="admin-header">
+            <h1>admin</h1>
+        </div>
+        <main>
+            <div class="login-container">
+                <div class="login-title">log in</div>
                 <form id="loginForm">
-                    <div class="form-group"><label for="username">Username</label><input type="text" id="username" name="username" required autocomplete="username"></div>
-                    <div class="form-group"><label for="password">Password</label><input type="password" id="password" name="password" required autocomplete="current-password"></div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem;">Log In</button>
-                    <div id="login-error" style="color: var(--error); margin-top: 1rem; text-align: center; min-height: 1.2em; font-weight: bold;"></div>
+                    <div class="form-group">
+                        <label for="username">user:</label>
+                        <input type="text" id="username" name="username" required autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">pass:</label>
+                        <input type="password" id="password" name="password" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="login-btn">let me in</button>
+                    <div id="login-error" class="error"></div>
                 </form>
             </div>
-        </div>
+        </main>
+        <style>
+            #login-container {
+                background: var(--header-bg);
+                font-family: var(--font-main, 'Lora', serif);
+                margin: 0;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                z-index: 9999;
+            }
+            .admin-header {
+                width: 100%;
+                background: var(--primary-bg-color) url('/img/bg4.png') center/cover no-repeat;
+                background-attachment: fixed;
+                border-bottom: 1px solid var(--nav-border-color);
+                padding: 1rem 2rem;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 212px;
+            }
+            .admin-header h1 {
+                font-family: var(--font-db, 'Lora', serif);
+                font-size: clamp(2.5rem, 8vw, 4em);
+                color: var(--secondary-bg-color);
+                -webkit-text-stroke: 1px black;
+                text-shadow: -1px -1px 0 #000,
+                    1px -1px 0 #000,
+                    -1px 1px 0 #000,
+                    1px 1px 0 #000,
+                    -8px 8px 0px var(--nav-border-color);
+                margin: 0;
+            }
+            .login-container {
+                background: var(--card-bg-color);
+                border: 2px solid var(--nav-border-color);
+                border-radius: 8px;
+                box-shadow: -5px 5px 0px rgba(0,0,0,0.08);
+                padding: 2.5rem 2rem 2rem 2rem;
+                margin: 2rem auto 0 auto;
+                max-width: 400px;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .login-title {
+                font-family: var(--font-db, 'Lora', serif);
+                font-size: 2.2rem;
+                color: var(--accent-color);
+                margin-bottom: 1.5rem;
+                text-shadow: 2px 2px 4px var(--header-text-shadow);
+            }
+            .form-group {
+                width: 100%;
+                margin-bottom: 1.2rem;
+                text-align: left;
+            }
+            #loginForm label {
+                font-family: var(--font-main, 'Lora', serif);
+                color: var(--accent-color);
+                font-weight: bold;
+                margin-bottom: 0.3rem;
+                display: block;
+            }
+            #loginForm input {
+                width: 100%;
+                padding: 0.8rem;
+                border: 1.5px solid var(--nav-border-color);
+                border-radius: 4px;
+                font-family: var(--font-hnm11, 'Lora', serif);
+                font-size: 1rem;
+                background: rgba(255,255,255,0.95);
+                color: var(--text-color);
+                transition: border 0.2s;
+            }
+            #loginForm input:focus {
+                outline: none;
+                border-color: var(--secondary-bg-color);
+                box-shadow: -3px 3px 0px rgba(0,0,0,0.08);
+            }
+            .login-btn {
+                width: 100%;
+                padding: 1rem 2rem;
+                background: var(--button-bg-color);
+                color: var(--button-text-color);
+                font-family: var(--font-main, 'Lora', serif);
+                font-weight: bold;
+                border-radius: 4px;
+                border: 2px solid var(--text-color);
+                font-size: 1.1rem;
+                margin-top: 0.5rem;
+                cursor: pointer;
+                transition: all var(--transition-speed) ease;
+            }
+            .login-btn:hover {
+                background: var(--accent-color);
+                color: white;
+                transform: translateY(-2px);
+            }
+            .error {
+                color: var(--redd);
+                margin-top: 0.7rem;
+                font-size: 1rem;
+                min-height: 1.2em;
+                text-align: center;
+                font-family: var(--font-main, 'Lora', serif);
+            }
+            @media (max-width: 600px) {
+                .login-container { padding: 1.2rem 0.5rem; }
+                .admin-header { min-height: 120px; padding: 0.5rem; }
+                .admin-header h1 { font-size: 2rem; }
+            }
+        </style>
     `;
-    document.getElementById('loginForm')?.addEventListener('submit', handleLoginSubmit);
+
+    document.getElementById('loginForm').addEventListener('submit', handleLoginSubmit);
 }
 
 function showDashboard() {
@@ -114,7 +244,7 @@ async function handleLoginSubmit(e) {
     console.log('Login data:', { username: form.username.value, password: '********' });
     if (errorDiv) errorDiv.textContent = '';
     try {
-        const response = await fetch('/api/login', {
+        const response = await fetch('/api/admin/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -775,14 +905,27 @@ function showEventForm(id = null) {
 
         showToast('Uploading flyer...', 'info');
 
-        const res = await fetch('/api/admin/events/flyer', { method: 'POST', body: formData, credentials: 'include' });
-        const result = await res.json();
-
-        if (res.ok && result.success) {
-            document.querySelector('input[name="flyer_image_url"]').value = result.url;
-            showToast('Flyer uploaded!', 'success');
-        } else {
-            showToast(result.error || 'Flyer upload failed.', 'error');
+        try {
+            const res = await api._call('/api/admin/events/flyer', { 
+                method: 'POST', 
+                body: formData,
+                headers: {} // Override default Content-Type for FormData
+            });
+            
+            if (res) {
+                const result = await res.json();
+                if (result.success) {
+                    document.querySelector('input[name="flyer_image_url"]').value = result.url;
+                    showToast('Flyer uploaded!', 'success');
+                } else {
+                    showToast(result.error || 'Flyer upload failed.', 'error');
+                }
+            } else {
+                showToast('Flyer upload failed.', 'error');
+            }
+        } catch (error) {
+            console.error('Flyer upload error:', error);
+            showToast('Error uploading flyer: ' + (error.message || 'Unknown error'), 'error');
         }
     });
     
@@ -923,8 +1066,13 @@ window.editBlogPost = (id) => {
 
 window.deleteBlogPost = async (id) => {
     if (confirm('Are you sure?')) {
-        const res = await api.delete(`/api/admin/blog/${id}`);
-        if (res) { loadBlogPosts(); showToast('Post deleted.', 'success'); }
+        const res = await api.delete(`/api/admin/blog/posts/${id}`);
+        if (res) { 
+            loadBlogPosts(); 
+            showToast('Post deleted.', 'success'); 
+        } else {
+            showToast('Failed to delete post. Please try again.', 'error');
+        }
     }
 }
 
@@ -1042,25 +1190,29 @@ function showBlogForm(id = null) {
                             const formData = new FormData();
                             formData.append('image', file);
                             
-                            const response = await fetch('/api/admin/blog/upload-image', {
-                                method: 'POST',
+                            const res = await api._call('/api/admin/blog/upload-image', { 
+                                method: 'POST', 
                                 body: formData,
-                                credentials: 'include'
+                                headers: {} // Override default Content-Type for FormData
                             });
                             
-                            const result = await response.json();
-                            
-                            if (response.ok && result.success) {
-                                // Update the URL input with the new image URL
-                                blogImageUrlInput.value = result.imageUrl;
+                            if (res) {
+                                const result = await res.json();
                                 
-                                // Update the preview
-                                blogImagePreview.innerHTML = `<img src="${result.imageUrl}" alt="Featured image">`;
-                                blogImagePreview.classList.add('has-image');
-                                
-                                showToast('Featured image uploaded successfully!', 'success');
+                                if (result.success) {
+                                    // Update the URL input with the new image URL
+                                    blogImageUrlInput.value = result.imageUrl;
+                                    
+                                    // Update the preview
+                                    blogImagePreview.innerHTML = `<img src="${result.imageUrl}" alt="Featured image">`;
+                                    blogImagePreview.classList.add('has-image');
+                                    
+                                    showToast('Featured image uploaded successfully!', 'success');
+                                } else {
+                                    showToast(result.error || 'Failed to upload image', 'error');
+                                }
                             } else {
-                                showToast(result.error || 'Failed to upload image', 'error');
+                                showToast('Failed to upload image', 'error');
                             }
                         } catch (error) {
                             console.error('Error uploading featured image:', error);

@@ -81,7 +81,7 @@ function handleLogout() {
     sessionStorage.removeItem("sessionToken");
     sessionToken = null;
     // Redirect to main admin logout
-    window.location.href = '/admin/api/logout';
+    window.location.href = '/api/admin/logout';
 }
 
 document.addEventListener('mousemove', resetAuthTimer);
