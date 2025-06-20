@@ -24,6 +24,10 @@ function showLoginScreen() {
     }
     
     if (!loginContainer) return;
+    
+    // Add the active class to make the login container visible
+    loginContainer.classList.add('active');
+    console.log('Added active class to login container');
 
     loginContainer.innerHTML = `
         <div class="login-page" style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; background: var(--bg-dark);">
@@ -42,22 +46,43 @@ function showLoginScreen() {
 }
 
 function showDashboard() {
+    console.log('showDashboard called');
     const loginContainer = document.getElementById('login-container');
     const dashboardContainer = document.getElementById('dashboard-container');
-    if (loginContainer) loginContainer.innerHTML = '';
+    
+    console.log('Login container:', loginContainer);
+    console.log('Dashboard container:', dashboardContainer);
+    
+    if (loginContainer) {
+        loginContainer.classList.remove('active');
+        loginContainer.innerHTML = '';
+        console.log('Removed active class and cleared login container');
+    }
+    
     if (dashboardContainer) {
         // Display the dashboard container with the correct display type
         dashboardContainer.style.display = 'grid';
         console.log('Dashboard container display set to grid');
+        
+        // Add a class to track visibility issues
+        dashboardContainer.classList.add('dashboard-visible');
+        console.log('Added dashboard-visible class');
+        
+        // Log the computed style to verify
+        console.log('Dashboard container computed style after setting:', window.getComputedStyle(dashboardContainer).display);
     }
+    
+    console.log('Calling initializeDashboard...');
     initializeDashboard();
 }
 
 async function handleLoginSubmit(e) {
     e.preventDefault();
+    console.log('Login form submitted');
     const errorDiv = document.getElementById('login-error');
     const form = e.target;
     const data = { username: form.username.value, password: form.password.value };
+    console.log('Login data:', { username: form.username.value, password: '********' });
     if (errorDiv) errorDiv.textContent = '';
     try {
         const response = await fetch('/api/login', {
@@ -91,7 +116,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dashboardContainer = document.getElementById('dashboard-container');
     console.log('Dashboard container:', dashboardContainer);
     if (dashboardContainer) {
-        console.log('Dashboard container computed style:', window.getComputedStyle(dashboardContainer).display);
+        // Initially hide the dashboard container until we know the auth status
+        dashboardContainer.style.display = 'none';
+        console.log('Dashboard container initially hidden, computed style:', window.getComputedStyle(dashboardContainer).display);
     }
 
     // Check if admin sections exist
@@ -152,26 +179,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const sessionToken = getCookie('sessionToken');
 
-    if (!sessionToken) {
-        console.log('[Admin] No session token found. Showing login screen.');
-        showLoginScreen();
-        return;
-    }
+    // Now check authentication and show the appropriate screen
     try {
-        const authResponse = await fetch('/api/admin/check', { credentials: 'include', cache: 'no-store' });
-        if (authResponse && authResponse.ok) {
-            const authData = await authResponse.json();
-            if (authData.success && authData.user) {
-                currentUser = authData.user;
-                showDashboard();
-                return;
+        if (!sessionToken) {
+            console.log('[Admin] No session token found. Showing login screen.');
+            showLoginScreen();
+        } else {
+            console.log('[Admin] Session token found, checking validity...');
+            const authResponse = await fetch('/api/admin/check', { credentials: 'include', cache: 'no-store' });
+            if (authResponse && authResponse.ok) {
+                const authData = await authResponse.json();
+                if (authData.success && authData.user) {
+                    console.log('[Admin] Valid user session, showing dashboard');
+                    currentUser = authData.user;
+                    showDashboard();
+                } else {
+                    console.log('[Admin] Invalid user session data, showing login');
+                    document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    showLoginScreen();
+                }
+            } else {
+                console.log('[Admin] Auth check failed, showing login');
+                document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                showLoginScreen();
             }
         }
-        // If the check fails for any reason (401, network error, etc.), show login
-        document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        showLoginScreen();
     } catch (error) {
-        console.error("Auth check failed, showing login screen.", error);
+        console.error("[Admin] Auth check error, showing login screen.", error);
+        document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         showLoginScreen();
     }
 });
@@ -285,12 +320,27 @@ function showToast(message, type = 'info') {
 // ====================================
 
 async function initializeDashboard() {
+    console.log('initializeDashboard started');
+    
+    console.log('Setting up navigation...');
     setupNavigation();
+    
+    console.log('Setting up mobile menu...');
     setupMobileMenu();
+    
+    console.log('Setting up modal...');
     setupModal();
+    
+    console.log('Setting up toasts...');
     setupToasts();
+    
+    console.log('Loading initial data...');
     await loadInitialData();
+    
+    console.log('Showing dashboard section...');
     showSection('dashboard');
+    
+    console.log('initializeDashboard completed');
 }
 
 function setupNavigation() {

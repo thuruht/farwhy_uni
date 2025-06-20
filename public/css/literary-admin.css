@@ -689,4 +689,9 @@ input:focus, select:focus, textarea:focus {
     }
 }
 
+/* Specific style rule for dashboard-visible class */
+#dashboard-container.dashboard-visible {
+    display: grid !important;
+}
+
 /* End of File */
