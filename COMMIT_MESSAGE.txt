@@ -1,27 +1,35 @@
-Fix: Implemented missing navigation functions in admin dashboard
+Fix: Public page links and admin table layout
 
-This commit resolves the "showSection is not defined" error in the admin dashboard by:
+This commit includes several important fixes:
 
-1. Adding the missing `showSection` function to admin-unified.js
-   - Implemented proper section switching and display
-   - Added CSS class toggling for active sections
-   - Connected to section-specific data loading functions
+1. Fixed "view show listings" link in public/index.html to:
+   - Only open the events modal and not an empty popup window
+   - Use javascript:void(0) to prevent default link behavior
+   - Renamed trigger class from "open-popup" to "events-modal-trigger" for clarity
 
-2. Adding complementary missing functions:
-   - `loadVenueSettings`: Added placeholder for venue settings display
-   - `setupImportHandlers`: Implemented legacy event import functionality
+2. Updated text in the calendar section:
+   - Removed outdated text about different venue views showing different listings
+   - Replaced with simpler message about viewing events at both venues
+   - Improved the styling with a lighter background
 
-3. Updated documentation:
-   - Added section navigation details to DOCUMENTATION.md
-   - Updated PROGRESS_REPORT.md with completed fixes
+3. Updated events-modal.js to use the new trigger class
 
-This change ensures proper navigation between dashboard sections, fixes the runtime error, and maintains consistent state tracking in the dashboard.
+4. Fixed misaligned table headers in event management section
+   - Properly structured the table HTML with consistent column widths
+   - Added proper vertical alignment for all cells
+   - Ensured image thumbnails are properly aligned and sized
+
+5. Applied consistent styling to tables for uniform appearance
+   - Added identical styling for thumbnails across tables
+   - Maintained consistent vertical alignment across all tables
+
+6. Updated documentation in PROGRESS_REPORT.md
+
+These changes ensure a better user experience with both the public site events modal
+and the admin dashboard tables, providing a more professional and usable interface.
 
 Related files:
+- public/index.html
+- public/jss/events-modal.js
 - public/jss/admin-unified.js
-- DOCUMENTATION.md
 - PROGRESS_REPORT.md
-
-Tested on:
-- Desktop Chrome, Firefox
-- Mobile Safari, Chrome
