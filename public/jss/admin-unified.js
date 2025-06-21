@@ -374,20 +374,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Set up mobile menu toggle
-    const mobileToggle = document.getElementById('mobile-menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
-    if (mobileToggle && sidebar) {
-        console.log('Found mobile toggle, adding direct click handler');
-        mobileToggle.addEventListener('click', () => {
-            console.log('Mobile menu toggle clicked');
-            sidebar.classList.toggle('open');
-        });
-    }
-
-    const sessionToken = getCookie('sessionToken');
-
     // Now check authentication and show the appropriate screen
+    const sessionToken = getCookie('sessionToken');
+    
     try {
         if (!sessionToken) {
             console.log('[Admin] No session token found. Showing login screen.');
@@ -616,16 +605,46 @@ function setupMobileMenu() {
     console.log('Setting up mobile menu toggle');
     const mobileToggle = document.getElementById('mobile-menu-toggle');
     const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
 
-    console.log('Mobile menu elements:', mobileToggle, sidebar);
+    console.log('Mobile menu elements:', mobileToggle, sidebar, overlay);
 
     if (mobileToggle && sidebar) {
-        mobileToggle.addEventListener('click', (e) => {
+        // Add better click handling for mobile
+        const toggleMobileMenu = (e) => {
             console.log('Mobile menu toggle clicked');
             e.preventDefault();
+            e.stopPropagation();
             sidebar.classList.toggle('open');
+            
+            // Toggle overlay
+            if (overlay) {
+                overlay.classList.toggle('active');
+            }
+            
             console.log('Sidebar classes after toggle:', sidebar.classList);
+        };
+
+        // Use both click and touchend events for better mobile response
+        mobileToggle.addEventListener('click', toggleMobileMenu);
+        mobileToggle.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            toggleMobileMenu(e);
         });
+
+        // Add overlay click handler
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+            
+            overlay.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+        }
 
         // Close sidebar when clicking outside of it
         document.addEventListener('click', (e) => {
@@ -634,6 +653,7 @@ function setupMobileMenu() {
                 !sidebar.contains(e.target) &&
                 !mobileToggle.contains(e.target)) {
                 sidebar.classList.remove('open');
+                if (overlay) overlay.classList.remove('active');
             }
         });
         
@@ -644,6 +664,7 @@ function setupMobileMenu() {
                 if (window.innerWidth <= 768) {
                     setTimeout(() => {
                         sidebar.classList.remove('open');
+                        if (overlay) overlay.classList.remove('active');
                     }, 150);
                 }
             });
@@ -793,12 +814,12 @@ function renderEvents(events, setupFilters = true) {
     eventList.innerHTML = `<table class="admin-table">
         <thead>
             <tr>
-                <th style="width: 80px; text-align: center;">Image</th>
-                <th>Title</th>
-                <th>Date</th>
-                <th>Venue</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
+                <th>&nbsp;</th>
             </tr>
         </thead>
         <tbody>` +

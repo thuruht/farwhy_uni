@@ -698,10 +698,10 @@ input:focus, select:focus, textarea:focus {
     padding: 0.5rem;
     height: 44px;
     width: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+}
 }
 
 @media (max-width: 768px) {
@@ -715,7 +715,7 @@ input:focus, select:focus, textarea:focus {
         left: -280px;
         height: 100vh;
         width: 280px;
-        z-index: 100;
+        z-index: 1000; /* Increased z-index to ensure it's above other elements */
         transition: left 0.3s ease;
         background-color: var(--bg-light);
         box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
@@ -731,6 +731,17 @@ input:focus, select:focus, textarea:focus {
         display: block;
         font-size: 1.8rem;
         margin-right: 1rem;
+        cursor: pointer;
+        z-index: 1001; /* Ensure toggle is above the sidebar */
+        position: relative; /* Ensure position context for z-index */
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 8px;
+        border-radius: 5px;
+        height: 44px;
+        width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .main-content {
@@ -752,6 +763,24 @@ input:focus, select:focus, textarea:focus {
     .user-info {
         padding: 1rem 0;
         margin-top: 2rem;
+    }
+    
+    /* Make nav items bigger and more touch-friendly on mobile */
+    .nav-item {
+        padding: 15px 20px;
+        margin-bottom: 5px;
+        font-size: 18px;
+    }
+    
+    /* Ensure sidebar is above all other content */
+    .sidebar {
+        z-index: 1000;
+    }
+    
+    /* Ensure the mobile menu toggle is visible and accessible */
+    .mobile-menu-toggle {
+        min-height: 44px;
+        min-width: 44px;
     }
     
     /* Responsive table styles for mobile view                    */
@@ -1131,6 +1160,28 @@ tr.event-divider hr, tr.blog-divider hr {
 .ql-snow .ql-editor img {
     max-width: 100%;
     height: auto;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Sidebar Overlay for Mobile Menu             */
+/* -------------------------------------------------------------------------- */
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
 }
 
 /* End of File */
