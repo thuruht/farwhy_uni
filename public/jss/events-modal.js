@@ -24,7 +24,7 @@
     setupEventListeners();
     
     // Trigger modal when clicking show listings or calendar image
-    const listingLinks = document.querySelectorAll('.open-popup, #calendar img');
+    const listingLinks = document.querySelectorAll('.events-modal-trigger, #calendar img');
     listingLinks.forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();

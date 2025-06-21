@@ -84,16 +84,21 @@
     - Resolved "showSection is not defined" runtime error
 
 16. ✅ **Event Table Layout Fixed**
-    - Fixed issues with event images appearing above everything
-    - Corrected title, date, and venue columns alignment
-    - Improved table display and responsiveness
-    - Fixed empty column layout issues in event management
+    - Fixed event table columns alignment
+    - Added consistent table styling
+    - Improved visual organization of event listings
 
 17. ✅ **Admin Table Alignment Fixed**
     - Fixed misaligned table headers in event and blog tables
     - Improved consistent styling for admin tables
     - Added proper column widths and vertical alignment
     - Enhanced visibility of thumbnail images and venue tags
+
+18. ✅ **Public Index Page Links Fixed**
+    - Fixed "view show listings" link to only open the modal, not an empty popup window
+    - Removed outdated text about different venue views showing different listings
+    - Updated calendar link to use javascript:void(0) to prevent default link behavior
+    - Changed trigger class from "open-popup" to "events-modal-trigger" for clarity
 
 ### Current Issues
 
