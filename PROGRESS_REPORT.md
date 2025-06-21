@@ -115,6 +115,23 @@
     - Modified event delegation code to handle both old and new class names
     - Ensured backward compatibility with any existing old links
 
+20. ✅ **Events Modal Improvements**
+    - Enhanced venue selection to make it more obvious and intuitive
+    - Added "Both Venues" option to filter events across venues
+    - Only showing past events when "archived" filter is selected
+    - Removed generic "Check with venue" text in favor of actual event information
+    - Added detailed event information display with venue badge, age restrictions, price info
+    - Improved ticket purchase link appearance
+    - Enhanced mobile responsiveness for the event details view
+    - Updated backend API to consistently handle event information
+
+22. ✅ **Events Modal UI Improvements**
+    - Made "Upcoming Only" the default when opening the modal
+    - Made venue filter buttons (Both Venues, Upcoming Only, Howdy, and Farewell) the same size
+    - Fixed the event details view and flyer display
+    - Enhanced mobile responsiveness for event details and filter buttons
+    - Added error handling for missing event images
+
 ### Current Issues
 
 1. ❓ **Stats Display Issues**

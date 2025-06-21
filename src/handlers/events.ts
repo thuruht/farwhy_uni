@@ -33,7 +33,7 @@ function normalizeEventForDisplay(event: Event): any {
     description: event.description || '',
     suggestedPrice: event.price || '', // Legacy field mapping
     ticketLink: event.ticket_url || '',
-    ageRestriction: event.age_restriction || 'Check with venue',
+    ageRestriction: event.age_restriction || '',
     status: event.status || 'active',
     is_featured: event.is_featured || false,
     capacity: event.capacity || null,
@@ -140,31 +140,49 @@ async function getSlideshow(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
 
   try {
+    // Modified to fetch all active events regardless of date
     const { results } = await FWHY_D1.prepare(`
       SELECT * FROM events
-      WHERE date >= datetime('now') AND status = 'active'
+      WHERE status = 'active'
       ORDER BY date ASC
     `).all();
 
-    const events = (results as Event[] ?? []).map(event => ({
-      id: event.id,
-      title: event.title || 'Untitled Event',
-      venue: event.venue || 'unknown',
-      date: event.date || '',
-      time: event.event_time || 'Doors at 7pm / Music at 8pm',
-      imageUrl: event.flyer_image_url || event.legacy_image_url || '',
-      description: event.description || '',
-      is_featured: event.is_featured || false,
-      ticketLink: event.ticket_url || '',
-      price: event.price || '',
-      ageRestriction: event.age_restriction || 'Check with venue',
-      event_type: event.event_type || 'music',
-      performers: event.performers || '[]',
-      tags: event.tags || '[]',
-      external_links: event.external_links || '{}'
-    }));
+    const events = (results as Event[] ?? []).map(event => {
+      // Ensure consistent date format
+      let formattedDate = event.date || '';
+      
+      // If we have a datetime with time, extract just the date part
+      if (formattedDate && formattedDate.includes('T')) {
+        formattedDate = formattedDate.split('T')[0];
+      }
+      
+      // Log for debugging
+      console.log(`Event "${event.title}" date: ${event.date} → ${formattedDate}`);
+      
+      return {
+        id: event.id,
+        title: event.title || 'Untitled Event',
+        venue: event.venue || 'unknown',
+        date: formattedDate,
+        time: event.event_time || 'Doors at 7pm / Music at 8pm',
+        imageUrl: event.flyer_image_url || event.legacy_image_url || '',
+        description: event.description || '',
+        is_featured: event.is_featured || false,
+        ticketLink: event.ticket_url || '',
+        price: event.price || '',
+        ageRestriction: event.age_restriction || '',
+        event_type: event.event_type || 'music',
+        performers: event.performers || '[]',
+        tags: event.tags || '[]',
+        external_links: event.external_links || '{}'
+      };
+    });
 
-    return c.json(events);
+    return c.json(events, 200, {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
   } catch (error) {
     console.error('Error fetching slideshow events:', error);
     return c.json({ success: false, error: 'Failed to fetch slideshow events' }, 500);

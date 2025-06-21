@@ -1,33 +1,50 @@
-Improve Event and Blog Table Structure & Styling
+Enhance Events Modal UX and Detailed Event Information Display
 
-This commit enhances the table structure and styling in the admin dashboard to improve usability and consistency:
+This commit significantly improves the events modal functionality and user experience:
 
-- Enhanced events table structure to match blog table quality
-- Added status indicators for events (Past/Upcoming) and blog posts (Recent/Older)
-- Implemented consistent thumbnail styling across tables with proper borders and shadows
-- Added hover effects to table rows for better interactivity
-- Color-coded action buttons for better usability (blue for edit, red for delete)
-- Added filtering capabilities for both events and blog tables
-- Implemented setupEventFilters and setupBlogFilters functions
-- Removed unnecessary divider rows for cleaner table appearance
-- Added featured indicators for blog posts
-- Added ticket link display in events table
-- Updated setupDashboardStyles with improved CSS rules
-- Updated documentation in PROGRESS_REPORT.md
+1. Enhanced venue selection interface
+   - Made venue selection tabs more visually distinct and obvious
+   - Added "BOTH VENUES" option to allow viewing events from both venues together
+   - Added clear venue badges to identify which venue each event belongs to
 
-This change significantly improves the admin dashboard user experience by making both tables more consistent, visually appealing, and functional.
+2. Improved event filtering and display
+   - Added archive toggle to show past events only when explicitly requested
+   - Past events are visually indicated with styling (strikethrough and opacity)
+   - Default view now focuses on upcoming events for better user experience
 
-5. Applied consistent styling to tables for uniform appearance
-   - Added identical styling for thumbnails across tables
-   - Maintained consistent vertical alignment across all tables
+3. Enhanced event details display
+   - Removed generic "Check with venue" placeholder text
+   - Added structured layout for event information with proper labels
+   - Included venue badge, age restrictions, price info in detail view
+   - Made the ticket purchase link more prominent when available
+   - Better displayed event description in a properly styled container
 
-6. Updated documentation in PROGRESS_REPORT.md
+4. Mobile responsiveness improvements
+   - Optimized filter controls for mobile screens
+   - Enhanced event details layout for smaller devices
+   - Improved touch targets and readability on mobile
 
-These changes ensure a better user experience with both the public site events modal
-and the admin dashboard tables, providing a more professional and usable interface.
+5. Backend API updates
+   - Modified event handlers to remove default placeholder text
+   - Updated normalizeEventForDisplay and getSlideshow functions
+
+6. Events Modal UI Polishing (Part 2)
+   - Made "Upcoming Only" the default when opening the modal
+   - Standardized all filter buttons (Both Venues, Upcoming Only, Howdy, Farewell) to have the same size
+   - Fixed event details view with flyer that wasn't displaying correctly
+   - Added error handling for event images that fail to load
+   - Enhanced responsive layout for all event details components
+   - Improved contrast and readability of event information
+
+7. Documentation updates
+   - Updated PROGRESS_REPORT.md with the latest improvements
+   - Added detailed documentation of changes and features
+
+These changes make the events modal more intuitive and informative, providing users
+with a better experience when viewing event listings across both venues.
 
 Related files:
-- public/index.html
 - public/jss/events-modal.js
-- public/jss/admin-unified.js
+- public/css/events-modal.css
+- src/handlers/events.ts
 - PROGRESS_REPORT.md
