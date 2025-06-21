@@ -782,7 +782,7 @@ async function loadEvents() {
     }
 }
 
-function renderEvents(events) {
+function renderEvents(events, setupFilters = true) {
     const eventList = document.getElementById('event-list');
     if (!eventList) return;
     if (!Array.isArray(events) || events.length === 0) {
@@ -847,10 +847,30 @@ function renderEvents(events) {
         });
     });
     
-    setupEventFilters();
+    if (setupFilters) {
+        setupEventFilters();
+    }
 }
 
-function renderBlogPosts(posts) {
+async function loadBlogPosts() {
+    const result = await api.get('/api/admin/blog/posts');
+    if (result && result.data) {
+        dashboardState.blogPosts = result.data;
+        renderBlogPosts(result.data, true);
+
+        const addBlogBtn = document.getElementById('add-blog-btn');
+        if (addBlogBtn) {
+            // To prevent multiple listeners on re-renders, we clone and replace the button
+            const newAddBlogBtn = addBlogBtn.cloneNode(true);
+            addBlogBtn.parentNode.replaceChild(newAddBlogBtn, addBlogBtn);
+            // And add the listener to the new button
+            newAddBlogBtn.addEventListener('click', () => showBlogForm());
+            console.log('New Blog Post button listener attached');
+        }
+    }
+}
+
+function renderBlogPosts(posts, setupFilters = true) {
     const blogList = document.getElementById('blog-list');
     if (!blogList) return;
     if (!posts || posts.length === 0) {
@@ -864,24 +884,38 @@ function renderBlogPosts(posts) {
                 <th style="width: 80px; text-align: center;">Image</th>
                 <th>Title</th>
                 <th>Date</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>` +
-        posts.map(post => `<tr>
-            <td class="thumbnail-cell" style="width: 80px; vertical-align: middle; text-align: center;">
-                ${post.image_url ? 
-                    `<div class="thumbnail"><img src="${post.image_url}" alt="${post.title}" loading="lazy" style="max-width: 70px; max-height: 70px; object-fit: cover;"></div>` : 
-                    `<div class="thumbnail empty-thumbnail"><span>No Image</span></div>`}
-            </td>
-            <td style="vertical-align: middle;"><strong>${post.title}</strong></td>
-            <td style="vertical-align: middle;">${formatDate(post.date || post.created_at)}</td>
-            <td class='admin-table-actions' style="vertical-align: middle;">
-                <button class="edit-blog-btn" data-id="${post.id}">Edit</button>
-                <button class="delete-blog-btn" data-id="${post.id}">Delete</button>
-            </td>
-        </tr>
-        <tr class="blog-divider"><td colspan="4"><hr/></td></tr>`).join('') + `</tbody></table>`;
+        posts.map(post => {
+            // Calculate if post is recent (within last 7 days)
+            const postDate = new Date(post.date || post.created_at || new Date());
+            const today = new Date();
+            const daysDiff = Math.floor((today - postDate) / (1000 * 60 * 60 * 24));
+            const isRecent = daysDiff <= 7;
+            const statusClass = isRecent ? 'post-recent' : 'post-older';
+            const statusText = isRecent ? 'Recent' : 'Older';
+            
+            return `<tr class="blog-row">
+                <td class="thumbnail-cell" style="width: 80px; vertical-align: middle; text-align: center;">
+                    ${post.image_url ? 
+                        `<div class="thumbnail"><img src="${post.image_url}" alt="${post.title}" loading="lazy" style="max-width: 70px; max-height: 70px; object-fit: cover;"></div>` : 
+                        `<div class="thumbnail empty-thumbnail"><span>No Image</span></div>`}
+                </td>
+                <td style="vertical-align: middle;">
+                    <strong>${post.title}</strong>
+                    ${post.featured ? `<div class="featured-indicator">⭐ Featured</div>` : ''}
+                </td>
+                <td style="vertical-align: middle;">${formatDate(post.date || post.created_at)}</td>
+                <td style="vertical-align: middle;"><span class="status-tag ${statusClass}">${statusText}</span></td>
+                <td class='admin-table-actions' style="vertical-align: middle;">
+                    <button class="edit-blog-btn" data-id="${post.id}">Edit</button>
+                    <button class="delete-blog-btn" data-id="${post.id}">Delete</button>
+                </td>
+            </tr>`;
+        }).join('') + `</tbody></table>`;
     
     // Add event listeners to the newly created buttons
     blogList.querySelectorAll('.edit-blog-btn').forEach(btn => {
@@ -898,6 +932,10 @@ function renderBlogPosts(posts) {
             deleteBlogPost(id);
         });
     });
+    
+    if (setupFilters) {
+        setupBlogFilters();
+    }
 }
 
 window.deleteEvent = async function (id) {
@@ -1115,7 +1153,7 @@ async function loadBlogPosts() {
     }
 }
 
-function renderBlogPosts(posts) {
+function renderBlogPosts(posts, setupFilters = true) {
     const blogList = document.getElementById('blog-list');
     if (!blogList) return;
     if (!posts || posts.length === 0) {
@@ -1129,24 +1167,38 @@ function renderBlogPosts(posts) {
                 <th style="width: 80px; text-align: center;">Image</th>
                 <th>Title</th>
                 <th>Date</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>` +
-        posts.map(post => `<tr>
-            <td class="thumbnail-cell" style="width: 80px; vertical-align: middle; text-align: center;">
-                ${post.image_url ? 
-                    `<div class="thumbnail"><img src="${post.image_url}" alt="${post.title}" loading="lazy" style="max-width: 70px; max-height: 70px; object-fit: cover;"></div>` : 
-                    `<div class="thumbnail empty-thumbnail"><span>No Image</span></div>`}
-            </td>
-            <td style="vertical-align: middle;"><strong>${post.title}</strong></td>
-            <td style="vertical-align: middle;">${formatDate(post.date || post.created_at)}</td>
-            <td class='admin-table-actions' style="vertical-align: middle;">
-                <button class="edit-blog-btn" data-id="${post.id}">Edit</button>
-                <button class="delete-blog-btn" data-id="${post.id}">Delete</button>
-            </td>
-        </tr>
-        <tr class="blog-divider"><td colspan="4"><hr/></td></tr>`).join('') + `</tbody></table>`;
+        posts.map(post => {
+            // Calculate if post is recent (within last 7 days)
+            const postDate = new Date(post.date || post.created_at || new Date());
+            const today = new Date();
+            const daysDiff = Math.floor((today - postDate) / (1000 * 60 * 60 * 24));
+            const isRecent = daysDiff <= 7;
+            const statusClass = isRecent ? 'post-recent' : 'post-older';
+            const statusText = isRecent ? 'Recent' : 'Older';
+            
+            return `<tr class="blog-row">
+                <td class="thumbnail-cell" style="width: 80px; vertical-align: middle; text-align: center;">
+                    ${post.image_url ? 
+                        `<div class="thumbnail"><img src="${post.image_url}" alt="${post.title}" loading="lazy" style="max-width: 70px; max-height: 70px; object-fit: cover;"></div>` : 
+                        `<div class="thumbnail empty-thumbnail"><span>No Image</span></div>`}
+                </td>
+                <td style="vertical-align: middle;">
+                    <strong>${post.title}</strong>
+                    ${post.featured ? `<div class="featured-indicator">⭐ Featured</div>` : ''}
+                </td>
+                <td style="vertical-align: middle;">${formatDate(post.date || post.created_at)}</td>
+                <td style="vertical-align: middle;"><span class="status-tag ${statusClass}">${statusText}</span></td>
+                <td class='admin-table-actions' style="vertical-align: middle;">
+                    <button class="edit-blog-btn" data-id="${post.id}">Edit</button>
+                    <button class="delete-blog-btn" data-id="${post.id}">Delete</button>
+                </td>
+            </tr>`;
+        }).join('') + `</tbody></table>`;
     
     // Add event listeners to the newly created buttons
     blogList.querySelectorAll('.edit-blog-btn').forEach(btn => {
@@ -1731,6 +1783,22 @@ function setupDashboardStyles() {
                 color: #006064;
             }
             
+            .post-recent {
+                background-color: #e8f5e9;
+                color: #2e7d32;
+            }
+            
+            .post-older {
+                background-color: #f5f5f5;
+                color: #616161;
+            }
+            
+            .featured-indicator {
+                margin-top: 4px;
+                font-size: 12px;
+                color: #ff6d00;
+            }
+            
             .ticket-info {
                 margin-top: 4px;
                 font-size: 12px;
@@ -1745,7 +1813,7 @@ function setupDashboardStyles() {
                 text-decoration: underline;
             }
             
-            .event-row:hover, .admin-table tbody tr:hover {
+            .event-row:hover, .blog-row:hover, .admin-table tbody tr:hover {
                 background-color: #f9f9f9;
             }
         `;

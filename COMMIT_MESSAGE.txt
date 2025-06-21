@@ -1,23 +1,21 @@
-Fix: Public page links and admin table layout
+Improve Event and Blog Table Structure & Styling
 
-This commit includes several important fixes:
+This commit enhances the table structure and styling in the admin dashboard to improve usability and consistency:
 
-1. Fixed "view show listings" link in public/index.html to:
-   - Only open the events modal and not an empty popup window
-   - Use javascript:void(0) to prevent default link behavior
-   - Renamed trigger class from "open-popup" to "events-modal-trigger" for clarity
+- Enhanced events table structure to match blog table quality
+- Added status indicators for events (Past/Upcoming) and blog posts (Recent/Older)
+- Implemented consistent thumbnail styling across tables with proper borders and shadows
+- Added hover effects to table rows for better interactivity
+- Color-coded action buttons for better usability (blue for edit, red for delete)
+- Added filtering capabilities for both events and blog tables
+- Implemented setupEventFilters and setupBlogFilters functions
+- Removed unnecessary divider rows for cleaner table appearance
+- Added featured indicators for blog posts
+- Added ticket link display in events table
+- Updated setupDashboardStyles with improved CSS rules
+- Updated documentation in PROGRESS_REPORT.md
 
-2. Updated text in the calendar section:
-   - Removed outdated text about different venue views showing different listings
-   - Replaced with simpler message about viewing events at both venues
-   - Improved the styling with a lighter background
-
-3. Updated events-modal.js to use the new trigger class
-
-4. Fixed misaligned table headers in event management section
-   - Properly structured the table HTML with consistent column widths
-   - Added proper vertical alignment for all cells
-   - Ensured image thumbnails are properly aligned and sized
+This change significantly improves the admin dashboard user experience by making both tables more consistent, visually appealing, and functional.
 
 5. Applied consistent styling to tables for uniform appearance
    - Added identical styling for thumbnails across tables
