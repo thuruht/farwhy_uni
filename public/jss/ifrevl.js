@@ -36,12 +36,30 @@ function updateCalendarLinks() {
     // Updated to use events-modal-trigger class instead of open-popup
     const mainBlockHtml = `
 <div>
-<hr> || <a href="javascript:void(0);" class="events-modal-trigger">shows</a> || <a href="${urls.icsFile}">.ics</a> || <a href="${urls.googleCalendar}" target="_blank">gcal</a> || <hr><small>(view all upcoming events at both venues)</small><hr>
+<hr> || <a href="javascript:void(0);" class="events-modal-trigger">view show listings</a> || <a href="${urls.icsFile}">.ics</a> || <a href="${urls.googleCalendar}" target="_blank">gcal</a> || <hr><small>(view all upcoming events at both venues)</small><hr>
 <p><small>calendar graphic (and the other swell graphics and general layout of this site) designed by the excellent <a href="https://austinchapmandesign.com/" target="_blank" rel="noopener">austin chapman</a> - however, any parts of the site that you dislike, that are animated annoyingly, bitcrushed, badly implemented, or the like, may instead be blamed on me (<a href="https://ntapkc.com" target="_blank" rel="noopener">jojo</a>), with the exception of show/event flyers, which are variously sourced</small></p>
 </div>
     `;
     credEtDiv.innerHTML = mainBlockHtml;
-    console.log('[UpdateLinks] Updated #credEt block.');
+    
+    // Add event listeners to the newly created events-modal-trigger links
+    const newModalTriggers = credEtDiv.querySelectorAll('.events-modal-trigger');
+    newModalTriggers.forEach(link => {
+      link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        // Get the current venue state for the modal
+        const currentState = document.body.dataset.state || 'farewell';
+        console.log(`[UpdateLinks] Modal trigger clicked with state: ${currentState}`);
+        
+        // Dispatch a custom event to notify events-modal.js
+        const event = new CustomEvent('openEventsModal', { 
+          detail: { venue: currentState }
+        });
+        document.dispatchEvent(event);
+      });
+    });
+    
+    console.log('[UpdateLinks] Updated #credEt block and attached event listeners.');
   } else {
     console.warn('[UpdateLinks] Element with id="credEt" not found.');
   }

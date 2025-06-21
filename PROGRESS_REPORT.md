@@ -128,9 +128,18 @@
 22. ✅ **Events Modal UI Improvements**
     - Made "Upcoming Only" the default when opening the modal
     - Made venue filter buttons (Both Venues, Upcoming Only, Howdy, and Farewell) the same size
+    - Added check marks (✓) to indicate which filter options are currently active
+    - Restored event details view with flyer that wasn't displaying correctly
     - Fixed the event details view and flyer display
     - Enhanced mobile responsiveness for event details and filter buttons
     - Added error handling for missing event images
+
+23. ✅ **Events Modal Filter UI Polishing**
+    - Updated venue button text to be more descriptive ("FAREWELL ONLY", "HOWDY ONLY")
+    - Added check marks to clearly indicate active filter options
+    - Standardized button sizes with fixed height and minimum width
+    - Made buttons the same size on both desktop and mobile
+    - Improved hover and active states for all filter buttons
 
 ### Current Issues
 
@@ -191,3 +200,19 @@
 6. Implement form validation improvements
 7. Clean up debugging logs and add documentation
 8. Enhance UI with loading indicators and confirmation dialogs
+
+### Recent Fixes (June 21, 2025)
+
+1. ✅ **Fixed Events Modal Venue Selection**
+   - Fixed issue where modal would still show "Farewell only" when opened from Howdy state
+   - Ensured currentVenue is properly updated from body data-state before opening modal
+   - Added MutationObserver to detect data-state changes in real-time
+   - Implemented proper active tab indication with checkmarks for selected venue
+
+2. ✅ **Fixed Calendar Overlay Links in Howdy State**
+   - Fixed issue where credEt div links would stop working after switching to Howdy state
+   - Added direct event listeners to newly created calendar overlay links
+   - Implemented event delegation for all modal trigger links
+   - Created custom event system for communication between ifrevl.js and events-modal.js
+
+These changes ensure that the events modal works consistently regardless of the current page state, and that all links to view events function correctly in both Farewell and Howdy states.

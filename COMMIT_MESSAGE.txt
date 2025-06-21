@@ -1,23 +1,23 @@
-Enhance Events Modal UX and Detailed Event Information Display
+Fix Modal Venue Selection and Calendar Links
 
-This commit significantly improves the events modal functionality and user experience:
+This commit resolves two critical issues with the events modal:
 
-1. Enhanced venue selection interface
-   - Made venue selection tabs more visually distinct and obvious
-   - Added "BOTH VENUES" option to allow viewing events from both venues together
-   - Added clear venue badges to identify which venue each event belongs to
+1. Fixed issue where credEt div links stop working when switched to "howdy" state:
+   - Added direct event listeners to newly created calendar overlay links
+   - Implemented event delegation for all events-modal-trigger links
+   - Created a custom event system for communication between ifrevl.js and events-modal.js
 
-2. Improved event filtering and display
-   - Added archive toggle to show past events only when explicitly requested
-   - Past events are visually indicated with styling (strikethrough and opacity)
-   - Default view now focuses on upcoming events for better user experience
+2. Fixed issue where modal still shows "Farewell only" instead of "Howdy only" when opened from howdy state:
+   - Added a MutationObserver to detect and respond to data-state changes
+   - Ensured currentVenue is updated from body data-state immediately before opening modal
+   - Added logging to track venue state changes for easier debugging
+   - Updated openModal function to correctly set active tab based on current state
 
-3. Enhanced event details display
-   - Removed generic "Check with venue" placeholder text
-   - Added structured layout for event information with proper labels
-   - Included venue badge, age restrictions, price info in detail view
-   - Made the ticket purchase link more prominent when available
-   - Better displayed event description in a properly styled container
+These changes ensure:
+- All modal trigger links work consistently regardless of current data-state
+- The modal defaults to the correct venue filter (farewell/howdy) based on current page state
+- Calendar links in both states trigger the modal with proper venue selection
+- Event listeners are properly attached even when links are dynamically recreated
 
 4. Mobile responsiveness improvements
    - Optimized filter controls for mobile screens
@@ -36,7 +36,14 @@ This commit significantly improves the events modal functionality and user exper
    - Enhanced responsive layout for all event details components
    - Improved contrast and readability of event information
 
-7. Documentation updates
+7. Filter UX Improvement
+   - Added check marks (✓) to clearly indicate active filter buttons
+   - Updated venue button text to be more descriptive ("FAREWELL ONLY", "HOWDY ONLY")
+   - Standardized button sizes with fixed height and minimum width
+   - Improved consistency of button text length for better visual alignment
+   - Made buttons the same size on both desktop and mobile (adjusted proportionally)
+
+8. Documentation updates
    - Updated PROGRESS_REPORT.md with the latest improvements
    - Added detailed documentation of changes and features
 

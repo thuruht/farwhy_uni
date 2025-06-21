@@ -122,8 +122,12 @@
   cursor: pointer;
   transition: all 0.2s;
   font-size: 0.85rem;
-  min-width: 120px;
+  min-width: 140px; /* Increased width to accommodate longer text */
   text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px; /* Fixed height for all buttons */
 }
 
 .venue-tab:first-of-type {
@@ -457,6 +461,7 @@
     padding: 0.4rem 0.5rem;
     font-size: 0.75rem;
     min-width: 0; /* Override min-width for mobile */
+    height: 36px; /* Slightly smaller height for mobile */
   }
   
   .event-flyer-container {

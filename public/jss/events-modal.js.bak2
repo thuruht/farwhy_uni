@@ -1,5 +1,18 @@
 // events-modal.js - Unified Events Modal functionality
-// Implements the interactive modal that combines event listings and flyers
+// Implements the     const farewellTab = document.createElement('button');
+    farewellTab.className = 'venue-tab active';
+    farewellTab.dataset.venue = 'farewell';
+    farewellTab.textContent = 'FAREWELL ONLY';
+    
+    const howdyTab = document.createElement('button');
+    howdyTab.className = 'venue-tab';
+    howdyTab.dataset.venue = 'howdy';
+    howdyTab.textContent = 'HOWDY ONLY';
+    
+    const bothTab = document.createElement('button');
+    bothTab.className = 'venue-tab';
+    bothTab.dataset.venue = 'both';
+    bothTab.textContent = 'BOTH VENUES';dal that combines event listings and flyers
 
 (function() {
   // DOM references
@@ -13,7 +26,7 @@
   // State management
   let allEvents = [];
   let displayedEvents = [];
-  let currentVenue = document.body.dataset.state || 'farewell'; // Get venue from page state
+  let currentVenue = 'farewell'; // Default venue
   let selectedEventId = null;
   let showArchived = false; // Flag to toggle past events (false = upcoming only)
   
@@ -24,47 +37,11 @@
     createModalStructure();
     setupEventListeners();
     
-    // Watch for data-state changes and update currentVenue accordingly
-    const observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        if (mutation.attributeName === 'data-state') {
-          // Update current venue when page state changes
-          currentVenue = document.body.dataset.state || 'farewell';
-          console.log(`[Events Modal] Updated currentVenue to ${currentVenue} from data-state change`);
-        }
-      });
-    });
-    
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ['data-state']
-    });
-    
-    // Listen for custom event from ifrevl.js
-    document.addEventListener('openEventsModal', async (e) => {
-      // Set venue from custom event detail
-      if (e.detail && e.detail.venue) {
-        currentVenue = e.detail.venue;
-        console.log(`[Events Modal] Opening with venue from custom event: ${currentVenue}`);
-      } else {
-        // Fallback to body data-state
-        currentVenue = document.body.dataset.state || 'farewell';
-        console.log(`[Events Modal] Opening with venue from body: ${currentVenue}`);
-      }
-      
-      // Fetch and open the modal
-      await fetchEvents();
-      openModal();
-    });
-    
     // Trigger modal when clicking show listings or calendar image
     const listingLinks = document.querySelectorAll('.events-modal-trigger, #calendar img');
     listingLinks.forEach(link => {
       link.addEventListener('click', async (e) => {
         e.preventDefault();
-        // Update currentVenue from current state before opening the modal
-        currentVenue = document.body.dataset.state || 'farewell';
-        console.log(`[Events Modal] Opening with venue: ${currentVenue}`);
         // Always reload data when opening modal
         await fetchEvents();
         openModal();
@@ -109,19 +86,21 @@
     venueFilter.appendChild(venueLabel);
     
     const farewellTab = document.createElement('button');
-    farewellTab.className = 'venue-tab' + (currentVenue === 'farewell' ? ' active' : '');
+    farewellTab.className = 'venue-tab active';
+    const farewellTab = document.createElement('button');
+    farewellTab.className = 'venue-tab active';
     farewellTab.dataset.venue = 'farewell';
-    farewellTab.textContent = currentVenue === 'farewell' ? 'FAREWELL ONLY ✓' : 'FAREWELL ONLY';
+    farewellTab.innerHTML = '✓ FAREWELL ONLY';
     
     const howdyTab = document.createElement('button');
-    howdyTab.className = 'venue-tab' + (currentVenue === 'howdy' ? ' active' : '');
+    howdyTab.className = 'venue-tab';
     howdyTab.dataset.venue = 'howdy';
-    howdyTab.textContent = currentVenue === 'howdy' ? 'HOWDY ONLY ✓' : 'HOWDY ONLY';
+    howdyTab.textContent = 'HOWDY ONLY';
     
     const bothTab = document.createElement('button');
-    bothTab.className = 'venue-tab' + (currentVenue === 'both' ? ' active' : '');
+    bothTab.className = 'venue-tab';
     bothTab.dataset.venue = 'both';
-    bothTab.textContent = currentVenue === 'both' ? 'BOTH VENUES ✓' : 'BOTH VENUES';
+    bothTab.textContent = 'BOTH VENUES';
     
     venueFilterTabs = [farewellTab, howdyTab, bothTab];
     venueFilter.append(farewellTab, howdyTab, bothTab);
@@ -137,12 +116,12 @@
     
     const archiveToggle = document.createElement('button');
     archiveToggle.className = 'archive-toggle';
-    archiveToggle.textContent = 'UPCOMING ONLY ✓';
+    archiveToggle.innerHTML = '✓ UPCOMING ONLY';
     archiveToggle.setAttribute('aria-pressed', 'false');
     
     archiveToggle.addEventListener('click', () => {
       showArchived = !showArchived;
-      archiveToggle.textContent = showArchived ? 'ALL EVENTS ✓' : 'UPCOMING ONLY ✓';
+      archiveToggle.innerHTML = showArchived ? '✓ ALL EVENTS' : '✓ UPCOMING ONLY';
       archiveToggle.setAttribute('aria-pressed', showArchived.toString());
       filterEvents();
     });
@@ -210,44 +189,18 @@
           // Update active tab
           venueFilterTabs.forEach(t => {
             t.classList.remove('active');
-            // Remove check marks from all tabs
-            if (t.dataset.venue === 'farewell') {
-              t.textContent = 'FAREWELL ONLY';
-            } else if (t.dataset.venue === 'howdy') {
-              t.textContent = 'HOWDY ONLY';
-            } else if (t.dataset.venue === 'both') {
-              t.textContent = 'BOTH VENUES';
-            }
+            // Remove check mark from all tabs
+            t.innerHTML = t.innerHTML.replace('✓ ', '');
           });
           
           tab.classList.add('active');
           // Add check mark to the active tab
-          if (venue === 'farewell') {
-            tab.textContent = 'FAREWELL ONLY ✓';
-          } else if (venue === 'howdy') {
-            tab.textContent = 'HOWDY ONLY ✓';
-          } else if (venue === 'both') {
-            tab.textContent = 'BOTH VENUES ✓';
-          }
+          tab.innerHTML = '✓ ' + tab.textContent;
           
           // Update displayed events
           filterEvents();
         }
       });
-    });
-    
-    // Set up global click delegation for events-modal-trigger links
-    document.addEventListener('click', (e) => {
-      // Find closest trigger link
-      const link = e.target.closest('.events-modal-trigger');
-      if (link) {
-        e.preventDefault();
-        // Update currentVenue from current page state
-        currentVenue = document.body.dataset.state || 'farewell';
-        console.log(`[Events Modal] Delegation handler opening with venue: ${currentVenue}`);
-        // Open the modal
-        fetchEvents().then(() => openModal());
-      }
     });
   }
   
@@ -255,40 +208,10 @@
   // Modal Control Functions
   // --------------------------
   async function openModal() {
-    console.log(`[Events Modal] Opening modal with venue: ${currentVenue}`);
-    
     // Fetch events if we don't have them yet
     if (allEvents.length === 0) {
       await fetchEvents();
     }
-    
-    // Set the active tab based on currentVenue
-    venueFilterTabs.forEach(tab => {
-      const venue = tab.dataset.venue;
-      tab.classList.remove('active');
-      
-      // Reset tab text
-      if (venue === 'farewell') {
-        tab.textContent = 'FAREWELL ONLY';
-      } else if (venue === 'howdy') {
-        tab.textContent = 'HOWDY ONLY';
-      } else if (venue === 'both') {
-        tab.textContent = 'BOTH VENUES';
-      }
-      
-      // Set active tab based on current venue
-      if (venue === currentVenue) {
-        tab.classList.add('active');
-        // Add check mark to the active tab
-        if (venue === 'farewell') {
-          tab.textContent = 'FAREWELL ONLY ✓';
-        } else if (venue === 'howdy') {
-          tab.textContent = 'HOWDY ONLY ✓';
-        } else if (venue === 'both') {
-          tab.textContent = 'BOTH VENUES ✓';
-        }
-      }
-    });
     
     // Show the modal
     modalOverlay.classList.add('active');
@@ -430,7 +353,7 @@
       if (currentVenue === 'both') {
         const venueIndicator = document.createElement('span');
         venueIndicator.className = `venue-indicator ${event.venue}`;
-        venueIndicator.textContent = event.venue === 'farewell' ? 'FW' : 'HY';
+        venueIndicator.textContent = event.venue === 'farewell' ? 'FW' : 'HD';
         dateContainer.appendChild(venueIndicator);
       }
       
