@@ -1,0 +1,32 @@
+Fix: Update calendar div and events handling in public index
+
+This commit fixes issues with the calendar div in public/index.html and updates
+event handling in ifrevl.js:
+
+1. Fixed calendar image click behavior:
+   - Added events-modal-trigger class to the calendar image
+   - Added cursor:pointer style to make it clear the image is clickable
+   - Made it directly trigger the events modal rather than an old popup
+
+2. Updated ifrevl.js to:
+   - Replace open-popup class with events-modal-trigger
+   - Update link handling to use javascript:void(0) instead of URLs
+   - Add backward compatibility for any remaining open-popup links
+   - Redirect old popup links to trigger the new events modal
+
+3. Improved event text:
+   - Removed outdated text about different venue views showing different listings
+   - Updated to indicate events from both venues are shown in the modal
+
+4. Improved code integration between:
+   - ifrevl.js (legacy script)
+   - events-modal.js (new modal functionality)
+   - index.html (main public page)
+
+These changes ensure a consistent user experience by making all event-related
+links and the calendar image open the new events modal instead of popup windows.
+
+Related files:
+- public/index.html
+- public/jss/ifrevl.js
+- PROGRESS_REPORT.md

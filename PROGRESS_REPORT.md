@@ -100,6 +100,12 @@
     - Updated calendar link to use javascript:void(0) to prevent default link behavior
     - Changed trigger class from "open-popup" to "events-modal-trigger" for clarity
 
+19. ✅ **Calendar Image Click Behavior Fixed**
+    - Added events-modal-trigger class to the calendar image
+    - Updated ifrevl.js to use the new events-modal-trigger class
+    - Modified event delegation code to handle both old and new class names
+    - Ensured backward compatibility with any existing old links
+
 ### Current Issues
 
 1. ❓ **Stats Display Issues**

@@ -301,33 +301,30 @@
     const ctaButton = document.createElement('a');
     ctaButton.className = 'event-cta glitch-effect';
     
-    // If there's a ticket link, use it, otherwise show more info
+    // If there's a ticket link, use it
     if (event.ticketLink) {
-      ctaButton.textContent = event.price ? `TICKETS ${event.price}` : 'TICKETS';
+      ctaButton.textContent = event.price ? `TICKETS ${event.price}` : 'BUY TICKETS';
       ctaButton.href = event.ticketLink;
       ctaButton.target = '_blank';
       ctaButton.rel = 'noopener noreferrer';
-    } else {
-      ctaButton.textContent = 'MORE INFO';
-      // If no ticket link, open the slideshow to this event
-      ctaButton.href = `#event-${event.id}`;
-      ctaButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        closeModal();
-        // Show slideshow focused on this event
-        const slideshowContainer = document.querySelector('.slideshow-container');
-        if (slideshowContainer) {
-          slideshowContainer.scrollIntoView({ behavior: 'smooth' });
-        }
-      });
+      infoContainer.appendChild(ctaButton);
+    } 
+    // If there's an event URL, show a website link
+    else if (event.url) {
+      ctaButton.textContent = 'EVENT WEBSITE';
+      ctaButton.href = event.url;
+      ctaButton.target = '_blank';
+      ctaButton.rel = 'noopener noreferrer';
+      infoContainer.appendChild(ctaButton);
     }
+    // No buttons if no links are available
     
     // Additional event info
     const eventExtras = document.createElement('div');
     eventExtras.className = 'event-extras';
     eventExtras.textContent = event.ageRestriction || '';
     
-    infoContainer.append(title, dateTime, ctaButton, eventExtras);
+    infoContainer.append(title, dateTime, eventExtras);
     
     // Add everything to the details section
     eventDetails.append(flyerContainer, infoContainer);

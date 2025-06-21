@@ -33,10 +33,10 @@ function updateCalendarLinks() {
   // --- Part 1: Update the main #credEt block ---
   const credEtDiv = document.getElementById('credEt');
   if (credEtDiv) {
-    // Note: Added class="open-popup" to the 'shows' link here too
+    // Updated to use events-modal-trigger class instead of open-popup
     const mainBlockHtml = `
 <div>
-<hr> || <a href="${urls.showListings}" class="open-popup">shows</a> || <a href="${urls.icsFile}">.ics</a> || <a href="${urls.googleCalendar}" target="_blank">gcal</a> || <hr><small>(above links per venue ; toggle farewell/howdy to change!)</small><hr>
+<hr> || <a href="javascript:void(0);" class="events-modal-trigger">shows</a> || <a href="${urls.icsFile}">.ics</a> || <a href="${urls.googleCalendar}" target="_blank">gcal</a> || <hr><small>(view all upcoming events at both venues)</small><hr>
 <p><small>calendar graphic (and the other swell graphics and general layout of this site) designed by the excellent <a href="https://austinchapmandesign.com/" target="_blank" rel="noopener">austin chapman</a> - however, any parts of the site that you dislike, that are animated annoyingly, bitcrushed, badly implemented, or the like, may instead be blamed on me (<a href="https://ntapkc.com" target="_blank" rel="noopener">jojo</a>), with the exception of show/event flyers, which are variously sourced</small></p>
 </div>
     `;
@@ -48,7 +48,16 @@ function updateCalendarLinks() {
 
   // --- Part 2: Update individual links by class ---
   const listingLinks = document.querySelectorAll('.cal-link-listing');
-  listingLinks.forEach(link => { if (link instanceof HTMLAnchorElement) link.href = urls.showListings; });
+  listingLinks.forEach(link => { 
+    if (link instanceof HTMLAnchorElement) {
+      // Replace href with javascript:void(0) and update class
+      link.href = "javascript:void(0);";
+      link.classList.remove('open-popup');
+      if (!link.classList.contains('events-modal-trigger')) {
+        link.classList.add('events-modal-trigger');
+      }
+    }
+  });
   if (listingLinks.length > 0) console.log(`[UpdateLinks] Updated ${listingLinks.length} '.cal-link-listing'.`);
 
   const icsLinks = document.querySelectorAll('.cal-link-ics');
@@ -88,27 +97,39 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if the clicked element itself OR its parent is a link with '.open-popup'
     const link = event.target.closest('a.open-popup');
 
+    // We're no longer using open-popup, but keeping this code for backward compatibility
+    // with any links that might still use the old class
     if (link && link instanceof HTMLAnchorElement) {
         event.preventDefault(); // Prevent default link navigation
 
-        const url = link.getAttribute('href');
-        if (!url) return; // No URL, do nothing
+        // Instead of opening a popup, trigger the events modal
+        const eventModalTriggers = document.querySelectorAll('.events-modal-trigger');
+        if (eventModalTriggers.length > 0) {
+            // Simulate a click on the first events-modal-trigger
+            eventModalTriggers[0].click();
+        } else {
+            console.warn("No events modal trigger found for compatibility redirect");
+            
+            // Fallback to the old behavior
+            const url = link.getAttribute('href');
+            if (!url) return; // No URL, do nothing
 
-        const popupWidth = 800; // Adjusted size
-        const popupHeight = 600;
-        const left = (window.innerWidth - popupWidth) / 2;
-        const top = (window.innerHeight - popupHeight) / 2;
+            const popupWidth = 800; // Adjusted size
+            const popupHeight = 600;
+            const left = (window.innerWidth - popupWidth) / 2;
+            const top = (window.innerHeight - popupHeight) / 2;
 
-        const popup = window.open(
-          url,
-          '_blank',
-          `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`
-        );
+            const popup = window.open(
+              url,
+              '_blank',
+              `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`
+            );
 
-        // Fallback if popup blocker prevents window.open
-        if (!popup) {
-           console.warn("Popup blocked? Attempting navigation in new tab.");
-           window.open(url, '_blank');
+            // Fallback if popup blocker prevents window.open
+            if (!popup) {
+               console.warn("Popup blocked? Attempting navigation in new tab.");
+               window.open(url, '_blank');
+            }
         }
     }
   }); // End event delegation listener

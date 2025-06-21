@@ -789,6 +789,7 @@ function renderEvents(events) {
         eventList.innerHTML = `<div class='status-message status-info'>No events found.</div>`;
         return;
     }
+    
     eventList.innerHTML = `<table class="admin-table">
         <thead>
             <tr>
@@ -796,433 +797,107 @@ function renderEvents(events) {
                 <th>Title</th>
                 <th>Date</th>
                 <th>Venue</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>` +
-        events.map(ev => `<tr class="event-row venue-${ev.venue || 'unknown'}">
-            <td style="width: 80px; vertical-align: middle; text-align: center;">
-              <div class="event-list-thumbnail">
-                ${ev.flyer_image_url || ev.imageUrl ? 
-                  `<img src="${ev.flyer_image_url || ev.imageUrl}" alt="${ev.title || 'Event'} flyer" style="max-width: 70px; max-height: 70px; object-fit: cover;">` : 
-                  `<span class="no-image">📷</span>`}
-              </div>
-            </td>
-            <td style="vertical-align: middle;"><strong>${ev.title || 'Untitled'}</strong></td>
-            <td style="vertical-align: middle;">${formatDate(ev.date)}</td>
-            <td style="vertical-align: middle;"><span class="venue-tag venue-${ev.venue}">${ev.venue || 'N/A'}</span></td>
-            <td class='admin-table-actions' style="vertical-align: middle;">
-                <button onclick='editEvent("${ev.id}")'>Edit</button>
-                <button onclick='deleteEvent("${ev.id}")'>Delete</button>
-            </td>
-        </tr>
-        <tr class="event-divider"><td colspan="5"><hr/></td></tr>`).join('') + `</tbody></table>`;
+        events.map(ev => {
+            // Calculate if event is past or upcoming
+            const eventDate = new Date(ev.date);
+            const today = new Date();
+            const isPast = eventDate < today;
+            const statusClass = isPast ? 'event-past' : 'event-upcoming';
+            const statusText = isPast ? 'Past' : 'Upcoming';
+            
+            return `<tr class="event-row venue-${ev.venue || 'unknown'}">
+                <td class="thumbnail-cell" style="width: 80px; vertical-align: middle; text-align: center;">
+                    ${ev.flyer_image_url || ev.imageUrl ? 
+                      `<div class="thumbnail"><img src="${ev.flyer_image_url || ev.imageUrl}" alt="${ev.title || 'Event'} flyer" loading="lazy" style="max-width: 70px; max-height: 70px; object-fit: cover;"></div>` : 
+                      `<div class="thumbnail empty-thumbnail"><span>No Image</span></div>`}
+                </td>
+                <td style="vertical-align: middle;">
+                    <strong>${ev.title || 'Untitled'}</strong>
+                    ${ev.ticketLink ? `<div class="ticket-info"><a href="${ev.ticketLink}" target="_blank" class="ticket-link">🎟️ Tickets</a></div>` : ''}
+                </td>
+                <td style="vertical-align: middle;">${formatDate(ev.date)}</td>
+                <td style="vertical-align: middle;"><span class="venue-tag venue-${ev.venue}">${ev.venue || 'N/A'}</span></td>
+                <td style="vertical-align: middle;"><span class="status-tag ${statusClass}">${statusText}</span></td>
+                <td class='admin-table-actions' style="vertical-align: middle;">
+                    <button class="edit-event-btn" data-id="${ev.id}">Edit</button>
+                    <button class="delete-event-btn" data-id="${ev.id}">Delete</button>
+                </td>
+            </tr>`;
+        }).join('') + `</tbody></table>`;
+    
+    // Add event listeners to the newly created buttons
+    eventList.querySelectorAll('.edit-event-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            console.log('Edit event button clicked for id:', id);
+            editEvent(id);
+        });
+    });
+    
+    eventList.querySelectorAll('.delete-event-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            console.log('Delete event button clicked for id:', id);
+            deleteEvent(id);
+        });
+    });
+    
     setupEventFilters();
 }
 
-// Add consistent table styling
-const tableStyles = document.createElement('style');
-tableStyles.textContent = `
-    .admin-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 1rem;
-        font-size: 14px;
-    }
-    
-    .admin-table thead th {
-        text-align: left;
-        padding: 12px 8px;
-        background-color: #f5f5f5;
-        border-bottom: 2px solid #ddd;
-        font-weight: bold;
-        color: #333;
-    }
-    
-    .admin-table tbody td {
-        padding: 10px 8px;
-        border-bottom: 1px solid #eee;
-        vertical-align: middle;
-    }
-    
-    .event-list-thumbnail, .thumbnail {
-        display: inline-block;
-        width: 70px;
-        height: 70px;
-        border-radius: 4px;
-        overflow: hidden;
-        background-color: #f0f0f0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .event-list-thumbnail img, .thumbnail img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: cover;
-    }
-    
-    .admin-table-actions {
-        white-space: nowrap;
-    }
-    
-    .admin-table-actions button {
-        margin-right: 5px;
-    }
-    
-    .event-divider, .blog-divider {
-        display: none;
-    }
-    
-    .empty-thumbnail {
-        background-color: #eee;
-        color: #999;
-        font-size: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 70px;
-        width: 70px;
-        border-radius: 4px;
-    }
-    
-    .venue-tag {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: bold;
-    }
-    
-    .venue-farewell {
-        background-color: #f8e9b0;
-        color: #8a6d3b;
-    }
-    
-    .venue-howdy {
-        background-color: #d4edda;
-        color: #155724;
-    }
-`;
-
-// Only add the styles once when the dashboard is initialized
-function setupDashboardStyles() {
-    console.log('Setting up dashboard styles...');
-    if (!document.getElementById('admin-table-styles')) {
-        tableStyles.id = 'admin-table-styles';
-        document.head.appendChild(tableStyles);
-        console.log('Added table styles to document head');
-    }
-}
-
-async function initializeDashboard() {
-    console.log('initializeDashboard started');
-    
-    console.log('Setting up dashboard styles...');
-    setupDashboardStyles();
-    
-    console.log('Setting up navigation...');
-    setupNavigation();
-    
-    console.log('Setting up mobile menu...');
-    setupMobileMenu();
-    
-    console.log('Setting up modal...');
-    setupModal();
-    
-    console.log('Setting up toasts...');
-    setupToasts();
-    
-    console.log('Loading initial data...');
-    await loadInitialData();
-    
-    console.log('Showing dashboard section...');
-    showSection('dashboard');
-    
-    console.log('initializeDashboard completed');
-}
-
-function showSection(sectionName) {
-    console.log(`Showing section: ${sectionName}`);
-    const sections = document.querySelectorAll('.admin-section');
-    sections.forEach(section => section.classList.remove('active'));
-
-    const targetSection = document.getElementById(`section-${sectionName}`);
-    if (targetSection) {
-        targetSection.classList.add('active');
-        dashboardState.currentSection = sectionName;
-        
-        // Call appropriate loading function based on section
-        switch (sectionName) {
-            case 'dashboard': 
-                loadDashboardStats(); 
-                break;
-            case 'events': 
-                loadEvents(); 
-                break;
-            case 'blog': 
-                loadBlogPosts(); 
-                break;
-            case 'venue': 
-                loadVenueSettings(); 
-                break;
-            case 'import': 
-                setupImportHandlers(); 
-                break;
-        }
-    } else {
-        console.error(`Section not found: section-${sectionName}`);
-    }
-}
-
-function setupNavigation() {
-    const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
-    const sectionIndicator = document.getElementById('section-indicator');
-    const breadcrumb = document.getElementById('breadcrumb');
-
-    navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = item.getAttribute('data-target');
-            navItems.forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-            showSection(target);
-            const sectionNames = { 'dashboard': 'Dashboard', 'events': 'Event Management', 'blog': 'Blog Management', 'venue': 'Venue Settings', 'import': 'Import Legacy Data' };
-            if (sectionIndicator) sectionIndicator.textContent = sectionNames[target] || target;
-            if (breadcrumb) breadcrumb.textContent = `Home / ${sectionNames[target] || target}`;
-        });
-    });
-
-    document.getElementById('logout-btn')?.addEventListener('click', async () => {
-        await api.post('/api/logout', {});
-        document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        showLoginScreen();
-    });
-}
-
-function setupMobileMenu() {
-    console.log('Setting up mobile menu toggle');
-    const mobileToggle = document.getElementById('mobile-menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
-
-    console.log('Mobile menu elements:', mobileToggle, sidebar);
-
-    if (mobileToggle && sidebar) {
-        mobileToggle.addEventListener('click', (e) => {
-            console.log('Mobile menu toggle clicked');
-            e.preventDefault();
-            sidebar.classList.toggle('open');
-            console.log('Sidebar classes after toggle:', sidebar.classList);
-        });
-
-        // Close sidebar when clicking outside of it
-        document.addEventListener('click', (e) => {
-            if (sidebar &&
-                sidebar.classList.contains('open') &&
-                !sidebar.contains(e.target) &&
-                !mobileToggle.contains(e.target)) {
-                sidebar.classList.remove('open');
-            }
-        });
-        
-        // Close sidebar when a nav item is clicked
-        const navItems = sidebar.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    setTimeout(() => {
-                        sidebar.classList.remove('open');
-                    }, 150);
-                }
-            });
-        });
-
-        console.log('Mobile menu handlers set up successfully');
-    } else {
-        console.error('Mobile menu elements not found');
-    }
-}
-
-function setupModal() {
-    console.log('Setting up modal...');
-    const modal = document.getElementById('form-modal');
-    console.log('Modal element:', modal);
-
-    const closeBtn = modal?.querySelector('.modal-close-btn');
-    console.log('Modal close button:', closeBtn);
-
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            console.log('Modal close button clicked');
-            modal.classList.remove('active');
-        });
-    } else {
-        console.error('Modal close button not found');
-    }
-
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                console.log('Modal background clicked, closing modal');
-                modal.classList.remove('active');
-            }
-        });
-        console.log('Modal setup complete');
-    } else {
-        console.error('Modal element not found during setup');
-    }
-}
-
-function setupToasts() {
-    // This is a placeholder, a real implementation would create the container if it doesn't exist.
-    if (!document.getElementById('toast-container')) {
-        const container = document.createElement('div');
-        container.id = 'toast-container';
-        container.className = 'toast-container';
-        document.body.appendChild(container);
-    }
-}
-
-async function loadInitialData() {
-    console.log('Loading initial data, currentUser:', currentUser);
-    const currentUserEl = document.getElementById('current-user');
-    const userRoleEl = document.getElementById('user-role');
-
-    if (currentUserEl) {
-        if (currentUser && currentUser.username) {
-            currentUserEl.textContent = currentUser.username;
-            console.log('Updated current user element with:', currentUser.username);
-
-            if (userRoleEl && currentUser.role) {
-                userRoleEl.textContent = currentUser.role;
-                console.log('Updated user role element with:', currentUser.role);
-            }
-        } else {
-            currentUserEl.textContent = 'Not logged in';
-            console.log('No current user, displaying "Not logged in"');
-        }
-    } else {
-        console.error('Current user element not found');
-    }
-
-    // Load dashboard stats
-    await loadDashboardStats();
-}
-
-async function loadDashboardStats() {
-    console.log('Loading dashboard stats...');
-    
-    try {
-        const events = await api.get('/api/admin/events');
-        const blogData = await api.get('/api/admin/blog/posts');
-        
-        console.log('Stats data loaded:', { events, blogData });
-        
-        const totalEventsEl = document.getElementById('stats-total-events');
-        const statsTotalPostsEl = document.getElementById('stats-total-posts');
-        
-        if (totalEventsEl) {
-            const eventCount = Array.isArray(events) ? events.length : 0;
-            totalEventsEl.textContent = eventCount;
-            console.log(`Updated events count: ${eventCount}`);
-        } else {
-            console.error('Stats total events element not found');
-        }
-        
-        if (statsTotalPostsEl && blogData && blogData.data) {
-            const postCount = Array.isArray(blogData.data) ? blogData.data.length : 0;
-            statsTotalPostsEl.textContent = postCount;
-            console.log(`Updated blog posts count: ${postCount}`);
-        } else {
-            console.error('Stats total posts element not found or blogData invalid', blogData);
-        }
-    } catch (error) {
-        console.error('Error loading dashboard stats:', error);
-    }
-}
-
-async function loadEvents() {
-    console.log('Loading events...');
-    const events = await api.get('/api/admin/events');
-    if (events) {
-        console.log(`Loaded ${events.length} events`);
-        dashboardState.events = events;
-        renderEvents(events);
-
-        const addEventBtn = document.getElementById('add-event-btn');
-        console.log('Add Event button element:', addEventBtn);
-        if (addEventBtn) {
-            // To prevent multiple listeners on re-renders, we clone and replace the button
-            const newAddEventBtn = addEventBtn.cloneNode(true);
-            addEventBtn.parentNode.replaceChild(newAddEventBtn, addEventBtn);
-            // And add the listener to the new button
-            newAddEventBtn.addEventListener('click', (e) => {
-                console.log('New Event button clicked via direct handler');
-                e.preventDefault();
-                showEventForm();
-            });
-            console.log('New Event button listener attached');
-        } else {
-            console.log('Add Event button not found in the DOM');
-        }
-    } else {
-        console.log('Failed to load events or received empty response');
-    }
-}
-
-function renderEvents(events) {
-    const eventList = document.getElementById('event-list');
-    if (!eventList) return;
-    if (!Array.isArray(events) || events.length === 0) {
-        eventList.innerHTML = `<div class='status-message status-info'>No events found.</div>`;
+function renderBlogPosts(posts) {
+    const blogList = document.getElementById('blog-list');
+    if (!blogList) return;
+    if (!posts || posts.length === 0) {
+        blogList.innerHTML = `<div class='status-message status-info'>No blog posts.</div>`;
         return;
     }
-    eventList.innerHTML = `<table class="admin-table">
+    
+    blogList.innerHTML = `<table class="admin-table">
         <thead>
             <tr>
                 <th style="width: 80px; text-align: center;">Image</th>
                 <th>Title</th>
                 <th>Date</th>
-                <th>Venue</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>` +
-        events.map(ev => `<tr class="event-row venue-${ev.venue || 'unknown'}">
-            <td style="width: 80px; vertical-align: middle; text-align: center;">
-              <div class="event-list-thumbnail">
-                ${ev.flyer_image_url || ev.imageUrl ? 
-                  `<img src="${ev.flyer_image_url || ev.imageUrl}" alt="${ev.title || 'Event'} flyer" style="max-width: 70px; max-height: 70px; object-fit: cover;">` : 
-                  `<span class="no-image">📷</span>`}
-              </div>
+        posts.map(post => `<tr>
+            <td class="thumbnail-cell" style="width: 80px; vertical-align: middle; text-align: center;">
+                ${post.image_url ? 
+                    `<div class="thumbnail"><img src="${post.image_url}" alt="${post.title}" loading="lazy" style="max-width: 70px; max-height: 70px; object-fit: cover;"></div>` : 
+                    `<div class="thumbnail empty-thumbnail"><span>No Image</span></div>`}
             </td>
-            <td style="vertical-align: middle;"><strong>${ev.title || 'Untitled'}</strong></td>
-            <td style="vertical-align: middle;">${formatDate(ev.date)}</td>
-            <td style="vertical-align: middle;"><span class="venue-tag venue-${ev.venue}">${ev.venue || 'N/A'}</span></td>
+            <td style="vertical-align: middle;"><strong>${post.title}</strong></td>
+            <td style="vertical-align: middle;">${formatDate(post.date || post.created_at)}</td>
             <td class='admin-table-actions' style="vertical-align: middle;">
-                <button onclick='editEvent("${ev.id}")'>Edit</button>
-                <button onclick='deleteEvent("${ev.id}")'>Delete</button>
+                <button class="edit-blog-btn" data-id="${post.id}">Edit</button>
+                <button class="delete-blog-btn" data-id="${post.id}">Delete</button>
             </td>
         </tr>
-        <tr class="event-divider"><td colspan="5"><hr/></td></tr>`).join('') + `</tbody></table>`;
-    setupEventFilters();
-}
-
-function setupEventFilters() {
-    const venueFilter = document.getElementById('event-venue-filter');
-    const searchInput = document.getElementById('event-search');
-    const applyFilters = () => {
-        const venue = venueFilter ? venueFilter.value : '';
-        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-        const filteredEvents = dashboardState.events.filter(event =>
-            (!venue || event.venue === venue) &&
-            (!searchTerm || (event.title && event.title.toLowerCase().includes(searchTerm)))
-        );
-        renderEvents(filteredEvents);
-    };
-    if (venueFilter) venueFilter.onchange = applyFilters;
-    if (searchInput) searchInput.oninput = applyFilters;
+        <tr class="blog-divider"><td colspan="4"><hr/></td></tr>`).join('') + `</tbody></table>`;
+    
+    // Add event listeners to the newly created buttons
+    blogList.querySelectorAll('.edit-blog-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            console.log('Edit blog button clicked for id:', id);
+            editBlogPost(id);
+        });
+    });
+    
+    blogList.querySelectorAll('.delete-blog-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            deleteBlogPost(id);
+        });
+    });
 }
 
 window.deleteEvent = async function (id) {
@@ -1909,70 +1584,174 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Patch event table column layout
-const eventTableStyle = document.createElement('style');
-eventTableStyle.textContent = `
-.admin-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin-bottom: 1rem;
-}
-.admin-table th, .admin-table td {
-  padding: 0.75rem;
-  text-align: left;
-  vertical-align: middle !important;
-}
-.admin-table th { 
-  white-space: nowrap; 
-  background-color: #f8f9fa;
-  font-weight: 600;
-}
-.admin-table td { 
-  max-width: 200px; 
-  overflow-wrap: break-word; 
-}
-`;
-document.head.appendChild(eventTableStyle);
-
-// Make sure sidebar toggle is working on mobile
-const mobileToggle = document.getElementById('mobile-menu-toggle');
-if (mobileToggle) {
-  console.log('Adding additional mobile toggle listener for safety');
-  mobileToggle.addEventListener('click', (e) => {
-    e.preventDefault();
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar) {
-      sidebar.classList.toggle('open');
-      console.log('Toggled sidebar open class:', sidebar.classList.contains('open'));
+// Only add the styles once when the dashboard is initialized
+function setupDashboardStyles() {
+    console.log('Setting up dashboard styles...');
+    if (!document.getElementById('admin-table-styles')) {
+        const tableStyles = document.createElement('style');
+        tableStyles.id = 'admin-table-styles';
+        tableStyles.textContent = `
+            .admin-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 1rem;
+                font-size: 14px;
+            }
+            
+            .admin-table thead th {
+                text-align: left;
+                padding: 12px 8px;
+                background-color: #f5f5f5;
+                border-bottom: 2px solid #ddd;
+                font-weight: bold;
+                color: #333;
+            }
+            
+            .admin-table tbody td {
+                padding: 10px 8px;
+                border-bottom: 1px solid #eee;
+                vertical-align: middle;
+            }
+            
+            .event-list-thumbnail, .thumbnail {
+                display: inline-block;
+                width: 70px;
+                height: 70px;
+                border-radius: 4px;
+                overflow: hidden;
+                background-color: #f0f0f0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #ddd;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            .event-list-thumbnail img, .thumbnail img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: cover;
+            }
+            
+            .admin-table-actions {
+                white-space: nowrap;
+            }
+            
+            .admin-table-actions button {
+                margin-right: 5px;
+                padding: 4px 8px;
+                border-radius: 4px;
+                border: 1px solid #ddd;
+                background-color: #f5f5f5;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            
+            .admin-table-actions button:hover {
+                background-color: #e0e0e0;
+            }
+            
+            .admin-table-actions button.edit-event-btn, 
+            .admin-table-actions button.edit-blog-btn {
+                background-color: #e7f5ff;
+                border-color: #90c8f2;
+                color: #0066cc;
+            }
+            
+            .admin-table-actions button.edit-event-btn:hover, 
+            .admin-table-actions button.edit-blog-btn:hover {
+                background-color: #d0e8ff;
+            }
+            
+            .admin-table-actions button.delete-event-btn, 
+            .admin-table-actions button.delete-blog-btn {
+                background-color: #fff2f2;
+                border-color: #ffb8b8;
+                color: #cc0000;
+            }
+            
+            .admin-table-actions button.delete-event-btn:hover, 
+            .admin-table-actions button.delete-blog-btn:hover {
+                background-color: #ffe0e0;
+            }
+            
+            .event-divider, .blog-divider {
+                display: none;
+            }
+            
+            .empty-thumbnail, .no-image {
+                background-color: #eee;
+                color: #999;
+                font-size: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                width: 100%;
+                border-radius: 4px;
+            }
+            
+            .venue-tag {
+                display: inline-block;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            
+            .venue-farewell {
+                background-color: #f8e9b0;
+                color: #8a6d3b;
+            }
+            
+            .venue-howdy {
+                background-color: #d4edda;
+                color: #155724;
+            }
+            
+            .thumbnail-cell {
+                text-align: center;
+            }
+            
+            .status-tag {
+                display: inline-block;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            
+            .event-past {
+                background-color: #f2f2f2;
+                color: #666;
+            }
+            
+            .event-upcoming {
+                background-color: #e0f7fa;
+                color: #006064;
+            }
+            
+            .ticket-info {
+                margin-top: 4px;
+                font-size: 12px;
+            }
+            
+            .ticket-link {
+                color: #0066cc;
+                text-decoration: none;
+            }
+            
+            .ticket-link:hover {
+                text-decoration: underline;
+            }
+            
+            .event-row:hover, .admin-table tbody tr:hover {
+                background-color: #f9f9f9;
+            }
+        `;
+        document.head.appendChild(tableStyles);
+        console.log('Added table styles to document head');
     }
-  });
-}
-
-// Patch import events feedback
-const importBtn = document.getElementById('import-legacy-btn');
-if (importBtn) {
-  importBtn.addEventListener('click', async () => {
-    importBtn.disabled = true;
-    importBtn.textContent = 'Importing...';
-    const status = document.getElementById('import-status');
-    try {
-      const res = await api.post('/api/admin/events/sync', {});
-      if (res && res.success) {
-        if (status) status.textContent = 'Import successful!';
-        showToast('Events imported!', 'success');
-      } else {
-        if (status) status.textContent = res?.error || 'Import failed.';
-        showToast('Import failed.', 'error');
-      }
-    } catch (err) {
-      if (status) status.textContent = 'Error importing events.';
-      showToast('Error importing events.', 'error');
-    } finally {
-      importBtn.disabled = false;
-      importBtn.textContent = 'Import Events';
-    }
-  });
 }
 
 // End of file
