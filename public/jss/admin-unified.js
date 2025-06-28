@@ -1083,8 +1083,29 @@ function showEventForm(id = null) {
             
             if (res) {
                 const result = await res.json();
+                console.log('Flyer upload response:', result);
+                
                 if (result.success) {
-                    document.querySelector('input[name="flyer_image_url"]').value = result.imageUrl;
+                    // Get the image URL from the response (check for both imageUrl and url fields)
+                    let uploadedUrl = result.imageUrl || result.url || '';
+                    console.log('Raw URL from server:', uploadedUrl);
+                    
+                    // Ensure it's a full URL (add origin if it's a relative path)
+                    if (uploadedUrl && !uploadedUrl.startsWith('http')) {
+                        uploadedUrl = `${window.location.origin}${uploadedUrl.startsWith('/') ? '' : '/'}${uploadedUrl}`;
+                    }
+                    
+                    console.log('Processed URL for form:', uploadedUrl);
+                    
+                    // Update the form field
+                    const flyerUrlInput = document.querySelector('input[name="flyer_image_url"]');
+                    if (flyerUrlInput) {
+                        flyerUrlInput.value = uploadedUrl;
+                        console.log('Form field updated with URL:', uploadedUrl);
+                    } else {
+                        console.error('Could not find flyer_image_url input field');
+                    }
+                    
                     showToast('Flyer uploaded!', 'success');
                 } else {
                     showToast(result.error || 'Flyer upload failed.', 'error');
@@ -1112,7 +1133,16 @@ function showEventForm(id = null) {
             // Get form data
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
-            console.log('Event form data:', data);
+            console.log('Event form data (before processing):', data);
+            
+            // Convert full URLs to relative paths for the backend
+            if (data.flyer_image_url && data.flyer_image_url.startsWith(window.location.origin)) {
+                // Remove the origin from the URL, leaving only the path
+                data.flyer_image_url = data.flyer_image_url.replace(window.location.origin, '');
+                console.log('Processed flyer URL for backend:', data.flyer_image_url);
+            }
+            
+            console.log('Event form data (after processing):', data);
             
             // Validate required fields
             if (!data.title || !data.venue || !data.date) {

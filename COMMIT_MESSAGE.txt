@@ -1,23 +1,17 @@
-Fix Modal Venue Selection and Calendar Links
+Fix Flyer Upload URL in Event Form
 
-This commit resolves two critical issues with the events modal:
+This commit resolves an issue with the flyer upload functionality in the admin dashboard:
 
-1. Fixed issue where credEt div links stop working when switched to "howdy" state:
-   - Added direct event listeners to newly created calendar overlay links
-   - Implemented event delegation for all events-modal-trigger links
-   - Created a custom event system for communication between ifrevl.js and events-modal.js
+1. Fixed issue where uploaded flyer URLs weren't properly populated in the form:
+   - The backend was returning relative URLs (`/images/flyers/filename.jpg`) but the frontend wasn't handling them correctly
+   - Added code to convert relative URLs to full URLs with proper origin
+   - Added better console logging to debug the upload response
+   - Ensured the URL is correctly formatted before setting it in the form field
 
-2. Fixed issue where modal still shows "Farewell only" instead of "Howdy only" when opened from howdy state:
-   - Added a MutationObserver to detect and respond to data-state changes
-   - Ensured currentVenue is updated from body data-state immediately before opening modal
-   - Added logging to track venue state changes for easier debugging
-   - Updated openModal function to correctly set active tab based on current state
-
-These changes ensure:
-- All modal trigger links work consistently regardless of current data-state
-- The modal defaults to the correct venue filter (farewell/howdy) based on current page state
-- Calendar links in both states trigger the modal with proper venue selection
-- Event listeners are properly attached even when links are dynamically recreated
+Now when uploading event flyers:
+- The URL is properly converted to a full URL if needed
+- The flyer image URL field is correctly populated
+- The user can see the actual URL that will be used for the event
 
 4. Mobile responsiveness improvements
    - Optimized filter controls for mobile screens
