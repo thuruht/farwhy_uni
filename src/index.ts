@@ -5,6 +5,7 @@ import { timing } from 'hono/timing';
 import { handleAuth } from './handlers/auth';
 import { handleEvents } from './handlers/events';
 import { handleSync } from './handlers/sync';
+import { handleMenu } from './handlers/menu';
 // import { handleBlog } from './handlers/blog'; // We now import individual handlers instead
 import {
     getPublicPosts,
@@ -70,6 +71,7 @@ publicApi.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.que
 // publicApi.get('/blog/featured', (c) => handleBlog(c.req.raw, c.env)); // Replaced with direct handler
 publicApi.get('/blog/posts', getPublicPosts);
 publicApi.get('/blog/featured', getFeaturedContent);
+publicApi.get('/venues/:venue/menu', (c) => handleMenu(c, 'list'));
 app.route('/api', publicApi);
 
 
@@ -102,6 +104,14 @@ protectedAdminApi.delete('/events/:id', (c) => handleEvents(c, 'delete'));
 protectedAdminApi.post('/events/flyer', (c) => handleEvents(c, 'upload-flyer'));
 // Add sync-events endpoint for legacy import
 protectedAdminApi.post('/events/sync', handleSync);
+
+// Menu management endpoints
+protectedAdminApi.get('/venues/:venue/menu', (c) => handleMenu(c, 'list'));
+protectedAdminApi.post('/venues/:venue/menu', (c) => handleMenu(c, 'create'));
+protectedAdminApi.get('/menu/:id', (c) => handleMenu(c, 'items'));
+protectedAdminApi.post('/venues/:venue/menu-items', (c) => handleMenu(c, 'create-item'));
+protectedAdminApi.put('/menu-items/:id', (c) => handleMenu(c, 'update-item'));
+protectedAdminApi.delete('/menu-items/:id', (c) => handleMenu(c, 'delete-item'));
 
 // Mount the protected routes under the /admin path
 adminApi.route('/admin', protectedAdminApi);

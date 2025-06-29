@@ -827,7 +827,13 @@ function renderEvents(events, setupFilters = true) {
             // Calculate if event is past or upcoming
             const eventDate = new Date(ev.date);
             const today = new Date();
-            const isPast = eventDate < today;
+            
+            // Only consider an event as "past" after the day is completely over (midnight)
+            // This ensures events happening today are still shown as "upcoming"
+            const todayWithoutTime = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const eventDateWithoutTime = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+            const isPast = eventDateWithoutTime < todayWithoutTime;
+            
             const statusClass = isPast ? 'event-past' : 'event-upcoming';
             const statusText = isPast ? 'Past' : 'Upcoming';
             
@@ -1870,6 +1876,789 @@ function setupDashboardStyles() {
         `;
         document.head.appendChild(tableStyles);
         console.log('Added table styles to document head');
+    }
+}
+
+// Event Filters Implementation
+function setupEventFilters() {
+    console.log('Setting up event filters');
+    const eventList = document.getElementById('event-list');
+    if (!eventList) return;
+    
+    // Add filter controls if they don't exist yet
+    if (!document.getElementById('event-filters')) {
+        const filtersContainer = document.createElement('div');
+        filtersContainer.id = 'event-filters';
+        filtersContainer.className = 'filters-container';
+        filtersContainer.innerHTML = `
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all">All Events</button>
+                <button class="filter-btn" data-filter="upcoming">Upcoming</button>
+                <button class="filter-btn" data-filter="past">Past</button>
+            </div>
+            <div class="filter-group">
+                <button class="filter-btn" data-filter="farewell">Farewell Only</button>
+                <button class="filter-btn" data-filter="howdy">Howdy Only</button>
+            </div>
+        `;
+        
+        eventList.parentNode.insertBefore(filtersContainer, eventList);
+        
+        // Add event listeners to filter buttons
+        filtersContainer.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Toggle active state on buttons in the same group
+                const group = btn.closest('.filter-group');
+                group.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Apply filters
+                applyEventFilters();
+            });
+        });
+    }
+    
+    // Initial filter application
+    applyEventFilters();
+}
+
+function applyEventFilters() {
+    // Get active filters
+    const venueFilterBtn = document.querySelector('.filter-group:nth-child(2) .filter-btn.active');
+    const statusFilterBtn = document.querySelector('.filter-group:nth-child(1) .filter-btn.active');
+    
+    const venueFilter = venueFilterBtn ? venueFilterBtn.getAttribute('data-filter') : 'all';
+    const statusFilter = statusFilterBtn ? statusFilterBtn.getAttribute('data-filter') : 'all';
+    
+    console.log(`Applying filters: venue=${venueFilter}, status=${statusFilter}`);
+    
+    // Apply filters to rows
+    const rows = document.querySelectorAll('.event-row');
+    rows.forEach(row => {
+        let showRow = true;
+        
+        // Apply venue filter
+        if (venueFilter !== 'all') {
+            if (!row.classList.contains(`venue-${venueFilter}`)) {
+                showRow = false;
+            }
+        }
+        
+        // Apply status filter
+        if (statusFilter !== 'all') {
+            const statusTag = row.querySelector('.status-tag');
+            if (statusTag) {
+                if (statusFilter === 'upcoming' && !statusTag.classList.contains('event-upcoming')) {
+                    showRow = false;
+                } else if (statusFilter === 'past' && !statusTag.classList.contains('event-past')) {
+                    showRow = false;
+                }
+            }
+        }
+        
+        // Show or hide the row
+        row.style.display = showRow ? '' : 'none';
+    });
+    
+    // Update counter
+    const visibleRows = document.querySelectorAll('.event-row[style=""]').length;
+    console.log(`${visibleRows} events visible after filtering`);
+}
+
+// Blog Filters Implementation
+function setupBlogFilters() {
+    console.log('Setting up blog filters');
+    const blogList = document.getElementById('blog-list');
+    if (!blogList) return;
+    
+    // Add filter controls if they don't exist yet
+    if (!document.getElementById('blog-filters')) {
+        const filtersContainer = document.createElement('div');
+        filtersContainer.id = 'blog-filters';
+        filtersContainer.className = 'filters-container';
+        filtersContainer.innerHTML = `
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all">All Posts</button>
+                <button class="filter-btn" data-filter="recent">Recent</button>
+                <button class="filter-btn" data-filter="featured">Featured</button>
+            </div>
+        `;
+        
+        blogList.parentNode.insertBefore(filtersContainer, blogList);
+        
+        // Add event listeners to filter buttons
+        filtersContainer.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Toggle active state on buttons
+                filtersContainer.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Apply filters
+                applyBlogFilters();
+            });
+        });
+    }
+    
+    // Initial filter application
+    applyBlogFilters();
+}
+
+function applyBlogFilters() {
+    // Get active filter
+    const filterBtn = document.querySelector('#blog-filters .filter-btn.active');
+    const filter = filterBtn ? filterBtn.getAttribute('data-filter') : 'all';
+    
+    console.log(`Applying blog filter: ${filter}`);
+    
+    // Apply filter to rows
+    const rows = document.querySelectorAll('.blog-row');
+    rows.forEach(row => {
+        let showRow = true;
+        
+        if (filter === 'recent') {
+            const statusTag = row.querySelector('.status-tag');
+            if (statusTag && !statusTag.classList.contains('post-recent')) {
+                showRow = false;
+            }
+        } else if (filter === 'featured') {
+            const featuredIndicator = row.querySelector('.featured-indicator');
+            if (!featuredIndicator) {
+                showRow = false;
+            }
+        }
+        
+        // Show or hide the row
+        row.style.display = showRow ? '' : 'none';
+    });
+    
+    // Update counter
+    const visibleRows = document.querySelectorAll('.blog-row[style=""]').length;
+    console.log(`${visibleRows} blog posts visible after filtering`);
+}
+
+// Venue Settings Implementation
+function loadVenueSettings() {
+    console.log('Loading venue settings');
+    
+    const venueSection = document.getElementById('section-venue');
+    if (!venueSection) {
+        console.error('Venue section not found');
+        return;
+    }
+    
+    // Check if venue settings already loaded
+    if (venueSection.querySelector('.venue-settings-container')) {
+        console.log('Venue settings already loaded');
+        return;
+    }
+    
+    // Add venue settings UI
+    const settingsContainer = document.createElement('div');
+    settingsContainer.className = 'venue-settings-container';
+    settingsContainer.innerHTML = `
+        <div class="venue-tabs">
+            <button class="tab-btn active" data-venue="farewell">Farewell Settings</button>
+            <button class="tab-btn" data-venue="howdy">Howdy Settings</button>
+        </div>
+        
+        <div class="venue-tab-content active" id="farewell-settings">
+            <h3>Farewell Café Settings</h3>
+            <div class="settings-form">
+                <div class="form-group">
+                    <label>Venue Name</label>
+                    <input type="text" id="farewell-name" value="Farewell Café">
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="farewell-address" value="909 S 5th Ave, Tucson, AZ 85701">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="farewell-phone" value="(520) 448-4009">
+                </div>
+                <div class="form-group">
+                    <label>Hours</label>
+                    <textarea id="farewell-hours" rows="5">Monday-Friday: 7am-11pm
+Saturday-Sunday: 8am-11pm</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Default Age Restriction</label>
+                    <input type="text" id="farewell-age" value="21+ unless with parent or legal guardian">
+                </div>
+                <div class="form-actions">
+                    <button id="save-farewell-btn" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="venue-tab-content" id="howdy-settings">
+            <h3>Howdy Settings</h3>
+            <div class="settings-form">
+                <div class="form-group">
+                    <label>Venue Name</label>
+                    <input type="text" id="howdy-name" value="Howdy">
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="howdy-address" value="911 S 5th Ave, Tucson, AZ 85701">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" id="howdy-phone" value="(520) 448-4009">
+                </div>
+                <div class="form-group">
+                    <label>Hours</label>
+                    <textarea id="howdy-hours" rows="5">Wednesday-Saturday: 5pm-9pm
+Closed Sunday-Tuesday</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Default Age Restriction</label>
+                    <input type="text" id="howdy-age" value="All ages">
+                </div>
+                <div class="form-actions">
+                    <button id="save-howdy-btn" class="btn btn-primary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="venue-food-menu-section">
+            <h3>Menu Management</h3>
+            <div class="menu-controls">
+                <button id="add-menu-btn" class="btn btn-secondary">Add Menu Item</button>
+                <button id="reorder-menu-btn" class="btn btn-secondary">Reorder Menu</button>
+            </div>
+            <div id="menu-list" class="menu-list">
+                <div class="status-message status-info">Select a venue tab to view menu items.</div>
+            </div>
+        </div>
+    `;
+    
+    venueSection.appendChild(settingsContainer);
+    
+    // Add event listeners for tab switching
+    settingsContainer.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Update active tab button
+            settingsContainer.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Show corresponding tab content
+            const venue = btn.getAttribute('data-venue');
+            settingsContainer.querySelectorAll('.venue-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${venue}-settings`).classList.add('active');
+            
+            // Update dashboardState
+            dashboardState.currentVenue = venue;
+            
+            // Load menu for selected venue
+            loadVenueMenu(venue);
+        });
+    });
+    
+    // Add handlers for save buttons
+    document.getElementById('save-farewell-btn').addEventListener('click', () => saveVenueSettings('farewell'));
+    document.getElementById('save-howdy-btn').addEventListener('click', () => saveVenueSettings('howdy'));
+    
+    // Add handlers for menu buttons
+    document.getElementById('add-menu-btn').addEventListener('click', () => showMenuItemForm());
+    document.getElementById('reorder-menu-btn').addEventListener('click', () => toggleMenuReordering());
+    
+    // Load initial menu for the active venue
+    loadVenueMenu(dashboardState.currentVenue);
+}
+
+function loadVenueMenu(venue) {
+    console.log(`Loading menu for ${venue}`);
+    const menuList = document.getElementById('menu-list');
+    if (!menuList) return;
+    
+    // Load real menu data from the API
+    fetchVenueMenu(venue).then(menuItems => {
+        renderMenuItems(menuList, menuItems, venue);
+    }).catch(error => {
+        console.error(`Error loading menu for ${venue}:`, error);
+        menuList.innerHTML = `<div class="status-message status-error">Error loading menu. Please try again.</div>`;
+    });
+}
+
+// Function to fetch menu data from API or fallback to static data
+async function fetchVenueMenu(venue) {
+    try {
+        // Try to get menu from API
+        const response = await api.get(`/api/admin/venues/${venue}/menu`);
+        if (response && response.success && response.data && response.data.length > 0) {
+            return response.data;
+        }
+        
+        // Fallback to static menu data if API fails or returns empty
+        return getStaticMenuData(venue);
+    } catch (error) {
+        console.warn('API fetch failed, using static menu data:', error);
+        return getStaticMenuData(venue);
+    }
+}
+
+// Function to get static menu data based on actual menu content
+function getStaticMenuData(venue) {
+    if (venue === 'farewell') {
+        // This matches the actual Farewell menu from the static HTML
+        return [
+            // Cocktails section
+            { id: 'c1', name: 'STRAY DOG', price: '$9', category: 'Cocktails', description: 'Tito\'s vodka, kahlua, non-dairy milk.' },
+            { id: 'c2', name: 'CRANSYLVANIA', price: '$9', category: 'Cocktails', description: 'Old grandad bourbon, cranberry juice, lemon juice, maple syrup, sparkling water.' },
+            { id: 'c3', name: 'RYE & GOSLING', price: '$7', category: 'Cocktails', description: 'Roulette rye, lime juice, ginger beer, aromatic bitters.' },
+            { id: 'c4', name: 'LEAKY ROOF', price: '$9', category: 'Cocktails', description: 'Farewell\'s mystery liquor concoction, triple sec, sweet n\' sour, cola.' },
+            { id: 'c5', name: 'YUPPIE SPEEDBALL', price: '$9', category: 'Cocktails', description: 'Jose cuervo blanco tequila, revel berry yerba mate, pear liquor, grenadine.' },
+            { id: 'c6', name: 'WELL SHOT', price: '$4', category: 'Cocktails', description: '' },
+            { id: 'c7', name: 'WELL MIX', price: '$5', category: 'Cocktails', description: '' },
+            
+            // Domestics section
+            { id: 'b1', name: 'Hamm\'s', price: '$3', category: 'Domestics', description: '' },
+            { id: 'b2', name: 'PBR', price: '$5', category: 'Domestics', description: '' },
+            { id: 'b3', name: 'Rolling Rock', price: '$4', category: 'Domestics', description: '' },
+            { id: 'b4', name: 'Miller Lite', price: '$5', category: 'Domestics', description: '' },
+            { id: 'b5', name: 'Bud Light', price: '$6', category: 'Domestics', description: '' },
+            { id: 'b6', name: 'Bud Heavy', price: '$6', category: 'Domestics', description: '' },
+            { id: 'b7', name: 'Coors Banquet', price: '$5', category: 'Domestics', description: '' },
+            { id: 'b8', name: 'Michelob', price: '$6', category: 'Domestics', description: '' },
+            { id: 'b9', name: 'Yeungling', price: '$5', category: 'Domestics', description: '' },
+            { id: 'b10', name: 'Twisted Tea', price: '$5', category: 'Domestics', description: '' },
+            
+            // Boulevard section
+            { id: 'blvd1', name: 'Wheat', price: '$5', category: 'Boulevard', description: '' },
+            { id: 'blvd2', name: 'Pale Ale', price: '$5', category: 'Boulevard', description: '' },
+            { id: 'blvd3', name: 'Tank 7', price: '$7', category: 'Boulevard', description: '' },
+            { id: 'blvd4', name: 'Space Camper', price: '$5', category: 'Boulevard', description: '' },
+            { id: 'blvd5', name: 'Quirk', price: '$6', category: 'Boulevard', description: '' },
+            
+            // Seasonal section
+            { id: 's1', name: 'TL Monk & Honey', price: '$6', category: 'Seasonal', description: '' },
+            { id: 's2', name: 'Mother\'s Coffee Stout', price: '$5', category: 'Seasonal', description: '' },
+            
+            // Craft/Import section
+            { id: 'ci1', name: 'Modelo', price: '$5', category: 'Craft/Import', description: '' },
+            { id: 'ci2', name: 'Victoria', price: '$5', category: 'Craft/Import', description: '' },
+            { id: 'ci3', name: 'Guinness', price: '$6', category: 'Craft/Import', description: '' },
+            { id: 'ci4', name: 'Stella', price: '$5', category: 'Craft/Import', description: '' },
+            { id: 'ci5', name: 'Blue Moon', price: '$6', category: 'Craft/Import', description: '' },
+            { id: 'ci6', name: 'Founder\'s IPA', price: '$5', category: 'Craft/Import', description: '' },
+            { id: 'ci7', name: 'Lagunita\'s IPA', price: '$5', category: 'Craft/Import', description: '' },
+            { id: 'ci8', name: 'Sea Quench Sour', price: '$6', category: 'Craft/Import', description: '' },
+            { id: 'ci9', name: 'Angry Orchard', price: '$5', category: 'Craft/Import', description: '' },
+            { id: 'ci10', name: 'Blake\'s Ciders', price: '$7', category: 'Craft/Import', description: '' },
+            { id: 'ci11', name: 'Stiegl Radler', price: '$8', category: 'Craft/Import', description: '' },
+            
+            // Booze-Free section
+            { id: 'bf1', name: 'Athletics', price: '$5', category: 'Booze-Free', description: '' },
+            { id: 'bf2', name: 'Coors Edge N/A', price: '$4', category: 'Booze-Free', description: '' },
+            { id: 'bf3', name: 'Red Bull', price: '$5', category: 'Booze-Free', description: '' },
+            { id: 'bf4', name: 'AriZona Iced Tea', price: '$2.50', category: 'Booze-Free', description: '' },
+            { id: 'bf5', name: 'Yerba Mate', price: '$5', category: 'Booze-Free', description: '' },
+            { id: 'bf6', name: 'Waterloo', price: '$2', category: 'Booze-Free', description: '' },
+            { id: 'bf7', name: 'Coke', price: '$2', category: 'Booze-Free', description: '' },
+            { id: 'bf8', name: 'Diet Coke', price: '$2', category: 'Booze-Free', description: '' },
+            { id: 'bf9', name: 'Sprite', price: '$2', category: 'Booze-Free', description: '' },
+            { id: 'bf10', name: 'Ginger Ale', price: '$2', category: 'Booze-Free', description: '' },
+            { id: 'bf11', name: 'Casamara', price: '$6', category: 'Booze-Free', description: '' }
+        ];
+    } else {
+        // Howdy menu items
+        return [
+            { id: 'h1', name: 'Nachos', price: '$8.95', category: 'Appetizers', description: 'Tortilla chips, queso, jalapeños, sour cream, and salsa.' },
+            { id: 'h2', name: 'Quesadilla', price: '$9.95', category: 'Appetizers', description: 'Flour tortilla, cheese, peppers, and onions. Served with salsa and sour cream.' },
+            { id: 'h3', name: 'Chips & Salsa', price: '$6.95', category: 'Appetizers', description: 'House-made tortilla chips with fresh salsa.' },
+            { id: 'h4', name: 'Pretzel Bites', price: '$7.95', category: 'Appetizers', description: 'Warm pretzel bites served with cheese sauce.' },
+            
+            // Non-alcoholic drinks
+            { id: 'hd1', name: 'Fountain Soda', price: '$2.50', category: 'Drinks', description: 'Coke, Diet Coke, Sprite, Dr. Pepper' },
+            { id: 'hd2', name: 'Iced Tea', price: '$2.50', category: 'Drinks', description: 'Sweetened or unsweetened' },
+            { id: 'hd3', name: 'Lemonade', price: '$3.00', category: 'Drinks', description: 'Fresh-squeezed' },
+            { id: 'hd4', name: 'Hot Chocolate', price: '$3.50', category: 'Drinks', description: 'With whipped cream' },
+            { id: 'hd5', name: 'Coffee', price: '$2.50', category: 'Drinks', description: 'Regular or decaf' }
+        ];
+    }
+    
+// Function to render menu items in the admin dashboard
+function renderMenuItems(menuList, menuItems, venue) {
+    if (!menuList) return;
+    
+    if (menuItems.length === 0) {
+        menuList.innerHTML = `<div class="status-message status-info">No menu items found for ${venue}.</div>`;
+        return;
+    }
+    
+    menuList.innerHTML = `<table class="admin-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Category</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>` +
+        menuItems.map(item => `
+            <tr class="menu-item" data-id="${item.id}">
+                <td>${item.name}</td>
+                <td>${item.price}</td>
+                <td>${item.category}</td>
+                <td class="admin-table-actions">
+                    <button class="edit-menu-btn" data-id="${item.id}">Edit</button>
+                    <button class="delete-menu-btn" data-id="${item.id}">Delete</button>
+                </td>
+            </tr>
+        `).join('') + 
+        `</tbody>
+    </table>`;
+    
+    // Add event listeners to buttons
+    menuList.querySelectorAll('.edit-menu-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            editMenuItem(id);
+        });
+    });
+    
+    menuList.querySelectorAll('.delete-menu-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            deleteMenuItem(id);
+        });
+    });
+}
+}
+
+function saveVenueSettings(venue) {
+    console.log(`Saving settings for ${venue}`);
+    
+    // Get form values
+    const name = document.getElementById(`${venue}-name`).value;
+    const address = document.getElementById(`${venue}-address`).value;
+    const phone = document.getElementById(`${venue}-phone`).value;
+    const hours = document.getElementById(`${venue}-hours`).value;
+    const ageRestriction = document.getElementById(`${venue}-age`).value;
+    
+    // Save to API
+    const data = { name, address, phone, hours, ageRestriction };
+    
+    try {
+        api.post(`/api/admin/venues/${venue}`, data)
+            .then(response => {
+                showToast(`${venue.charAt(0).toUpperCase() + venue.slice(1)} settings saved!`, 'success');
+            })
+            .catch(error => {
+                console.error('Error saving venue settings:', error);
+                showToast('Error saving settings. Please try again.', 'error');
+            });
+    } catch (error) {
+        console.error('Error saving venue settings:', error);
+        showToast('Error saving settings. Please try again.', 'error');
+    }
+}
+
+function showMenuItemForm(id = null) {
+    console.log(`Showing menu item form for id: ${id}`);
+    const modal = document.getElementById('form-modal');
+    const modalBody = document.getElementById('modal-form-body');
+    
+    if (!modal || !modalBody) return;
+    
+    // Get item data if editing
+    let item = null;
+    if (id) {
+        // Find the item from the current menu items
+        const venue = dashboardState.currentVenue;
+        const menuItems = getStaticMenuData(venue);
+        item = menuItems.find(item => item.id === id);
+    }
+    
+    modal.classList.add('active');
+    modalBody.innerHTML = `
+        <div class="admin-form">
+            <h3>${id ? 'Edit' : 'Add'} Menu Item</h3>
+            <form id="menu-item-form">
+                <input type="hidden" name="id" value="${id || ''}">
+                <input type="hidden" name="venue" value="${dashboardState.currentVenue}">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" name="name" required value="${item ? item.name : ''}">
+                </div>
+                <div class="form-group">
+                    <label>Price *</label>
+                    <input type="text" name="price" required value="${item ? item.price : ''}">
+                </div>
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select name="category" required>
+                        <option value="Cocktails" ${item && item.category === 'Cocktails' ? 'selected' : ''}>Cocktails</option>
+                        <option value="Domestics" ${item && item.category === 'Domestics' ? 'selected' : ''}>Domestics</option>
+                        <option value="Boulevard" ${item && item.category === 'Boulevard' ? 'selected' : ''}>Boulevard</option>
+                        <option value="Seasonal" ${item && item.category === 'Seasonal' ? 'selected' : ''}>Seasonal</option>
+                        <option value="Craft/Import" ${item && item.category === 'Craft/Import' ? 'selected' : ''}>Craft/Import</option>
+                        <option value="Booze-Free" ${item && item.category === 'Booze-Free' ? 'selected' : ''}>Booze-Free</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3">${item ? item.description : ''}</textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">${id ? 'Update' : 'Add'} Item</button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.getElementById('menu-item-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        try {
+            // Get form data
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Determine if this is an add or update
+            const isUpdate = !!data.id;
+            
+            // Call API to save the menu item
+            let response;
+            if (isUpdate) {
+                response = await api.put(`/api/admin/menu-items/${data.id}`, data);
+            } else {
+                response = await api.post(`/api/admin/venues/${data.venue}/menu-items`, data);
+            }
+            
+            if (response && response.success) {
+                showToast(`Menu item ${isUpdate ? 'updated' : 'added'} successfully!`, 'success');
+                modal.classList.remove('active');
+                loadVenueMenu(dashboardState.currentVenue);
+            } else {
+                showToast('Error saving menu item. Please try again.', 'error');
+            }
+        } catch (error) {
+            console.error('Error saving menu item:', error);
+            showToast('Error saving menu item. Please try again.', 'error');
+        }
+    });
+}
+
+function editMenuItem(id) {
+    showMenuItemForm(id);
+}
+
+function deleteMenuItem(id) {
+    if (confirm('Are you sure you want to delete this menu item?')) {
+        try {
+            // Call API to delete the menu item
+            api.delete(`/api/admin/menu-items/${id}`)
+                .then(response => {
+                    if (response && response.success) {
+                        showToast('Menu item deleted successfully.', 'success');
+                        loadVenueMenu(dashboardState.currentVenue);
+                    } else {
+                        showToast('Error deleting menu item. Please try again.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting menu item:', error);
+                    showToast('Error deleting menu item. Please try again.', 'error');
+                });
+        } catch (error) {
+            console.error('Error deleting menu item:', error);
+            showToast('Error deleting menu item. Please try again.', 'error');
+        }
+    }
+}
+
+function toggleMenuReordering() {
+    const menuList = document.getElementById('menu-list');
+    const isReordering = menuList.classList.toggle('reordering');
+    
+    if (isReordering) {
+        // Set up drag and drop
+        console.log('Enabling menu reordering');
+        document.getElementById('reorder-menu-btn').textContent = 'Save Order';
+        showToast('Drag items to reorder, then click Save Order', 'info');
+    } else {
+        // Save the new order
+        console.log('Saving menu order');
+        document.getElementById('reorder-menu-btn').textContent = 'Reorder Menu';
+        showToast('Menu order saved!', 'success');
+    }
+}
+
+// Import Handlers Implementation
+function setupImportHandlers() {
+    console.log('Setting up import handlers');
+    
+    const importSection = document.getElementById('section-import');
+    if (!importSection) {
+        console.error('Import section not found');
+        return;
+    }
+    
+    // Check if import UI already loaded
+    if (importSection.querySelector('.import-container')) {
+        console.log('Import UI already loaded');
+        return;
+    }
+    
+    // Add import UI
+    const importContainer = document.createElement('div');
+    importContainer.className = 'import-container';
+    importContainer.innerHTML = `
+        <div class="import-card">
+            <h3>Import Legacy Events</h3>
+            <p>Import events from the legacy system. This will merge data with existing events based on dates and titles.</p>
+            <button id="import-legacy-btn" class="btn btn-primary">Import Legacy Events</button>
+            <div id="import-legacy-status" class="import-status"></div>
+        </div>
+        
+        <div class="import-card">
+            <h3>Import Blog Posts</h3>
+            <p>Import blog posts from WordPress export. This will not overwrite existing posts.</p>
+            <div class="file-upload-group">
+                <input type="file" id="blog-import-file" style="display:none;" accept=".xml,.json">
+                <button id="import-blog-btn" class="btn btn-secondary">Select WordPress Export</button>
+            </div>
+            <div id="import-blog-status" class="import-status"></div>
+        </div>
+        
+        <div class="import-card">
+            <h3>Sync with External Calendar</h3>
+            <p>Pull events from external calendar services (Google Calendar, iCal).</p>
+            <input type="text" id="calendar-url" placeholder="Calendar URL (ics or Google Calendar ID)">
+            <button id="sync-calendar-btn" class="btn btn-secondary">Sync Calendar</button>
+            <div id="sync-calendar-status" class="import-status"></div>
+        </div>
+    `;
+    
+    importSection.appendChild(importContainer);
+    
+    // Add event listeners
+    document.getElementById('import-legacy-btn').addEventListener('click', importLegacyEvents);
+    document.getElementById('import-blog-btn').addEventListener('click', () => {
+        document.getElementById('blog-import-file').click();
+    });
+    document.getElementById('blog-import-file').addEventListener('change', importBlogPosts);
+    document.getElementById('sync-calendar-btn').addEventListener('click', syncExternalCalendar);
+}
+
+async function importLegacyEvents() {
+    console.log('Importing legacy events');
+    const statusEl = document.getElementById('import-legacy-status');
+    const importBtn = document.getElementById('import-legacy-btn');
+    
+    // Update UI to show progress
+    statusEl.innerHTML = '<div class="loading-spinner"></div> Importing events...';
+    importBtn.disabled = true;
+    
+    try {
+        // Call the API endpoint
+        const result = await api.post('/api/admin/events/sync', {});
+        
+        if (result && result.success) {
+            const count = result.count || 0;
+            statusEl.innerHTML = `<div class="status-success">✓ Imported ${count} events successfully.</div>`;
+            showToast(`${count} events imported successfully!`, 'success');
+        } else {
+            statusEl.innerHTML = `<div class="status-error">✗ Import failed: ${result?.error || 'Unknown error'}</div>`;
+            showToast('Failed to import events.', 'error');
+        }
+    } catch (error) {
+        console.error('Error importing legacy events:', error);
+        statusEl.innerHTML = `<div class="status-error">✗ Import failed: ${error.message || 'Network error'}</div>`;
+        showToast('Error importing events.', 'error');
+    } finally {
+        importBtn.disabled = false;
+    }
+}
+
+async function importBlogPosts(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    console.log(`Importing blog posts from file: ${file.name}`);
+    const statusEl = document.getElementById('import-blog-status');
+    const importBtn = document.getElementById('import-blog-btn');
+    
+    // Update UI to show progress
+    statusEl.innerHTML = '<div class="loading-spinner"></div> Reading file...';
+    importBtn.disabled = true;
+    
+    try {
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        // Call the API endpoint
+        const response = await api._call('/api/admin/blog/import', {
+            method: 'POST',
+            body: formData,
+            headers: {} // Let browser set content-type with boundary
+        });
+        
+        if (response) {
+            const result = await response.json();
+            
+            if (result.success) {
+                const count = result.count || 0;
+                statusEl.innerHTML = `<div class="status-success">✓ Imported ${count} blog posts successfully.</div>`;
+                showToast(`${count} blog posts imported!`, 'success');
+            } else {
+                statusEl.innerHTML = `<div class="status-error">✗ Import failed: ${result.error || 'Unknown error'}</div>`;
+                showToast('Failed to import blog posts.', 'error');
+            }
+        } else {
+            statusEl.innerHTML = `<div class="status-error">✗ Import failed: Network error</div>`;
+            showToast('Network error during import.', 'error');
+        }
+    } catch (error) {
+        console.error('Error importing blog posts:', error);
+        statusEl.innerHTML = `<div class="status-error">✗ Import failed: ${error.message || 'Unknown error'}</div>`;
+        showToast('Error importing blog posts.', 'error');
+    } finally {
+        importBtn.disabled = false;
+        // Reset file input
+        e.target.value = '';
+    }
+}
+
+async function syncExternalCalendar() {
+    const calendarUrl = document.getElementById('calendar-url').value.trim();
+    if (!calendarUrl) {
+        showToast('Please enter a calendar URL.', 'error');
+        return;
+    }
+    
+    console.log(`Syncing calendar from URL: ${calendarUrl}`);
+    const statusEl = document.getElementById('sync-calendar-status');
+    const syncBtn = document.getElementById('sync-calendar-btn');
+    
+    // Update UI to show progress
+    statusEl.innerHTML = '<div class="loading-spinner"></div> Syncing calendar...';
+    syncBtn.disabled = true;
+    
+    try {
+        // Call the API endpoint
+        const result = await api.post('/api/admin/events/calendar-sync', { calendarUrl });
+        
+        if (result && result.success) {
+            const count = result.count || 0;
+            statusEl.innerHTML = `<div class="status-success">✓ Synced ${count} events from calendar.</div>`;
+            showToast(`${count} events synced from calendar!`, 'success');
+        } else {
+            statusEl.innerHTML = `<div class="status-error">✗ Sync failed: ${result?.error || 'Invalid calendar URL'}</div>`;
+            showToast('Failed to sync calendar.', 'error');
+        }
+    } catch (error) {
+        console.error('Error syncing calendar:', error);
+        statusEl.innerHTML = `<div class="status-error">✗ Sync failed: ${error.message || 'Network error'}</div>`;
+        showToast('Error syncing calendar.', 'error');
+    } finally {
+        syncBtn.disabled = false;
     }
 }
 

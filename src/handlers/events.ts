@@ -109,11 +109,13 @@ async function getArchives(c: Context<{ Bindings: Env }>, options?: { venue?: st
   const { FWHY_D1 } = c.env;
 
   try {
-    let query = "SELECT * FROM events WHERE date < datetime('now') ORDER BY date DESC";
+    // Use date() instead of datetime() to only compare the date portion
+    // This ensures events are considered "past" only after the day is completely over
+    let query = "SELECT * FROM events WHERE date < date('now') ORDER BY date DESC";
     let params: any[] = [];
 
     if (options?.venue) {
-      query = "SELECT * FROM events WHERE venue = ? AND date < datetime('now') ORDER BY date DESC";
+      query = "SELECT * FROM events WHERE venue = ? AND date < date('now') ORDER BY date DESC";
       params = [options.venue];
     }
 
