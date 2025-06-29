@@ -211,3 +211,40 @@ You can filter events by:
 
 - Venue (Farewell or Howdy)
 - Search by title or content
+
+## Menu Management
+
+The admin dashboard includes a menu management system for editing the drinks and food menu:
+
+1. **Features**:
+   - Edit existing menu items
+   - Add new menu items
+   - Remove menu items
+   - Organize menu items by category
+   - Preserve the unique style of the menu
+   
+2. **Menu Structure**:
+   - Categories (e.g., Cocktails, Beer, Booze-Free)
+   - Items within each category
+   - Item details (name, description, price)
+   
+3. **Implementation**:
+   - Menu data stored in the database
+   - API endpoints for CRUD operations
+   - Admin UI for editing menu items
+   - Preserved styling from the static menu
+
+## YouTube Video Carousel
+
+The blog system includes a YouTube video carousel for featured content:
+
+1. **Features**:
+   - Add multiple YouTube videos to the carousel
+   - Reorder videos
+   - Edit video titles and descriptions
+   - Control video visibility
+   
+2. **Implementation**:
+   - Videos stored in the database
+   - Admin UI for managing videos
+   - Responsive carousel on the public site

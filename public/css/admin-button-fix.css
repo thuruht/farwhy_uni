@@ -1,0 +1,144 @@
+/* Admin UI Button Standardization CSS */
+
+/* Base button styles for all admin buttons */
+.admin-view button,
+#admin-view button,
+.post-actions button,
+.admin-form button,
+.admin-table-actions button,
+.admin-panel button,
+.blog-content button,
+#post-form button,
+#featured-form button {
+    /* Consistent sizing */
+    min-height: 36px;
+    min-width: 80px;
+    padding: 8px 16px;
+    margin: 4px;
+    
+    /* Consistent styling */
+    border-radius: 6px;
+    font-family: var(--font-main);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    
+    /* Default border & outline */
+    border: 1px solid var(--cyan, #00bfff);
+    outline: none;
+    
+    /* Ensure consistent text alignment */
+    text-align: center;
+    line-height: 1.2;
+    
+    /* Prevent text overflow */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+    /* Default color scheme */
+    background-color: transparent;
+    color: var(--cyan, #00bfff);
+}
+
+/* Button states */
+.admin-view button:hover,
+#admin-view button:hover,
+.admin-form button:hover,
+.admin-table-actions button:hover,
+.post-actions button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.admin-view button:active,
+#admin-view button:active,
+.admin-form button:active,
+.admin-table-actions button:active,
+.post-actions button:active {
+    transform: translateY(0);
+}
+
+/* Button types */
+button[type="submit"],
+.btn-primary,
+.save-btn {
+    background-color: var(--cyan, #00bfff);
+    color: #fff;
+}
+
+.edit-btn,
+.update-btn {
+    background-color: var(--accent-color, #b0ee00);
+    color: #000;
+    border-color: var(--accent-color, #b0ee00);
+}
+
+.delete-btn,
+.remove-btn {
+    background-color: var(--error, #ff2b13);
+    color: #fff;
+    border-color: var(--error, #ff2b13);
+}
+
+button#cancel-edit-btn,
+.cancel-btn {
+    background-color: #888;
+    color: #fff;
+    border-color: #888;
+}
+
+/* Special styling for youtube list control buttons */
+#youtube-list-container button {
+    min-height: 30px;
+    min-width: 30px;
+    width: 30px;
+    padding: 4px;
+    font-size: 12px;
+}
+
+/* Specifically style post-actions buttons to be properly aligned */
+.post-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.post-item-admin {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background-color: #fff;
+}
+
+/* Make sure admin-table action buttons are consistent */
+.admin-table-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .admin-view button,
+    #admin-view button,
+    .admin-form button,
+    .admin-table-actions button {
+        min-width: 70px;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    
+    .post-actions {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .post-actions button {
+        flex: 1;
+    }
+}

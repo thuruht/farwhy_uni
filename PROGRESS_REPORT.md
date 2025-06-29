@@ -64,58 +64,59 @@
     - Added better loading indicators with text
     - Optimized for both portrait and landscape orientations
 
-11. ✅ **Admin Tables and Forms Improved**
+12. ✅ **Admin Tables and Forms Improved**
     - Made tables horizontally scrollable on small screens
     - Enhanced form inputs and buttons for touch interaction
     - Improved form layout on mobile devices
     - Added better image previews for event flyers and blog images
 
-12. ✅ **Documentation Updated**
+13. ✅ **Documentation Updated**
     - Added mobile responsiveness documentation
     - Updated project documentation with recent improvements
     - Fixed markdown formatting issues in documentation files
 
-13. ✅ **CSS Fixes**
+14. ✅ **CSS Fixes**
     - Fixed CSS validation errors
     - Added standard property `line-clamp` alongside `-webkit-line-clamp`
     - Improved modal positioning and scrolling on mobile
 
-14. ✅ **Section Navigation Fixed**
+15. ✅ **Section Navigation Fixed**
     - Added missing `showSection` function to admin-unified.js
     - Implemented `loadVenueSettings` and `setupImportHandlers` functions
     - Fixed navigation between dashboard sections
     - Properly highlights active section in sidebar
 
-15. ✅ **Admin Navigation System Fixed**
+16. ✅ **Admin Navigation System Fixed**
     - Implemented missing `showSection` function
     - Added proper section switching and state management
     - Fixed `loadVenueSettings` and `setupImportHandlers` functions
     - Resolved "showSection is not defined" runtime error
 
-16. ✅ **Event Table Layout Fixed**
+17. ✅ **Event Table Layout Fixed**
     - Fixed event table columns alignment
     - Added consistent table styling
     - Improved visual organization of event listings
 
-17. ✅ **Admin Table Alignment Fixed**
+18. ✅ **Admin Table Alignment Fixed**
     - Fixed misaligned table headers in event and blog tables
     - Improved consistent styling for admin tables
     - Added proper column widths and vertical alignment
     - Enhanced visibility of thumbnail images and venue tags
 
-18. ✅ **Public Index Page Links Fixed**
+19. ✅ **Public Index Page Links Fixed**
     - Fixed "view show listings" link to only open the modal, not an empty popup window
     - Removed outdated text about different venue views showing different listings
     - Updated calendar link to use javascript:void(0) to prevent default link behavior
     - Changed trigger class from "open-popup" to "events-modal-trigger" for clarity
 
-19. ✅ **Calendar Image Click Behavior Fixed**
+20. ✅ **Calendar Image Click Behavior Fixed**
     - Added events-modal-trigger class to the calendar image
     - Updated ifrevl.js to use the new events-modal-trigger class
     - Modified event delegation code to handle both old and new class names
     - Ensured backward compatibility with any existing old links
+    - Ensured backward compatibility with any existing old links
 
-20. ✅ **Events Modal Improvements**
+21. ✅ **Events Modal Improvements**
     - Enhanced venue selection to make it more obvious and intuitive
     - Added "Both Venues" option to filter events across venues
     - Only showing past events when "archived" filter is selected
@@ -141,12 +142,67 @@
     - Made buttons the same size on both desktop and mobile
     - Improved hover and active states for all filter buttons
 
+24. ✅ **Menu Management System Implemented**
+    - Added menu management system to admin dashboard
+    - Implemented API endpoints for CRUD operations on menu items
+    - Preserved the unique style of the menu while making it editable
+    - Added UI for editing menu items in the admin dashboard
+    - Implemented database storage for menu items
+    - Added category management for organizing menu items
+
+25. ✅ **YouTube Video Carousel for Blog**
+    - Implemented YouTube video carousel for featured content
+    - Added admin controls for adding/removing/reordering videos
+    - Integrated with blog system for featured content
+    - Added responsive design for mobile devices
+    - Enhanced styling for improved appearance
+
+26. ✅ **Documentation Updated**
+    - Reviewed and updated all documentation files
+    - Marked obsolete documentation in the ye_olde_docs directory
+    - Added new sections for menu management and YouTube video carousel
+    - Updated README.md with current project status and features
+    - Enhanced DOCUMENTATION.md with detailed information about new features
+
+27. ✅ **Venue Information Corrected**
+    - Updated all venue addresses and phone numbers to Kansas City, MO
+    - Removed outdated Tucson, AZ references
+    - Updated venue hours in admin dashboard to match actual hours
+    - Enhanced venue settings in admin dashboard
+
+28. ✅ **Fixed Event Date Logic**
+    - Corrected issue where events were considered "past" all day on the day they occur
+    - Events are now only considered "past" after midnight (Central Time)
+    - Improved date display and filtering in event tables
+    - Enhanced event modal with better date information
+
+29. ✅ **Blog Post Ordering Fixed**
+    - Corrected blog post ordering to show newest posts first
+    - Implemented consistent ordering in both admin and public views
+    - Enhanced blog post list with better sorting options
+    - Improved blog post timestamps for better readability
+
+30. ✅ **Admin UI Button Styling Standardized**
+    - Created consistent button styling across all admin interfaces
+    - Fixed inconsistent button sizes, shapes, and alignments
+    - Implemented semantic color coding (blue for primary, green for edit, red for delete)
+    - Added proper hover and active states
+    - Improved mobile responsiveness for all buttons
+    - Documented standards in ADMIN_UI_IMPROVEMENTS.md
+
+31. ✅ **Blog Management Functionality Completed**
+    - Added missing login form submission handler
+    - Fixed login modal behavior
+    - Added proper cancel button functionality
+    - Enhanced YouTube carousel controls with consistent styling
+    - Fixed reference issues with YouTube list container
+    - Improved error handling throughout the blog management interface
+
 ### Current Issues
 
-1. ❓ **Stats Display Issues**
-   - Dashboard stats (events and blog counts) showing as 0 despite data in database
-   - Needs debugging in the `loadStats()` function
-   - May be fixed by the API response handling update
+1. ✅ **Stats Display Issues** (FIXED)
+   - Dashboard stats (events and blog counts) now correctly display data from the database
+   - Fixed by properly parsing API responses in the loadStats() function
 
 ### Todo List (Updated)
 
@@ -163,56 +219,49 @@
    - Added venue-specific defaults per Aaron's requirements
    - Enhanced event form with auto-population logic
 
-4. **Fix Dashboard Stats**
-   - Debug the `loadStats()` function
-   - Ensure proper counts are displayed for events and blogs
-   - May be fixed by the API response handling update - needs testing
+4. ✅ **Fix Dashboard Stats** (COMPLETED)
+   - Fixed the `loadStats()` function to properly display event and blog counts
+   - Ensured API response handling properly updates the dashboard stats
 
 ### Medium Priority
 
-1. **Improve Form Validation**
-   - Add client-side form validation for required fields
+1. ✅ **Improve Form Validation** (COMPLETED)
+   - Added client-side form validation for required fields
    - Display validation errors to users before submission
 
-2. **Enhance Error Handling**
-   - Add more specific error messages for different API failure cases
-   - Improve toast notification feedback for users
+2. ✅ **Enhance Error Handling** (COMPLETED)
+   - Added more specific error messages for different API failure cases
+   - Improved toast notification feedback for users
+
+3. ✅ **Review and Update Documentation** (COMPLETED)
+   - Reviewed all documentation files
+   - Updated README.md and DOCUMENTATION.md with current project status
+   - Marked obsolete documentation
 
 ### Low Priority
 
-1. **Code Cleanup**
-   - Remove unnecessary console.logs after debugging is complete
-   - Optimize event handling
-   - Add documentation comments to complex code sections
+1. ✅ **Code Cleanup** (COMPLETED)
+   - Removed unnecessary console.logs after debugging is complete
+   - Optimized event handling
+   - Added documentation comments to complex code sections
 
-2. **UI Enhancements**
-   - Add loading indicators during form submissions
-   - Improve error message display
-   - Add confirmation dialogs for delete actions
+2. ✅ **UI Enhancements** (COMPLETED)
+   - Added loading indicators during form submissions
+   - Improved error message display
+   - Added confirmation dialogs for delete actions
 
-## Next Steps (Implementation Plan)
+## Future Enhancements
 
-1. ✅ Fix the API helper methods to properly parse JSON responses (COMPLETED)
-2. ✅ Remove duplicate modal activation in the blog form (COMPLETED)
-3. ✅ Implement auto-population for event creation (COMPLETED)
-4. Test all form submissions and ensure proper feedback
-5. Debug and fix the stats display if still an issue
-6. Implement form validation improvements
-7. Clean up debugging logs and add documentation
-8. Enhance UI with loading indicators and confirmation dialogs
+1. **Image Gallery**
+   - Create a page for an image gallery showcasing biggest/coolest shows
+   - Implement storage and management for gallery images
 
-### Recent Fixes (June 21, 2025)
+2. **Show History/Archive Page**
+   - Build a comprehensive archive page for past shows
+   - Include storage for historical event information
+   - Use Fugazi archive as inspiration
 
-1. ✅ **Fixed Events Modal Venue Selection**
-   - Fixed issue where modal would still show "Farewell only" when opened from Howdy state
-   - Ensured currentVenue is properly updated from body data-state before opening modal
-   - Added MutationObserver to detect data-state changes in real-time
-   - Implemented proper active tab indication with checkmarks for selected venue
-
-2. ✅ **Fixed Calendar Overlay Links in Howdy State**
-   - Fixed issue where credEt div links would stop working after switching to Howdy state
-   - Added direct event listeners to newly created calendar overlay links
-   - Implemented event delegation for all modal trigger links
-   - Created custom event system for communication between ifrevl.js and events-modal.js
-
-These changes ensure that the events modal works consistently regardless of the current page state, and that all links to view events function correctly in both Farewell and Howdy states.
+3. **Webstore Integration**
+   - Add photos and information about Farewell and Howdy merchandise
+   - Include prices and purchasing information
+   - Potentially add e-commerce functionality

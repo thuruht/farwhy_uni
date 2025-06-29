@@ -1,51 +1,53 @@
-Fix Flyer Upload URL in Event Form
+UI/UX Improvements and Documentation Update (June 24, 2025)
 
-This commit resolves an issue with the flyer upload functionality in the admin dashboard:
+This commit includes several significant improvements to the admin interface and public site, along with comprehensive documentation updates:
 
-1. Fixed issue where uploaded flyer URLs weren't properly populated in the form:
-   - The backend was returning relative URLs (`/images/flyers/filename.jpg`) but the frontend wasn't handling them correctly
-   - Added code to convert relative URLs to full URLs with proper origin
-   - Added better console logging to debug the upload response
-   - Ensured the URL is correctly formatted before setting it in the form field
+1. Admin UI Enhancements:
+   - Standardized button styling across all admin interfaces
+   - Fixed event filtering and blog post ordering
+   - Improved YouTube video carousel controls
+   - Enhanced menu management interface
 
-Now when uploading event flyers:
-- The URL is properly converted to a full URL if needed
-- The flyer image URL field is correctly populated
-- The user can see the actual URL that will be used for the event
+2. Bug Fixes:
+   - Fixed event date logic to properly handle past/upcoming events
+   - Corrected blog post ordering to show newest first
+   - Fixed YouTube list container reference issues
+   - Fixed login form submission handlers
 
-4. Mobile responsiveness improvements
-   - Optimized filter controls for mobile screens
-   - Enhanced event details layout for smaller devices
-   - Improved touch targets and readability on mobile
+3. Content Updates:
+   - Corrected all venue information to reference Kansas City, MO
+   - Updated venue hours in admin dashboard
+   - Implemented menu management with real menu data
 
-5. Backend API updates
-   - Modified event handlers to remove default placeholder text
-   - Updated normalizeEventForDisplay and getSlideshow functions
+4. Documentation:
+   - Updated README.md with current project status
+   - Created RECENT_IMPLEMENTATIONS.md to track completed features
+   - Created ADMIN_UI_IMPROVEMENTS.md for UI styling details
+   - Created DOCUMENTATION_UPDATE_SUMMARY.md
+   - Created MENU_MANAGEMENT_SYSTEM.md for the menu system
+   - Marked obsolete documentation with OBSOLETE_DOCUMENTATION_NOTICE.md
 
-6. Events Modal UI Polishing (Part 2)
-   - Made "Upcoming Only" the default when opening the modal
-   - Standardized all filter buttons (Both Venues, Upcoming Only, Howdy, Farewell) to have the same size
-   - Fixed event details view with flyer that wasn't displaying correctly
-   - Added error handling for event images that fail to load
-   - Enhanced responsive layout for all event details components
-   - Improved contrast and readability of event information
+5. New Files:
+   - public/css/admin-button-fix.css (new standardized button styling)
+   - ADMIN_UI_IMPROVEMENTS.md (documentation for UI changes)
+   - RECENT_IMPLEMENTATIONS.md (summary of implemented features)
+   - DOCUMENTATION_UPDATE_SUMMARY.md (documentation changes)
+   - MENU_MANAGEMENT_SYSTEM.md (menu system documentation)
+   - ye_olde_docs/OBSOLETE_DOCUMENTATION_NOTICE.md (obsolete docs marker)
 
-7. Filter UX Improvement
-   - Added check marks (✓) to clearly indicate active filter buttons
-   - Updated venue button text to be more descriptive ("FAREWELL ONLY", "HOWDY ONLY")
-   - Standardized button sizes with fixed height and minimum width
-   - Improved consistency of button text length for better visual alignment
-   - Made buttons the same size on both desktop and mobile (adjusted proportionally)
-
-8. Documentation updates
-   - Updated PROGRESS_REPORT.md with the latest improvements
-   - Added detailed documentation of changes and features
-
-These changes make the events modal more intuitive and informative, providing users
-with a better experience when viewing event listings across both venues.
+These changes maintain all existing functionality while enhancing the user experience, code quality, and documentation comprehensiveness.
 
 Related files:
-- public/jss/events-modal.js
-- public/css/events-modal.css
-- src/handlers/events.ts
+- public/admin.html
+- public/u/index.html
+- public/u/news.js
+- public/u/news.css
+- public/css/admin-button-fix.css
+- DOCUMENTATION.md
 - PROGRESS_REPORT.md
+- README.md
+- ADMIN_UI_IMPROVEMENTS.md
+- DOCUMENTATION_UPDATE_SUMMARY.md
+- MENU_MANAGEMENT_SYSTEM.md
+- RECENT_IMPLEMENTATIONS.md
+- ye_olde_docs/OBSOLETE_DOCUMENTATION_NOTICE.md

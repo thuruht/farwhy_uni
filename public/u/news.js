@@ -352,15 +352,19 @@ async function loadAdminFeatured() {
 
 // --- Featured YouTube admin UI logic ---
 // Make sure we have the container before modifying it
-if (!youtubeListContainer && document.getElementById('youtube-list-container')) {
-    // If the container exists in the HTML but wasn't captured in the variables
-    const youtubeListContainer = document.getElementById('youtube-list-container');
-} else if (!youtubeListContainer) {
-    // If the container doesn't exist at all, create it
-    const tempContainer = document.createElement('div');
-    tempContainer.id = 'youtube-list-container';
-    if (youtubeUrlInput && youtubeUrlInput.parentNode) {
-        youtubeUrlInput.parentNode.insertBefore(tempContainer, youtubeUrlInput.nextSibling);
+if (!youtubeListContainer) {
+    const existingContainer = document.getElementById('youtube-list-container');
+    if (existingContainer) {
+        // If the container exists in the HTML but wasn't captured in the variables
+        youtubeListContainer = existingContainer;
+    } else {
+        // If the container doesn't exist at all, create it
+        const tempContainer = document.createElement('div');
+        tempContainer.id = 'youtube-list-container';
+        if (youtubeUrlInput && youtubeUrlInput.parentNode) {
+            youtubeUrlInput.parentNode.insertBefore(tempContainer, youtubeUrlInput.nextSibling);
+            youtubeListContainer = tempContainer;
+        }
     }
 }
 
@@ -492,7 +496,11 @@ featuredForm.addEventListener('submit', async (e) => {
 });
 
 loginBtn.addEventListener('click', () => {
-    window.location.href = '/admin/login';
+    // Show login modal instead of redirecting
+    loginModal.classList.add('active');
+    loginForm.reset();
+    loginErrorEl.textContent = '';
+    loginPasswordEl.focus();
 });
 
 logoutBtn.addEventListener('click', handleLogout);
@@ -547,6 +555,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     updateView();
+});
+
+// Cancel login button handler
+cancelLoginBtn.addEventListener('click', () => {
+    loginModal.classList.remove('active');
+    loginForm.reset();
+    loginErrorEl.textContent = '';
 });
 
 // Clear the post form for a new post
@@ -629,4 +644,39 @@ removePostImageBtn.addEventListener('click', () => {
     postImagePreviewEl.style.display = 'none';
     postImageUrlDisplayEl.textContent = '';
     removePostImageBtn.style.display = 'none';
+});
+
+// Login form submission handler
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const submitButton = loginForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    loginErrorEl.textContent = '';
+    
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                password: loginPasswordEl.value
+            }),
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            loginModal.classList.remove('active');
+            updateView();
+        } else {
+            const data = await response.json();
+            loginErrorEl.textContent = data.error || 'Login failed';
+        }
+    } catch (err) {
+        loginErrorEl.textContent = 'Network error occurred';
+        console.error('Login error:', err);
+    } finally {
+        submitButton.disabled = false;
+    }
 });

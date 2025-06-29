@@ -135,6 +135,41 @@ header {
   margin-right: 0.5rem;
 }
 
+/* Admin Post Items Styling */
+.post-item-admin {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s;
+}
+
+.post-item-admin:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.post-item-admin strong {
+    display: block;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.post-item-admin p {
+    margin: 8px 0;
+    color: #555;
+}
+
+.post-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
 /* Modal Styling */
 .modal {
   position: fixed;
@@ -315,4 +350,59 @@ h2:nth-of-type(7) {
 
 .close-button:hover {
     color: #cc0000;
+}
+
+/* YouTube Carousel Styling */
+.yt-carousel {
+    position: relative;
+    max-width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.yt-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.yt-controls {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    gap: 10px;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 8px 12px;
+    border-radius: 20px;
+}
+
+.yt-prev, 
+.yt-next {
+    background-color: var(--primary-color, #d990ff);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.yt-prev:hover, 
+.yt-next:hover {
+    background-color: var(--success-color, #b0ee00);
+    color: #000;
+    transform: translateY(-2px);
+}
+
+.yt-prev:active, 
+.yt-next:active {
+    transform: translateY(0);
 }
