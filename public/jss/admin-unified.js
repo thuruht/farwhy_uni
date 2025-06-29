@@ -2070,16 +2070,21 @@ function loadVenueSettings() {
                 </div>
                 <div class="form-group">
                     <label>Address</label>
-                    <input type="text" id="farewell-address" value="909 S 5th Ave, Tucson, AZ 85701">
+                    <input type="text" id="farewell-address" value="6515 STADIUM DRIVE, KANSAS CITY, MISSOURI">
                 </div>
                 <div class="form-group">
                     <label>Phone</label>
-                    <input type="text" id="farewell-phone" value="(520) 448-4009">
+                    <input type="text" id="farewell-phone" value="(816) 448-4009">
                 </div>
                 <div class="form-group">
                     <label>Hours</label>
-                    <textarea id="farewell-hours" rows="5">Monday-Friday: 7am-11pm
-Saturday-Sunday: 8am-11pm</textarea>
+                    <textarea id="farewell-hours" rows="5">Monday: shows only
+Tuesday: 06pm - 12am
+Wednesday: 06pm - 12am
+Thursday: 06pm - 12am
+Friday: 12pm - 12am
+Saturday: 12pm - 12am
+Sunday: shows only</textarea>
                 </div>
                 <div class="form-group">
                     <label>Default Age Restriction</label>
@@ -2100,16 +2105,16 @@ Saturday-Sunday: 8am-11pm</textarea>
                 </div>
                 <div class="form-group">
                     <label>Address</label>
-                    <input type="text" id="howdy-address" value="911 S 5th Ave, Tucson, AZ 85701">
+                    <input type="text" id="howdy-address" value="6523 STADIUM DRIVE, KANSAS CITY, MISSOURI">
                 </div>
                 <div class="form-group">
                     <label>Phone</label>
-                    <input type="text" id="howdy-phone" value="(520) 448-4009">
+                    <input type="text" id="howdy-phone" value="(816) 448-4009">
                 </div>
                 <div class="form-group">
                     <label>Hours</label>
-                    <textarea id="howdy-hours" rows="5">Wednesday-Saturday: 5pm-9pm
-Closed Sunday-Tuesday</textarea>
+                    <textarea id="howdy-hours" rows="5">Open for shows and events
+(For Howdy DIY Thrift hours, please check their Instagram: @howdydiythrift)</textarea>
                 </div>
                 <div class="form-group">
                     <label>Default Age Restriction</label>

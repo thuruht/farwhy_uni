@@ -12,6 +12,8 @@ const currentFeaturedPreviewEl = document.getElementById('current-featured-previ
 const featuredForm = document.getElementById('featured-form');
 const featuredTextEl = document.getElementById('featured-text');
 const youtubeUrlInput = document.getElementById('youtube-url');
+const youtubeListContainer = document.getElementById('youtube-list-container');
+const addYoutubeBtn = document.getElementById('add-youtube-btn');
 const loginModal = document.getElementById('login-modal');
 const loginForm = document.getElementById('login-form');
 const loginBtn = document.getElementById('login-btn');
@@ -258,7 +260,10 @@ function updateView() {
 async function loadPublicPosts() {
     try {
         const { data: posts } = await fetchApi('/blog/posts', { method: 'GET', excludeAuth: true });
-        publicPostsListEl.innerHTML = posts.length ? posts.map(post => `
+        // Sort posts in reverse chronological order (newest first)
+        const sortedPosts = [...posts].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        
+        publicPostsListEl.innerHTML = sortedPosts.length ? sortedPosts.map(post => `
             <article class="post-item-public">
                 <h3>${post.title.replace(/</g, '&lt;')}</h3>
                 ${post.image_url ? `<img src="${post.image_url}" alt="${post.title}" class="post-image-public">` : ''}
@@ -274,10 +279,35 @@ async function loadPublicPosts() {
 async function loadPublicFeatured() {
     try {
         const { data: featured } = await fetchApi('/blog/featured', { method: 'GET', excludeAuth: true });
-        publicFeaturedContentEl.innerHTML = `
-            <p>${featured.text.replace(/</g, '&lt;')}</p>
-            ${featured.youtubeUrl ? createYouTubeEmbed(featured.youtubeUrl) : ''}
-        `;
+        
+        // Create featured content HTML with enhanced styling
+        let featuredHTML = `<div class="featured-content-wrapper">`;
+        
+        // Add featured text
+        if (featured.text) {
+            featuredHTML += `<div class="featured-text">${featured.text.replace(/</g, '&lt;').replace(/\n/g, '<br>')}</div>`;
+        }
+        
+        // Add YouTube videos with enhanced carousel if multiple videos
+        if (featured.youtubeUrl) {
+            featuredHTML += `<div class="featured-video-container">${createYouTubeEmbed(featured.youtubeUrl)}</div>`;
+        }
+        
+        featuredHTML += `</div>`;
+        
+        publicFeaturedContentEl.innerHTML = featuredHTML;
+        
+        // Initialize carousel navigation if needed
+        const carousel = publicFeaturedContentEl.querySelector('.yt-carousel');
+        if (carousel) {
+            // Make sure controls are visible and styled well
+            const controls = carousel.querySelector('.yt-controls');
+            if (controls) {
+                controls.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                controls.style.padding = '5px 10px';
+                controls.style.borderRadius = '5px';
+            }
+        }
     } catch (err) {
         publicFeaturedContentEl.innerHTML = `<p>Error loading featured content: ${err.message}</p>`;
     }
@@ -286,7 +316,10 @@ async function loadPublicFeatured() {
 async function loadAdminPosts() {
     try {
         const { data: posts } = await fetchApi('/admin/blog/posts');
-        adminPostsListEl.innerHTML = posts.length ? posts.map(post => `
+        // Sort posts in reverse chronological order (newest first)
+        const sortedPosts = [...posts].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        
+        adminPostsListEl.innerHTML = sortedPosts.length ? sortedPosts.map(post => `
             <div class="post-item-admin" data-post-id="${post.id}">
                 <strong>${post.title.replace(/</g, '&lt;')}</strong>
                 <p>${post.content.substring(0, 100).replace(/<[^>]*>/g, '')}...</p>
@@ -318,15 +351,44 @@ async function loadAdminFeatured() {
 }
 
 // --- Featured YouTube admin UI logic ---
-const youtubeListContainer = document.createElement('div');
-youtubeListContainer.id = 'youtube-list-container';
-youtubeUrlInput.parentNode.insertBefore(youtubeListContainer, youtubeUrlInput.nextSibling);
+// Make sure we have the container before modifying it
+if (!youtubeListContainer && document.getElementById('youtube-list-container')) {
+    // If the container exists in the HTML but wasn't captured in the variables
+    const youtubeListContainer = document.getElementById('youtube-list-container');
+} else if (!youtubeListContainer) {
+    // If the container doesn't exist at all, create it
+    const tempContainer = document.createElement('div');
+    tempContainer.id = 'youtube-list-container';
+    if (youtubeUrlInput && youtubeUrlInput.parentNode) {
+        youtubeUrlInput.parentNode.insertBefore(tempContainer, youtubeUrlInput.nextSibling);
+    }
+}
 
-youtubeUrlInput.style.display = 'none'; // Hide original input
+// Add YouTube button handler
+if (addYoutubeBtn) {
+    addYoutubeBtn.addEventListener('click', () => {
+        const urlPrompt = prompt("Enter YouTube video URL:");
+        if (urlPrompt && urlPrompt.trim()) {
+            const textarea = document.getElementById('youtube-list-textarea');
+            if (textarea) {
+                const currentUrls = textarea.value.split('\n').filter(Boolean);
+                currentUrls.push(urlPrompt.trim());
+                textarea.value = currentUrls.join('\n');
+                // Trigger the update
+                const event = new Event('input');
+                textarea.dispatchEvent(event);
+            }
+        }
+    });
+}
 
 function renderYoutubeList(urlArr) {
-    youtubeListContainer.innerHTML = '';
+    const container = document.getElementById('youtube-list-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
     if (!Array.isArray(urlArr)) urlArr = [];
+    
     // Textarea for manual editing
     const textarea = document.createElement('textarea');
     textarea.id = 'youtube-list-textarea';
@@ -334,7 +396,8 @@ function renderYoutubeList(urlArr) {
     textarea.style.width = '100%';
     textarea.placeholder = 'One YouTube URL per line';
     textarea.value = urlArr.join('\n');
-    youtubeListContainer.appendChild(textarea);
+    container.appendChild(textarea);
+    
     // List with controls
     const list = document.createElement('ul');
     list.style.listStyle = 'none';
@@ -387,7 +450,8 @@ function renderYoutubeList(urlArr) {
         li.appendChild(rmBtn);
         list.appendChild(li);
     });
-    youtubeListContainer.appendChild(list);
+    container.appendChild(list);
+    
     // Sync textarea and list
     textarea.oninput = () => {
         const lines = textarea.value.split('\n').map(u => u.trim()).filter(Boolean);

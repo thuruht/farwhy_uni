@@ -7,6 +7,7 @@
   
   <link rel="stylesheet" href="../css/ccssss.css">
   <link rel="stylesheet" href="./news.css">
+  <link rel="stylesheet" href="./blog-styles.css">
   <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 </head>
 <body>
@@ -77,8 +78,10 @@
          <form id="featured-form" class="admin-form">
             <label for="featured-text">Update Text:</label>
             <textarea id="featured-text" name="text" rows="4" required></textarea>
-            <label for="youtube-url">YouTube Video URL:</label>
-            <input type="url" id="youtube-url" name="youtubeUrl" placeholder="https://www.youtube.com/watch?v=...">
+            <label for="youtube-videos">YouTube Videos (Add multiple videos for carousel):</label>
+            <div id="youtube-list-container"></div>
+            <input type="url" id="youtube-url" name="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." style="display:none;">
+            <button type="button" id="add-youtube-btn">Add YouTube Video</button>
             <button type="submit">Update Featured Section</button>
          </form>
       </div>
