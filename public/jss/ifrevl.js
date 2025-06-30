@@ -20,8 +20,7 @@ function generateUrls(state) {
   const eventPathBase = state === 'howdy' ? 'hyevent' : 'fwevent'; // Path WITHOUT trailing slash
   return {
     showListings: `https://${baseUrl}/${eventPathBase}/`, // Add slash for listings
-    icsFile: `https://${baseUrl}/${eventPathBase}/calendar.ics`, // Use base path for file
-    googleCalendar: `https://www.google.com/calendar/render?cid=${encodeURIComponent(`https://${baseUrl}/${eventPathBase}/calendar.ics`)}` // Encode correct URL
+    icsFile: `https://${baseUrl}/${eventPathBase}/calendar.ics` // Use base path for file
   };
 }
 
@@ -36,7 +35,7 @@ function updateCalendarLinks() {
     // Updated to use events-modal-trigger class instead of open-popup
     const mainBlockHtml = `
 <div>
-<hr> || <a href="javascript:void(0);" class="events-modal-trigger">view show listings</a> || <a href="${urls.icsFile}">.ics</a> || <a href="${urls.googleCalendar}" target="_blank">gcal</a> || <hr><small>(view all upcoming events at both venues)</small><hr>
+<hr> || <a href="javascript:void(0);" class="events-modal-trigger">view show listings</a> || <a href="#" class="cal-link-ics">.ics</a> || <hr><small>(view all upcoming events at both venues)</small><hr>
 <p><small>calendar graphic (and the other swell graphics and general layout of this site) designed by the excellent <a href="https://austinchapmandesign.com/" target="_blank" rel="noopener">austin chapman</a> - however, any parts of the site that you dislike, that are animated annoyingly, bitcrushed, badly implemented, or the like, may instead be blamed on me (<a href="https://ntapkc.com" target="_blank" rel="noopener">jojo</a>), with the exception of show/event flyers, which are variously sourced</small></p>
 </div>
     `;
@@ -79,12 +78,8 @@ function updateCalendarLinks() {
   if (listingLinks.length > 0) console.log(`[UpdateLinks] Updated ${listingLinks.length} '.cal-link-listing'.`);
 
   const icsLinks = document.querySelectorAll('.cal-link-ics');
-  icsLinks.forEach(link => { if (link instanceof HTMLAnchorElement) link.href = urls.icsFile; });
-  if (icsLinks.length > 0) console.log(`[UpdateLinks] Updated ${icsLinks.length} '.cal-link-ics'.`);
-
-  const gcalLinks = document.querySelectorAll('.cal-link-gcal');
-  gcalLinks.forEach(link => { if (link instanceof HTMLAnchorElement) link.href = urls.googleCalendar; });
-  if (gcalLinks.length > 0) console.log(`[UpdateLinks] Updated ${gcalLinks.length} '.cal-link-gcal'.`);
+  // We no longer set href directly, as ics-generator.js will handle clicks
+  if (icsLinks.length > 0) console.log(`[UpdateLinks] Found ${icsLinks.length} '.cal-link-ics' links (handled by ics-generator.js).`);
 
   console.log(`[UpdateLinks] Link updates complete for state: ${state}`);
 }

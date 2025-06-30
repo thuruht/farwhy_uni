@@ -265,3 +265,34 @@
    - Add photos and information about Farewell and Howdy merchandise
    - Include prices and purchasing information
    - Potentially add e-commerce functionality
+
+## Recent Implementations (June 30, 2025)
+
+1. ✅ **JWT Security Improvements**
+    - Fixed JWT logout vulnerability by implementing token blacklisting using KV storage
+    - Added unique token IDs for proper invalidation
+    - Updated auth middleware to check for blacklisted tokens
+    - Improved security posture for the entire application
+
+2. ✅ **Admin UI Cleanup**
+    - Removed duplicate import button generation
+    - Fixed ID conflicts between HTML-defined and JavaScript-generated elements
+    - Corrected status element references to match actual HTML structure
+    - Cleaned up redundant code that was creating extra import sections
+
+3. ✅ **Menu Renderer Improvements**
+    - Fixed menu renderer to try multiple API endpoints for better reliability
+    - Improved error handling in menu loading with proper fallbacks
+    - Enhanced price formatting to ensure consistent display
+
+4. ✅ **ICS Calendar File Implementation**
+    - Implemented functionality to generate and download .ics files with all upcoming events
+    - Created comprehensive script that handles fetching events, formatting to iCalendar format, and downloading
+    - Enhanced user experience by allowing easy addition of events to personal calendars
+    - Added intelligent event time parsing from event descriptions
+
+5. ✅ **Google Calendar Link Removal**
+    - Removed all Google Calendar links from the public website
+    - Updated index.html to only show the .ics download link
+    - Modified ifrevl.js to remove Google Calendar URL generation and references
+    - Simplified calendar integration while maintaining full functionality
