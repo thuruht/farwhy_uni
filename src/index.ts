@@ -34,6 +34,94 @@ app.get('/images/*', async (c) => {
   const path = c.req.path.replace('/images/', '');
   
   try {
+    // Security check: Only allow specific image paths and extensions
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    const hasValidExtension = allowedExtensions.some(ext => path.toLowerCase().endsWith(ext));
+    
+    if (!hasValidExtension) {
+      console.warn(`[SECURITY] Blocked request for non-image file: ${path}`);
+      return new Response('Not found', { status: 404 });
+    }
+    
+    // Prevent directory traversal attacks
+    if (path.includes('../') || path.includes('..\\') || path.startsWith('/')) {
+      console.warn(`[SECURITY] Blocked directory traversal attempt: ${path}`);
+      return new Response('Not found', { status: 404 });
+    }
+    
+    // For admin-uploaded content (like blog images, flyers), check authorization
+    if (path.startsWith('blog/') || path.startsWith('flyers/') || path.startsWith('admin/')) {
+      // Check if user has admin access for private images
+      const { JWT_SECRET, SESSIONS_KV } = c.env;
+      let isAuthorized = false;
+      
+      // Try to get token from cookie first
+      let token: string | null = null;
+      const cookie = c.req.header('cookie') || '';
+      const cookieMatch = cookie.match(/sessionToken=([^;]+)/);
+      
+      if (cookieMatch) {
+        token = cookieMatch[1];
+      } else {
+        // Fallback to Authorization header
+        const authHeader = c.req.header('authorization');
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          token = authHeader.substring(7);
+        }
+      }
+      
+      if (token) {
+        try {
+          // Use the same JWT verification as auth middleware
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const [header, payload, signature] = parts;
+            const data = `${header}.${payload}`;
+            
+            const encoder = new TextEncoder();
+            const key = await crypto.subtle.importKey(
+              'raw',
+              encoder.encode(JWT_SECRET),
+              { name: 'HMAC', hash: 'SHA-256' },
+              false,
+              ['verify']
+            );
+            
+            const signatureBuffer = Uint8Array.from(
+              atob(signature.replace(/-/g, '+').replace(/_/g, '/')), 
+              c => c.charCodeAt(0)
+            );
+            
+            const isValid = await crypto.subtle.verify('HMAC', key, signatureBuffer, encoder.encode(data));
+            
+            if (isValid) {
+              const decodedPayload = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+              
+              // Check expiration
+              if (!decodedPayload.exp || decodedPayload.exp > Date.now() / 1000) {
+                // Check if token is in the blocklist
+                if (decodedPayload.jti) {
+                  const isBlocked = await SESSIONS_KV.get(`blocked:${decodedPayload.jti}`);
+                  if (!isBlocked) {
+                    isAuthorized = true;
+                  }
+                } else {
+                  isAuthorized = true; // Legacy token without jti
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.warn(`[SECURITY] JWT verification failed for image request: ${error}`);
+        }
+      }
+      
+      if (!isAuthorized) {
+        console.warn(`[SECURITY] Unauthorized access attempt to private image: ${path}`);
+        return new Response('Unauthorized', { status: 401 });
+      }
+    }
+    
     // Get the image from R2
     const object = await c.env.FWHY_IMAGES.get(path);
     
@@ -50,7 +138,12 @@ app.get('/images/*', async (c) => {
       headers.set('Content-Type', object.httpMetadata.contentType);
     }
     
-    headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    // Set appropriate cache headers based on image type
+    if (path.startsWith('blog/') || path.startsWith('flyers/') || path.startsWith('admin/')) {
+      headers.set('Cache-Control', 'private, max-age=3600'); // Private cache for 1 hour
+    } else {
+      headers.set('Cache-Control', 'public, max-age=31536000'); // Public cache for 1 year
+    }
     
     return new Response(object.body, {
       headers

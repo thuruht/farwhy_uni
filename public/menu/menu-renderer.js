@@ -21,7 +21,18 @@ async function loadMenuData() {
             }
         }
         
-        // If API fails or returns empty data, use existing static content
+        // If that fails, try the unified menu endpoint
+        const unifiedResponse = await fetch('/api/menu');
+        if (unifiedResponse.ok) {
+            const unifiedData = await unifiedResponse.json();
+            if (unifiedData.success && Array.isArray(unifiedData.data) && unifiedData.data.length > 0) {
+                console.log('Using unified menu API data');
+                updateMenuContent(unifiedData.data);
+                return;
+            }
+        }
+        
+        // If both API calls fail or return empty data, use existing static content
         console.log('Using existing static menu content');
     } catch (error) {
         console.error('Error loading menu data:', error);
@@ -42,61 +53,140 @@ function updateMenuContent(menuData) {
         categorizedItems[item.category].push(item);
     });
     
-    // Update cocktails section
-    if (categorizedItems['Cocktails']) {
-        updateCocktailsSection(categorizedItems['Cocktails']);
+    // Clear existing dynamic content containers to prevent duplicates
+    const cocktailsContainer = document.querySelector('.cocktail-section');
+    const domesticsContainer = document.getElementById('domestics-container');
+    const boulevardContainer = document.getElementById('boulevard-container');
+    const seasonalContainer = document.getElementById('seasonal-container');
+    const craftImportContainer = document.getElementById('craft-import-container');
+    const boozeFreeContainer = document.getElementById('booze-free-container');
+
+    // Update each section if it exists
+    if (categorizedItems['Cocktails'] && cocktailsContainer) {
+        updateCocktailsSection(categorizedItems['Cocktails'], cocktailsContainer);
     }
     
-    // Update beer sections (multiple beer-related categories)
-    updateBeerSections(categorizedItems);
+    if (categorizedItems['Domestics'] && domesticsContainer) {
+        updateBeerSection(categorizedItems['Domestics'], domesticsContainer);
+    }
+    
+    if (categorizedItems['Boulevard'] && boulevardContainer) {
+        updateBeerSection(categorizedItems['Boulevard'], boulevardContainer);
+    }
+    
+    if (categorizedItems['Seasonal'] && seasonalContainer) {
+        updateBeerSection(categorizedItems['Seasonal'], seasonalContainer);
+    }
+    
+    if (categorizedItems['Craft/Import'] && craftImportContainer) {
+        updateBeerSection(categorizedItems['Craft/Import'], craftImportContainer);
+    }
+    
+    if (categorizedItems['Booze-Free'] && boozeFreeContainer) {
+        updateBeerSection(categorizedItems['Booze-Free'], boozeFreeContainer);
+    }
+    
+    // Apply animations
+    applyAnimations();
     
     console.log('Menu update complete');
 }
 
 // Function to update the cocktails section
-function updateCocktailsSection(cocktails) {
-    const cocktailSection = document.querySelector('.cocktail-section');
-    if (!cocktailSection) return;
+function updateCocktailsSection(cocktails, container) {
+    // Preserve any special elements like images
+    const specialElements = [];
+    container.querySelectorAll('.cowboy, .cocktail-header, h2, .section-divider').forEach(el => {
+        specialElements.push(el.cloneNode(true));
+    });
     
-    // Clear existing cocktails except the cowboy image
-    const cowboyImage = cocktailSection.querySelector('.cowboy');
-    cocktailSection.innerHTML = '';
+    // Clear the container
+    container.innerHTML = '';
     
-    // Add cowboy image back if it existed
-    if (cowboyImage) {
-        cocktailSection.appendChild(cowboyImage);
-    }
+    // Add back special elements
+    specialElements.forEach(el => {
+        container.appendChild(el);
+    });
     
     // Add cocktail items
     cocktails.forEach(cocktail => {
+        const cocktailEl = document.createElement('div');
+        
         if (cocktail.description) {
             // Standard cocktail with description
-            const cocktailEl = document.createElement('div');
             cocktailEl.className = 'cocktail';
             cocktailEl.innerHTML = `
                 <div class="cocktail-name">${cocktail.name}</div>
                 <div class="cocktail-details">
                     <div class="cocktail-ingredients">${cocktail.description}</div>
-                    <div class="cocktail-price">${cocktail.price}</div>
+                    <div class="cocktail-price">$${parseFloat(cocktail.price).toFixed(2)}</div>
                 </div>
             `;
-            cocktailSection.appendChild(cocktailEl);
         } else {
             // Simple cocktail without description (just name and price)
-            const cocktailEl = document.createElement('div');
             cocktailEl.className = 'cocktail-simple';
             cocktailEl.innerHTML = `
                 <div class="cocktail-name">${cocktail.name}</div>
-                <div class="cocktail-price">${cocktail.price}</div>
+                <div class="cocktail-price">$${parseFloat(cocktail.price).toFixed(2)}</div>
             `;
-            cocktailSection.appendChild(cocktailEl);
         }
+        
+        container.appendChild(cocktailEl);
     });
     
-    // Add divider at the end
-    const divider = document.createElement('div');
-    divider.className = 'divider';
-    cocktailSection.appendChild(divider);
+    // Add divider at the end if it doesn't already exist
+    if (!container.querySelector('.divider')) {
+        const divider = document.createElement('div');
+        divider.className = 'divider';
+        container.appendChild(divider);
+    }
+}
+
+// Function to update beer sections
+function updateBeerSection(items, container) {
+    // Preserve header if it exists
+    const header = container.parentElement.querySelector('h1, h2, h3, h4, h5, h6');
+    
+    // Clear the container
+    container.innerHTML = '';
+    
+    // Add beer items
+    items.forEach(item => {
+        const beerEl = document.createElement('div');
+        beerEl.className = 'beer-item';
+        beerEl.innerHTML = `
+            <span class="beer-name">${item.name}</span>
+            <span class="beer-price">$${parseFloat(item.price).toFixed(2)}</span>
+        `;
+        container.appendChild(beerEl);
+    });
+}
+
+// Function to apply animations
+function applyAnimations() {
+    // Check if GSAP is available
+    if (typeof gsap !== 'undefined') {
+        // Animate the menu header on load
+        gsap.from(".menu-header img", { 
+            duration: 1, 
+            y: -50, 
+            opacity: 0, 
+            ease: "bounce", 
+            stagger: 0.2 
+        });
+        
+        // Animate the menu items
+        const allItems = document.querySelectorAll(".cocktail, .cocktail-simple, .beer-item");
+        gsap.from(allItems, {
+            duration: 0.5,
+            opacity: 0,
+            y: 20,
+            stagger: 0.05,
+            ease: "power2.out"
+        });
+    } else {
+        console.log('GSAP not available, skipping animations');
+    }
 }
 
 // Function to update beer sections (Domestics, Boulevard, Seasonal, Craft/Import, Booze-Free)

@@ -2,6 +2,28 @@
 
 This document outlines the most recent implementations, bug fixes, and enhancements to the Farewell/Howdy Unified Project.
 
+### Security Enhancements (June 29, 2025)
+
+- **Status**: ✅ Implemented
+- **Description**: Major security improvements addressing JWT token invalidation and R2 bucket access controls.
+- **Implementation Details**:
+  - Implemented proper JWT token invalidation on logout using KV storage blocklist
+  - Added comprehensive R2 bucket security with authorization checks for private images
+  - Enhanced image serving with file extension validation and directory traversal protection
+  - Added differentiated cache headers for public vs private content
+  - Improved audit logging for security events
+
+### Menu Rendering Improvements (June 29, 2025)
+
+- **Status**: ✅ Completed
+- **Description**: Fixed menu rendering issues and improved fallback handling for the public menu page.
+- **Implementation Details**:
+  - Enhanced menu renderer to try multiple API endpoints with proper fallback
+  - Fixed HTML structure and styling consistency
+  - Added proper error handling and graceful degradation
+  - Improved price formatting and animation support
+  - Ensured menu displays correctly with or without API data
+
 ## Completed Features
 
 ### Menu Management System

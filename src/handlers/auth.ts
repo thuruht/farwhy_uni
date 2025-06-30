@@ -9,6 +9,9 @@ async function createJWT(payload: any, secret: string): Promise<string> {
     typ: 'JWT'
   };
 
+  // Add a unique token ID (jti) to the payload for token invalidation
+  payload.jti = crypto.randomUUID();
+
   const encodedHeader = btoa(JSON.stringify(header)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   const encodedPayload = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 
@@ -258,6 +261,32 @@ async function handleLogin(c: Context<{ Bindings: Env }>): Promise<Response> {
 }
 
 async function handleLogout(c: Context<{ Bindings: Env }>): Promise<Response> {
+  const { SESSIONS_KV, JWT_SECRET } = c.env;
+  
+  // Get the token from the cookie
+  const cookie = c.req.header('cookie') || '';
+  const sessionToken = cookie.match(/sessionToken=([^;]+)/)?.[1];
+  
+  // If we have a token, add it to the blocklist in KV
+  if (sessionToken) {
+    try {
+      // Verify and extract token payload to get token ID and expiration
+      const payload = await verifyJWT(sessionToken, JWT_SECRET);
+      if (payload && payload.jti) {
+        // Calculate TTL (time-to-live) for the blocklist entry
+        const now = Math.floor(Date.now() / 1000);
+        const expiresIn = payload.exp ? Math.max(payload.exp - now, 60) : 86400; // At least 1 minute, default 24 hours
+        
+        // Add token to blocklist
+        await SESSIONS_KV.put(`blocked:${payload.jti}`, 'true', { expirationTtl: expiresIn });
+        console.log(`[AUTH] Token added to blocklist: ${payload.jti}, expires in ${expiresIn}s`);
+      }
+    } catch (error) {
+      console.error('[AUTH] Error processing token for blocklist:', error);
+      // Continue with logout even if we can't add to blocklist
+    }
+  }
+  
   // Clear the JWT cookie
   const cookieOptions = [
     'sessionToken=',

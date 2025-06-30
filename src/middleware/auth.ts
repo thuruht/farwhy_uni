@@ -75,6 +75,15 @@ export function authMiddleware(allowedRoles: string[] = ['admin']) {
       user = await verifyJWT(token, JWT_SECRET);
       if (user) {
         console.log(`[AUTH] JWT verification successful: ${JSON.stringify(user)}`);
+        
+        // Check if token is in the blocklist
+        if (user.jti) {
+          const isBlocked = await SESSIONS_KV.get(`blocked:${user.jti}`);
+          if (isBlocked) {
+            console.log(`[AUTH] Token is in blocklist: ${user.jti}`);
+            return c.json({ success: false, error: 'Token has been invalidated' }, 401);
+          }
+        }
       }
     } catch (e) {
       console.log(`[AUTH] JWT verification failed, trying KV fallback: ${e}`);
