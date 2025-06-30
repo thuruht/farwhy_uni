@@ -390,6 +390,24 @@ input, select, textarea {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Fix for Quill editor text color */
+.ql-editor {
+    color: var(--text-primary) !important; /* Force dark text color */
+    background-color: white !important; /* Ensure background is white */
+}
+
+.ql-container, .ql-toolbar {
+    border-color: var(--border-color) !important;
+}
+
+/* Ensure text in blog form inputs is visible */
+#blog-form input, 
+#blog-form textarea,
+#blog-form select {
+    color: var(--text-primary) !important;
+    background-color: white !important;
+}
+
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--accent-color);
@@ -401,18 +419,69 @@ input:focus, select:focus, textarea:focus {
     gap: 1rem;
     margin-bottom: 1.5rem;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .filters-bar label {
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .filters-bar select {
     min-width: 150px;
+    max-width: 200px;  /* Added max-width to prevent too wide dropdowns */
+    width: auto;       /* Allow auto width based on content */
 }
 
-.filters-bar input {
+.filters-bar input[type="text"] {
     flex: 1;
+    min-width: 200px;  /* Ensure search has minimum width */
+}
+
+/* Add specific style for blog filter controls */
+#section-blog .filters-bar select {
+    width: auto;
+    max-width: 180px;
+}
+
+#section-blog .filters-bar input[type="text"] {
+    flex: 1;
+    min-width: 250px;
+}
+
+/* Filter groups for better layout control */
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-dropdown-group {
+    display: flex;
+    align-items: center;
+    min-width: 200px;
+    max-width: 250px;
+}
+
+.filter-search-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+/* Blog specific filter refinements */
+#section-blog .filter-dropdown-group label {
+    margin-right: 0.5rem;
+    white-space: nowrap;
+}
+
+#section-blog .filter-dropdown-group select {
+    width: auto;
+    min-width: 120px;
+    max-width: 160px;
+}
+
+#section-blog .filter-search-group input {
+    width: 100%;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -554,6 +623,11 @@ input:focus, select:focus, textarea:focus {
     width: 100%;
     margin-bottom: 1.5rem;
     min-height: 44px; /* Apple's recommended minimum touch target size */
+    color: var(--text-primary); /* Ensure text is visible */
+    background-color: var(--bg-light); /* Lighter background for better contrast */
+    border: 1px solid var(--border-color);
+    padding: 0.5rem;
+    border-radius: 4px;
 }
 
 .admin-form button, 
@@ -701,7 +775,6 @@ input:focus, select:focus, textarea:focus {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     outline: none;
-}
 }
 
 @media (max-width: 768px) {

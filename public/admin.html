@@ -99,26 +99,34 @@
             <section id="section-events" class="admin-section">
                 <div class="section-header"><h2>Event Management</h2><button class="btn btn-primary" id="add-event-btn">+ New Event</button></div>
                 <div class="filters-bar">
-                    <label for="event-venue-filter">Filter by venue:</label>
-                    <select id="event-venue-filter" aria-label="Filter events by venue">
-                        <option value="">All Venues</option>
-                        <option value="farewell">Farewell</option>
-                        <option value="howdy">Howdy</option>
-                    </select>
-                    <input type="text" id="event-search" placeholder="Search events..." aria-label="Search events">
+                    <div class="filter-group filter-dropdown-group">
+                        <label for="event-venue-filter">Filter by venue:</label>
+                        <select id="event-venue-filter" aria-label="Filter events by venue">
+                            <option value="">All Venues</option>
+                            <option value="farewell">Farewell</option>
+                            <option value="howdy">Howdy</option>
+                        </select>
+                    </div>
+                    <div class="filter-group filter-search-group">
+                        <input type="text" id="event-search" placeholder="Search events..." aria-label="Search events">
+                    </div>
                 </div>
                 <div id="event-list" class="item-list-container"></div>
             </section>
             <section id="section-blog" class="admin-section">
                 <div class="section-header"><h2>Blog Management</h2><button class="btn btn-primary" id="add-blog-btn">+ New Post</button></div>
                 <div class="filters-bar">
-                    <label for="blog-status-filter">Filter by status:</label>
-                    <select id="blog-status-filter" aria-label="Filter blog posts by status">
-                        <option value="">All Posts</option>
-                        <option value="published">Published</option>
-                        <option value="draft">Draft</option>
-                    </select>
-                    <input type="text" id="blog-search" placeholder="Search posts..." aria-label="Search blog posts">
+                    <div class="filter-group filter-dropdown-group">
+                        <label for="blog-status-filter">Filter by status:</label>
+                        <select id="blog-status-filter" aria-label="Filter blog posts by status">
+                            <option value="">All Posts</option>
+                            <option value="published">Published</option>
+                            <option value="draft">Draft</option>
+                        </select>
+                    </div>
+                    <div class="filter-group filter-search-group">
+                        <input type="text" id="blog-search" placeholder="Search posts..." aria-label="Search blog posts">
+                    </div>
                 </div>
                 <div id="blog-list" class="item-list-container"></div>
             </section>

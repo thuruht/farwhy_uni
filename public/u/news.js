@@ -67,15 +67,36 @@ function isLoggedIn() {
 
 function createYouTubeEmbed(urls) {
     if (!urls) return '';
+    console.log('Creating YouTube embed for:', urls);
+    
     // Support comma-separated or array of URLs
     let urlArr = Array.isArray(urls) ? urls : (typeof urls === 'string' ? urls.split(',').map(u => u.trim()).filter(Boolean) : []);
     urlArr = urlArr.filter(Boolean);
+    console.log('Processed URL array:', urlArr);
+    
     if (urlArr.length === 0) return '';
+    
     if (urlArr.length === 1) {
         // Single video
         try {
-            const videoId = new URL(urlArr[0]).searchParams.get('v');
-            if (!videoId) return '';
+            let videoId;
+            const url = urlArr[0];
+            
+            // Handle different YouTube URL formats
+            if (url.includes('youtube.com/watch')) {
+                videoId = new URL(url).searchParams.get('v');
+            } else if (url.includes('youtu.be/')) {
+                videoId = url.split('youtu.be/')[1].split('?')[0];
+            } else if (url.includes('youtube.com/embed/')) {
+                videoId = url.split('youtube.com/embed/')[1].split('?')[0];
+            }
+            
+            if (!videoId) {
+                console.log('Could not extract video ID from:', url);
+                return '<p>Invalid YouTube URL</p>';
+            }
+            
+            console.log('Embedding single video with ID:', videoId);
             return `<div class="embed-container" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
                 <iframe src="https://www.youtube.com/embed/${videoId}" 
                     style="position:absolute;top:0;left:0;width:100%;height:100%;" 
@@ -83,27 +104,42 @@ function createYouTubeEmbed(urls) {
                     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
                     allowfullscreen></iframe>
                 </div>`;
-        } catch {
+        } catch (error) {
+            console.error('Error creating YouTube embed:', error);
             return '<p>Invalid YouTube URL</p>';
         }
     }
+    
     // Carousel for multiple videos
+    console.log('Creating carousel for multiple videos:', urlArr);
     let carouselId = 'yt-carousel-' + Math.random().toString(36).slice(2, 8);
     let slides = urlArr.map((url, i) => {
         try {
-            const videoId = new URL(url).searchParams.get('v');
+            let videoId;
+            
+            // Handle different YouTube URL formats
+            if (url.includes('youtube.com/watch')) {
+                videoId = new URL(url).searchParams.get('v');
+            } else if (url.includes('youtu.be/')) {
+                videoId = url.split('youtu.be/')[1].split('?')[0];
+            } else if (url.includes('youtube.com/embed/')) {
+                videoId = url.split('youtube.com/embed/')[1].split('?')[0];
+            }
+            
             if (!videoId) return '';
-            return `<div class="yt-slide" style="display:${i === 0 ? 'block' : 'none'};">\
+            
+            return `<div class="yt-slide" style="display:${i === 0 ? 'block' : 'none'};">
                 <iframe src="https://www.youtube.com/embed/${videoId}" 
                     style="position:absolute;top:0;left:0;width:100%;height:100%;" 
                     frameborder="0" 
                     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
                     allowfullscreen></iframe>
-                </div>`;
-        } catch {
-            return '<p>Invalid YouTube URL</p>';
+            </div>`;
+        } catch (error) {
+            console.error('Error creating carousel slide:', error);
+            return '';
         }
-    }).join('');
+    }).filter(Boolean).join('');
     // Carousel controls
     let controls = `<button class="yt-prev" onclick="window.ytCarouselNav('${carouselId}', -1)">Prev</button>
         <button class="yt-next" onclick="window.ytCarouselNav('${carouselId}', 1)">Next</button>`;
@@ -260,8 +296,11 @@ function updateView() {
 async function loadPublicPosts() {
     try {
         const { data: posts } = await fetchApi('/blog/posts', { method: 'GET', excludeAuth: true });
+        console.log('Original posts order:', posts.map(p => ({ title: p.title, date: p.created_at })));
+        
         // Sort posts in reverse chronological order (newest first)
         const sortedPosts = [...posts].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        console.log('Sorted posts order:', sortedPosts.map(p => ({ title: p.title, date: p.created_at })));
         
         publicPostsListEl.innerHTML = sortedPosts.length ? sortedPosts.map(post => `
             <article class="post-item-public">
@@ -279,6 +318,7 @@ async function loadPublicPosts() {
 async function loadPublicFeatured() {
     try {
         const { data: featured } = await fetchApi('/blog/featured', { method: 'GET', excludeAuth: true });
+        console.log('Featured data from API:', featured);
         
         // Create featured content HTML with enhanced styling
         let featuredHTML = `<div class="featured-content-wrapper">`;
@@ -290,7 +330,12 @@ async function loadPublicFeatured() {
         
         // Add YouTube videos with enhanced carousel if multiple videos
         if (featured.youtubeUrl) {
+            console.log('YouTube URLs:', featured.youtubeUrl);
             featuredHTML += `<div class="featured-video-container">${createYouTubeEmbed(featured.youtubeUrl)}</div>`;
+        } else if (featured.youtube) {
+            // Support the alternate 'youtube' property
+            console.log('YouTube property found:', featured.youtube);
+            featuredHTML += `<div class="featured-video-container">${createYouTubeEmbed(featured.youtube)}</div>`;
         }
         
         featuredHTML += `</div>`;
@@ -535,148 +580,38 @@ adminPostsListEl.addEventListener('click', async (e) => {
     }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.addEventListener('click', (e) => {
-        if (loginModal.classList.contains('active') && 
-            !e.target.closest('.modal-content') &&
-            !e.target.closest('#login-btn')) {
-            loginModal.classList.remove('active');
-        }
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && loginModal.classList.contains('active')) {
-            loginModal.classList.remove('active');
-        }
-    });
-
-    document.querySelector('.close-button').addEventListener('click', () => {
-        loginModal.classList.remove('active');
-    });
-
-    updateView();
-});
-
-// Cancel login button handler
-cancelLoginBtn.addEventListener('click', () => {
-    loginModal.classList.remove('active');
-    loginForm.reset();
-    loginErrorEl.textContent = '';
-});
-
-// Clear the post form for a new post
-function clearPostForm() {
-    postIdInput.value = '';
-    postTitleEl.value = '';
-    postEditor.root.innerHTML = '';
-    postImageUrlInput.value = '';
-    postImagePreviewEl.src = '';
-    postImageUrlDisplayEl.textContent = '';
-    formHeadingEl.textContent = 'Create New Post';
-    submitPostBtn.textContent = 'Submit Post';
-    cancelEditBtn.style.display = 'none';
-}
-
-// Post form submission handler
-postForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+// Initialize app on DOM load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('News.js initialized');
     
-    const submitButton = postForm.querySelector('button[type="submit"]');
-    submitButton.disabled = true;
+    // Check if we're in the right page
+    if (publicPostsListEl) {
+        console.log('Loading public content');
+        loadPublicPosts();
+        loadPublicFeatured();
+    }
     
-    try {
-        const postId = postIdInput.value;
-        const method = postId ? 'PUT' : 'POST';
-        const endpoint = postId ? `/admin/blog/posts/${postId}` : '/admin/blog/posts';
-        
-        // Get the content from Quill editor
-        const content = postEditor.root.innerHTML;
-        
-        const postData = {
-            title: postTitleEl.value.trim(),
-            content: content,
-            image_url: postImageUrlInput.value || null
-        };
-        
-        await fetchApi(endpoint, {
-            method,
-            body: JSON.stringify(postData)
+    // Setup login/logout handlers
+    if (loginBtn) loginBtn.addEventListener('click', showLoginModal);
+    if (cancelLoginBtn) cancelLoginBtn.addEventListener('click', hideLoginModal);
+    if (loginForm) loginForm.addEventListener('submit', handleLogin);
+    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+    
+    // Close modal when clicking X or outside
+    document.querySelectorAll('.close-button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.modal').forEach(modal => modal.style.display = 'none');
         });
-        
-        alert(postId ? 'Post updated!' : 'Post created!');
-        loadAdminPosts();
-        clearPostForm();
-    } catch (err) {
-        alert(`Error: ${err.message}`);
-    } finally {
-        submitButton.disabled = false;
-    }
-});
-
-// Cancel edit button handler
-cancelEditBtn.addEventListener('click', () => {
-    clearPostForm();
-});
-
-// Image upload handler
-postImageUploadInput.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    });
     
-    try {
-        const imageUrl = await uploadImage(file, postUploadProgressEl);
-        if (imageUrl) {
-            postImageUrlInput.value = imageUrl;
-            postImagePreviewEl.src = imageUrl;
-            postImagePreviewEl.style.display = 'block';
-            postImageUrlDisplayEl.textContent = imageUrl.split('/').pop();
-            removePostImageBtn.style.display = 'inline-block';
-        }
-    } catch (err) {
-        alert(`Image upload failed: ${err.message}`);
-    }
-});
-
-// Remove image button handler
-removePostImageBtn.addEventListener('click', () => {
-    postImageUrlInput.value = '';
-    postImagePreviewEl.src = '';
-    postImagePreviewEl.style.display = 'none';
-    postImageUrlDisplayEl.textContent = '';
-    removePostImageBtn.style.display = 'none';
-});
-
-// Login form submission handler
-loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const submitButton = loginForm.querySelector('button[type="submit"]');
-    submitButton.disabled = true;
-    loginErrorEl.textContent = '';
-    
-    try {
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                password: loginPasswordEl.value
-            }),
-            credentials: 'include'
+    window.addEventListener('click', function(event) {
+        document.querySelectorAll('.modal').forEach(modal => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
         });
-        
-        if (response.ok) {
-            loginModal.classList.remove('active');
-            updateView();
-        } else {
-            const data = await response.json();
-            loginErrorEl.textContent = data.error || 'Login failed';
-        }
-    } catch (err) {
-        loginErrorEl.textContent = 'Network error occurred';
-        console.error('Login error:', err);
-    } finally {
-        submitButton.disabled = false;
-    }
+    });
+    
+    // Check if logged in
+    checkLoginStatus();
 });

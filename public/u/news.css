@@ -406,3 +406,52 @@ h2:nth-of-type(7) {
 .yt-next:active {
     transform: translateY(0);
 }
+
+/* Fix for filter controls in admin view */
+#admin-view select,
+#admin-view .filter-dropdown {
+    width: auto;
+    max-width: 180px;
+    min-width: 100px;
+}
+
+#admin-view input[type="text"],
+#admin-view .search-input {
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+/* Blog filters specific styling */
+#blog-status-filter {
+    width: auto;
+    max-width: 180px;
+}
+
+#blog-search {
+    min-width: 250px;
+    max-width: none;
+    flex: 1;
+}
+
+/* Filter bar styling */
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    #blog-search,
+    #admin-view input[type="text"] {
+        width: 100%;
+        max-width: none;
+    }
+}

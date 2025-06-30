@@ -44,11 +44,32 @@ async function loadFeaturedVideos() {
     showStatus(videosStatusEl, 'Loading featured videos...', 'info');
     
     try {
+        // Try the primary endpoint first
         const response = await api.get('/api/admin/featured');
         const data = response.data || {};
+        console.log('Featured data from admin/featured:', data);
         
-        // Extract YouTube URLs from the featured content
-        if (data.youtube) {
+        // If no videos found in primary endpoint, check the blog/featured endpoint
+        if (!data.youtube || (Array.isArray(data.youtube) && data.youtube.length === 0)) {
+            try {
+                const blogResponse = await api.get('/api/admin/blog/featured');
+                const blogData = blogResponse.data || {};
+                console.log('Featured data from blog/featured:', blogData);
+                
+                if (blogData.youtubeUrl) {
+                    // Extract videos from the blog/featured endpoint
+                    if (typeof blogData.youtubeUrl === 'string') {
+                        featuredVideos = blogData.youtubeUrl.split(',').filter(url => url.trim());
+                    } else if (Array.isArray(blogData.youtubeUrl)) {
+                        featuredVideos = blogData.youtubeUrl.filter(url => url);
+                    }
+                    console.log('Found videos in blog/featured:', featuredVideos);
+                }
+            } catch (e) {
+                console.warn('Could not load from blog/featured endpoint:', e);
+            }
+        } else {
+            // Extract YouTube URLs from the featured content
             if (typeof data.youtube === 'string') {
                 // Handle single URL
                 featuredVideos = [data.youtube];
@@ -56,8 +77,7 @@ async function loadFeaturedVideos() {
                 // Handle array of URLs
                 featuredVideos = data.youtube.filter(url => url);
             }
-        } else {
-            featuredVideos = [];
+            console.log('Found videos in admin/featured:', featuredVideos);
         }
         
         // Render the videos list and preview
@@ -320,9 +340,26 @@ async function saveFeaturedVideos() {
     showStatus(videosStatusEl, 'Saving featured videos...', 'info');
     
     try {
+        // Save to the admin/featured endpoint
         const response = await api.post('/api/admin/featured', {
             youtube: featuredVideos
         });
+        
+        // Also save to blog/featured to ensure compatibility
+        // This ensures the videos appear in both admin and public views
+        try {
+            const blogFeaturedResponse = await api.get('/api/blog/featured');
+            const currentFeatured = blogFeaturedResponse.data || {};
+            
+            await api.post('/api/admin/blog/featured', {
+                text: currentFeatured.text || '',
+                youtubeUrl: featuredVideos.join(',')
+            });
+            
+            console.log('Featured videos saved to both endpoints');
+        } catch (e) {
+            console.warn('Could not save to blog/featured endpoint:', e);
+        }
         
         showStatus(videosStatusEl, 'Featured videos saved successfully', 'success', 3000);
         
