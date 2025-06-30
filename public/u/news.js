@@ -80,11 +80,15 @@ function createYouTubeEmbed(urls) {
                 videoId = url.split('youtube.com/embed/')[1].split('?')[0];
             }
             
-            if (!videoId) return '';
+            if (!videoId) {
+                console.warn('Could not extract video ID from:', url);
+                return '';
+            }
             
+            console.log(`Adding slide ${i} with video ID: ${videoId}`);
             return `<div class="yt-slide" style="display:${i === 0 ? 'block' : 'none'};">
                 <iframe src="https://www.youtube.com/embed/${videoId}" 
-                    frameborder="0" 
+                    frameborder="0"
                     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
                     allowfullscreen></iframe>
             </div>`;
@@ -93,6 +97,12 @@ function createYouTubeEmbed(urls) {
             return '';
         }
     }).filter(Boolean).join('');
+    
+    // If no valid slides were created, return empty
+    if (!slides) {
+        console.error('No valid slides were created for carousel');
+        return '<p>Could not load YouTube videos</p>';
+    }
     
     // Add video counter indicator
     let indicator = urlArr.length > 1 ? 
@@ -105,29 +115,64 @@ function createYouTubeEmbed(urls) {
     `;
     
     // Wrapper
+    console.log(`Created carousel with ID: ${carouselId} and ${urlArr.length} videos`);
     return `<div id="${carouselId}" class="yt-carousel" data-current="0" data-total="${urlArr.length}">
         ${slides}
         <div class="yt-controls">${indicator}${controls}</div>
     </div>`;
 }
+}
 
 // Carousel navigation logic (global for inline onclick)
 window.ytCarouselNav = function(carouselId, dir) {
+    console.log(`Navigating carousel ${carouselId} in direction ${dir}`);
     const carousel = document.getElementById(carouselId);
-    if (!carousel) return;
+    if (!carousel) {
+        console.error(`Carousel with ID ${carouselId} not found`);
+        return;
+    }
     
     const slides = carousel.querySelectorAll('.yt-slide');
-    let active = Array.from(slides).findIndex(s => s.style.display !== 'none');
+    if (!slides || slides.length === 0) {
+        console.error(`No slides found in carousel ${carouselId}`);
+        return;
+    }
+    
+    console.log(`Found ${slides.length} slides in carousel`);
+    
+    // Find the active slide
+    let active = -1;
+    for (let i = 0; i < slides.length; i++) {
+        if (slides[i].style.display === 'block') {
+            active = i;
+            break;
+        }
+    }
+    
+    // If no active slide found, use the first one
+    if (active === -1) {
+        console.warn(`No active slide found, defaulting to first slide`);
+        active = 0;
+    }
+    
+    console.log(`Current active slide: ${active}`);
+    
+    // Hide the current active slide
     slides[active].style.display = 'none';
     
+    // Calculate the next slide index
     let next = (active + dir + slides.length) % slides.length;
+    console.log(`Next slide: ${next}`);
+    
+    // Show the next slide
     slides[next].style.display = 'block';
     
     // Update indicator if it exists
     const indicator = carousel.querySelector('.yt-indicator');
     if (indicator) {
-        const total = carousel.getAttribute('data-total') || slides.length;
+        const total = slides.length;
         indicator.textContent = `Video ${next + 1}/${total}`;
+        console.log(`Updated indicator to: Video ${next + 1}/${total}`);
     }
     
     // Update carousel data attribute
@@ -231,7 +276,12 @@ async function loadPublicFeatured() {
         
         // Add YouTube videos with enhanced carousel if we have URLs
         if (youtubeUrls) {
-            featuredHTML += `<div class="featured-video-container">${createYouTubeEmbed(youtubeUrls)}</div>`;
+            console.log('Adding YouTube carousel with URLs:', youtubeUrls);
+            const youtubeEmbed = createYouTubeEmbed(youtubeUrls);
+            console.log('Generated YouTube embed HTML:', youtubeEmbed.substring(0, 100) + '...');
+            featuredHTML += `<div class="featured-video-container">${youtubeEmbed}</div>`;
+        } else {
+            console.log('No YouTube URLs found in primary endpoint');
         }
         
         featuredHTML += `</div>`;
@@ -245,12 +295,15 @@ async function loadPublicFeatured() {
                 console.log('Featured data from general API:', generalFeatured);
                 
                 if (generalFeatured.youtube) {
+                    console.log('Found YouTube URLs in general endpoint:', generalFeatured.youtube);
                     // If we have videos, update the container
                     const youtubeContainer = publicFeaturedContentEl.querySelector('.featured-content-wrapper');
                     if (youtubeContainer) {
+                        const youtubeEmbed = createYouTubeEmbed(generalFeatured.youtube);
+                        console.log('Generated YouTube embed HTML from general endpoint:', youtubeEmbed.substring(0, 100) + '...');
                         youtubeContainer.innerHTML += `
                             <div class="featured-video-container">
-                                ${createYouTubeEmbed(generalFeatured.youtube)}
+                                ${youtubeEmbed}
                             </div>
                         `;
                     }
@@ -259,6 +312,22 @@ async function loadPublicFeatured() {
                 console.warn('Could not load from general featured endpoint:', err);
             }
         }
+        
+        // After content is loaded, ensure all carousels are properly initialized
+        setTimeout(() => {
+            document.querySelectorAll('.yt-carousel').forEach(carousel => {
+                console.log('Initializing carousel:', carousel.id);
+                const slides = carousel.querySelectorAll('.yt-slide');
+                console.log(`Carousel has ${slides.length} slides`);
+                
+                // Make sure first slide is visible
+                if (slides.length > 0) {
+                    slides.forEach((slide, i) => {
+                        slide.style.display = i === 0 ? 'block' : 'none';
+                    });
+                }
+            });
+        }, 500);
     } catch (err) {
         console.error('Error loading featured content:', err);
         publicFeaturedContentEl.innerHTML = `
