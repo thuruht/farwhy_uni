@@ -1,53 +1,33 @@
-UI/UX Improvements and Documentation Update (June 24, 2025)
+Security Fixes and UI Cleanup (June 30, 2025)
 
-This commit includes several significant improvements to the admin interface and public site, along with comprehensive documentation updates:
+This commit addresses critical security vulnerabilities and cleans up redundant UI elements:
 
-1. Admin UI Enhancements:
-   - Standardized button styling across all admin interfaces
-   - Fixed event filtering and blog post ordering
-   - Improved YouTube video carousel controls
-   - Enhanced menu management interface
+1. Security Improvements:
+   - Fixed JWT logout vulnerability by implementing token blacklisting using KV storage
+   - Added unique token IDs (jti) to JWT tokens for proper invalidation
+   - Updated auth middleware to check for blacklisted tokens
+   - Improved menu renderer to handle multiple API endpoints gracefully
 
-2. Bug Fixes:
-   - Fixed event date logic to properly handle past/upcoming events
-   - Corrected blog post ordering to show newest first
-   - Fixed YouTube list container reference issues
-   - Fixed login form submission handlers
+2. Admin UI Cleanup:
+   - Removed duplicate import button generation in setupImportHandlers()
+   - Fixed ID conflicts between HTML-defined and JavaScript-generated elements
+   - Corrected status element references to match actual HTML structure
+   - Cleaned up redundant code that was creating extra import sections
 
-3. Content Updates:
-   - Corrected all venue information to reference Kansas City, MO
-   - Updated venue hours in admin dashboard
-   - Implemented menu management with real menu data
+3. Bug Fixes:
+   - Fixed menu renderer to try multiple API endpoints for better reliability
+   - Improved error handling in menu loading with proper fallbacks
+   - Enhanced price formatting to ensure consistent display
 
-4. Documentation:
-   - Updated README.md with current project status
-   - Created RECENT_IMPLEMENTATIONS.md to track completed features
-   - Created ADMIN_UI_IMPROVEMENTS.md for UI styling details
-   - Created DOCUMENTATION_UPDATE_SUMMARY.md
-   - Created MENU_MANAGEMENT_SYSTEM.md for the menu system
-   - Marked obsolete documentation with OBSOLETE_DOCUMENTATION_NOTICE.md
+4. Code Quality:
+   - Removed redundant import UI generation
+   - Fixed syntax errors from incomplete function cleanup
+   - Improved console logging for better debugging
 
-5. New Files:
-   - public/css/admin-button-fix.css (new standardized button styling)
-   - ADMIN_UI_IMPROVEMENTS.md (documentation for UI changes)
-   - RECENT_IMPLEMENTATIONS.md (summary of implemented features)
-   - DOCUMENTATION_UPDATE_SUMMARY.md (documentation changes)
-   - MENU_MANAGEMENT_SYSTEM.md (menu system documentation)
-   - ye_olde_docs/OBSOLETE_DOCUMENTATION_NOTICE.md (obsolete docs marker)
-
-These changes maintain all existing functionality while enhancing the user experience, code quality, and documentation comprehensiveness.
+These changes maintain all existing functionality while significantly improving security and reducing UI confusion caused by duplicate elements.
 
 Related files:
-- public/admin.html
-- public/u/index.html
-- public/u/news.js
-- public/u/news.css
-- public/css/admin-button-fix.css
-- DOCUMENTATION.md
-- PROGRESS_REPORT.md
-- README.md
-- ADMIN_UI_IMPROVEMENTS.md
-- DOCUMENTATION_UPDATE_SUMMARY.md
-- MENU_MANAGEMENT_SYSTEM.md
-- RECENT_IMPLEMENTATIONS.md
-- ye_olde_docs/OBSOLETE_DOCUMENTATION_NOTICE.md
+- src/handlers/auth.ts (JWT security improvements)
+- src/middleware/auth.ts (token blacklist checking)
+- public/jss/admin-unified.js (import UI cleanup)
+- public/menu/menu-renderer.js (improved reliability)

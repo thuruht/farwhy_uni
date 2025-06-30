@@ -2498,62 +2498,24 @@ function toggleMenuReordering() {
 function setupImportHandlers() {
     console.log('Setting up import handlers');
     
-    const importSection = document.getElementById('section-import');
-    if (!importSection) {
-        console.error('Import section not found');
-        return;
+    // Get existing import buttons from HTML and add event listeners
+    const importLegacyBtn = document.getElementById('import-legacy-btn');
+    const importBlogBtn = document.getElementById('import-blog-btn');
+    
+    if (importLegacyBtn) {
+        importLegacyBtn.addEventListener('click', importLegacyEvents);
+        console.log('Legacy import button handler attached');
     }
     
-    // Check if import UI already loaded
-    if (importSection.querySelector('.import-container')) {
-        console.log('Import UI already loaded');
-        return;
+    if (importBlogBtn) {
+        importBlogBtn.addEventListener('click', importBlogPosts);
+        console.log('Blog import button handler attached');
     }
-    
-    // Add import UI
-    const importContainer = document.createElement('div');
-    importContainer.className = 'import-container';
-    importContainer.innerHTML = `
-        <div class="import-card">
-            <h3>Import Legacy Events</h3>
-            <p>Import events from the legacy system. This will merge data with existing events based on dates and titles.</p>
-            <button id="import-legacy-btn" class="btn btn-primary">Import Legacy Events</button>
-            <div id="import-legacy-status" class="import-status"></div>
-        </div>
-        
-        <div class="import-card">
-            <h3>Import Blog Posts</h3>
-            <p>Import blog posts from WordPress export. This will not overwrite existing posts.</p>
-            <div class="file-upload-group">
-                <input type="file" id="blog-import-file" style="display:none;" accept=".xml,.json">
-                <button id="import-blog-btn" class="btn btn-secondary">Select WordPress Export</button>
-            </div>
-            <div id="import-blog-status" class="import-status"></div>
-        </div>
-        
-        <div class="import-card">
-            <h3>Sync with External Calendar</h3>
-            <p>Pull events from external calendar services (Google Calendar, iCal).</p>
-            <input type="text" id="calendar-url" placeholder="Calendar URL (ics or Google Calendar ID)">
-            <button id="sync-calendar-btn" class="btn btn-secondary">Sync Calendar</button>
-            <div id="sync-calendar-status" class="import-status"></div>
-        </div>
-    `;
-    
-    importSection.appendChild(importContainer);
-    
-    // Add event listeners
-    document.getElementById('import-legacy-btn').addEventListener('click', importLegacyEvents);
-    document.getElementById('import-blog-btn').addEventListener('click', () => {
-        document.getElementById('blog-import-file').click();
-    });
-    document.getElementById('blog-import-file').addEventListener('change', importBlogPosts);
-    document.getElementById('sync-calendar-btn').addEventListener('click', syncExternalCalendar);
 }
 
 async function importLegacyEvents() {
     console.log('Importing legacy events');
-    const statusEl = document.getElementById('import-legacy-status');
+    const statusEl = document.getElementById('import-status');
     const importBtn = document.getElementById('import-legacy-btn');
     
     // Update UI to show progress
