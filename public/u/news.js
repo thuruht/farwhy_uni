@@ -121,7 +121,6 @@ function createYouTubeEmbed(urls) {
         <div class="yt-controls">${indicator}${controls}</div>
     </div>`;
 }
-}
 
 // Carousel navigation logic (global for inline onclick)
 window.ytCarouselNav = function(carouselId, dir) {
