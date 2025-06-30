@@ -88,7 +88,12 @@ export async function getPublicPosts(c: Context<{ Bindings: Env }>): Promise<Res
         const posts = await getPostsFromKV(c);
         const publishedPosts = posts
             .filter((post: any) => post.status === 'published' || !post.status)
-            .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+            .sort((a: any, b: any) => {
+                // Ensure we're dealing with Date objects for correct comparison
+                const dateA = new Date(a.created_at || 0).getTime();
+                const dateB = new Date(b.created_at || 0).getTime();
+                return dateB - dateA; // Sort newest first
+            });
 
         const paginatedPosts = publishedPosts.slice(offset, offset + limit);
 

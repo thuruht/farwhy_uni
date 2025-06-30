@@ -6,7 +6,7 @@ type FeaturedAction = 'get' | 'update';
 
 // Main handler function for featured content API
 export async function handleFeatured(c: Context<{ Bindings: Env }>, action: FeaturedAction) {
-  const { FWHY_KV } = c.env;
+  const { BLOG_KV } = c.env;
   
   switch (action) {
     case 'get':
@@ -20,11 +20,11 @@ export async function handleFeatured(c: Context<{ Bindings: Env }>, action: Feat
 
 // Get featured content (videos, posts, etc.)
 async function getFeaturedContent(c: Context<{ Bindings: Env }>) {
-  const { FWHY_KV } = c.env;
+  const { BLOG_KV } = c.env;
   
   try {
     // Get featured content from KV store
-    const featuredData = await FWHY_KV.get('featured');
+    const featuredData = await BLOG_KV.get('featured');
     
     // Parse JSON or initialize empty object
     const featured = featuredData ? JSON.parse(featuredData) : {};
@@ -44,14 +44,14 @@ async function getFeaturedContent(c: Context<{ Bindings: Env }>) {
 
 // Update featured content
 async function updateFeaturedContent(c: Context<{ Bindings: Env }>) {
-  const { FWHY_KV } = c.env;
+  const { BLOG_KV } = c.env;
   
   try {
     // Get request body
     const body = await c.req.json();
     
     // Get current featured content
-    const featuredData = await FWHY_KV.get('featured');
+    const featuredData = await BLOG_KV.get('featured');
     const featured = featuredData ? JSON.parse(featuredData) : {};
     
     // Update with new content
@@ -62,7 +62,7 @@ async function updateFeaturedContent(c: Context<{ Bindings: Env }>) {
     };
     
     // Save to KV store
-    await FWHY_KV.put('featured', JSON.stringify(updatedFeatured));
+    await BLOG_KV.put('featured', JSON.stringify(updatedFeatured));
     
     return c.json({ 
       success: true, 
