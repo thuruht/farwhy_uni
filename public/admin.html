@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/css/admin-button-fix.css">
     <link rel="stylesheet" href="/css/featured-videos.css">
     <link rel="stylesheet" href="/css/unified-buttons.css">
+    <link rel="stylesheet" href="/css/admin-help.css">
     <style>
         /* Hours Management Styles */
         .hours-table {
@@ -71,6 +72,7 @@
                 <a href="#" class="nav-item" data-target="featured-videos">Featured Videos</a>
                 <a href="#" class="nav-item" data-target="venue">Venue Settings</a>
                 <a href="#" class="nav-item" data-target="import">Import</a>
+                <a href="#" class="nav-item" data-target="help">Help</a>
                 <a href="#" id="logout-btn" class="nav-item">Logout</a>
             </nav>
             <div class="user-info">
@@ -157,6 +159,163 @@
                             <p class="help-text">Add multiple videos to create a carousel in the featured section</p>
                             <button type="button" id="save-featured-videos-btn" class="btn btn-primary">Save Featured Videos</button>
                             <div id="featured-videos-status" class="status-message-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="section-help" class="admin-section">
+                <div class="section-header">
+                    <h2>Admin Help Center</h2>
+                </div>
+                <div class="help-container">
+                    <div class="help-toc">
+                        <h3>Table of Contents</h3>
+                        <ul>
+                            <li><a href="#help-overview">Overview</a></li>
+                            <li><a href="#help-events">Events Management</a></li>
+                            <li><a href="#help-blog">Blog Management</a></li>
+                            <li><a href="#help-featured-videos">Featured Videos</a></li>
+                            <li><a href="#help-venue">Venue Settings</a></li>
+                            <li><a href="#help-import">Import Legacy Data</a></li>
+                            <li><a href="#help-troubleshooting">Troubleshooting</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-content">
+                        <div id="help-overview" class="help-section">
+                            <h3>Admin Dashboard Overview</h3>
+                            <p>Welcome to the Farewell/Howdy admin dashboard. This interface allows you to manage events, blog posts, featured videos, and venue settings for both Farewell Transmission and Howdy spaces.</p>
+                            <p>Use the navigation sidebar on the left to access different sections of the dashboard.</p>
+                            <div class="help-tip">
+                                <strong>Tip:</strong> The dashboard home page shows a quick overview of your site statistics.
+                            </div>
+                        </div>
+                        
+                        <div id="help-events" class="help-section">
+                            <h3>Events Management</h3>
+                            <p>The Events section lets you create, edit, and delete events for both venues.</p>
+                            
+                            <h4>Creating Events</h4>
+                            <ol>
+                                <li>Click the "+ New Event" button</li>
+                                <li>Fill in the event details including title, description, date, and time</li>
+                                <li>Select the venue (Farewell or Howdy)</li>
+                                <li>Upload a flyer image if available</li>
+                                <li>Click "Save" to create the event</li>
+                            </ol>
+                            
+                            <h4>Editing Events</h4>
+                            <ol>
+                                <li>Find the event in the list</li>
+                                <li>Click the "Edit" button</li>
+                                <li>Update the event details</li>
+                                <li>Click "Save" to update the event</li>
+                            </ol>
+                            
+                            <div class="help-tip">
+                                <strong>Note:</strong> Events can be filtered by venue using the dropdown at the top of the events list.
+                            </div>
+                        </div>
+                        
+                        <div id="help-blog" class="help-section">
+                            <h3>Blog Management</h3>
+                            <p>The Blog section allows you to create and manage blog posts that appear on the public news page.</p>
+                            
+                            <h4>Creating Blog Posts</h4>
+                            <ol>
+                                <li>Click the "+ New Post" button</li>
+                                <li>Enter a title for your post</li>
+                                <li>Use the rich text editor to create your content</li>
+                                <li>Upload an image if desired</li>
+                                <li>Click "Save" to publish the post</li>
+                            </ol>
+                            
+                            <h4>The Rich Text Editor</h4>
+                            <p>The editor toolbar provides formatting options:</p>
+                            <ul>
+                                <li>Text formatting (bold, italic, etc.)</li>
+                                <li>Headings and lists</li>
+                                <li>Adding links</li>
+                                <li>Embedding images</li>
+                            </ul>
+                            
+                            <div class="help-tip">
+                                <strong>Tip:</strong> Images in the blog editor can be resized by clicking and dragging the corners.
+                            </div>
+                        </div>
+                        
+                        <div id="help-featured-videos" class="help-section">
+                            <h3>Featured Videos</h3>
+                            <p>The Featured Videos section lets you create a carousel of YouTube videos that will be displayed on the blog/news page.</p>
+                            
+                            <h4>Adding Videos</h4>
+                            <ol>
+                                <li>Paste a YouTube URL into the input field</li>
+                                <li>Click "Add Video"</li>
+                                <li>Repeat for multiple videos</li>
+                                <li>Click "Save Featured Videos" when finished</li>
+                            </ol>
+                            
+                            <div class="help-tip">
+                                <strong>Supported formats:</strong> The system accepts standard YouTube URLs (youtube.com/watch?v=ID), short URLs (youtu.be/ID), and embed URLs.
+                            </div>
+                        </div>
+                        
+                        <div id="help-venue" class="help-section">
+                            <h3>Venue Settings</h3>
+                            <p>The Venue Settings section allows you to manage venue-specific information such as business hours and menu items.</p>
+                            
+                            <h4>Business Hours</h4>
+                            <ol>
+                                <li>Select the venue (Farewell or Howdy)</li>
+                                <li>Set open/close times for each day</li>
+                                <li>Check the "Closed" box for days when the venue is not open</li>
+                                <li>Click "Save Hours" to update</li>
+                            </ol>
+                            
+                            <h4>Menu Management</h4>
+                            <ol>
+                                <li>Select the venue and menu type (Food, Drinks, etc.)</li>
+                                <li>Add, edit, or remove menu items</li>
+                                <li>Click "Save Menu" to update</li>
+                            </ol>
+                            
+                            <div class="help-tip">
+                                <strong>Note:</strong> Menu items can be organized into sections (like "Appetizers" or "Cocktails").
+                            </div>
+                        </div>
+                        
+                        <div id="help-import" class="help-section">
+                            <h3>Import Legacy Data</h3>
+                            <p>The Import section allows you to import data from previous versions of the website.</p>
+                            
+                            <div class="help-warning">
+                                <strong>Warning:</strong> Importing data may overwrite existing content. Use with caution.
+                            </div>
+                        </div>
+                        
+                        <div id="help-troubleshooting" class="help-section">
+                            <h3>Troubleshooting</h3>
+                            <p>If you encounter any issues while using the admin dashboard, try these steps:</p>
+                            
+                            <h4>Common Issues</h4>
+                            <ul>
+                                <li><strong>Changes not appearing:</strong> Try refreshing the page or clearing your browser cache.</li>
+                                <li><strong>Upload errors:</strong> Ensure your image is under 5MB and in a supported format (JPG, PNG).</li>
+                                <li><strong>Login issues:</strong> Try clearing cookies or using a private/incognito browsing window.</li>
+                            </ul>
+                            
+                            <h4>Get Help</h4>
+                            <p>If you continue to experience issues, please contact support:</p>
+                            <p><strong>Email:</strong> <a href="mailto:helpibrokethewebsite@kcmo.xyz">helpibrokethewebsite@kcmo.xyz</a> (use any prefix before @kcmo.xyz)</p>
+                            <p>When reporting an issue, please include:</p>
+                            <ul>
+                                <li>What you were trying to do</li>
+                                <li>What steps you took</li>
+                                <li>What error message you received (if any)</li>
+                                <li>Screenshots if possible</li>
+                            </ul>
                         </div>
                     </div>
                 </div>

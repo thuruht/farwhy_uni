@@ -577,6 +577,10 @@ function showSection(sectionName) {
                     console.error('Featured Videos Manager not found');
                 }
                 break;
+            case 'help':
+                // No specific loading needed for help section
+                setupHelpSectionLinks();
+                break;
         }
     } else {
         console.error(`Section not found: section-${sectionName}`);
@@ -2007,6 +2011,36 @@ function setupDashboardStyles() {
     }
 }
 
+// Setup smooth scrolling for help section links
+function setupHelpSectionLinks() {
+    const helpLinks = document.querySelectorAll('.help-toc a');
+    
+    helpLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            
+            if (targetElement) {
+                // Smooth scroll to the section
+                targetElement.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+                
+                // Add a temporary highlight
+                targetElement.classList.add('help-section-highlight');
+                setTimeout(() => {
+                    targetElement.classList.remove('help-section-highlight');
+                }, 2000);
+            }
+        });
+    });
+    
+    console.log('Help section links initialized');
+}
+
 // Event Filters Implementation
 function setupEventFilters() {
     console.log('Setting up event filters');
@@ -2613,7 +2647,6 @@ function renderMenuItems(menuList, menuItems, venue) {
             deleteMenuItem(id);
         });
     });
-}
 }
 
 function showMenuItemForm(id = null) {
