@@ -111,10 +111,16 @@ export async function getFeaturedContent(c: Context<{ Bindings: Env }>): Promise
     try {
         const featuredData = await c.env.BLOG_KV.get('blog:featured');
         const featured = featuredData ? JSON.parse(featuredData) : { text: '', youtubeUrl: '' };
-        return c.json(featured);
+        return c.json({
+            success: true,
+            data: featured
+        });
     } catch (error) {
         console.error('Get featured content error:', error);
-        return c.json({ error: 'Failed to fetch featured content' }, 500);
+        return c.json({ 
+            success: false,
+            error: 'Failed to fetch featured content' 
+        }, 500);
     }
 }
 

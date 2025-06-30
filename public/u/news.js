@@ -248,7 +248,10 @@ async function loadPublicPosts() {
 async function loadPublicFeatured() {
     try {
         // First try the blog/featured endpoint
-        const { data: featured } = await fetchApi('/blog/featured', { method: 'GET' });
+        const response = await fetchApi('/blog/featured', { method: 'GET' });
+        console.log('Featured API response:', response);
+        
+        const featured = response.data || {};
         console.log('Featured data from API:', featured);
         
         // Create featured content HTML with enhanced styling
