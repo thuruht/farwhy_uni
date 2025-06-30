@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/literary-admin.css">
     <link rel="stylesheet" href="/css/image-upload.css">
     <link rel="stylesheet" href="/css/admin-button-fix.css">
+    <link rel="stylesheet" href="/css/featured-videos.css">
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 </head>
 <body data-state="farewell">
@@ -25,6 +26,7 @@
                 <a href="#" class="nav-item active" data-target="dashboard">Dashboard</a>
                 <a href="#" class="nav-item" data-target="events">Events</a>
                 <a href="#" class="nav-item" data-target="blog">Blog</a>
+                <a href="#" class="nav-item" data-target="featured-videos">Featured Videos</a>
                 <a href="#" class="nav-item" data-target="venue">Venue Settings</a>
                 <a href="#" class="nav-item" data-target="import">Import</a>
                 <a href="#" id="logout-btn" class="nav-item">Logout</a>
@@ -87,6 +89,28 @@
                 <div class="section-header"><h2>Import Legacy Data</h2></div>
                 <div class="import-options"><div class="import-card"><h3>Legacy Events</h3><p>Import events from the legacy system (fygw0.kcmo.xyz).</p><button id="import-legacy-btn" class="btn btn-primary">Import Events</button><div id="import-status" class="status-message-container"></div></div><div class="import-card"><h3>Legacy Blog Posts</h3><p>Import blog posts from previous system.</p><button id="import-blog-btn" class="btn btn-secondary">Import Blog</button><div id="import-blog-status" class="status-message-container"></div></div></div>
             </section>
+            <section id="section-featured-videos" class="admin-section">
+                <div class="section-header"><h2>Featured Videos Carousel</h2></div>
+                <div class="featured-videos-container">
+                    <div class="featured-videos-preview">
+                        <h3>Current Featured Videos</h3>
+                        <div id="featured-videos-preview-container" class="preview-container"></div>
+                    </div>
+                    <div class="featured-videos-editor">
+                        <h3>Edit Featured Videos</h3>
+                        <div class="featured-videos-form">
+                            <div id="youtube-list-container"></div>
+                            <div class="input-group">
+                                <input type="url" id="youtube-url" class="form-control" placeholder="Enter YouTube Video URL (https://www.youtube.com/watch?v=...)">
+                                <button type="button" id="add-youtube-btn" class="btn btn-secondary">Add Video</button>
+                            </div>
+                            <p class="help-text">Add multiple videos to create a carousel in the featured section</p>
+                            <button type="button" id="save-featured-videos-btn" class="btn btn-primary">Save Featured Videos</button>
+                            <div id="featured-videos-status" class="status-message-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -107,6 +131,7 @@
     <div id="login-container"></div>
 
     <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    <script src="/jss/featured-videos-manager.js"></script>
     <script src="/jss/admin-unified.js"></script>
     </body>
     </html>

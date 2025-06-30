@@ -1,0 +1,29 @@
+Featured Videos Carousel and UI Cleanup (June 30, 2025)
+
+This commit adds a dedicated tab for managing the Featured Videos carousel in the admin dashboard and removes the unnecessary paragraph text from the main index page.
+
+1. Featured Videos Management:
+   - Added a new "Featured Videos" tab in the admin dashboard sidebar
+   - Created a dedicated section for managing YouTube videos in the carousel
+   - Implemented add, remove, and drag-and-drop reordering functionality
+   - Added live preview of how the carousel will appear on the blog page
+
+2. UI Cleanup:
+   - Removed the redundant paragraph "(view all upcoming events at both venues)" from the main index page
+   - Simplified calendar links for a cleaner interface
+   - Ensured consistent styling across the site
+
+3. Technical Implementation:
+   - Added featured-videos.css for new UI components
+   - Created featured-videos-manager.js module for the carousel functionality
+   - Updated admin-unified.js to support the new section
+   - Ensured compatibility with existing blog/news implementation
+
+These changes provide a more intuitive way to manage the featured video content that appears in the blog carousel while cleaning up redundant UI elements.
+
+Related files:
+- public/admin.html
+- public/jss/admin-unified.js
+- public/jss/ifrevl.js
+- public/jss/featured-videos-manager.js
+- public/css/featured-videos.css

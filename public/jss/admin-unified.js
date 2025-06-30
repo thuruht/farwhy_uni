@@ -570,6 +570,13 @@ function showSection(sectionName) {
             case 'import': 
                 setupImportHandlers(); 
                 break;
+            case 'featured-videos': 
+                if (window.featuredVideosManager && typeof window.featuredVideosManager.init === 'function') {
+                    window.featuredVideosManager.init();
+                } else {
+                    console.error('Featured Videos Manager not found');
+                }
+                break;
         }
     } else {
         console.error(`Section not found: section-${sectionName}`);

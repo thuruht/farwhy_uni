@@ -35,7 +35,7 @@ function updateCalendarLinks() {
     // Updated to use events-modal-trigger class instead of open-popup
     const mainBlockHtml = `
 <div>
-<hr> || <a href="javascript:void(0);" class="events-modal-trigger">view show listings</a> || <a href="#" class="cal-link-ics">.ics</a> || <hr><small>(view all upcoming events at both venues)</small><hr>
+<hr> || <a href="javascript:void(0);" class="events-modal-trigger">view show listings</a> || <a href="#" class="cal-link-ics">.ics</a> ||<hr>
 <p><small>calendar graphic (and the other swell graphics and general layout of this site) designed by the excellent <a href="https://austinchapmandesign.com/" target="_blank" rel="noopener">austin chapman</a> - however, any parts of the site that you dislike, that are animated annoyingly, bitcrushed, badly implemented, or the like, may instead be blamed on me (<a href="https://ntapkc.com" target="_blank" rel="noopener">jojo</a>), with the exception of show/event flyers, which are variously sourced</small></p>
 </div>
     `;
