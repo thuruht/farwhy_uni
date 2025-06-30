@@ -6,6 +6,8 @@ import { handleAuth } from './handlers/auth';
 import { handleEvents } from './handlers/events';
 import { handleSync } from './handlers/sync';
 import { handleMenu } from './handlers/menu';
+import { handleHours } from './handlers/hours';
+import { handleFeatured } from './handlers/featured';
 // import { handleBlog } from './handlers/blog'; // We now import individual handlers instead
 import {
     getPublicPosts,
@@ -165,6 +167,9 @@ publicApi.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.que
 publicApi.get('/blog/posts', getPublicPosts);
 publicApi.get('/blog/featured', getFeaturedContent);
 publicApi.get('/venues/:venue/menu', (c) => handleMenu(c, 'list'));
+publicApi.get('/hours', (c) => handleHours(c, 'list'));
+publicApi.get('/venues/:venue/hours', (c) => handleHours(c, 'list'));
+publicApi.get('/featured', (c) => handleFeatured(c, 'get'));
 app.route('/api', publicApi);
 
 
@@ -205,6 +210,15 @@ protectedAdminApi.get('/menu/:id', (c) => handleMenu(c, 'items'));
 protectedAdminApi.post('/venues/:venue/menu-items', (c) => handleMenu(c, 'create-item'));
 protectedAdminApi.put('/menu-items/:id', (c) => handleMenu(c, 'update-item'));
 protectedAdminApi.delete('/menu-items/:id', (c) => handleMenu(c, 'delete-item'));
+
+// Hours management endpoints
+protectedAdminApi.get('/hours', (c) => handleHours(c, 'list'));
+protectedAdminApi.get('/venues/:venue/hours', (c) => handleHours(c, 'list'));
+protectedAdminApi.put('/venues/:venue/hours', (c) => handleHours(c, 'update'));
+
+// Featured content management endpoints
+protectedAdminApi.get('/featured', (c) => handleFeatured(c, 'get'));
+protectedAdminApi.post('/featured', (c) => handleFeatured(c, 'update'));
 
 // Mount the protected routes under the /admin path
 adminApi.route('/admin', protectedAdminApi);

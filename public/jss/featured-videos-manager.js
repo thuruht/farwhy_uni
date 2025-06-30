@@ -44,7 +44,7 @@ async function loadFeaturedVideos() {
     showStatus(videosStatusEl, 'Loading featured videos...', 'info');
     
     try {
-        const response = await api.get('/api/admin/featured');
+        const response = await api.get('/api/admin/admin/featured');
         const data = response.data || {};
         
         // Extract YouTube URLs from the featured content
@@ -320,7 +320,7 @@ async function saveFeaturedVideos() {
     showStatus(videosStatusEl, 'Saving featured videos...', 'info');
     
     try {
-        const response = await api.post('/api/admin/featured', {
+        const response = await api.post('/api/admin/admin/featured', {
             youtube: featuredVideos
         });
         

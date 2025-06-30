@@ -52,20 +52,20 @@
         <div class="card" id="wun" style="background:var(--blew);">
             <section>
                 <h2 style="text-align:left; margin-left:var(--padding-large); color:#fff;">HOURS</h2>
-                <p class="nrml" style="font-size:1.6rem;"><strong style="font-size:1.8rem; color:var(--redd); -webkit-text-stroke: 1px #000000; text-shadow: -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000, 1px 1px 0 #000000;">Farewell</strong> - <span style="font-style:italic;"> SPRING HOURS</span> -</p>
-<ul style="font-family: monospace; font-size:1.22rem;">
-<li><strong>Monday---</strong>: shows only</li>
-<li><strong>Tuesday---</strong>: 06pm - 12am</li>
-<li><strong>Wednesday-</strong>: 06pm - 12am</li>
-<li><strong>Thursday--</strong>: 06pm - 12am</li>
-<li><strong>Friday----</strong>: 12pm - 12am</li>
-<li><strong>Saturday--</strong>: 12pm - 12am</li>
-<li><strong>Sunday---</strong>: shows only</li>
-</ul>
-                <p class="nrml"" style="font-size:1.6rem;"><strong style="font-size:1.8rem; color:var(--pupil); -webkit-text-stroke: 1px #000000; text-shadow: -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000, 1px 1px 0 #000000;">Howdy</strong>: Open for shows and events</p>
-                <p class="nrml" style="font-size:1.22rem; font-family: monospace;">
-    (For <em><a href="https://howdythrift.farewellcafe.com/" target="_blank">Howdy DIY Thrift</a></em> hours, please check their Instagram: <a href="https://www.instagram.com/howdydiythrift/" target="_blank">@howdydiythrift</a> as they tend to change depending on show schedule &amp;c.)
-</p></section>
+                <div id="farewell-hours-container">
+                    <p class="nrml" style="font-size:1.6rem;"><strong style="font-size:1.8rem; color:var(--redd); -webkit-text-stroke: 1px #000000; text-shadow: -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000, 1px 1px 0 #000000;">Farewell</strong> - <span style="font-style:italic;"> CURRENT HOURS</span> -</p>
+                    <ul style="font-family: monospace; font-size:1.22rem;" id="farewell-hours-list">
+                        <li><strong>Loading...</strong></li>
+                    </ul>
+                </div>
+                
+                <div id="howdy-hours-container">
+                    <p class="nrml" style="font-size:1.6rem;"><strong style="font-size:1.8rem; color:var(--pupil); -webkit-text-stroke: 1px #000000; text-shadow: -1px -1px 0 #000000, 1px -1px 0 #000000, -1px 1px 0 #000000, 1px 1px 0 #000000;">Howdy</strong>: <span id="howdy-hours-summary">Loading...</span></p>
+                    <ul style="font-family: monospace; font-size:1.22rem; display:none;" id="howdy-hours-list"></ul>
+                    <p class="nrml" style="font-size:1.22rem; font-family: monospace;">
+                        (For <em><a href="https://howdythrift.farewellcafe.com/" target="_blank">Howdy DIY Thrift</a></em> hours, please check their Instagram: <a href="https://www.instagram.com/howdydiythrift/" target="_blank">@howdydiythrift</a> as they tend to change depending on show schedule &amp;c.)
+                    </p>
+                </div></section>
                 </div>
                 <div class="card" id="tew" style="padding:0; background:#000;">
             <img src="./img/fp3.png" class="insect" alt="rock on">
@@ -147,10 +147,170 @@
                 window.location.href = './howdy.htm';
             }
         }
-        function openBlarp() {768
-            const popup = window.open('', 'farewell / howdy', 'width=900,height=900,fullscreen=yes');
-            
+        
+        // Function to load and display venue hours
+        async function loadVenueHours() {
+            try {
+                // Fetch hours from the API
+                const response = await fetch('/api/hours');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.success && data.data) {
+                        // Display Farewell hours
+                        if (data.data.farewell && data.data.farewell.length > 0) {
+                            displayFarewellHours(data.data.farewell);
+                        } else {
+                            // Fallback to default hours if no data
+                            displayFarewellHoursDefault();
+                        }
+                        
+                        // Display Howdy hours
+                        if (data.data.howdy && data.data.howdy.length > 0) {
+                            displayHowdyHours(data.data.howdy);
+                        } else {
+                            // Fallback to default hours if no data
+                            displayHowdyHoursDefault();
+                        }
+                    } else {
+                        // Fallback to default if API response is not in expected format
+                        displayFarewellHoursDefault();
+                        displayHowdyHoursDefault();
+                    }
+                } else {
+                    // Fallback to default if API request fails
+                    displayFarewellHoursDefault();
+                    displayHowdyHoursDefault();
+                }
+            } catch (error) {
+                console.error('Error fetching hours:', error);
+                // Fallback to default if API request fails
+                displayFarewellHoursDefault();
+                displayHowdyHoursDefault();
+            }
         }
+        
+        // Display Farewell hours from API data
+        function displayFarewellHours(hours) {
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayWidths = ['Sunday----', 'Monday---', 'Tuesday---', 'Wednesday-', 'Thursday--', 'Friday----', 'Saturday--'];
+            
+            // Sort hours by day of week
+            hours.sort((a, b) => a.day_of_week - b.day_of_week);
+            
+            const hoursList = document.getElementById('farewell-hours-list');
+            hoursList.innerHTML = '';
+            
+            hours.forEach(hour => {
+                const dayName = dayWidths[hour.day_of_week];
+                const li = document.createElement('li');
+                
+                if (hour.is_closed) {
+                    li.innerHTML = `<strong>${dayName}</strong>: ${hour.notes || 'Closed'}`;
+                } else {
+                    // Format time strings (assumes HH:MM format)
+                    const openTime = formatTime(hour.open_time);
+                    const closeTime = formatTime(hour.close_time);
+                    
+                    li.innerHTML = `<strong>${dayName}</strong>: ${openTime} - ${closeTime}${hour.notes ? ' (' + hour.notes + ')' : ''}`;
+                }
+                
+                hoursList.appendChild(li);
+            });
+        }
+        
+        // Display default Farewell hours as fallback
+        function displayFarewellHoursDefault() {
+            const hoursList = document.getElementById('farewell-hours-list');
+            hoursList.innerHTML = `
+                <li><strong>Monday---</strong>: shows only</li>
+                <li><strong>Tuesday---</strong>: 06pm - 12am</li>
+                <li><strong>Wednesday-</strong>: 06pm - 12am</li>
+                <li><strong>Thursday--</strong>: 06pm - 12am</li>
+                <li><strong>Friday----</strong>: 12pm - 12am</li>
+                <li><strong>Saturday--</strong>: 12pm - 12am</li>
+                <li><strong>Sunday----</strong>: shows only</li>
+            `;
+        }
+        
+        // Display Howdy hours from API data
+        function displayHowdyHours(hours) {
+            // For Howdy, we just show a summary by default
+            const howdySummary = document.getElementById('howdy-hours-summary');
+            
+            // Check if all days are closed or show-only
+            const allClosed = hours.every(hour => hour.is_closed);
+            const allShows = hours.every(hour => hour.is_closed || hour.notes && hour.notes.toLowerCase().includes('show'));
+            
+            if (allClosed) {
+                howdySummary.textContent = 'Open for shows and events only';
+            } else if (allShows) {
+                howdySummary.textContent = 'Open for shows and special events';
+            } else {
+                // Display regular hours
+                const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const dayWidths = ['Sunday----', 'Monday---', 'Tuesday---', 'Wednesday-', 'Thursday--', 'Friday----', 'Saturday--'];
+                
+                // Sort hours by day of week
+                hours.sort((a, b) => a.day_of_week - b.day_of_week);
+                
+                const hoursList = document.getElementById('howdy-hours-list');
+                hoursList.innerHTML = '';
+                hoursList.style.display = 'block';
+                
+                howdySummary.textContent = 'Regular Hours:';
+                
+                hours.forEach(hour => {
+                    const dayName = dayWidths[hour.day_of_week];
+                    const li = document.createElement('li');
+                    
+                    if (hour.is_closed) {
+                        li.innerHTML = `<strong>${dayName}</strong>: ${hour.notes || 'Closed'}`;
+                    } else {
+                        // Format time strings (assumes HH:MM format)
+                        const openTime = formatTime(hour.open_time);
+                        const closeTime = formatTime(hour.close_time);
+                        
+                        li.innerHTML = `<strong>${dayName}</strong>: ${openTime} - ${closeTime}${hour.notes ? ' (' + hour.notes + ')' : ''}`;
+                    }
+                    
+                    hoursList.appendChild(li);
+                });
+            }
+        }
+        
+        // Display default Howdy hours as fallback
+        function displayHowdyHoursDefault() {
+            const howdySummary = document.getElementById('howdy-hours-summary');
+            howdySummary.textContent = 'Open for shows and events';
+            
+            const hoursList = document.getElementById('howdy-hours-list');
+            hoursList.style.display = 'none';
+        }
+        
+        // Helper function to format time
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            
+            try {
+                // Parse HH:MM format
+                const [hours, minutes] = timeStr.split(':').map(num => parseInt(num, 10));
+                
+                // Format as 12-hour time
+                const period = hours >= 12 ? 'pm' : 'am';
+                const hour12 = hours % 12 || 12;
+                
+                // Format with leading zeros for minutes
+                return `${hour12.toString().padStart(2, '0')}${minutes > 0 ? ':' + minutes.toString().padStart(2, '0') : ''}${period}`;
+            } catch (e) {
+                // Return the original if parsing fails
+                return timeStr;
+            }
+        }
+        
+        // Load hours when the page loads
+        document.addEventListener('DOMContentLoaded', loadVenueHours);
     </script>
 </body>
 </html>

@@ -2059,77 +2059,26 @@ function loadVenueSettings() {
         return;
     }
     
-    // Add venue settings UI
+    // Add venue settings UI - Now focused on hours management rather than general venue info
     const settingsContainer = document.createElement('div');
     settingsContainer.className = 'venue-settings-container';
     settingsContainer.innerHTML = `
         <div class="venue-tabs">
-            <button class="tab-btn active" data-venue="farewell">Farewell Settings</button>
-            <button class="tab-btn" data-venue="howdy">Howdy Settings</button>
+            <button class="tab-btn active" data-venue="farewell">Farewell Hours</button>
+            <button class="tab-btn" data-venue="howdy">Howdy Hours</button>
         </div>
         
         <div class="venue-tab-content active" id="farewell-settings">
-            <h3>Farewell Café Settings</h3>
-            <div class="settings-form">
-                <div class="form-group">
-                    <label>Venue Name</label>
-                    <input type="text" id="farewell-name" value="Farewell Café">
-                </div>
-                <div class="form-group">
-                    <label>Address</label>
-                    <input type="text" id="farewell-address" value="6515 STADIUM DRIVE, KANSAS CITY, MISSOURI">
-                </div>
-                <div class="form-group">
-                    <label>Phone</label>
-                    <input type="text" id="farewell-phone" value="(816) 448-4009">
-                </div>
-                <div class="form-group">
-                    <label>Hours</label>
-                    <textarea id="farewell-hours" rows="5">Monday: shows only
-Tuesday: 06pm - 12am
-Wednesday: 06pm - 12am
-Thursday: 06pm - 12am
-Friday: 12pm - 12am
-Saturday: 12pm - 12am
-Sunday: shows only</textarea>
-                </div>
-                <div class="form-group">
-                    <label>Default Age Restriction</label>
-                    <input type="text" id="farewell-age" value="21+ unless with parent or legal guardian">
-                </div>
-                <div class="form-actions">
-                    <button id="save-farewell-btn" class="btn btn-primary">Save Changes</button>
-                </div>
+            <h3>Farewell Hours Management</h3>
+            <div class="hours-form" id="farewell-hours-form">
+                <div class="status-message status-loading">Loading hours...</div>
             </div>
         </div>
         
         <div class="venue-tab-content" id="howdy-settings">
-            <h3>Howdy Settings</h3>
-            <div class="settings-form">
-                <div class="form-group">
-                    <label>Venue Name</label>
-                    <input type="text" id="howdy-name" value="Howdy">
-                </div>
-                <div class="form-group">
-                    <label>Address</label>
-                    <input type="text" id="howdy-address" value="6523 STADIUM DRIVE, KANSAS CITY, MISSOURI">
-                </div>
-                <div class="form-group">
-                    <label>Phone</label>
-                    <input type="text" id="howdy-phone" value="(816) 448-4009">
-                </div>
-                <div class="form-group">
-                    <label>Hours</label>
-                    <textarea id="howdy-hours" rows="5">Open for shows and events
-(For Howdy DIY Thrift hours, please check their Instagram: @howdydiythrift)</textarea>
-                </div>
-                <div class="form-group">
-                    <label>Default Age Restriction</label>
-                    <input type="text" id="howdy-age" value="All ages">
-                </div>
-                <div class="form-actions">
-                    <button id="save-howdy-btn" class="btn btn-primary">Save Changes</button>
-                </div>
+            <h3>Howdy Hours Management</h3>
+            <div class="hours-form" id="howdy-hours-form">
+                <div class="status-message status-loading">Loading hours...</div>
             </div>
         </div>
         
@@ -2164,21 +2113,196 @@ Sunday: shows only</textarea>
             // Update dashboardState
             dashboardState.currentVenue = venue;
             
-            // Load menu for selected venue
+            // Load hours and menu for selected venue
+            loadVenueHours(venue);
             loadVenueMenu(venue);
         });
     });
-    
-    // Add handlers for save buttons
-    document.getElementById('save-farewell-btn').addEventListener('click', () => saveVenueSettings('farewell'));
-    document.getElementById('save-howdy-btn').addEventListener('click', () => saveVenueSettings('howdy'));
     
     // Add handlers for menu buttons
     document.getElementById('add-menu-btn').addEventListener('click', () => showMenuItemForm());
     document.getElementById('reorder-menu-btn').addEventListener('click', () => toggleMenuReordering());
     
-    // Load initial menu for the active venue
+    // Load initial data for the active venue
+    loadVenueHours(dashboardState.currentVenue);
     loadVenueMenu(dashboardState.currentVenue);
+}
+
+// Function to load venue hours
+function loadVenueHours(venue) {
+    console.log(`Loading hours for ${venue}`);
+    const hoursForm = document.getElementById(`${venue}-hours-form`);
+    if (!hoursForm) return;
+    
+    hoursForm.innerHTML = `<div class="status-message status-loading">Loading hours...</div>`;
+    
+    // Fetch hours from API
+    api.get(`/api/admin/venues/${venue}/hours`)
+        .then(response => {
+            if (response.success && response.data && response.data[venue]) {
+                renderHoursForm(hoursForm, response.data[venue], venue);
+            } else {
+                // If no data, create default hours template
+                renderHoursForm(hoursForm, createDefaultHours(), venue);
+            }
+        })
+        .catch(error => {
+            console.error(`Error fetching hours for ${venue}:`, error);
+            // If API fails, use default hours
+            renderHoursForm(hoursForm, createDefaultHours(), venue);
+        });
+}
+
+// Create default hours structure
+function createDefaultHours() {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days.map((day, index) => ({
+        day_of_week: index,
+        day_name: day,
+        open_time: '17:00',
+        close_time: '23:00',
+        is_closed: index === 0, // Default: Closed on Sundays
+        notes: ''
+    }));
+}
+
+// Render hours form
+function renderHoursForm(container, hours, venue) {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    // Make sure we have all days of the week
+    const hoursMap = new Map();
+    hours.forEach(hour => {
+        hoursMap.set(hour.day_of_week, hour);
+    });
+    
+    // Fill in any missing days
+    const completeHours = days.map((day, index) => {
+        if (hoursMap.has(index)) {
+            const hour = hoursMap.get(index);
+            hour.day_name = day;
+            return hour;
+        } else {
+            return {
+                day_of_week: index,
+                day_name: day,
+                open_time: '17:00',
+                close_time: '23:00',
+                is_closed: index === 0, // Default: Closed on Sundays
+                notes: ''
+            };
+        }
+    });
+    
+    // Create the form
+    container.innerHTML = `
+        <table class="hours-table">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Open</th>
+                    <th>Close</th>
+                    <th>Closed</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${completeHours.map(hour => `
+                    <tr data-day="${hour.day_of_week}">
+                        <td>${hour.day_name}</td>
+                        <td>
+                            <input type="time" class="open-time" value="${hour.open_time || ''}" 
+                                ${hour.is_closed ? 'disabled' : ''}>
+                        </td>
+                        <td>
+                            <input type="time" class="close-time" value="${hour.close_time || ''}"
+                                ${hour.is_closed ? 'disabled' : ''}>
+                        </td>
+                        <td>
+                            <input type="checkbox" class="is-closed" 
+                                ${hour.is_closed ? 'checked' : ''}>
+                        </td>
+                        <td>
+                            <input type="text" class="notes" value="${hour.notes || ''}" 
+                                placeholder="e.g., Shows only, Special hours, etc.">
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+        <div class="form-actions">
+            <button id="save-hours-btn" class="btn btn-primary">Save Hours</button>
+        </div>
+    `;
+    
+    // Add event listeners for the closed checkboxes
+    container.querySelectorAll('.is-closed').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const row = this.closest('tr');
+            const openTime = row.querySelector('.open-time');
+            const closeTime = row.querySelector('.close-time');
+            
+            if (this.checked) {
+                openTime.disabled = true;
+                closeTime.disabled = true;
+            } else {
+                openTime.disabled = false;
+                closeTime.disabled = false;
+            }
+        });
+    });
+    
+    // Add event listener for the save button
+    container.querySelector('#save-hours-btn').addEventListener('click', () => {
+        saveVenueHours(venue, container);
+    });
+}
+
+// Save hours to API
+function saveVenueHours(venue, container) {
+    const hours = [];
+    
+    // Collect data from the form
+    container.querySelectorAll('tbody tr').forEach(row => {
+        const day_of_week = parseInt(row.getAttribute('data-day'));
+        const open_time = row.querySelector('.open-time').value;
+        const close_time = row.querySelector('.close-time').value;
+        const is_closed = row.querySelector('.is-closed').checked;
+        const notes = row.querySelector('.notes').value;
+        
+        hours.push({
+            day_of_week,
+            open_time: is_closed ? null : open_time,
+            close_time: is_closed ? null : close_time,
+            is_closed,
+            notes
+        });
+    });
+    
+    // Show loading state
+    const saveBtn = container.querySelector('#save-hours-btn');
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = 'Saving...';
+    saveBtn.disabled = true;
+    
+    // Send to API
+    api.put(`/api/admin/venues/${venue}/hours`, { venue, hours })
+        .then(response => {
+            if (response.success) {
+                showToast(`${venue.charAt(0).toUpperCase() + venue.slice(1)} hours saved!`, 'success');
+            } else {
+                showToast('Error saving hours: ' + (response.error || 'Unknown error'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error saving hours:', error);
+            showToast('Error saving hours. Please try again.', 'error');
+        })
+        .finally(() => {
+            // Reset button state
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+        });
 }
 
 function loadVenueMenu(venue) {
@@ -2371,34 +2495,6 @@ function renderMenuItems(menuList, menuItems, venue) {
 }
 }
 
-function saveVenueSettings(venue) {
-    console.log(`Saving settings for ${venue}`);
-    
-    // Get form values
-    const name = document.getElementById(`${venue}-name`).value;
-    const address = document.getElementById(`${venue}-address`).value;
-    const phone = document.getElementById(`${venue}-phone`).value;
-    const hours = document.getElementById(`${venue}-hours`).value;
-    const ageRestriction = document.getElementById(`${venue}-age`).value;
-    
-    // Save to API
-    const data = { name, address, phone, hours, ageRestriction };
-    
-    try {
-        api.post(`/api/admin/venues/${venue}`, data)
-            .then(response => {
-                showToast(`${venue.charAt(0).toUpperCase() + venue.slice(1)} settings saved!`, 'success');
-            })
-            .catch(error => {
-                console.error('Error saving venue settings:', error);
-                showToast('Error saving settings. Please try again.', 'error');
-            });
-    } catch (error) {
-        console.error('Error saving venue settings:', error);
-        showToast('Error saving settings. Please try again.', 'error');
-    }
-}
-
 function showMenuItemForm(id = null) {
     console.log(`Showing menu item form for id: ${id}`);
     const modal = document.getElementById('form-modal');
@@ -2456,7 +2552,8 @@ function populateMenuItemForm(item, modal, modalBody) {
                 </div>
                 <div class="form-group">
                     <label>Price * (numeric value, no $ sign)</label>
-                    <input type="text" name="price" required value="${displayPrice}" placeholder="e.g. 9.50">
+                    <input type="text" name="price" required pattern="^\\d+(\\.\\d{1,2})?$" value="${displayPrice}" placeholder="e.g. 9.50">
+                    <small class="form-hint">Enter a number (e.g., 9.50). No dollar sign.</small>
                 </div>
                 <div class="form-group">
                     <label>Category *</label>
@@ -2496,8 +2593,22 @@ function populateMenuItemForm(item, modal, modalBody) {
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
             
+            // Validate price format
+            const priceInput = e.target.querySelector('input[name="price"]');
+            const priceValue = priceInput.value.trim();
+            
+            // Check price format using regex (digits followed by optional decimal point and 1-2 digits)
+            const priceRegex = /^\d+(\.\d{1,2})?$/;
+            if (!priceRegex.test(priceValue)) {
+                priceInput.setCustomValidity('Please enter a valid price (e.g., 9.50). No dollar sign.');
+                priceInput.reportValidity();
+                return;
+            } else {
+                priceInput.setCustomValidity('');
+            }
+            
             // Format price to ensure it's a number (remove $ if present)
-            data.price = data.price.replace('$', '').trim();
+            data.price = priceValue;
             
             // Determine if this is an add or update
             const isUpdate = !!data.id;

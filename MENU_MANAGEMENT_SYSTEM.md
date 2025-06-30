@@ -24,36 +24,26 @@ The menu system uses the following tables in the D1 database:
 ```sql
 CREATE TABLE menus (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  venue TEXT NOT NULL CHECK (venue IN ('farewell', 'howdy')),
   name TEXT NOT NULL,
-  venue TEXT NOT NULL,
-  description TEXT,
+  display_order INTEGER DEFAULT 0,
+  active BOOLEAN DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE menu_categories (
+CREATE TABLE menu_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   menu_id INTEGER NOT NULL,
   name TEXT NOT NULL,
-  display_order INTEGER NOT NULL DEFAULT 0,
   description TEXT,
+  price DECIMAL(10,2),
+  category TEXT,
+  display_order INTEGER DEFAULT 0,
+  active BOOLEAN DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (menu_id) REFERENCES menus(id) ON DELETE CASCADE
-);
-
-CREATE TABLE menu_items (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  category_id INTEGER NOT NULL,
-  name TEXT NOT NULL,
-  description TEXT,
-  price DECIMAL(10,2),
-  display_order INTEGER NOT NULL DEFAULT 0,
-  is_special BOOLEAN NOT NULL DEFAULT 0,
-  is_available BOOLEAN NOT NULL DEFAULT 1,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (category_id) REFERENCES menu_categories(id) ON DELETE CASCADE
 );
 ```
 
@@ -61,21 +51,18 @@ CREATE TABLE menu_items (
 
 The menu management system provides the following API endpoints:
 
-#### Menus
+#### Public API Endpoints
 
-- `GET /api/admin/menus` - Get all menus
-- `GET /api/admin/menus/:id` - Get a specific menu
-- `POST /api/admin/menus` - Create a new menu
-- `PUT /api/admin/menus/:id` - Update a menu
-- `DELETE /api/admin/menus/:id` - Delete a menu
+- `GET /api/venues/:venue/menu` - Get all menu items for a venue
 
-#### Categories
+#### Admin API Endpoints
 
-- `GET /api/admin/menus/:menuId/categories` - Get all categories for a menu
-- `GET /api/admin/categories/:id` - Get a specific category
-- `POST /api/admin/menus/:menuId/categories` - Create a new category
-- `PUT /api/admin/categories/:id` - Update a category
-- `DELETE /api/admin/categories/:id` - Delete a category
+- `GET /api/admin/venues/:venue/menu` - Get all menu items for a venue (admin view)
+- `POST /api/admin/venues/:venue/menu` - Create a new menu for a venue
+- `GET /api/admin/menu/:id` - Get menu items for a specific menu ID
+- `POST /api/admin/venues/:venue/menu-items` - Create a new menu item
+- `PUT /api/admin/menu-items/:id` - Update a menu item
+- `DELETE /api/admin/menu-items/:id` - Delete a menu item
 
 #### Menu Items
 
@@ -89,19 +76,19 @@ The menu management system provides the following API endpoints:
 
 The menu management UI in the admin dashboard includes:
 
-1. **Menu List View**:
-   - Shows all menus for both venues
-   - Allows creating new menus
-   - Provides access to edit each menu
+1. **Menu Management Section**:
+   - Shows all menu items for the selected venue (Farewell or Howdy)
+   - Allows adding new menu items
+   - Provides interface for editing existing items
 
-2. **Menu Editor**:
-   - Displays categories and items in a hierarchical view
-   - Allows drag-and-drop reordering of categories and items
-   - Provides inline editing of item names, descriptions, and prices
-
-3. **Category Management**:
-   - Create, edit, and delete categories
-   - Reorder categories to control display order
+2. **Menu Item Form**:
+   - Form for adding or editing menu items
+   - Fields for name, price, category, and description
+   - Validation to ensure required fields are filled
+   
+3. **Menu Categories**:
+   - Predefined categories like Cocktails, Domestics, Boulevard, etc.
+   - Items are grouped by category for display
 
 4. **Item Management**:
    - Add, edit, and delete menu items
@@ -125,62 +112,53 @@ The public menu display preserves the unique style of the original static menu w
 
 ## Usage Guidelines
 
-### Creating a New Menu
+### Creating a New Menu Item
 
 1. Navigate to the "Venue Settings" section in the admin dashboard
-2. Click on "Menu Management"
-3. Click "Create New Menu"
-4. Enter the menu name and venue
-5. Click "Save"
-
-### Adding Categories
-
-1. Open a menu in the editor
-2. Click "Add Category"
-3. Enter the category name and description
-4. Click "Save"
-
-### Adding Menu Items
-
-1. Open a menu in the editor
-2. Select a category
-3. Click "Add Item"
-4. Enter the item name, description, and price
-5. Set availability and special status as needed
-6. Click "Save"
+2. Click on the venue tab (Farewell or Howdy)
+3. Click "Add Menu Item"
+4. Enter the item name, price, category, and description
+5. Click "Add Item"
 
 ### Editing Menu Items
 
-1. Click on an item in the menu editor
-2. Edit the item details
-3. Click "Save"
+1. In the Venue Settings section, find the item in the menu list
+2. Click the "Edit" button
+3. Update the item details
+4. Click "Update Item"
+
+### Deleting Menu Items
+
+1. In the Venue Settings section, find the item in the menu list
+2. Click the "Delete" button
+3. Confirm the deletion
 
 ## Styling Preservation
 
 The menu management system preserves the unique styling of the original menu through:
 
-1. **CSS Mapping**: Specific CSS classes for each menu section
-2. **Custom Renderers**: Special rendering logic for different item types
-3. **Style Templates**: Predefined templates for consistent styling
+1. **CSS Classes**: Maintaining the original CSS classes for menu display
+2. **Original Layout**: Preserving the two-column layout design
+3. **Font Styling**: Keeping the custom fonts and typography
+4. **Image Assets**: Using the original menu header images and illustrations
 
 ## Future Enhancements
 
 Planned enhancements for the menu management system include:
 
-1. **Image Support**: Add images for menu items
-2. **Seasonal Menus**: Support for time-limited seasonal menus
-3. **Menu Versioning**: Track changes to menus over time
-4. **Nutrition Information**: Add nutritional data to menu items
-5. **Allergen Tags**: Mark items with common allergens
+1. **Drag-and-Drop Ordering**: Add ability to reorder menu items via drag-and-drop
+2. **Image Support**: Add images for menu items
+3. **Seasonal Specials**: Support for marking items as seasonal specials
+4. **Menu Versioning**: Track changes to menus over time
+5. **Rich Text Descriptions**: Add support for formatted text in item descriptions
 
 ## Troubleshooting
 
 Common issues and their solutions:
 
-1. **Menu Not Displaying**: Check that the menu API is responding correctly
-2. **Items Out of Order**: Verify the display_order values for categories and items
-3. **Styling Issues**: Ensure the CSS for menu display is properly loaded
+1. **Menu Not Displaying**: Verify the API endpoints are working properly and check browser console for errors
+2. **API Errors**: Check that the menu item has all required fields (name, price, category)
+3. **Pricing Format**: Ensure prices are entered without the dollar sign for consistent formatting
+4. **Static Fallback**: If dynamic content fails to load, the system will display static menu content
 
-For additional support, contact the development team.
-
-**Last Updated**: June 22, 2025
+**Last Updated**: June 30, 2025
