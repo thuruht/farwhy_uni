@@ -1032,10 +1032,24 @@ function showEventForm(id = null) {
                 <label>Ticket URL</label>
                 <input name='ticket_url' type="url" placeholder="https://..." value="${event?.ticket_url || ''}">
                 <label>Flyer Image URL</label>
-                <div class="flyer-upload-group">
-                  <input name='flyer_image_url' type="url" placeholder="Upload a flyer to get a URL" value="${event?.imageUrl || event?.flyer_image_url || ''}">
-                  <input type="file" id="flyer-upload-input" style="display:none;">
-                  <button type="button" id="flyer-upload-btn">Upload Flyer</button>
+                <div class="image-upload-field">
+                  <!-- Hidden field that holds the actual image URL value for form submission -->
+                  <input name='flyer_image_url' type="hidden" value="${event?.imageUrl || event?.flyer_image_url || ''}">
+                  
+                  <!-- Visible display of the image URL (read-only) -->
+                  <div class="image-url-display" id="flyer-image-url-display">
+                    ${event?.imageUrl || event?.flyer_image_url || 'No flyer uploaded'}
+                  </div>
+                  
+                  <!-- Upload controls -->
+                  <div class="image-upload-controls">
+                    <input type="file" id="flyer-upload-input" accept="image/*" style="display:none;">
+                    <button type="button" id="flyer-upload-btn" class="image-upload-button">Upload Flyer</button>
+                    <button type="button" id="flyer-clear-btn" class="image-upload-button" ${!(event?.imageUrl || event?.flyer_image_url) ? 'style="display:none;"' : ''}>Clear Flyer</button>
+                  </div>
+                </div>
+                <div id="flyer-preview" class="image-preview ${(event?.imageUrl || event?.flyer_image_url) ? 'has-image' : ''}">
+                  ${(event?.imageUrl || event?.flyer_image_url) ? `<img src="${event?.imageUrl || event?.flyer_image_url}" alt="Event flyer">` : ''}
                 </div>
                 <div class="form-actions"><button type='submit' class='btn btn-primary'>${id ? 'Update Event' : 'Create Event'}</button></div>
             </form>
@@ -1045,7 +1059,25 @@ function showEventForm(id = null) {
 
     document.getElementById('flyer-upload-btn').addEventListener('click', () => {
         document.getElementById('flyer-upload-input').click();
-    });    // Add auto-population logic for venue selection
+    });
+    
+    // Add clear button functionality for flyer
+    const flyerClearBtn = document.getElementById('flyer-clear-btn');
+    const flyerUrlInput = document.querySelector('input[name="flyer_image_url"]');
+    const flyerUrlDisplay = document.getElementById('flyer-image-url-display');
+    const flyerPreview = document.getElementById('flyer-preview');
+    
+    if (flyerClearBtn) {
+        flyerClearBtn.addEventListener('click', () => {
+            flyerUrlInput.value = '';
+            flyerUrlDisplay.textContent = 'No flyer uploaded';
+            flyerPreview.innerHTML = '';
+            flyerPreview.classList.remove('has-image');
+            flyerClearBtn.style.display = 'none';
+        });
+    }
+    
+    // Add auto-population logic for venue selection
     const venueSelect = document.querySelector('select[name="venue"]');
     const ageRestrictionInput = document.querySelector('input[name="age_restriction"]');
     const descriptionTextarea = document.querySelector('textarea[name="description"]');
@@ -1085,6 +1117,10 @@ function showEventForm(id = null) {
         const formData = new FormData();
         formData.append('flyer', file);
 
+        // Show loading state
+        const uploadBtn = document.getElementById('flyer-upload-btn');
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = 'Uploading...';
         showToast('Uploading flyer...', 'info');
 
         try {
@@ -1103,18 +1139,38 @@ function showEventForm(id = null) {
                     let uploadedUrl = result.imageUrl || result.url || '';
                     console.log('Raw URL from server:', uploadedUrl);
                     
-                    // Ensure it's a full URL (add origin if it's a relative path)
-                    if (uploadedUrl && !uploadedUrl.startsWith('http')) {
-                        uploadedUrl = `${window.location.origin}${uploadedUrl.startsWith('/') ? '' : '/'}${uploadedUrl}`;
+                    // Clean the URL for backend storage (remove origin)
+                    let backendUrl = uploadedUrl;
+                    if (backendUrl.startsWith(window.location.origin)) {
+                        backendUrl = backendUrl.replace(window.location.origin, '');
                     }
+                    console.log('Processed flyer URL for backend:', backendUrl);
                     
-                    console.log('Processed URL for form:', uploadedUrl);
-                    
-                    // Update the form field
+                    // Update the hidden form field with the clean URL
                     const flyerUrlInput = document.querySelector('input[name="flyer_image_url"]');
                     if (flyerUrlInput) {
-                        flyerUrlInput.value = uploadedUrl;
-                        console.log('Form field updated with URL:', uploadedUrl);
+                        flyerUrlInput.value = backendUrl;
+                        
+                        // Update the display field
+                        const flyerUrlDisplay = document.getElementById('flyer-image-url-display');
+                        if (flyerUrlDisplay) {
+                            flyerUrlDisplay.textContent = backendUrl;
+                        }
+                        
+                        // Update the preview
+                        const flyerPreview = document.getElementById('flyer-preview');
+                        if (flyerPreview) {
+                            flyerPreview.innerHTML = `<img src="${uploadedUrl}" alt="Event flyer">`;
+                            flyerPreview.classList.add('has-image');
+                        }
+                        
+                        // Show the clear button
+                        const flyerClearBtn = document.getElementById('flyer-clear-btn');
+                        if (flyerClearBtn) {
+                            flyerClearBtn.style.display = '';
+                        }
+                        
+                        showToast('Flyer uploaded successfully!', 'success');
                     } else {
                         console.error('Could not find flyer_image_url input field');
                     }
@@ -1373,10 +1429,21 @@ function showBlogForm(id = null) {
                 <label>Date</label>
                 <input name='date' type='date' value="${post?.date ? new Date(post.date).toISOString().split('T')[0] : ''}">
                 <label>Featured Image</label>
-                <div class="image-upload-group">
-                  <input name='image_url' type="url" placeholder="Upload an image or enter URL" value="${post?.image_url || ''}">
-                  <input type="file" id="blog-image-upload-input" accept="image/*" style="display:none;">
-                  <button type="button" id="blog-image-upload-btn">Upload Image</button>
+                <div class="image-upload-field">
+                  <!-- Hidden field that holds the actual image URL value for form submission -->
+                  <input name='image_url' type="hidden" value="${post?.image_url || ''}">
+                  
+                  <!-- Visible display of the image URL (read-only) -->
+                  <div class="image-url-display" id="blog-image-url-display">
+                    ${post?.image_url || 'No image selected'}
+                  </div>
+                  
+                  <!-- Upload controls -->
+                  <div class="image-upload-controls">
+                    <input type="file" id="blog-image-upload-input" accept="image/*" style="display:none;">
+                    <button type="button" id="blog-image-upload-btn" class="image-upload-button">Upload Image</button>
+                    <button type="button" id="blog-image-clear-btn" class="image-upload-button" ${!post?.image_url ? 'style="display:none;"' : ''}>Clear Image</button>
+                  </div>
                 </div>
                 <div id="blog-image-preview" class="image-preview ${post?.image_url ? 'has-image' : ''}">
                   ${post?.image_url ? `<img src="${post.image_url}" alt="Featured image">` : ''}
@@ -1402,14 +1469,27 @@ function showBlogForm(id = null) {
             
             // Set up blog image upload handler for the featured image
             const blogImageUploadBtn = document.getElementById('blog-image-upload-btn');
+            const blogImageClearBtn = document.getElementById('blog-image-clear-btn');
             const blogImageUploadInput = document.getElementById('blog-image-upload-input');
             const blogImagePreview = document.getElementById('blog-image-preview');
             const blogImageUrlInput = document.querySelector('input[name="image_url"]');
+            const blogImageUrlDisplay = document.getElementById('blog-image-url-display');
             
             if (blogImageUploadBtn && blogImageUploadInput) {
                 blogImageUploadBtn.addEventListener('click', () => {
                     blogImageUploadInput.click();
                 });
+                
+                // Add clear button functionality
+                if (blogImageClearBtn) {
+                    blogImageClearBtn.addEventListener('click', () => {
+                        blogImageUrlInput.value = '';
+                        blogImageUrlDisplay.textContent = 'No image selected';
+                        blogImagePreview.innerHTML = '';
+                        blogImagePreview.classList.remove('has-image');
+                        blogImageClearBtn.style.display = 'none';
+                    });
+                }
                 
                 blogImageUploadInput.addEventListener('change', async (e) => {
                     if (e.target.files && e.target.files[0]) {
@@ -1435,19 +1515,27 @@ function showBlogForm(id = null) {
                                 const result = await res.json();
                                 
                                 if (result.success) {
-                                    // Update the URL input with the new image URL
+                                    // Update the hidden URL input with the new image URL
                                     blogImageUrlInput.value = result.imageUrl;
+                                    
+                                    // Update the display element
+                                    blogImageUrlDisplay.textContent = result.imageUrl;
                                     
                                     // Update the preview
                                     blogImagePreview.innerHTML = `<img src="${result.imageUrl}" alt="Featured image">`;
                                     blogImagePreview.classList.add('has-image');
                                     
+                                    // Show the clear button
+                                    if (blogImageClearBtn) {
+                                        blogImageClearBtn.style.display = '';
+                                    }
+                                    
                                     showToast('Featured image uploaded successfully!', 'success');
-                                } else {
-                                    showToast(result.error || 'Failed to upload image', 'error');
+                                        
+                                    // Reset button state
+                                    blogImageUploadBtn.disabled = false;
+                                    blogImageUploadBtn.textContent = 'Upload Image';
                                 }
-                            } else {
-                                showToast('Failed to upload image', 'error');
                             }
                         } catch (error) {
                             console.error('Error uploading featured image:', error);

@@ -392,20 +392,44 @@ input, select, textarea {
 
 /* Fix for Quill editor text color */
 .ql-editor {
-    color: var(--text-primary) !important; /* Force dark text color */
-    background-color: white !important; /* Ensure background is white */
+    color: #000000 !important; /* Force black text color for maximum visibility */
+    background-color: #ffffff !important; /* Pure white background */
+    font-family: var(--font-main) !important;
+    font-size: 16px !important;
+}
+
+.ql-editor p, .ql-editor h1, .ql-editor h2, .ql-editor h3, .ql-editor h4, .ql-editor h5, .ql-editor h6, 
+.ql-editor ul, .ql-editor ol, .ql-editor li, .ql-editor blockquote {
+    color: #000000 !important;
 }
 
 .ql-container, .ql-toolbar {
     border-color: var(--border-color) !important;
+    background-color: #ffffff !important;
+}
+
+.ql-toolbar button, .ql-toolbar .ql-picker {
+    color: #000000 !important;
+}
+
+.ql-toolbar .ql-stroke {
+    stroke: #000000 !important;
+}
+
+.ql-toolbar .ql-fill {
+    fill: #000000 !important;
 }
 
 /* Ensure text in blog form inputs is visible */
 #blog-form input, 
 #blog-form textarea,
-#blog-form select {
-    color: var(--text-primary) !important;
-    background-color: white !important;
+#blog-form select,
+#event-form input,
+#event-form textarea,
+#event-form select {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    border: 1px solid #cccccc !important;
 }
 
 input:focus, select:focus, textarea:focus {
@@ -969,38 +993,6 @@ input:focus, select:focus, textarea:focus {
     z-index: 1;
 }
 
-/* Improve event thumbnails */
-.event-list-thumbnail {
-    width: 70px;
-    height: 70px;
-    border-radius: 6px;
-    overflow: hidden;
-    display: inline-block;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.1);
-    vertical-align: middle;
-}
-
-.event-list-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.no-image {
-    font-size: 1.5rem;
-    color: var(--text-muted);
-}
-
-/* Specific style rule for dashboard-visible class */
-#dashboard-container.dashboard-visible {
-    display: grid !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-}
-
 /* -------------------------------------------------------------------------- */
 /* Status message styles */
 /* -------------------------------------------------------------------------- */
@@ -1100,94 +1092,71 @@ input:focus, select:focus, textarea:focus {
     margin: 0;
 }
 
-/* Venue tag styling */
-.venue-tag {
-    display: inline-block;
-    padding: 0.3rem 0.6rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-.venue-farewell {
-    background-color: rgba(42, 161, 152, 0.2);
-    color: var(--cyan);
-    border: 1px solid var(--cyan);
-}
-
-.venue-howdy {
-    background-color: rgba(133, 153, 0, 0.2);
-    color: var(--green);
-    border: 1px solid var(--green);
-}
-
-/* Row coloring by venue */
-tr.event-row.venue-farewell {
-    background-color: rgba(42, 161, 152, 0.05);
-}
-
-tr.event-row.venue-howdy {
-    background-color: rgba(133, 153, 0, 0.05);
-}
-
-/* Divider styling */
-tr.event-divider td, tr.blog-divider td {
-    padding: 0;
-}
-
-tr.event-divider hr, tr.blog-divider hr {
-    margin: 0;
-    border: none;
-    height: 1px;
-    background-color: rgba(101, 123, 131, 0.2);
-}
-
 /* -------------------------------------------------------------------------- */
 /* 11. Image Management Styles                 */
 /* -------------------------------------------------------------------------- */
 
 .image-upload-group {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.image-upload-field-group {
+    display: flex;
+    width: 100%;
     align-items: center;
     gap: 10px;
-    margin-bottom: 10px;
 }
 
-.image-upload-group input[type="url"] {
+.image-url-display {
     flex: 1;
-}
-
-.image-upload-group button {
-    background-color: var(--blue);
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 4px;
-    cursor: pointer;
+    background-color: #f5f5f5;
+    color: var(--text-primary);
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: default;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+    min-height: 44px;
+    line-height: 1.5;
+    font-family: var(--font-main);
 }
 
-.image-upload-group button:hover {
-    background-color: var(--cyan);
+.image-upload-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.image-upload-actions button {
+    white-space: nowrap;
+    min-width: auto;
+    padding: 0.75rem 1rem;
 }
 
 .image-preview {
     width: 100%;
     height: 200px;
-    border: 1px dashed var(--base01);
-    background-color: var(--base2);
+    border: 1px dashed var(--border-color);
+    background-color: #f5f5f5;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
-    position: relative;
+    margin-bottom: 15px;
+    border-radius: 8px;
     overflow: hidden;
+    position: relative;
 }
 
 .image-preview.has-image {
     border-style: solid;
+    border-color: var(--accent-color);
 }
 
 .image-preview img {
@@ -1196,43 +1165,49 @@ tr.event-divider hr, tr.blog-divider hr {
     object-fit: contain;
 }
 
-.image-preview .no-image {
-    color: var(--base01);
-    font-size: 2rem;
+.image-preview .no-image-text {
+    color: var(--text-secondary);
+    font-style: italic;
 }
 
-/* Event list thumbnails */
-.event-list-thumbnail {
-    width: 70px;
-    height: 70px;
-    border-radius: 4px;
-    overflow: hidden;
-    background-color: var(--base02);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Clear button styling */
+.clear-image-btn {
+    background-color: var(--error);
+    color: white;
+    border: none;
+    transition: background-color 0.2s;
 }
 
-.event-list-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.clear-image-btn:hover {
+    background-color: #b71c1c;
 }
 
-.event-list-thumbnail .no-image {
-    color: var(--base1);
-    font-size: 1.5rem;
+/* Upload button styling */
+.upload-image-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    transition: background-color 0.2s;
 }
 
-/* Quill editor image styles */
-.ql-editor img {
-    max-width: 100%;
-    height: auto;
+.upload-image-btn:hover {
+    background-color: #1565c0;
 }
 
-.ql-snow .ql-editor img {
-    max-width: 100%;
-    height: auto;
+@media (max-width: 768px) {
+    .image-upload-field-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .image-upload-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .image-upload-actions button {
+        flex: 1;
+    }
 }
 
 /* -------------------------------------------------------------------------- */

@@ -50,6 +50,31 @@ header {
   margin: 0.5rem 0;
 }
 
+/* Admin link styling */
+.admin-link {
+  display: inline-block;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.admin-link:hover {
+  background-color: #b06fd7;
+  text-decoration: none;
+}
+
+footer {
+  margin-top: 2rem;
+  padding: 1rem;
+  text-align: center;
+}
+}
+
 /* Public view */
 #public-view {
   display: block;
@@ -65,7 +90,7 @@ header {
 
 /* Apply card styling to the posts and featured sections.
    If the global .card is defined and your HTML adds that class,
-   you wouldn’t need to duplicate these rules. */
+   you wouldn't need to duplicate these rules. */
 #public-posts, 
 #public-featured {
   background: #fff;
@@ -73,6 +98,136 @@ header {
   border-radius: 4px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   padding: 1rem;
+}
+
+/* YouTube Carousel Styles */
+.yt-carousel {
+  position: relative;
+  max-width: 100%;
+  height: 0;
+  padding-bottom: 56.25%;
+  overflow: hidden;
+  margin: 1rem 0;
+  background-color: #000;
+  border-radius: 8px;
+}
+
+.yt-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.4s ease;
+}
+
+.yt-controls {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  background-color: rgba(0,0,0,0.6);
+  padding: 8px 12px;
+  border-radius: 30px;
+  display: flex;
+  gap: 10px;
+}
+
+.yt-controls button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 15px;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.yt-controls button:hover {
+  background-color: #b06fd7;
+}
+
+.yt-indicator {
+  margin: 0 10px 0 0;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.embed-container {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
+  margin: 1rem 0;
+  border-radius: 8px;
+}
+
+.embed-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.featured-video-container {
+  margin: 1rem 0;
+}
+
+.featured-text {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  white-space: pre-wrap;
+}
+
+/* Public posts styling */
+.post-item-public {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.post-item-public:last-child {
+  border-bottom: none;
+}
+
+.post-item-public h3 {
+  margin-top: 0;
+  color: var(--text-color);
+}
+
+.post-image-public {
+  max-width: 100%;
+  height: auto;
+  margin: 1rem 0;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.post-content-public {
+  margin-top: 1rem;
+  line-height: 1.6;
+}
+
+.post-content-public img {
+  max-width: 100%;
+  height: auto;
+  margin: 1rem 0;
+}
+
+.post-content-public a {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.post-content-public a:hover {
+  text-decoration: none;
 }
 
 /* Admin Featured Area – remove any inline styles from index.html and use these rules */
@@ -207,6 +362,15 @@ header {
   }
   .ql-editor {
     font-size: 16px !important;
+  }
+  
+  .yt-controls {
+    bottom: 10px;
+  }
+  
+  .yt-controls button {
+    padding: 4px 10px;
+    font-size: 0.8rem;
   }
 }
 
@@ -441,6 +605,49 @@ h2:nth-of-type(7) {
     margin-bottom: 1rem;
     align-items: center;
     flex-wrap: wrap;
+}
+
+/* Admin link styling */
+.admin-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: var(--primary-color);
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-family: var(--font-secondary);
+  transition: background-color 0.3s, transform 0.2s;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.admin-link:hover {
+  background-color: #c065f0;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  margin-top: 2rem;
+  border-top: 1px solid #eee;
+}
+
+/* Error Fallback Styles */
+.error-fallback {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.error-fallback p {
+  margin: 5px 0;
+  color: #6c757d;
 }
 
 @media (max-width: 768px) {
