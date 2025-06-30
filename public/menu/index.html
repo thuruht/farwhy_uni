@@ -86,180 +86,638 @@
         margin: 0 auto;
     }
     
-    .cocktail-section {
-        margin-bottom: 40px;
-    }
-    
     .cocktail-section h2 {
-        font-family: 'db', serif;
-        font-size: 2.5rem;
-        color: #2c2c2c;
-        text-align: center;
-        margin-top: 0;
+        font-family: 'db', 'Impact', 'Arial Black', sans-serif;
+        font-weight: normal;
+        font-size: 1.8rem;
+        text-transform: uppercase;
+        margin: 17px 0 8px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 3px;
+        letter-spacing: 1px;
     }
     
     .cocktail {
-        margin-bottom: 20px;
-        border-bottom: 1px dashed #ccc;
-        padding-bottom: 10px;
-    }
-    
-    .cocktail-simple {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 15px;
-        border-bottom: 1px dashed #ccc;
-        padding-bottom: 5px;
+        margin-bottom: 17px;
     }
     
     .cocktail-name {
-        font-family: 'ds', serif;
-        font-size: 1.5rem;
-        color: #1a1a1a;
-        margin-bottom: 5px;
+        font-family: 'ds', 'Impact', 'Arial Black', sans-serif;
+        font-weight: normal;
+        font-size: 2rem;
+        margin-bottom: 2px;
+        color: #6a2b00;
+        letter-spacing:0.069rem;
     }
     
     .cocktail-details {
         display: flex;
         justify-content: space-between;
+        width: 100%;
     }
     
     .cocktail-ingredients {
-        flex: 1;
-        font-size: 0.9rem;
-        font-style: italic;
-        color: #555;
-        margin-right: 20px;
+        font-family: 'hnm11', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: normal;
+        font-size: 1rem;
+        line-height: 1.4;
+        color: #444;
+        flex-grow: 1;
+        position: relative;
+        padding-right: 10px;
+    }
+    
+    .cocktail-ingredients:after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 10px;
+        height: 2px;
+        border-bottom: 2px dotted #999;
     }
     
     .cocktail-price {
-        font-family: 'hnb2', sans-serif;
+        font-family: 'hnbi4', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
         font-weight: bold;
-        color: #1a1a1a;
+        font-size: 1.48rem;
+        color: #222;
+        background-color: #f0fffc;
+        padding-left: 5px;
     }
     
     .divider {
         border-top: 2px solid #333;
-        margin: 30px 0;
+        margin: 18px 0;
+    }
+    
+    .footer {
+        text-align: center;
+        font-family: 'hnbi4', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: bold;
+        letter-spacing: 0.06rem;
+        font-size: 2rem;
+        margin-top: 13px;
+        padding-top: 15px;
+    }
+    
+    .beer-bottle-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 13px;
+    }
+    
+    .beer-bottle {
+        height: 128px;
+        width: auto;
+    }
+    
+    .beer-columns {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .beer-column {
+        flex: 1;
+    }
+    
+    .beer-columns h1 {
+        font-family: 'db', 'Impact', 'Arial Black', sans-serif;
+        font-weight: normal;
+        font-size: 1.8rem;
+        text-transform: uppercase;
+        margin: 13px 0 8px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 3px;
     }
     
     .menu-section {
-        margin-bottom: 40px;
-    }
-    
-    .menu-section h1 {
-        font-family: 'db', serif;
-        font-size: 2rem;
-        color: #2c2c2c;
-        margin-bottom: 15px;
-        border-bottom: 2px solid #333;
-        padding-bottom: 5px;
-    }
-    
-    .beer-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 10px;
+        margin-bottom: 18px;
     }
     
     .beer-item {
         display: flex;
         justify-content: space-between;
-        font-size: 1.1rem;
-        padding: 5px 0;
-        border-bottom: 1px dotted #ccc;
+        margin-bottom: 4px;
+        font-family: 'hnm11', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-size: 1.22rem;
     }
     
     .beer-name {
-        margin-right: 10px;
+        font-family: 'hnm11', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: normal;
+        flex-grow: 1;
+        position: relative;
+        color:#6a003a;
+    }
+    
+    .beer-name:after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        border-bottom: 2px dotted #999;
     }
     
     .beer-price {
-        font-family: 'hnb2', sans-serif;
-        font-weight: bold;
+        font-family: 'hnb2', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: normal;
+        background-color: #f0fffc;
+        padding-left: 4px;
     }
     
-    .footer {
-        margin-top: 50px;
-        text-align: center;
-        border-top: 2px solid #333;
-        padding-top: 20px;
+    .cowboy img {
+        height: auto;
+        width: 180px;
+        margin: 8px auto;
+        display: block;
     }
     
-    .beer-bottle-container {
+    .cocktail-simple {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        font-family: 'hnb2', sans-serif;
-        font-size: 0.8rem;
+        justify-content: space-between;
     }
     
-    .beer-bottle {
-        height: 40px;
+    .cocktail-simple .cocktail-name {
+        font-family: 'ds', 'Impact', 'Arial Black', sans-serif;
+        font-weight: normal;
+        font-size: 2rem;
+        color: #6a2b00;
+        letter-spacing: 0.069rem;
+        margin-bottom: 0;
+        position: relative;
+        flex-grow: 1;
+    }
+
+    .cocktail-simple .cocktail-name:after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        border-bottom: 2px dotted #999;
     }
     
     @media (max-width: 768px) {
         .menu-container {
             flex-direction: column;
         }
-        
-        .beer-container {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        .beer-columns {
+            flex-direction: column;
+            gap: 0;
         }
+    }
+
+    .footer {
+        margin:0 auto;
+        text-align: center;
+        font-family: 'hnbi4', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: bold;
+        letter-spacing: 0.06rem;
+        font-size: 2rem;
+        width: 100%;
+        max-width:1400px;
+        box-sizing: border-box;
+        margin-top: 24px;
+        padding: 18px 13px;
+        border: 2px solid #333;
+        background-image: linear-gradient(to right, #6a2b00, #6a003a);
+        color: #f0fffc;
+        border-radius:8px;
+    }
+
+    .footer span {
+        color: #f0fffc;
+    }
+
+    .footer .beer-bottle {
+        height: 128px;
+        width: auto;
+    }
+
+    .footer .beer-bottle-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
     }
     </style>
 </head>
 <body>
-    <div class="menu-header">
-        <img src="../img/fm.png" alt="Farewell Menu">
-    </div>
-    
-    <div class="cocktail-section">
-        <h2>Cocktails</h2>
-        <!-- Cocktails will be dynamically added here -->
-    </div>
-
-    <div class="menu-section">
-        <h1>Domestics</h1>
-        <div id="domestics-container" class="beer-container">
-            <!-- Domestic beers will be dynamically added here -->
+    <div class="menu-container">
+        <!-- Cocktail Menu Column -->
+        <div class="menu-column">
+            <div class="menu-header">
+                <img src="ctails.png" alt="Cocktails">
+            </div>
+            
+            <div class="cocktail-section" id="cocktails-container">
+                <!-- Cocktails will be dynamically added here -->
+            </div>
         </div>
-    </div>
-
-    <div class="menu-section">
-        <h1>Boulevard</h1>
-        <div id="boulevard-container" class="beer-container">
-            <!-- Boulevard beers will be dynamically added here -->
+        
+        <!-- Beer Menu Column -->
+        <div class="menu-column">
+            <div class="menu-header">
+                <img src="beerse.png" alt="Beer Menu">
+            </div>
+            
+            <div class="beer-columns">
+                <!-- Left Beer Column -->
+                <div class="beer-column">
+                    <div class="menu-section">
+                        <h1>Domestics</h1>
+                        <div id="domestics-container">
+                            <!-- Domestic beers will be dynamically added here -->
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h1>Boulevard</h1>
+                        <div id="boulevard-container">
+                            <!-- Boulevard beers will be dynamically added here -->
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h1>Seasonal</h1>
+                        <div id="seasonal-container">
+                            <!-- Seasonal beers will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Beer Column -->
+                <div class="beer-column">
+                    <div class="menu-section">
+                        <h1>Craft/Import</h1>
+                        <div id="craft-import-container">
+                            <!-- Craft/Import beers will be dynamically added here -->
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h1>Booze-Free</h1>
+                        <div id="booze-free-container">
+                            <!-- Booze-Free drinks will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="divider"></div>
         </div>
+        
     </div>
-
-    <div class="menu-section">
-        <h1>Seasonal</h1>
-        <div id="seasonal-container" class="beer-container">
-            <!-- Seasonal beers will be dynamically added here -->
-        </div>
-    </div>
-
-    <div class="menu-section">
-        <h1>Craft/Import</h1>
-        <div id="craft-import-container" class="beer-container">
-            <!-- Craft/Import beers will be dynamically added here -->
-        </div>
-    </div>
-
-    <div class="menu-section">
-        <h1>Booze-Free</h1>
-        <div id="booze-free-container" class="beer-container">
-            <!-- Booze-Free drinks will be dynamically added here -->
-        </div>
-    </div>
-    
     <div class="footer">
         <div class="beer-bottle-container">
-            <img src="../img/beere.png" alt="Beer bottle" class="beer-bottle">
+            <img src="beerd.png" alt="Beer bottle" class="beer-bottle">
             <span>WANT A SPECIFIC LIQUOR? LOOK AT THE WALL.</span>
-            <img src="../img/beerse.png" alt="Beer bottle" class="beer-bottle">
+            <img src="beere.png" alt="Beer bottle" class="beer-bottle">
+        </div>
+    </div>
+    
+    <script src="menu-renderer.js"></script>
+</body>
+</html>
+
+    body {
+        background-color: #f0fffc;
+        background-image: url('../img/bg8.png');
+        font-family: 'hnm11', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        line-height: 1.4;
+    }
+    
+    .menu-container {
+        display: flex;
+        max-width: 1400px;
+        margin: 0 auto;
+        gap: 30px;
+        align-items: flex-start;
+    }
+    
+    .menu-column {
+        flex: 1;
+        min-width: 0;
+        background-color: #f0fffc; 
+        border: 2px solid #333;
+        border-radius:8px;
+        margin-top:33px;
+        padding: 20px;      
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .menu-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .menu-header img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .cocktail-section h2 {
+        font-family: 'db', 'Impact', 'Arial Black', sans-serif;
+        font-weight: normal;
+        font-size: 1.8rem;
+        text-transform: uppercase;
+        margin: 17px 0 8px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 3px;
+        letter-spacing: 1px;
+    }
+    
+    .cocktail {
+        margin-bottom: 17px;
+    }
+    
+    .cocktail-name {
+        font-family: 'ds', 'Impact', 'Arial Black', sans-serif;
+        font-weight: normal;
+        font-size: 2rem;
+        margin-bottom: 2px;
+        color: #6a2b00;
+        letter-spacing:0.069rem;
+    }
+    
+    .cocktail-details {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .cocktail-ingredients {
+        font-family: 'hnm11', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: normal;
+        font-size: 1rem;
+        line-height: 1.4;
+        color: #444;
+        flex-grow: 1;
+        position: relative;
+        padding-right: 10px;
+    }
+    
+    .cocktail-ingredients:after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 10px;
+        height: 2px;
+        border-bottom: 2px dotted #999;
+    }
+    
+    .cocktail-price {
+        font-family: 'hnbi4', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: bold;
+        font-size: 1.48rem;
+        color: #222;
+        background-color: #f0fffc;
+        padding-left: 5px;
+    }
+    
+    .divider {
+        border-top: 2px solid #333;
+        margin: 18px 0;
+    }
+    
+    .footer {
+        text-align: center;
+        font-family: 'hnbi4', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: bold;
+        letter-spacing: 0.06rem;
+        font-size: 2rem;
+        margin-top: 13px;
+        padding-top: 15px;
+    }
+    
+    .beer-bottle-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 13px;
+    }
+    
+    .beer-bottle {
+        height: 128px;
+        width: auto;
+    }
+    
+    .beer-columns {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .beer-column {
+        flex: 1;
+    }
+    
+    .beer-columns h1 {
+        font-family: 'db', 'Impact', 'Arial Black', sans-serif;
+        font-weight: normal;
+        font-size: 1.8rem;
+        text-transform: uppercase;
+        margin: 13px 0 8px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 3px;
+    }
+    
+    .menu-section {
+        margin-bottom: 18px;
+    }
+    
+    .beer-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        font-family: 'hnm11', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-size: 1.22rem;
+    }
+    
+    .beer-name {
+        font-family: 'hnm11', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: normal;
+        flex-grow: 1;
+        position: relative;
+        color:#6a003a;
+    }
+    
+    .beer-name:after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        border-bottom: 2px dotted #999;
+    }
+    
+    .beer-price {
+        font-family: 'hnb2', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: normal;
+        background-color: #f0fffc;
+        padding-left: 4px;
+    }
+    
+    .cowboy img {
+        height: auto;
+        width: 180px;
+        margin: 8px auto;
+        display: block;
+    }
+    
+    .cocktail-simple {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .cocktail-simple .cocktail-name {
+        font-family: 'ds', 'Impact', 'Arial Black', sans-serif;
+        font-weight: normal;
+        font-size: 2rem;
+        color: #6a2b00;
+        letter-spacing: 0.069rem;
+        margin-bottom: 0;
+        position: relative;
+        flex-grow: 1;
+    }
+
+    .cocktail-simple .cocktail-name:after {
+        content: "";
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        border-bottom: 2px dotted #999;
+    }
+    
+    @media (max-width: 768px) {
+        .menu-container {
+            flex-direction: column;
+        }
+        .beer-columns {
+            flex-direction: column;
+            gap: 0;
+        }
+    }
+
+    .footer {
+        margin:0 auto;
+        text-align: center;
+        font-family: 'hnbi4', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+        font-weight: bold;
+        letter-spacing: 0.06rem;
+        font-size: 2rem;
+        width: 100%;
+        max-width:1400px;
+        box-sizing: border-box;
+        margin-top: 24px;
+        padding: 18px 13px;
+        border: 2px solid #333;
+        background-image: linear-gradient(to right, #6a2b00, #6a003a);
+        color: #f0fffc;
+        border-radius:8px;
+    }
+
+    .footer span {
+        color: #f0fffc;
+    }
+
+    .footer .beer-bottle {
+        height: 128px;
+        width: auto;
+    }
+
+    .footer .beer-bottle-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+    }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+        <!-- Cocktail Menu Column -->
+        <div class="menu-column">
+            <div class="menu-header">
+                <img src="ctails.png" alt="Cocktails">
+            </div>
+            
+            <div class="cocktail-section" id="cocktails-container">
+                <!-- Cocktails will be dynamically added here -->
+            </div>
+        </div>
+        
+        <!-- Beer Menu Column -->
+        <div class="menu-column">
+            <div class="menu-header">
+                <img src="beerse.png" alt="Beer Menu">
+            </div>
+            
+            <div class="beer-columns">
+                <!-- Left Beer Column -->
+                <div class="beer-column">
+                    <div class="menu-section">
+                        <h1>Domestics</h1>
+                        <div id="domestics-container">
+                            <!-- Domestic beers will be dynamically added here -->
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h1>Boulevard</h1>
+                        <div id="boulevard-container">
+                            <!-- Boulevard beers will be dynamically added here -->
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h1>Seasonal</h1>
+                        <div id="seasonal-container">
+                            <!-- Seasonal beers will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Beer Column -->
+                <div class="beer-column">
+                    <div class="menu-section">
+                        <h1>Craft/Import</h1>
+                        <div id="craft-import-container">
+                            <!-- Craft/Import beers will be dynamically added here -->
+                        </div>
+                    </div>
+                    
+                    <div class="menu-section">
+                        <h1>Booze-Free</h1>
+                        <div id="booze-free-container">
+                            <!-- Booze-Free drinks will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="divider"></div>
+        </div>
+        
+    </div>
+    <div class="footer">
+        <div class="beer-bottle-container">
+            <img src="beerd.png" alt="Beer bottle" class="beer-bottle">
+            <span>WANT A SPECIFIC LIQUOR? LOOK AT THE WALL.</span>
+            <img src="beere.png" alt="Beer bottle" class="beer-bottle">
         </div>
     </div>
     
@@ -818,7 +1276,6 @@
             <div class="beer-bottle-container">
                 <img src="beerd.png" alt="Beer bottle" class="beer-bottle">
                 <span>WANT A SPECIFIC LIQUOR? LOOK AT THE WALL.</span>
-                <img src="beere.png" alt="Beer bottle" class="beer-bottle">
             </div>
         </div>
     

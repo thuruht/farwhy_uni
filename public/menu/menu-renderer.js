@@ -34,57 +34,38 @@ async function loadMenuData() {
         
         // If both API calls fail or return empty data, use existing static content
         console.log('Using existing static menu content');
+        useStaticMenuData();
     } catch (error) {
         console.error('Error loading menu data:', error);
-        // On error, keep the existing static content
+        // On error, use the static content
+        useStaticMenuData();
     }
 }
 
 // Function to update menu content based on API data
-function updateMenuContent(menuData) {
-    console.log('Updating menu content with:', menuData);
+function updateMenuContent(menuItems) {
+    console.log('Updating menu content with:', menuItems);
     
     // Group menu items by category
     const categorizedItems = {};
-    menuData.forEach(item => {
+    menuItems.forEach(item => {
         if (!categorizedItems[item.category]) {
             categorizedItems[item.category] = [];
         }
         categorizedItems[item.category].push(item);
     });
     
-    // Clear existing dynamic content containers to prevent duplicates
-    const cocktailsContainer = document.querySelector('.cocktail-section');
-    const domesticsContainer = document.getElementById('domestics-container');
-    const boulevardContainer = document.getElementById('boulevard-container');
-    const seasonalContainer = document.getElementById('seasonal-container');
-    const craftImportContainer = document.getElementById('craft-import-container');
-    const boozeFreeContainer = document.getElementById('booze-free-container');
-
-    // Update each section if it exists
-    if (categorizedItems['Cocktails'] && cocktailsContainer) {
-        updateCocktailsSection(categorizedItems['Cocktails'], cocktailsContainer);
+    // Update cocktails section
+    if (categorizedItems['Cocktails']) {
+        updateCocktailsSection(categorizedItems['Cocktails']);
     }
     
-    if (categorizedItems['Domestics'] && domesticsContainer) {
-        updateBeerSection(categorizedItems['Domestics'], domesticsContainer);
-    }
-    
-    if (categorizedItems['Boulevard'] && boulevardContainer) {
-        updateBeerSection(categorizedItems['Boulevard'], boulevardContainer);
-    }
-    
-    if (categorizedItems['Seasonal'] && seasonalContainer) {
-        updateBeerSection(categorizedItems['Seasonal'], seasonalContainer);
-    }
-    
-    if (categorizedItems['Craft/Import'] && craftImportContainer) {
-        updateBeerSection(categorizedItems['Craft/Import'], craftImportContainer);
-    }
-    
-    if (categorizedItems['Booze-Free'] && boozeFreeContainer) {
-        updateBeerSection(categorizedItems['Booze-Free'], boozeFreeContainer);
-    }
+    // Update beer sections
+    updateBeerSection('Domestics', categorizedItems['Domestics'] || []);
+    updateBeerSection('Boulevard', categorizedItems['Boulevard'] || []);
+    updateBeerSection('Seasonal', categorizedItems['Seasonal'] || []);
+    updateBeerSection('Craft/Import', categorizedItems['Craft/Import'] || []);
+    updateBeerSection('Booze-Free', categorizedItems['Booze-Free'] || []);
     
     // Apply animations
     applyAnimations();
@@ -93,72 +74,83 @@ function updateMenuContent(menuData) {
 }
 
 // Function to update the cocktails section
-function updateCocktailsSection(cocktails, container) {
-    // Preserve any special elements like images
-    const specialElements = [];
-    container.querySelectorAll('.cowboy, .cocktail-header, h2, .section-divider').forEach(el => {
-        specialElements.push(el.cloneNode(true));
-    });
+function updateCocktailsSection(cocktails) {
+    const container = document.getElementById('cocktails-container');
+    if (!container) return;
     
     // Clear the container
     container.innerHTML = '';
     
-    // Add back special elements
-    specialElements.forEach(el => {
-        container.appendChild(el);
-    });
-    
     // Add cocktail items
-    cocktails.forEach(cocktail => {
-        const cocktailEl = document.createElement('div');
+    cocktails.forEach((cocktail, index) => {
+        // Insert cowboy image after the third cocktail
+        if (index === 2) {
+            const cowboyDiv = document.createElement('div');
+            cowboyDiv.className = 'cowboy';
+            cowboyDiv.innerHTML = '<img src="./ohel.png" alt="Cowboy illustration">';
+            container.appendChild(cowboyDiv);
+        }
         
-        if (cocktail.description) {
+        if (cocktail.description && cocktail.description.trim()) {
             // Standard cocktail with description
+            const cocktailEl = document.createElement('div');
             cocktailEl.className = 'cocktail';
             cocktailEl.innerHTML = `
                 <div class="cocktail-name">${cocktail.name}</div>
                 <div class="cocktail-details">
                     <div class="cocktail-ingredients">${cocktail.description}</div>
-                    <div class="cocktail-price">$${parseFloat(cocktail.price).toFixed(2)}</div>
+                    <div class="cocktail-price">$${parseFloat(cocktail.price).toFixed(2).replace(/\.00$/, '')}</div>
                 </div>
             `;
+            container.appendChild(cocktailEl);
         } else {
-            // Simple cocktail without description (just name and price)
+            // Simple cocktail without description
+            const cocktailEl = document.createElement('div');
             cocktailEl.className = 'cocktail-simple';
             cocktailEl.innerHTML = `
                 <div class="cocktail-name">${cocktail.name}</div>
-                <div class="cocktail-price">$${parseFloat(cocktail.price).toFixed(2)}</div>
+                <div class="cocktail-price">$${parseFloat(cocktail.price).toFixed(2).replace(/\.00$/, '')}</div>
             `;
+            container.appendChild(cocktailEl);
+            
+            if (index === cocktails.length - 2) {
+                // Add a line break before the last item
+                const br = document.createElement('br');
+                container.appendChild(br);
+            }
         }
-        
-        container.appendChild(cocktailEl);
     });
     
-    // Add divider at the end if it doesn't already exist
-    if (!container.querySelector('.divider')) {
-        const divider = document.createElement('div');
-        divider.className = 'divider';
-        container.appendChild(divider);
-    }
+    // Add divider at the end
+    const divider = document.createElement('div');
+    divider.className = 'divider';
+    container.appendChild(divider);
 }
 
 // Function to update beer sections
-function updateBeerSection(items, container) {
-    // Preserve header if it exists
-    const header = container.parentElement.querySelector('h1, h2, h3, h4, h5, h6');
+function updateBeerSection(category, items) {
+    const containerId = category.toLowerCase().replace('/', '-') + '-container';
+    const container = document.getElementById(containerId);
+    if (!container) return;
     
     // Clear the container
     container.innerHTML = '';
     
     // Add beer items
     items.forEach(item => {
-        const beerEl = document.createElement('div');
-        beerEl.className = 'beer-item';
-        beerEl.innerHTML = `
-            <span class="beer-name">${item.name}</span>
-            <span class="beer-price">$${parseFloat(item.price).toFixed(2)}</span>
+        const itemEl = document.createElement('div');
+        itemEl.className = 'beer-item';
+        
+        // Special case for Yeungling to add strikethrough
+        const nameHtml = item.name.toLowerCase() === 'yeungling' 
+            ? `<del>${item.name}</del>` 
+            : item.name;
+        
+        itemEl.innerHTML = `
+            <span class="beer-name">${nameHtml}</span>
+            <span class="beer-price">$${parseFloat(item.price).toFixed(2).replace(/\.00$/, '')}</span>
         `;
-        container.appendChild(beerEl);
+        container.appendChild(itemEl);
     });
 }
 
@@ -189,41 +181,83 @@ function applyAnimations() {
     }
 }
 
-// Function to update beer sections (Domestics, Boulevard, Seasonal, Craft/Import, Booze-Free)
-function updateBeerSections(categorizedItems) {
-    const beerCategories = ['Domestics', 'Boulevard', 'Seasonal', 'Craft/Import', 'Booze-Free'];
+// Function to use static menu data when API fails
+function useStaticMenuData() {
+    // Cocktails
+    const cocktails = [
+        { name: 'STRAY DOG', price: '9', description: 'Tito\'s vodka, kahlua, non-dairy milk.' },
+        { name: 'CRANSYLVANIA', price: '9', description: 'Old grandad bourbon, cranberry juice, lemon juice, maple syrup, sparkling water.' },
+        { name: 'RYE & GOSLING', price: '7', description: 'Roulette rye, lime juice, ginger beer, aromatic bitters.' },
+        { name: 'LEAKY ROOF', price: '9', description: 'Farewell\'s mystery liquor concoction, triple sec, sweet n\' sour, cola.' },
+        { name: 'YUPPIE SPEEDBALL', price: '9', description: 'Jose cuervo blanco tequila, revel berry yerba mate, pear liquor, grenadine.' },
+        { name: 'WELL SHOT', price: '4', description: '' },
+        { name: 'WELL MIX', price: '5', description: '' }
+    ];
     
-    beerCategories.forEach(category => {
-        if (categorizedItems[category]) {
-            updateBeerCategory(category, categorizedItems[category]);
-        }
-    });
-}
-
-// Function to update a specific beer category
-function updateBeerCategory(category, items) {
-    // Find the section for this category
-    const sectionHeader = Array.from(document.querySelectorAll('.menu-section h1'))
-        .find(el => el.textContent.trim() === category);
+    // Domestics
+    const domestics = [
+        { name: 'Hamm\'s', price: '3' },
+        { name: 'PBR', price: '5' },
+        { name: 'Rolling Rock', price: '4' },
+        { name: 'Miller Lite', price: '5' },
+        { name: 'Bud Light', price: '6' },
+        { name: 'Bud Heavy', price: '6' },
+        { name: 'Coors Banquet', price: '5' },
+        { name: 'Michelob', price: '6' },
+        { name: 'Yeungling', price: '5' },
+        { name: 'Twisted Tea', price: '5' }
+    ];
     
-    if (!sectionHeader) return;
+    // Boulevard
+    const boulevard = [
+        { name: 'Wheat', price: '5' },
+        { name: 'Pale Ale', price: '5' },
+        { name: 'Tank 7', price: '7' },
+        { name: 'Space Camper', price: '5' },
+        { name: 'Quirk', price: '6' }
+    ];
     
-    const section = sectionHeader.closest('.menu-section');
-    if (!section) return;
+    // Seasonal
+    const seasonal = [
+        { name: 'TL Monk & Honey', price: '6' },
+        { name: 'Mother\'s Coffee Stout', price: '5' }
+    ];
     
-    // Clear existing items (keep the header)
-    const header = section.querySelector('h1');
-    section.innerHTML = '';
-    section.appendChild(header);
+    // Craft/Import
+    const craftImport = [
+        { name: 'Modelo', price: '5' },
+        { name: 'Victoria', price: '5' },
+        { name: 'Guinness', price: '6' },
+        { name: 'Stella', price: '5' },
+        { name: 'Blue Moon', price: '6' },
+        { name: 'Founder\'s IPA', price: '5' },
+        { name: 'Lagunita\'s IPA', price: '5' },
+        { name: 'Sea Quench Sour', price: '6' },
+        { name: 'Angry Orchard', price: '5' },
+        { name: 'Blake\'s Ciders', price: '7' },
+        { name: 'Stiegl Radler', price: '8' }
+    ];
     
-    // Add items
-    items.forEach(item => {
-        const itemEl = document.createElement('div');
-        itemEl.className = 'beer-item';
-        itemEl.innerHTML = `
-            <span class="beer-name">${item.name}</span>
-            <span class="beer-price">${item.price}</span>
-        `;
-        section.appendChild(itemEl);
-    });
+    // Booze-Free
+    const boozeFree = [
+        { name: 'Athletics', price: '5' },
+        { name: 'Coors Edge N/A', price: '4' },
+        { name: 'Red Bull', price: '5' },
+        { name: 'AriZona Iced Tea', price: '2.50' },
+        { name: 'Yerba Mate', price: '5' },
+        { name: 'Waterloo', price: '2' },
+        { name: 'Coke', price: '2' },
+        { name: 'Diet Coke', price: '2' },
+        { name: 'Sprite', price: '2' },
+        { name: 'Ginger Ale', price: '2' },
+        { name: 'Casamara', price: '6' }
+    ];
+    
+    // Update all sections with static data
+    updateCocktailsSection(cocktails);
+    updateBeerSection('Domestics', domestics);
+    updateBeerSection('Boulevard', boulevard);
+    updateBeerSection('Seasonal', seasonal);
+    updateBeerSection('Craft/Import', craftImport);
+    updateBeerSection('Booze-Free', boozeFree);
 }

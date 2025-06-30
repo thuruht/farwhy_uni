@@ -2186,6 +2186,9 @@ function loadVenueMenu(venue) {
     const menuList = document.getElementById('menu-list');
     if (!menuList) return;
     
+    // Show loading indicator
+    menuList.innerHTML = `<div class="status-message status-loading">Loading menu items...</div>`;
+    
     // Load real menu data from the API
     fetchVenueMenu(venue).then(menuItems => {
         renderMenuItems(menuList, menuItems, venue);
@@ -2204,6 +2207,16 @@ async function fetchVenueMenu(venue) {
             return response.data;
         }
         
+        // Try alternate API endpoint
+        const altResponse = await api.get(`/api/admin/menu`);
+        if (altResponse && altResponse.success && altResponse.data && altResponse.data.length > 0) {
+            // Filter by venue if needed
+            const filteredItems = altResponse.data.filter(item => !item.venue || item.venue === venue);
+            if (filteredItems.length > 0) {
+                return filteredItems;
+            }
+        }
+        
         // Fallback to static menu data if API fails or returns empty
         return getStaticMenuData(venue);
     } catch (error) {
@@ -2218,77 +2231,77 @@ function getStaticMenuData(venue) {
         // This matches the actual Farewell menu from the static HTML
         return [
             // Cocktails section
-            { id: 'c1', name: 'STRAY DOG', price: '$9', category: 'Cocktails', description: 'Tito\'s vodka, kahlua, non-dairy milk.' },
-            { id: 'c2', name: 'CRANSYLVANIA', price: '$9', category: 'Cocktails', description: 'Old grandad bourbon, cranberry juice, lemon juice, maple syrup, sparkling water.' },
-            { id: 'c3', name: 'RYE & GOSLING', price: '$7', category: 'Cocktails', description: 'Roulette rye, lime juice, ginger beer, aromatic bitters.' },
-            { id: 'c4', name: 'LEAKY ROOF', price: '$9', category: 'Cocktails', description: 'Farewell\'s mystery liquor concoction, triple sec, sweet n\' sour, cola.' },
-            { id: 'c5', name: 'YUPPIE SPEEDBALL', price: '$9', category: 'Cocktails', description: 'Jose cuervo blanco tequila, revel berry yerba mate, pear liquor, grenadine.' },
-            { id: 'c6', name: 'WELL SHOT', price: '$4', category: 'Cocktails', description: '' },
-            { id: 'c7', name: 'WELL MIX', price: '$5', category: 'Cocktails', description: '' },
+            { id: 'c1', name: 'STRAY DOG', price: '9', category: 'Cocktails', description: 'Tito\'s vodka, kahlua, non-dairy milk.' },
+            { id: 'c2', name: 'CRANSYLVANIA', price: '9', category: 'Cocktails', description: 'Old grandad bourbon, cranberry juice, lemon juice, maple syrup, sparkling water.' },
+            { id: 'c3', name: 'RYE & GOSLING', price: '7', category: 'Cocktails', description: 'Roulette rye, lime juice, ginger beer, aromatic bitters.' },
+            { id: 'c4', name: 'LEAKY ROOF', price: '9', category: 'Cocktails', description: 'Farewell\'s mystery liquor concoction, triple sec, sweet n\' sour, cola.' },
+            { id: 'c5', name: 'YUPPIE SPEEDBALL', price: '9', category: 'Cocktails', description: 'Jose cuervo blanco tequila, revel berry yerba mate, pear liquor, grenadine.' },
+            { id: 'c6', name: 'WELL SHOT', price: '4', category: 'Cocktails', description: '' },
+            { id: 'c7', name: 'WELL MIX', price: '5', category: 'Cocktails', description: '' },
             
             // Domestics section
-            { id: 'b1', name: 'Hamm\'s', price: '$3', category: 'Domestics', description: '' },
-            { id: 'b2', name: 'PBR', price: '$5', category: 'Domestics', description: '' },
-            { id: 'b3', name: 'Rolling Rock', price: '$4', category: 'Domestics', description: '' },
-            { id: 'b4', name: 'Miller Lite', price: '$5', category: 'Domestics', description: '' },
-            { id: 'b5', name: 'Bud Light', price: '$6', category: 'Domestics', description: '' },
-            { id: 'b6', name: 'Bud Heavy', price: '$6', category: 'Domestics', description: '' },
-            { id: 'b7', name: 'Coors Banquet', price: '$5', category: 'Domestics', description: '' },
-            { id: 'b8', name: 'Michelob', price: '$6', category: 'Domestics', description: '' },
-            { id: 'b9', name: 'Yeungling', price: '$5', category: 'Domestics', description: '' },
-            { id: 'b10', name: 'Twisted Tea', price: '$5', category: 'Domestics', description: '' },
+            { id: 'b1', name: 'Hamm\'s', price: '3', category: 'Domestics', description: '' },
+            { id: 'b2', name: 'PBR', price: '5', category: 'Domestics', description: '' },
+            { id: 'b3', name: 'Rolling Rock', price: '4', category: 'Domestics', description: '' },
+            { id: 'b4', name: 'Miller Lite', price: '5', category: 'Domestics', description: '' },
+            { id: 'b5', name: 'Bud Light', price: '6', category: 'Domestics', description: '' },
+            { id: 'b6', name: 'Bud Heavy', price: '6', category: 'Domestics', description: '' },
+            { id: 'b7', name: 'Coors Banquet', price: '5', category: 'Domestics', description: '' },
+            { id: 'b8', name: 'Michelob', price: '6', category: 'Domestics', description: '' },
+            { id: 'b9', name: 'Yeungling', price: '5', category: 'Domestics', description: '' },
+            { id: 'b10', name: 'Twisted Tea', price: '5', category: 'Domestics', description: '' },
             
             // Boulevard section
-            { id: 'blvd1', name: 'Wheat', price: '$5', category: 'Boulevard', description: '' },
-            { id: 'blvd2', name: 'Pale Ale', price: '$5', category: 'Boulevard', description: '' },
-            { id: 'blvd3', name: 'Tank 7', price: '$7', category: 'Boulevard', description: '' },
-            { id: 'blvd4', name: 'Space Camper', price: '$5', category: 'Boulevard', description: '' },
-            { id: 'blvd5', name: 'Quirk', price: '$6', category: 'Boulevard', description: '' },
+            { id: 'blvd1', name: 'Wheat', price: '5', category: 'Boulevard', description: '' },
+            { id: 'blvd2', name: 'Pale Ale', price: '5', category: 'Boulevard', description: '' },
+            { id: 'blvd3', name: 'Tank 7', price: '7', category: 'Boulevard', description: '' },
+            { id: 'blvd4', name: 'Space Camper', price: '5', category: 'Boulevard', description: '' },
+            { id: 'blvd5', name: 'Quirk', price: '6', category: 'Boulevard', description: '' },
             
             // Seasonal section
-            { id: 's1', name: 'TL Monk & Honey', price: '$6', category: 'Seasonal', description: '' },
-            { id: 's2', name: 'Mother\'s Coffee Stout', price: '$5', category: 'Seasonal', description: '' },
+            { id: 's1', name: 'TL Monk & Honey', price: '6', category: 'Seasonal', description: '' },
+            { id: 's2', name: 'Mother\'s Coffee Stout', price: '5', category: 'Seasonal', description: '' },
             
             // Craft/Import section
-            { id: 'ci1', name: 'Modelo', price: '$5', category: 'Craft/Import', description: '' },
-            { id: 'ci2', name: 'Victoria', price: '$5', category: 'Craft/Import', description: '' },
-            { id: 'ci3', name: 'Guinness', price: '$6', category: 'Craft/Import', description: '' },
-            { id: 'ci4', name: 'Stella', price: '$5', category: 'Craft/Import', description: '' },
-            { id: 'ci5', name: 'Blue Moon', price: '$6', category: 'Craft/Import', description: '' },
-            { id: 'ci6', name: 'Founder\'s IPA', price: '$5', category: 'Craft/Import', description: '' },
-            { id: 'ci7', name: 'Lagunita\'s IPA', price: '$5', category: 'Craft/Import', description: '' },
-            { id: 'ci8', name: 'Sea Quench Sour', price: '$6', category: 'Craft/Import', description: '' },
-            { id: 'ci9', name: 'Angry Orchard', price: '$5', category: 'Craft/Import', description: '' },
-            { id: 'ci10', name: 'Blake\'s Ciders', price: '$7', category: 'Craft/Import', description: '' },
-            { id: 'ci11', name: 'Stiegl Radler', price: '$8', category: 'Craft/Import', description: '' },
+            { id: 'ci1', name: 'Modelo', price: '5', category: 'Craft/Import', description: '' },
+            { id: 'ci2', name: 'Victoria', price: '5', category: 'Craft/Import', description: '' },
+            { id: 'ci3', name: 'Guinness', price: '6', category: 'Craft/Import', description: '' },
+            { id: 'ci4', name: 'Stella', price: '5', category: 'Craft/Import', description: '' },
+            { id: 'ci5', name: 'Blue Moon', price: '6', category: 'Craft/Import', description: '' },
+            { id: 'ci6', name: 'Founder\'s IPA', price: '5', category: 'Craft/Import', description: '' },
+            { id: 'ci7', name: 'Lagunita\'s IPA', price: '5', category: 'Craft/Import', description: '' },
+            { id: 'ci8', name: 'Sea Quench Sour', price: '6', category: 'Craft/Import', description: '' },
+            { id: 'ci9', name: 'Angry Orchard', price: '5', category: 'Craft/Import', description: '' },
+            { id: 'ci10', name: 'Blake\'s Ciders', price: '7', category: 'Craft/Import', description: '' },
+            { id: 'ci11', name: 'Stiegl Radler', price: '8', category: 'Craft/Import', description: '' },
             
             // Booze-Free section
-            { id: 'bf1', name: 'Athletics', price: '$5', category: 'Booze-Free', description: '' },
-            { id: 'bf2', name: 'Coors Edge N/A', price: '$4', category: 'Booze-Free', description: '' },
-            { id: 'bf3', name: 'Red Bull', price: '$5', category: 'Booze-Free', description: '' },
-            { id: 'bf4', name: 'AriZona Iced Tea', price: '$2.50', category: 'Booze-Free', description: '' },
-            { id: 'bf5', name: 'Yerba Mate', price: '$5', category: 'Booze-Free', description: '' },
-            { id: 'bf6', name: 'Waterloo', price: '$2', category: 'Booze-Free', description: '' },
-            { id: 'bf7', name: 'Coke', price: '$2', category: 'Booze-Free', description: '' },
-            { id: 'bf8', name: 'Diet Coke', price: '$2', category: 'Booze-Free', description: '' },
-            { id: 'bf9', name: 'Sprite', price: '$2', category: 'Booze-Free', description: '' },
-            { id: 'bf10', name: 'Ginger Ale', price: '$2', category: 'Booze-Free', description: '' },
-            { id: 'bf11', name: 'Casamara', price: '$6', category: 'Booze-Free', description: '' }
+            { id: 'bf1', name: 'Athletics', price: '5', category: 'Booze-Free', description: '' },
+            { id: 'bf2', name: 'Coors Edge N/A', price: '4', category: 'Booze-Free', description: '' },
+            { id: 'bf3', name: 'Red Bull', price: '5', category: 'Booze-Free', description: '' },
+            { id: 'bf4', name: 'AriZona Iced Tea', price: '2.50', category: 'Booze-Free', description: '' },
+            { id: 'bf5', name: 'Yerba Mate', price: '5', category: 'Booze-Free', description: '' },
+            { id: 'bf6', name: 'Waterloo', price: '2', category: 'Booze-Free', description: '' },
+            { id: 'bf7', name: 'Coke', price: '2', category: 'Booze-Free', description: '' },
+            { id: 'bf8', name: 'Diet Coke', price: '2', category: 'Booze-Free', description: '' },
+            { id: 'bf9', name: 'Sprite', price: '2', category: 'Booze-Free', description: '' },
+            { id: 'bf10', name: 'Ginger Ale', price: '2', category: 'Booze-Free', description: '' },
+            { id: 'bf11', name: 'Casamara', price: '6', category: 'Booze-Free', description: '' }
         ];
     } else {
         // Howdy menu items
         return [
-            { id: 'h1', name: 'Nachos', price: '$8.95', category: 'Appetizers', description: 'Tortilla chips, queso, jalapeños, sour cream, and salsa.' },
-            { id: 'h2', name: 'Quesadilla', price: '$9.95', category: 'Appetizers', description: 'Flour tortilla, cheese, peppers, and onions. Served with salsa and sour cream.' },
-            { id: 'h3', name: 'Chips & Salsa', price: '$6.95', category: 'Appetizers', description: 'House-made tortilla chips with fresh salsa.' },
-            { id: 'h4', name: 'Pretzel Bites', price: '$7.95', category: 'Appetizers', description: 'Warm pretzel bites served with cheese sauce.' },
+            { id: 'h1', name: 'Nachos', price: '8.95', category: 'Appetizers', description: 'Tortilla chips, queso, jalapeños, sour cream, and salsa.' },
+            { id: 'h2', name: 'Quesadilla', price: '9.95', category: 'Appetizers', description: 'Flour tortilla, cheese, peppers, and onions. Served with salsa and sour cream.' },
+            { id: 'h3', name: 'Chips & Salsa', price: '6.95', category: 'Appetizers', description: 'House-made tortilla chips with fresh salsa.' },
+            { id: 'h4', name: 'Pretzel Bites', price: '7.95', category: 'Appetizers', description: 'Warm pretzel bites served with cheese sauce.' },
             
             // Non-alcoholic drinks
-            { id: 'hd1', name: 'Fountain Soda', price: '$2.50', category: 'Drinks', description: 'Coke, Diet Coke, Sprite, Dr. Pepper' },
-            { id: 'hd2', name: 'Iced Tea', price: '$2.50', category: 'Drinks', description: 'Sweetened or unsweetened' },
-            { id: 'hd3', name: 'Lemonade', price: '$3.00', category: 'Drinks', description: 'Fresh-squeezed' },
-            { id: 'hd4', name: 'Hot Chocolate', price: '$3.50', category: 'Drinks', description: 'With whipped cream' },
-            { id: 'hd5', name: 'Coffee', price: '$2.50', category: 'Drinks', description: 'Regular or decaf' }
+            { id: 'hd1', name: 'Fountain Soda', price: '2.50', category: 'Drinks', description: 'Coke, Diet Coke, Sprite, Dr. Pepper' },
+            { id: 'hd2', name: 'Iced Tea', price: '2.50', category: 'Drinks', description: 'Sweetened or unsweetened' },
+            { id: 'hd3', name: 'Lemonade', price: '3.00', category: 'Drinks', description: 'Fresh-squeezed' },
+            { id: 'hd4', name: 'Hot Chocolate', price: '3.50', category: 'Drinks', description: 'With whipped cream' },
+            { id: 'hd5', name: 'Coffee', price: '2.50', category: 'Drinks', description: 'Regular or decaf' }
         ];
     }
     
@@ -2301,6 +2314,14 @@ function renderMenuItems(menuList, menuItems, venue) {
         return;
     }
     
+    // Sort menu items by category and then by name
+    menuItems.sort((a, b) => {
+        if (a.category === b.category) {
+            return a.name.localeCompare(b.name);
+        }
+        return a.category.localeCompare(b.category);
+    });
+    
     menuList.innerHTML = `<table class="admin-table">
         <thead>
             <tr>
@@ -2311,19 +2332,27 @@ function renderMenuItems(menuList, menuItems, venue) {
             </tr>
         </thead>
         <tbody>` +
-        menuItems.map(item => `
+        menuItems.map(item => {
+            // Format price for display - ensure $ sign
+            const displayPrice = item.price.toString().startsWith('$') 
+                ? item.price 
+                : '$' + item.price;
+                
+            return `
             <tr class="menu-item" data-id="${item.id}">
                 <td>${item.name}</td>
-                <td>${item.price}</td>
+                <td>${displayPrice}</td>
                 <td>${item.category}</td>
                 <td class="admin-table-actions">
                     <button class="edit-menu-btn" data-id="${item.id}">Edit</button>
                     <button class="delete-menu-btn" data-id="${item.id}">Delete</button>
                 </td>
             </tr>
-        `).join('') + 
+            `;
+        }).join('') + 
         `</tbody>
     </table>`;
+    
     
     // Add event listeners to buttons
     menuList.querySelectorAll('.edit-menu-btn').forEach(btn => {
@@ -2380,26 +2409,54 @@ function showMenuItemForm(id = null) {
     // Get item data if editing
     let item = null;
     if (id) {
-        // Find the item from the current menu items
-        const venue = dashboardState.currentVenue;
-        const menuItems = getStaticMenuData(venue);
-        item = menuItems.find(item => item.id === id);
+        // Try to find the item from the current menu items via API
+        api.get(`/api/admin/menu-items/${id}`)
+            .then(response => {
+                if (response && response.success && response.data) {
+                    populateMenuItemForm(response.data, modal, modalBody);
+                } else {
+                    // Fallback to static data
+                    const venue = dashboardState.currentVenue;
+                    const menuItems = getStaticMenuData(venue);
+                    item = menuItems.find(item => item.id === id);
+                    populateMenuItemForm(item, modal, modalBody);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching menu item:', error);
+                // Fallback to static data
+                const venue = dashboardState.currentVenue;
+                const menuItems = getStaticMenuData(venue);
+                item = menuItems.find(item => item.id === id);
+                populateMenuItemForm(item, modal, modalBody);
+            });
+    } else {
+        // New item
+        populateMenuItemForm(null, modal, modalBody);
+    }
+}
+
+function populateMenuItemForm(item, modal, modalBody) {
+    // Format price for display - remove $ if present
+    let displayPrice = '';
+    if (item && item.price) {
+        displayPrice = item.price.toString().replace(/^\$/, '');
     }
     
     modal.classList.add('active');
     modalBody.innerHTML = `
         <div class="admin-form">
-            <h3>${id ? 'Edit' : 'Add'} Menu Item</h3>
+            <h3>${item ? 'Edit' : 'Add'} Menu Item</h3>
             <form id="menu-item-form">
-                <input type="hidden" name="id" value="${id || ''}">
+                <input type="hidden" name="id" value="${item ? item.id : ''}">
                 <input type="hidden" name="venue" value="${dashboardState.currentVenue}">
                 <div class="form-group">
                     <label>Name *</label>
                     <input type="text" name="name" required value="${item ? item.name : ''}">
                 </div>
                 <div class="form-group">
-                    <label>Price *</label>
-                    <input type="text" name="price" required value="${item ? item.price : ''}">
+                    <label>Price * (numeric value, no $ sign)</label>
+                    <input type="text" name="price" required value="${displayPrice}" placeholder="e.g. 9.50">
                 </div>
                 <div class="form-group">
                     <label>Category *</label>
@@ -2414,14 +2471,22 @@ function showMenuItemForm(id = null) {
                 </div>
                 <div class="form-group">
                     <label>Description</label>
-                    <textarea name="description" rows="3">${item ? item.description : ''}</textarea>
+                    <textarea name="description" rows="3">${item ? (item.description || '') : ''}</textarea>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">${id ? 'Update' : 'Add'} Item</button>
+                    <button type="submit" class="btn btn-primary">${item ? 'Update' : 'Add'} Item</button>
+                    <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
                 </div>
             </form>
         </div>
     `;
+    
+    // Add close button handler
+    document.querySelectorAll('.modal-close-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+    });
     
     document.getElementById('menu-item-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -2430,6 +2495,9 @@ function showMenuItemForm(id = null) {
             // Get form data
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
+            
+            // Format price to ensure it's a number (remove $ if present)
+            data.price = data.price.replace('$', '').trim();
             
             // Determine if this is an add or update
             const isUpdate = !!data.id;
