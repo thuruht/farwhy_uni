@@ -116,9 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const platforms = ['facebook', 'instagram', 'twitter', 'spotify', 'secret'];
 
     socialAnchors.forEach((anchor, index) => {
-      const platform = platforms[index];
-      if (links[platform]) {
-        anchor.href = links[platform];
+      if (index < platforms.length) {  // Skip any additional anchors like Discord
+        const platform = platforms[index];
+        if (links[platform]) {
+          anchor.href = links[platform];
+        }
       }
     });
   }
@@ -505,6 +507,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize hidden fields on page load
   updateHiddenFields();
+
+  // Initialize social media links on first page load
+  (function initSocialLinks() {
+    const state = body?.dataset.state || 'farewell';
+    const socialLinks = document.querySelectorAll('.social-icons a');
+    
+    // Make sure all social links have target="_blank" and rel="noopener"
+    socialLinks.forEach(link => {
+      // Ensure target="_blank" and rel="noopener" for all social links
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener');
+      
+      // Add a class to identify social links for event delegation
+      link.classList.add('social-link');
+      
+      // Add specific click handler for social links
+      link.addEventListener('click', function(e) {
+        // We don't prevent default here - we want the link to open
+        console.log('Social link clicked, opening in new tab:', this.href);
+        
+        // Ensure it opens in a new tab even if other handlers interfere
+        if (!this.target || this.target !== '_blank') {
+          this.target = '_blank';
+        }
+      });
+      
+      // Remove the open-popup class if it exists to prevent modal handlers from interfering
+      if (link.classList.contains('open-popup')) {
+        link.classList.remove('open-popup');
+        console.log(`Removed open-popup class from social link: ${link.href}`);
+      }
+      
+      // Add a class to explicitly mark these as external links
+      link.classList.add('external-link');
+    });
+    
+    // Set initial social media URLs
+    updateSocialLinks(state);
+    console.log(`[InitSocialLinks] Initialized social media links for state: ${state}`);
+  })();
 
   // Watch for body data-state changes and update hidden fields accordingly
   if (body) {

@@ -107,12 +107,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- ADDED Event Delegation for Popups ---
   document.body.addEventListener('click', function(event) {
-    // Check if the clicked element itself OR its parent is a link with '.open-popup'
+    // First, check if this is a social media link - if so, let it handle naturally
+    const socialLink = event.target.closest('.social-icons a, .social-link, a.external-link');
+    if (socialLink) {
+        // Ensure social links always open in a new tab
+        if (!socialLink.getAttribute('target')) {
+            socialLink.setAttribute('target', '_blank');
+        }
+        if (!socialLink.getAttribute('rel') || !socialLink.getAttribute('rel').includes('noopener')) {
+            socialLink.setAttribute('rel', 'noopener');
+        }
+        // Let the default link behavior happen (open in new tab)
+        console.log('Social/external link click detected, opening in new tab:', socialLink.href);
+        return;
+    }
+
+    // Only process .open-popup links that are specifically for events
     const link = event.target.closest('a.open-popup');
 
-    // We're no longer using open-popup, but keeping this code for backward compatibility
-    // with any links that might still use the old class
-    if (link && link instanceof HTMLAnchorElement) {
+    // Skip handling in the following cases:
+    // 1. If link has target="_blank" (external links)
+    // 2. If link has a specific href that indicates it's not an event link
+    if (link && (
+        link.getAttribute('target') === '_blank' ||
+        link.classList.contains('social-link') ||
+        link.classList.contains('external-link') ||
+        link.href.includes('facebook.com') ||
+        link.href.includes('instagram.com') ||
+        link.href.includes('x.com') ||
+        link.href.includes('twitter.com') ||
+        link.href.includes('spotify.com') ||
+        link.href.includes('linktr.ee')
+    )) {
+        // Let these links behave normally
+        console.log('Skipping modal handler for external link:', link.href);
+        return;
+    }
+
+    // For event-related .open-popup links only (backward compatibility)
+    if (link && link instanceof HTMLAnchorElement && 
+        link.href.includes('shows') || link.href.includes('events')) {
         event.preventDefault(); // Prevent default link navigation
 
         // Instead of opening a popup, trigger the events modal
