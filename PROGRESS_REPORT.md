@@ -198,6 +198,13 @@
     - Fixed reference issues with YouTube list container
     - Improved error handling throughout the blog management interface
 
+32. ✅ **Featured Videos Carousel Management**
+    - Added a dedicated "Featured Videos" tab in the admin dashboard
+    - Implemented full carousel management with add, remove, and reorder functionality
+    - Created preview functionality to see how the carousel will appear on the blog
+    - Added drag-and-drop reordering for intuitive management
+    - Removed redundant text "(view all upcoming events at both venues)" from main index
+
 ### Current Issues
 
 1. ✅ **Stats Display Issues** (FIXED)
