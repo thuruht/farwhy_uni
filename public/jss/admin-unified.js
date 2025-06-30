@@ -1150,11 +1150,15 @@ function showEventForm(id = null) {
                     const flyerUrlInput = document.querySelector('input[name="flyer_image_url"]');
                     if (flyerUrlInput) {
                         flyerUrlInput.value = backendUrl;
+                        console.log('Set flyer URL input value to:', flyerUrlInput.value);
                         
                         // Update the display field
                         const flyerUrlDisplay = document.getElementById('flyer-image-url-display');
                         if (flyerUrlDisplay) {
                             flyerUrlDisplay.textContent = backendUrl;
+                            console.log('Updated flyer URL display to:', flyerUrlDisplay.textContent);
+                        } else {
+                            console.warn('Could not find flyer-image-url-display element');
                         }
                         
                         // Update the preview
@@ -1162,20 +1166,23 @@ function showEventForm(id = null) {
                         if (flyerPreview) {
                             flyerPreview.innerHTML = `<img src="${uploadedUrl}" alt="Event flyer">`;
                             flyerPreview.classList.add('has-image');
+                        } else {
+                            console.warn('Could not find flyer-preview element');
                         }
                         
                         // Show the clear button
                         const flyerClearBtn = document.getElementById('flyer-clear-btn');
                         if (flyerClearBtn) {
                             flyerClearBtn.style.display = '';
+                        } else {
+                            console.warn('Could not find flyer-clear-btn element');
                         }
                         
                         showToast('Flyer uploaded successfully!', 'success');
                     } else {
                         console.error('Could not find flyer_image_url input field');
+                        showToast('Error: Could not update form with uploaded image URL', 'error');
                     }
-                    
-                    showToast('Flyer uploaded!', 'success');
                 } else {
                     showToast(result.error || 'Flyer upload failed.', 'error');
                 }
@@ -1737,14 +1744,19 @@ function showBlogForm(id = null) {
 
 // Patch blog image upload to update input and preview
 function patchBlogImageUpload() {
-    document.body.addEventListener('change', async function(e) {
-        if (e.target && e.target.id === 'blog-image-upload-input') {
+    document.body.addEventListener('change', async function(e) {            if (e.target && e.target.id === 'blog-image-upload-input') {
             const file = e.target.files[0];
             if (!file) return;
             const btn = document.getElementById('blog-image-upload-btn');
             const urlInput = document.querySelector('input[name="image_url"]');
+            const urlDisplay = document.getElementById('blog-image-url-display');
             const preview = document.getElementById('blog-image-preview');
+            const clearBtn = document.getElementById('blog-image-clear-btn');
+            
+            // Show loading state
             if (btn) { btn.disabled = true; btn.textContent = 'Uploading...'; }
+            showToast('Uploading image...', 'info');
+            
             try {
                 const formData = new FormData();
                 formData.append('image', file);
@@ -1752,12 +1764,32 @@ function patchBlogImageUpload() {
                 if (res) {
                     const result = await res.json();
                     if (result.success && result.imageUrl) {
-                        if (urlInput) urlInput.value = result.imageUrl;
+                        console.log('Image uploaded successfully:', result.imageUrl);
+                        
+                        // Update the hidden URL input field
+                        if (urlInput) {
+                            urlInput.value = result.imageUrl;
+                            console.log('Updated urlInput value:', urlInput.value);
+                        }
+                        
+                        // Update the display element
+                        if (urlDisplay) {
+                            urlDisplay.textContent = result.imageUrl;
+                            console.log('Updated urlDisplay text:', urlDisplay.textContent);
+                        }
+                        
+                        // Update the preview
                         if (preview) {
                             preview.innerHTML = `<img src="${result.imageUrl}" alt="Featured image">`;
                             preview.classList.add('has-image');
                         }
-                        showToast('Image uploaded!', 'success');
+                        
+                        // Show the clear button
+                        if (clearBtn) {
+                            clearBtn.style.display = '';
+                        }
+                        
+                        showToast('Image uploaded successfully!', 'success');
                     } else {
                         showToast(result.error || 'Image upload failed.', 'error');
                     }
@@ -1765,7 +1797,8 @@ function patchBlogImageUpload() {
                     showToast('Image upload failed.', 'error');
                 }
             } catch (err) {
-                showToast('Error uploading image', 'error');
+                console.error('Error uploading image:', err);
+                showToast('Error uploading image: ' + (err.message || 'Unknown error'), 'error');
             } finally {
                 if (btn) { btn.disabled = false; btn.textContent = 'Upload Image'; }
             }
