@@ -2614,8 +2614,7 @@ function getStaticMenuData(venue) {
             { id: 'hd5', name: 'Coffee', price: '2.50', category: 'Drinks', description: 'Regular or decaf' }
         ];
     }
-} // Added closing brace to fix syntax error
-
+    
 // Function to render menu items in the admin dashboard
 function renderMenuItems(menuList, menuItems, venue) {
     if (!menuList) return;
@@ -3001,6 +3000,5 @@ async function syncExternalCalendar() {
     }
 }
 
-// Close the main DOMContentLoaded event handler from line 310
 // Close the main DOMContentLoaded event handler from line 310
 });
