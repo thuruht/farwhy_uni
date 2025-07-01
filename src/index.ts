@@ -223,6 +223,8 @@ protectedAdminApi.post('/events/sync', handleSync);
 // Menu management endpoints
 protectedAdminApi.get('/venues/:venue/menu', (c) => handleMenu(c, 'list'));
 protectedAdminApi.post('/venues/:venue/menu', (c) => handleMenu(c, 'create'));
+protectedAdminApi.put('/venues/:venue/menu/:id', (c) => handleMenu(c, 'update'));
+protectedAdminApi.delete('/venues/:venue/menu/:id', (c) => handleMenu(c, 'delete'));
 protectedAdminApi.get('/menu/:id', (c) => handleMenu(c, 'items'));
 protectedAdminApi.post('/venues/:venue/menu-items', (c) => handleMenu(c, 'create-item'));
 protectedAdminApi.put('/menu-items/:id', (c) => handleMenu(c, 'update-item'));

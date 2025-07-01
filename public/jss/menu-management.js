@@ -1,12 +1,91 @@
 // Menu Management functionality for admin dashboard
 
-// Add this code to the end of admin-unified.js
+// Helper functions
+function escapeHTML(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function showModal(content) {
+    console.log('Showing menu modal with content');
+    
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('menu-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'menu-modal';
+        modal.className = 'modal';
+        document.body.appendChild(modal);
+    }
+    
+    // Set content
+    modal.innerHTML = content;
+    
+    // Show modal
+    modal.classList.add('active');
+    
+    console.log('Modal shown');
+}
+
+function hideModal() {
+    console.log('Hiding menu modal');
+    
+    // Find and hide modal
+    const modal = document.getElementById('menu-modal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
+function showStatusMessage(type, message) {
+    console.log(`Status message (${type}): ${message}`);
+    
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container';
+        document.body.appendChild(toastContainer);
+    }
+    
+    // Create toast
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    
+    // Add to container
+    toastContainer.appendChild(toast);
+    
+    // Remove after delay
+    setTimeout(() => {
+        toast.classList.add('fade-out');
+        setTimeout(() => {
+            toast.remove();
+        }, 500);
+    }, 3000);
+}
 
 // Initialize menu management
 function initMenuManagement() {
+    console.log('Initializing menu management...');
+    
     // Menu section elements
     const addMenuBtn = document.getElementById('add-menu-btn');
     const menuList = document.getElementById('menu-list');
+    
+    console.log('Menu elements:', { addMenuBtn, menuList });
+    
+    if (!addMenuBtn || !menuList) {
+        console.error('Menu elements not found!');
+        return;
+    }
+    
     let activeVenue = 'farewell'; // Default venue
     
     // Listen for venue tab changes
@@ -17,31 +96,39 @@ function initMenuManagement() {
         });
     });
     
-    // Load menus when the venue section is shown
-    if (addMenuBtn && menuList) {
-        // Add menu button click handler
-        addMenuBtn.addEventListener('click', () => openMenuModal());
-        
-        // Initial load of menus for default venue
-        loadMenus(activeVenue);
-    }
+    // Add menu button click handler
+    addMenuBtn.addEventListener('click', () => {
+        console.log('Add menu button clicked');
+        openMenuModal();
+    });
+    
+    // Initial load of menus for default venue
+    loadMenus(activeVenue);
 }
 
 // Load menus for a specific venue
 async function loadMenus(venue) {
+    console.log(`Loading menus for venue: ${venue}`);
+    
     const menuList = document.getElementById('menu-list');
-    if (!menuList) return;
+    if (!menuList) {
+        console.error('Menu list element not found!');
+        return;
+    }
     
     // Clear existing content
     menuList.innerHTML = '<div class="loading-spinner"></div>';
     
     try {
         const response = await fetch(`/api/venues/${venue}/menu`);
-        if (!response.ok) throw new Error('Failed to load menus');
+        if (!response.ok) {
+            throw new Error(`Failed to load menus: ${response.status} ${response.statusText}`);
+        }
         
         const data = await response.json();
+        console.log('Menu data:', data);
         
-        if (data.success && data.data.length > 0) {
+        if (data.success && data.data && data.data.length > 0) {
             menuList.innerHTML = '';
             
             data.data.forEach(menu => {
@@ -56,13 +143,15 @@ async function loadMenus(venue) {
     } catch (error) {
         console.error('Error loading menus:', error);
         menuList.innerHTML = `<div class="error-message">
-            <p>Failed to load menus. Please try again later.</p>
+            <p>Failed to load menus: ${error.message}</p>
         </div>`;
     }
 }
 
 // Create a menu card
 function createMenuCard(menu, venue) {
+    console.log(`Creating menu card for: ${menu.name}`);
+    
     const menuCard = document.createElement('div');
     menuCard.className = 'menu-card';
     menuCard.dataset.menuId = menu.id;
@@ -90,9 +179,20 @@ function createMenuCard(menu, venue) {
     `;
     
     // Add event listeners
-    menuCard.querySelector('.menu-edit-btn').addEventListener('click', () => openMenuModal(menu));
-    menuCard.querySelector('.menu-delete-btn').addEventListener('click', () => deleteMenu(menu.id));
-    menuCard.querySelector('.add-menu-item-btn').addEventListener('click', () => openMenuItemModal(null, menu.id));
+    menuCard.querySelector('.menu-edit-btn').addEventListener('click', () => {
+        console.log(`Edit menu clicked for: ${menu.name}`);
+        openMenuModal(menu);
+    });
+    
+    menuCard.querySelector('.menu-delete-btn').addEventListener('click', () => {
+        console.log(`Delete menu clicked for: ${menu.name}`);
+        deleteMenu(menu.id, venue);
+    });
+    
+    menuCard.querySelector('.add-menu-item-btn').addEventListener('click', () => {
+        console.log(`Add menu item clicked for menu: ${menu.name}`);
+        openMenuItemModal(null, menu.id);
+    });
     
     // Load menu items
     loadMenuItems(menu.id, menuCard.querySelector('.menu-items-container'));
@@ -426,26 +526,31 @@ function openMenuItemModal(item = null, menuId) {
 }
 
 // Delete a menu
-async function deleteMenu(menuId) {
+async function deleteMenu(menuId, venue) {
+    console.log(`Deleting menu ID: ${menuId}`);
+    
     if (!confirm('Are you sure you want to delete this menu? This will also delete all items in this menu.')) {
         return;
     }
     
     try {
-        const response = await fetch(`/api/venues/farewell/menu/${menuId}`, {
+        // Try the correct endpoint for the backend
+        const response = await fetch(`/api/venues/${venue}/menu/${menuId}`, {
             method: 'DELETE'
         });
         
-        if (!response.ok) throw new Error('Failed to delete menu');
+        if (!response.ok) {
+            throw new Error(`Failed to delete menu: ${response.status} ${response.statusText}`);
+        }
         
         // Reload menus
-        const activeVenue = document.querySelector('.venue-tabs .tab-btn.active').dataset.venue;
+        const activeVenue = document.querySelector('.venue-tabs .tab-btn.active')?.dataset.venue || venue;
         loadMenus(activeVenue);
         
         showStatusMessage('success', 'Menu deleted successfully!');
     } catch (error) {
         console.error('Error deleting menu:', error);
-        showStatusMessage('error', 'Failed to delete menu. Please try again.');
+        showStatusMessage('error', `Failed to delete menu: ${error.message}`);
     }
 }
 
@@ -478,7 +583,205 @@ async function deleteMenuItem(itemId) {
 
 // Add the menu initialization to the main init function
 document.addEventListener('DOMContentLoaded', function() {
-    // Existing initialization code...
+    console.log('DOM loaded, initializing menu management...');
+    
+    // Add CSS for the menu modal and toasts
+    const style = document.createElement('style');
+    style.textContent = `
+    /* Menu Management Styles */
+    #menu-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    #menu-modal.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    #menu-modal .modal-header {
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e0e0e0;
+        background-color: #f8f9fa;
+    }
+
+    #menu-modal .modal-header h3 {
+        margin: 0;
+        color: #333;
+    }
+
+    #menu-modal .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    #menu-modal .modal-body {
+        padding: 15px;
+        background-color: white;
+    }
+
+    #menu-modal .modal-footer {
+        padding: 15px;
+        border-top: 1px solid #e0e0e0;
+        text-align: right;
+        background-color: #f8f9fa;
+    }
+
+    #menu-modal .form-group {
+        margin-bottom: 15px;
+    }
+
+    #menu-modal label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    #menu-modal .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1100;
+    }
+
+    .toast {
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        color: white;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        opacity: 1;
+        transition: opacity 0.3s;
+    }
+
+    .toast.fade-out {
+        opacity: 0;
+    }
+
+    .toast-success {
+        background-color: #4CAF50;
+    }
+
+    .toast-error {
+        background-color: #F44336;
+    }
+
+    .toast-warning {
+        background-color: #FF9800;
+    }
+
+    /* Menu Cards */
+    .menu-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .menu-card-header {
+        padding: 15px;
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .menu-card-header h4 {
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .menu-items-container {
+        padding: 15px;
+    }
+
+    .menu-card-footer {
+        padding: 15px;
+        border-top: 1px solid #e0e0e0;
+        text-align: right;
+    }
+
+    .menu-items-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .menu-items-table th,
+    .menu-items-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .menu-items-table th {
+        font-weight: 600;
+        background-color: #f8f9fa;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 20px;
+        color: #6c757d;
+    }
+
+    .loading-spinner {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .loading-spinner:after {
+        content: '';
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .error-message {
+        color: #dc3545;
+        padding: 10px;
+        border: 1px solid #dc3545;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+    `;
+
+    document.head.appendChild(style);
     
     // Initialize menu management
     initMenuManagement();
