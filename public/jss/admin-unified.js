@@ -2614,7 +2614,7 @@ function getStaticMenuData(venue) {
             { id: 'hd5', name: 'Coffee', price: '2.50', category: 'Drinks', description: 'Regular or decaf' }
         ];
     }
-} // Closing brace for getStaticMenuData function
+} // FIXED: Removed extra closing brace in getStaticMenuData function
 
 // Function to render menu items in the admin dashboard
 function renderMenuItems(menuList, menuItems, venue) {
