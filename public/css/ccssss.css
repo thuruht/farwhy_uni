@@ -125,6 +125,33 @@ body {
   gap:var(--padding-medium);
 }
 
+/* Normal text class for content paragraphs */
+.nrml {
+  font-family: var(--font-db);
+  color: var(--text-color);
+  text-align: left;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  font-weight: normal;
+}
+
+/* Paragraph styling */
+p {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+/* Add this class for pages that need the header font as body text */
+.header-font-body p {
+  font-family: var(--font-db);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  font-weight: normal;
+}
+
 /* ==============================
    4. Header Styles
 ============================== */
