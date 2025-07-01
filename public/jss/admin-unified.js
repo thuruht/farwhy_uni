@@ -3002,5 +3002,4 @@ async function syncExternalCalendar() {
 }
 
 // Close the main DOMContentLoaded event handler from line 310
-// Close the main DOMContentLoaded event handler from line 310
 });
