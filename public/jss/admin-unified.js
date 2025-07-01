@@ -1748,7 +1748,8 @@ function showBlogForm(id = null) {
 
 // Patch blog image upload to update input and preview
 function patchBlogImageUpload() {
-    document.body.addEventListener('change', async function(e) {            if (e.target && e.target.id === 'blog-image-upload-input') {
+    document.body.addEventListener('change', async function(e) {
+        if (e.target && e.target.id === 'blog-image-upload-input') {
             const file = e.target.files[0];
             if (!file) return;
             const btn = document.getElementById('blog-image-upload-btn');
@@ -2998,3 +2999,6 @@ async function syncExternalCalendar() {
         syncBtn.disabled = false;
     }
 }
+
+// Close the main DOMContentLoaded event handler from line 310
+});
