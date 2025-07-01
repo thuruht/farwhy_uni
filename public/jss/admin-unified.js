@@ -1128,13 +1128,13 @@ function showEventForm(id = null) {
         showToast('Uploading flyer...', 'info');
 
         try {
-            const res = await api._call('/api/admin/events/flyer', { 
-                method: 'POST', 
+            const res = await fetch('/api/admin/events/flyer', {
+                method: 'POST',
                 body: formData,
-                headers: {} // Override default Content-Type for FormData
+                credentials: 'include'
             });
             
-            if (res) {
+            if (res.ok) {
                 const result = await res.json();
                 console.log('Flyer upload response:', result);
                 
@@ -1191,11 +1191,15 @@ function showEventForm(id = null) {
                     showToast(result.error || 'Flyer upload failed.', 'error');
                 }
             } else {
-                showToast('Flyer upload failed.', 'error');
+                showToast('Flyer upload failed with status: ' + res.status, 'error');
             }
         } catch (error) {
             console.error('Flyer upload error:', error);
             showToast('Error uploading flyer: ' + (error.message || 'Unknown error'), 'error');
+        } finally {
+            // Reset button state regardless of outcome
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = 'Upload Flyer';
         }
     });
     
@@ -1765,8 +1769,13 @@ function patchBlogImageUpload() {
             try {
                 const formData = new FormData();
                 formData.append('image', file);
-                const res = await api._call('/api/admin/blog/upload-image', { method: 'POST', body: formData, headers: {} });
-                if (res) {
+                const res = await fetch('/api/admin/blog/upload-image', { 
+                    method: 'POST', 
+                    body: formData,
+                    credentials: 'include'
+                });
+                
+                if (res.ok) {
                     const result = await res.json();
                     if (result.success && result.imageUrl) {
                         console.log('Image uploaded successfully:', result.imageUrl);
@@ -1799,7 +1808,7 @@ function patchBlogImageUpload() {
                         showToast(result.error || 'Image upload failed.', 'error');
                     }
                 } else {
-                    showToast('Image upload failed.', 'error');
+                    showToast('Image upload failed with status: ' + res.status, 'error');
                 }
             } catch (err) {
                 console.error('Error uploading image:', err);

@@ -1,0 +1,140 @@
+/* Menu Management Styles */
+
+.menu-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.menu-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.menu-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.menu-card-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.menu-card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.menu-items-container {
+    padding: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.menu-items-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.menu-items-table th,
+.menu-items-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.menu-items-table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.menu-card-footer {
+    padding: 15px;
+    border-top: 1px solid #eaeaea;
+    text-align: right;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+
+.loading-spinner::after {
+    content: "";
+    width: 30px;
+    height: 30px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Modal Form Styles for Menu Items */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.input-group {
+    display: flex;
+}
+
+.input-group-prepend {
+    display: flex;
+    align-items: center;
+}
+
+.input-group-text {
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+}
+
+.input-group .form-control {
+    border-radius: 0 4px 4px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .menu-container {
+        grid-template-columns: 1fr;
+    }
+}
