@@ -2230,25 +2230,11 @@ function loadVenueSettings() {
     settingsContainer.innerHTML = `
         <div class="venue-tabs">
             <button class="tab-btn active" data-venue="farewell">Farewell Hours</button>
-            <button class="tab-btn" data-venue="howdy">Howdy Hours</button>
         </div>
         
         <div class="venue-tab-content active" id="farewell-settings">
             <h3>Farewell Hours Management</h3>
             <div class="hours-form" id="farewell-hours-form">
-                <div class="status-message status-loading">Loading hours...</div>
-            </div>
-        </div>
-        
-        <div class="venue-tab-content" id="howdy-settings">
-            <h3>Howdy Hours Management</h3>
-            <div class="hours-form" id="howdy-hours-form">
-                <div class="howdy-hours-info alert alert-info">
-                    <p><strong>Note:</strong> Howdy is primarily open for shows and special events only. 
-                    These hours will only be shown on the public site as "Open for shows and events".</p>
-                    <p>You can still set specific hours below which will be stored in the database, 
-                    but please note that the public site will only display the simplified message.</p>
-                </div>
                 <div class="status-message status-loading">Loading hours...</div>
             </div>
         </div>

@@ -98,8 +98,7 @@
                 <a href="#" class="nav-item" data-target="events">Events</a>
                 <a href="#" class="nav-item" data-target="blog">Blog</a>
                 <a href="#" class="nav-item" data-target="featured-videos">Featured Videos</a>
-                <a href="#" class="nav-item" data-target="venue">Venue Settings</a>
-                <a href="#" class="nav-item" data-target="import">Import</a>
+                <a href="#" class="nav-item" data-target="venue">Venue Management</a>
                 <a href="#" class="nav-item" data-target="help">Help</a>
                 <a href="#" id="logout-btn" class="nav-item">Logout</a>
             </nav>
@@ -161,13 +160,21 @@
                 <div id="blog-list" class="item-list-container"></div>
             </section>
             <section id="section-venue" class="admin-section">
-                <div class="section-header"><h2>Venue Settings</h2></div>
-                <div class="venue-tabs"><button class="tab-btn active" data-venue="farewell">Farewell Cafe</button><button class="tab-btn" data-venue="howdy">Howdy</button></div>
-                <div class="venue-content"><div class="venue-section"><h3>Menu Management</h3><button class="btn btn-secondary" id="add-menu-btn">+ Add Menu Section</button><div id="menu-list" class="menu-container"></div></div><div class="venue-section"><h3>Business Hours</h3><div id="hours-editor" class="hours-container"></div></div></div>
-            </section>
-            <section id="section-import" class="admin-section">
-                <div class="section-header"><h2>Import Legacy Data</h2></div>
-                <div class="import-options"><div class="import-card"><h3>Legacy Events</h3><p>Import events from the legacy system (fygw0.kcmo.xyz).</p><button id="import-legacy-btn" class="btn btn-primary">Import Events</button><div id="import-status" class="status-message-container"></div></div><div class="import-card"><h3>Legacy Blog Posts</h3><p>Import blog posts from previous system.</p><button id="import-blog-btn" class="btn btn-secondary">Import Blog</button><div id="import-blog-status" class="status-message-container"></div></div></div>
+                <div class="section-header"><h2>Venue Management</h2></div>
+                <div class="venue-tabs"><button class="tab-btn active" data-venue="farewell">Farewell Cafe</button></div>
+                <div class="venue-content">
+                    <div class="venue-section">
+                        <h3>Menu Management</h3>
+                        <p class="section-description">Add, edit, or remove items from the Farewell Cafe menu. Changes will be reflected on the public menu page.</p>
+                        <button class="btn btn-secondary" id="add-menu-btn">+ Add Menu Section</button>
+                        <div id="menu-list" class="menu-container"></div>
+                    </div>
+                    <div class="venue-section">
+                        <h3>Business Hours</h3>
+                        <p class="section-description">Set the regular business hours for Farewell Cafe. These hours will be displayed on the public site.</p>
+                        <div id="hours-editor" class="hours-container"></div>
+                    </div>
+                </div>
             </section>
             <section id="section-featured-videos" class="admin-section">
                 <div class="section-header"><h2>Featured Videos Carousel</h2></div>
@@ -204,8 +211,7 @@
                             <li><a href="#help-events">Events Management</a></li>
                             <li><a href="#help-blog">Blog Management</a></li>
                             <li><a href="#help-featured-videos">Featured Videos</a></li>
-                            <li><a href="#help-venue">Venue Settings</a></li>
-                            <li><a href="#help-import">Import Legacy Data</a></li>
+                            <li><a href="#help-venue">Venue Management</a></li>
                             <li><a href="#help-troubleshooting">Troubleshooting</a></li>
                         </ul>
                     </div>
@@ -213,7 +219,7 @@
                     <div class="help-content">
                         <div id="help-overview" class="help-section">
                             <h3>Admin Dashboard Overview</h3>
-                            <p>Welcome to the Farewell/Howdy admin dashboard. This interface allows you to manage events, blog posts, featured videos, and venue settings for both Farewell Transmission and Howdy spaces.</p>
+                            <p>Welcome to the Farewell/Howdy admin dashboard. This interface allows you to manage events, blog posts, featured videos, and venue management for Farewell Cafe.</p>
                             <p>Use the navigation sidebar on the left to access different sections of the dashboard.</p>
                             <div class="help-tip">
                                 <strong>Tip:</strong> The dashboard home page shows a quick overview of your site statistics.
@@ -289,45 +295,33 @@
                                 <strong>Supported formats:</strong> The system accepts standard YouTube URLs (youtube.com/watch?v=ID), short URLs (youtu.be/ID), and embed URLs.
                             </div>
                         </div>
-                        
-                        <div id="help-venue" class="help-section">
-                            <h3>Venue Settings</h3>
-                            <p>The Venue Settings section allows you to manage venue-specific information such as business hours and menu items.</p>
+                         <div id="help-venue" class="help-section">
+                            <h3>Venue Management</h3>
+                            <p>The Venue Management section allows you to manage Farewell Cafe's business hours and menu items.</p>
                             
                             <h4>Business Hours</h4>
                             <ol>
-                                <li>Select the venue (Farewell or Howdy)</li>
-                                <li>Set open/close times for each day</li>
+                                <li>Set open/close times for each day of the week</li>
                                 <li>Check the "Closed" box for days when the venue is not open</li>
-                                <li>Add notes if needed (e.g., "Shows only", "Special event")</li>
+                                <li>Add notes if needed (e.g., "Private event")</li>
                                 <li>Click "Save Hours" to update</li>
                             </ol>
                             
-                            <p><strong>Note about Howdy Hours:</strong> The public site displays Howdy as "Open for shows and special events" 
-                            rather than showing specific hours. You can still set and save the hours in this admin interface, 
-                            but they will only be used internally and not displayed on the public site.</p>
-                            
                             <h4>Menu Management</h4>
                             <ol>
-                                <li>Select the venue and menu type (Food, Drinks, etc.)</li>
-                                <li>Add, edit, or remove menu items</li>
-                                <li>Click "Save Menu" to update</li>
+                                <li>Browse existing menu sections (Domestics, Boulevard, Craft/Import, etc.)</li>
+                                <li>Click "Edit" on a section to modify its items</li>
+                                <li>Click "Add Item" to add new beverages or food items</li>
+                                <li>Fill out the name, price, category, and description</li>
+                                <li>Make sure "Active" is checked for items to appear on the public menu</li>
+                                <li>Click "Save" to update the menu</li>
                             </ol>
                             
                             <div class="help-tip">
-                                <strong>Note:</strong> Menu items can be organized into sections (like "Appetizers" or "Cocktails").
+                                <strong>Note:</strong> Menu items must be marked as "Active" to appear on the public menu. The display order determines the sequence items appear in each category.
                             </div>
                         </div>
-                        
-                        <div id="help-import" class="help-section">
-                            <h3>Import Legacy Data</h3>
-                            <p>The Import section allows you to import data from previous versions of the website.</p>
-                            
-                            <div class="help-warning">
-                                <strong>Warning:</strong> Importing data may overwrite existing content. Use with caution.
-                            </div>
-                        </div>
-                        
+
                         <div id="help-troubleshooting" class="help-section">
                             <h3>Troubleshooting</h3>
                             <p>If you encounter any issues while using the admin dashboard, try these steps:</p>

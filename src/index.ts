@@ -158,21 +158,38 @@ app.get('/images/*', async (c) => {
 
 // --- Public API Routes ---
 const publicApi = new Hono<{ Bindings: Env }>();
+publicApi.get('/health', (c) => c.json({ status: 'ok' }));
 publicApi.get('/events', (c) => handleEvents(c, 'list'));
-publicApi.get('/events/slideshow', (c) => handleEvents(c, 'slideshow'));
-publicApi.get('/list/:state', (c) => handleEvents(c, 'list', { venue: c.req.param('state') }));
-publicApi.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.query('type') }));
-// publicApi.get('/blog/posts', (c) => handleBlog(c.req.raw, c.env)); // Replaced with direct handler
-// publicApi.get('/blog/featured', (c) => handleBlog(c.req.raw, c.env)); // Replaced with direct handler
-publicApi.get('/blog/posts', getPublicPosts);
-publicApi.get('/blog/featured', getFeaturedContent);
+publicApi.get('/events/:id', (c) => handleEvents(c, 'get'));
+publicApi.get('/venues/:venue/events', (c) => handleEvents(c, 'listByVenue'));
+publicApi.get('/blog', (c) => handleBlog(c, 'list'));
+publicApi.get('/blog/:id', (c) => handleBlog(c, 'get'));
+publicApi.get('/venues/:venue/blog', (c) => handleBlog(c, 'listByVenue'));
+publicApi.get('/featured', (c) => handleFeatured(c, 'list'));
+publicApi.get('/venues/:venue/featured', (c) => handleFeatured(c, 'listByVenue'));
 publicApi.get('/venues/:venue/menu', (c) => handleMenu(c, 'list'));
-publicApi.get('/hours', (c) => handleHours(c, 'list'));
-publicApi.get('/venues/:venue/hours', (c) => handleHours(c, 'list'));
-publicApi.get('/featured', (c) => handleFeatured(c, 'get'));
-app.route('/api', publicApi);
+publicApi.get('/menu', async (c) => {
+  const { FWHY_D1 } = c.env;
+  try {
+    // Get all menu items for Farewell (venue specific)
+    const { results } = await FWHY_D1.prepare(`
+      SELECT * FROM menu_items 
+      WHERE menu_id = 1 AND active = 1
+      ORDER BY category, display_order ASC, name ASC
+    `).all();
+    
+    if (!results || results.length === 0) {
+      return c.json({ success: false, error: "No menu items found" }, 404);
+    }
+    
+    return c.json({ success: true, data: results });
+  } catch (error) {
+    console.error('Error fetching unified menu:', error);
+    return c.json({ success: false, error: "Failed to fetch menu items" }, 500);
+  }
+});
 
-
+// Authentication
 // --- Admin API Routes ---
 const adminApi = new Hono<{ Bindings: Env }>();
 

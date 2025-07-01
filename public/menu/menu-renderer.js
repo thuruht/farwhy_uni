@@ -9,31 +9,42 @@ document.addEventListener('DOMContentLoaded', function() {
 // Function to load menu data from the API
 async function loadMenuData() {
     try {
-        // Try to fetch menu data from API
-        const response = await fetch('/api/venues/farewell/menu');
-        
-        // If API request succeeds, update the menu
-        if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.data && data.data.length > 0) {
-                updateMenuContent(data.data);
-                return;
-            }
-        }
-        
-        // If that fails, try the unified menu endpoint
+        console.log('Attempting to fetch menu data from /api/menu endpoint');
+        // Try the unified menu endpoint first (it's more reliable)
         const unifiedResponse = await fetch('/api/menu');
         if (unifiedResponse.ok) {
             const unifiedData = await unifiedResponse.json();
+            console.log('Unified API response:', unifiedData);
             if (unifiedData.success && Array.isArray(unifiedData.data) && unifiedData.data.length > 0) {
-                console.log('Using unified menu API data');
+                console.log('Using unified menu API data, found', unifiedData.data.length, 'items');
                 updateMenuContent(unifiedData.data);
                 return;
+            } else {
+                console.warn('Unified API returned success=false or empty data array');
             }
+        } else {
+            console.warn('Unified API response not OK:', unifiedResponse.status);
+        }
+        
+        // If that fails, try the venue-specific endpoint
+        console.log('Attempting to fetch menu data from venue-specific endpoint');
+        const response = await fetch('/api/venues/farewell/menu');
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Venue-specific API response:', data);
+            if (data.success && data.data && data.data.length > 0) {
+                console.log('Using venue-specific menu API data');
+                updateMenuContent(data.data);
+                return;
+            } else {
+                console.warn('Venue API returned success=false or empty data array');
+            }
+        } else {
+            console.warn('Venue API response not OK:', response.status);
         }
         
         // If both API calls fail or return empty data, use existing static content
-        console.log('Using existing static menu content');
+        console.log('Using existing static menu content (fallback)');
         useStaticMenuData();
     } catch (error) {
         console.error('Error loading menu data:', error);
@@ -49,11 +60,16 @@ function updateMenuContent(menuItems) {
     // Group menu items by category
     const categorizedItems = {};
     menuItems.forEach(item => {
-        if (!categorizedItems[item.category]) {
-            categorizedItems[item.category] = [];
+        // Ensure category is properly formatted for consistency
+        const category = item.category || 'Uncategorized';
+        
+        if (!categorizedItems[category]) {
+            categorizedItems[category] = [];
         }
-        categorizedItems[item.category].push(item);
+        categorizedItems[category].push(item);
     });
+    
+    console.log('Categorized items:', Object.keys(categorizedItems));
     
     // Update cocktails section
     if (categorizedItems['Cocktails']) {
@@ -129,9 +145,17 @@ function updateCocktailsSection(cocktails) {
 
 // Function to update beer sections
 function updateBeerSection(category, items) {
-    const containerId = category.toLowerCase().replace('/', '-') + '-container';
+    // Convert category to match the HTML container ID format
+    let containerId = category.toLowerCase().replace('/', '-') + '-container';
+    
+    // Debug info
+    console.log(`Updating beer section '${category}' with ${items.length} items, targeting container ID: ${containerId}`);
+    
     const container = document.getElementById(containerId);
-    if (!container) return;
+    if (!container) {
+        console.warn(`Container not found for category "${category}" with ID "${containerId}"`);
+        return;
+    }
     
     // Clear the container
     container.innerHTML = '';
@@ -152,6 +176,8 @@ function updateBeerSection(category, items) {
         `;
         container.appendChild(itemEl);
     });
+    
+    console.log(`Finished updating beer section '${category}' with ${items.length} items`);
 }
 
 // Function to apply animations
