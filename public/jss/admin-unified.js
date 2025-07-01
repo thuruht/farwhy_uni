@@ -2318,8 +2318,8 @@ function loadVenueHours(venue) {
 function createDefaultHours() {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     return days.map((day, index) => {
-        // Default Farewell hours matching what's shown on the public page
-        let defaultOpenTime = '16:00';  // 4pm
+        // Default values
+        let defaultOpenTime = '18:00';  // 6pm
         let defaultCloseTime = '00:00'; // 12am
         let isClosed = false;
         let defaultNotes = '';
@@ -2327,22 +2327,16 @@ function createDefaultHours() {
         // Adjust based on day of week
         switch(index) {
             case 0: // Sunday
-                defaultOpenTime = '12:00'; // 12pm
-                defaultCloseTime = '20:00'; // 8pm
+                isClosed = true;
+                defaultNotes = 'shows only';
                 break;
             case 1: // Monday
                 isClosed = true;
-                defaultNotes = 'Open for shows only';
+                defaultNotes = 'shows only';
                 break;
-            case 4: // Thursday
-            case 5: // Friday
-            case 6: // Saturday
-                if (index >= 4) { // Friday and Saturday
-                    defaultCloseTime = '01:00'; // 1am
-                }
-                if (index === 5 || index === 6) { // Saturday and Sunday
-                    defaultOpenTime = '12:00'; // 12pm
-                }
+            case 4: // Friday
+            case 5: // Saturday
+                defaultOpenTime = '12:00'; // 12pm
                 break;
         }
         

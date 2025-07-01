@@ -80,10 +80,7 @@
             </section>
         </div>
         
-        <div class="card" id="tew" style="padding:0; background:#000;">
-            <img src="./img/fp3.png" class="insect" alt="rock on">
-        </div>
-        
+
         <div class="card" id="tri">
             <section>
                 <h2 style="color:var(--blew); text-align:left; margin-left:var(--padding-large);">FAREWELL MENU</h2>
@@ -106,6 +103,10 @@
             <section><img src="./img/fm.png" style="width:256px; height:auto;" class="drop-crawl conic" alt="logo"></section>
             <hr style="color: transparent; padding:24px; border: 0 transparent;">
         </div>
+                <div class="card" id="tew" style="padding:0; background:#000;">
+            <img src="./img/fp3.png" class="insect" alt="rock on">
+        </div>
+        
     </main>
 
     <footer>
@@ -123,7 +124,6 @@
             }
         }
 
-        // Let's debug the menu popup functionality
         function openBloop() {
             const currentDomain = window.location.origin;
             console.log('Opening menu with domain:', currentDomain);
@@ -211,13 +211,13 @@
         function displayFarewellHoursDefault() {
             const hoursList = document.getElementById('farewell-hours-list');
             hoursList.innerHTML = `
-                <li><strong>Monday---</strong>: Closed (Open for shows only)</li>
-                <li><strong>Tuesday---</strong>: 4pm - 12am</li>
-                <li><strong>Wednesday-</strong>: 4pm - 12am</li>
-                <li><strong>Thursday--</strong>: 4pm - 12am</li>
-                <li><strong>Friday----</strong>: 4pm - 1am</li>
-                <li><strong>Saturday--</strong>: 12pm - 1am</li>
-                <li><strong>Sunday----</strong>: 12pm - 8pm</li>
+                <li><strong>Monday---</strong>: shows only</li>
+                <li><strong>Tuesday---</strong>: 06pm - 12am</li>
+                <li><strong>Wednesday-</strong>: 06pm - 12am</li>
+                <li><strong>Thursday--</strong>: 06pm - 12am</li>
+                <li><strong>Friday----</strong>: 12pm - 12am</li>
+                <li><strong>Saturday--</strong>: 12pm - 12am</li>
+                <li><strong>Sunday----</strong>: shows only</li>
             `;
         }
         
