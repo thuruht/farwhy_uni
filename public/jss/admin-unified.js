@@ -2233,6 +2233,12 @@ function loadVenueSettings() {
         <div class="venue-tab-content" id="howdy-settings">
             <h3>Howdy Hours Management</h3>
             <div class="hours-form" id="howdy-hours-form">
+                <div class="howdy-hours-info alert alert-info">
+                    <p><strong>Note:</strong> Howdy is primarily open for shows and special events only. 
+                    These hours will only be shown on the public site as "Open for shows and events".</p>
+                    <p>You can still set specific hours below which will be stored in the database, 
+                    but please note that the public site will only display the simplified message.</p>
+                </div>
                 <div class="status-message status-loading">Loading hours...</div>
             </div>
         </div>
@@ -2311,14 +2317,44 @@ function loadVenueHours(venue) {
 // Create default hours structure
 function createDefaultHours() {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    return days.map((day, index) => ({
-        day_of_week: index,
-        day_name: day,
-        open_time: '17:00',
-        close_time: '23:00',
-        is_closed: index === 0, // Default: Closed on Sundays
-        notes: ''
-    }));
+    return days.map((day, index) => {
+        // Default Farewell hours matching what's shown on the public page
+        let defaultOpenTime = '16:00';  // 4pm
+        let defaultCloseTime = '00:00'; // 12am
+        let isClosed = false;
+        let defaultNotes = '';
+        
+        // Adjust based on day of week
+        switch(index) {
+            case 0: // Sunday
+                defaultOpenTime = '12:00'; // 12pm
+                defaultCloseTime = '20:00'; // 8pm
+                break;
+            case 1: // Monday
+                isClosed = true;
+                defaultNotes = 'Open for shows only';
+                break;
+            case 4: // Thursday
+            case 5: // Friday
+            case 6: // Saturday
+                if (index >= 4) { // Friday and Saturday
+                    defaultCloseTime = '01:00'; // 1am
+                }
+                if (index === 5 || index === 6) { // Saturday and Sunday
+                    defaultOpenTime = '12:00'; // 12pm
+                }
+                break;
+        }
+        
+        return {
+            day_of_week: index,
+            day_name: day,
+            open_time: defaultOpenTime,
+            close_time: defaultCloseTime,
+            is_closed: isClosed,
+            notes: defaultNotes
+        };
+    });
 }
 
 // Render hours form
@@ -2968,5 +3004,3 @@ async function syncExternalCalendar() {
         syncBtn.disabled = false;
     }
 }
-
-// End of file
