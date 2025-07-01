@@ -236,7 +236,6 @@ async function loadPublicPosts() {
         publicPostsListEl.innerHTML = `
             <div class="error-fallback">
                 <p>Unable to load posts at this time.</p>
-                <p><small>This page will work correctly after deployment to Cloudflare.</small></p>
             </div>
         `;
     }
@@ -335,7 +334,6 @@ async function loadPublicFeatured() {
         publicFeaturedContentEl.innerHTML = `
             <div class="error-fallback">
                 <p>Unable to load featured content at this time.</p>
-                <p><small>This page will work correctly after deployment to Cloudflare.</small></p>
             </div>
         `;
     }
