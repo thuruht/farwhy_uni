@@ -1227,11 +1227,54 @@ function showEventForm(id = null) {
             const data = Object.fromEntries(formData.entries());
             console.log('Event form data (before processing):', data);
             
-            // Convert full URLs to relative paths for the backend
-            if (data.flyer_image_url && data.flyer_image_url.startsWith(window.location.origin)) {
-                // Remove the origin from the URL, leaving only the path
-                data.flyer_image_url = data.flyer_image_url.replace(window.location.origin, '');
-                console.log('Processed flyer URL for backend:', data.flyer_image_url);
+            // IMPORTANT: Convert full URLs back to relative paths for the backend
+            // The backend expects relative paths like "/images/flyers/filename.jpg"
+            if (data.flyer_image_url && data.flyer_image_url.trim() !== '') {
+                // If it's a full URL (with domain), convert to relative
+                if (data.flyer_image_url.startsWith('http')) {
+                    try {
+                        const url = new URL(data.flyer_image_url);
+                        data.flyer_image_url = url.pathname;
+                        console.log('Converted full URL to relative path:', data.flyer_image_url);
+                    } catch (e) {
+                        console.error('Error parsing URL:', e);
+                        // Keep original if URL parsing fails
+                    }
+                }
+                console.log('Final flyer URL for backend:', data.flyer_image_url);
+            }
+            
+            // Ensure date is properly formatted
+            if (data.date) {
+                // Make sure the date is in ISO format (YYYY-MM-DD or YYYY-MM-DDThh:mm)
+                if (!data.date.match(/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/)) {
+                    try {
+                        // Try to format the date properly
+                        const dateObj = new Date(data.date);
+                        data.date = dateObj.toISOString().split('T')[0];
+                        console.log('Reformatted date to:', data.date);
+                    } catch (e) {
+                        console.error('Error formatting date:', e);
+                    }
+                }
+            }
+            
+            // Ensure all required fields are present with correct types
+            if (data.capacity && isNaN(parseInt(data.capacity))) {
+                data.capacity = null; // Ensure capacity is a number or null
+            }
+            
+            // Ensure status is one of the allowed values
+            if (data.status && !['active', 'cancelled', 'postponed'].includes(data.status)) {
+                data.status = 'active'; // Default to active if invalid
+            }
+            
+            // For new events, ensure we have default values for JSON fields
+            if (!id) {
+                data.performers = data.performers || '[]';
+                data.tags = data.tags || '[]';
+                data.external_links = data.external_links || '{}';
+                data.event_type = data.event_type || 'music';
             }
             
             console.log('Event form data (after processing):', data);
@@ -1249,16 +1292,32 @@ function showEventForm(id = null) {
             const method = id ? 'put' : 'post';
             console.log(`Making ${method.toUpperCase()} request to ${url}`);
             
-            const response = await api[method](url, data);
-            console.log('API response:', response);
-            
-            if (response) {
-                showToast(`Event ${id ? 'updated' : 'created'} successfully!`, 'success');
-                modal.classList.remove('active');
-                loadEvents();
-            } else {
-                console.error('API call returned null response');
-                showToast('Failed to save event. Please try again.', 'error');
+            try {
+                const response = await api[method](url, data);
+                console.log('API response:', response);
+                
+                if (response) {
+                    showToast(`Event ${id ? 'updated' : 'created'} successfully!`, 'success');
+                    modal.classList.remove('active');
+                    loadEvents();
+                } else {
+                    console.error('API call returned null response');
+                    showToast('Failed to save event. Please try again.', 'error');
+                }
+            } catch (apiError) {
+                console.error('API Error:', apiError);
+                
+                // Try to extract more detailed error information
+                let errorMessage = `Error ${id ? 'updating' : 'creating'} event: `;
+                if (apiError.error) {
+                    errorMessage += apiError.error;
+                } else if (apiError.message) {
+                    errorMessage += apiError.message;
+                } else {
+                    errorMessage += 'Unknown error occurred';
+                }
+                
+                showToast(errorMessage, 'error');
             }
             
             // Restore button state
@@ -1726,7 +1785,24 @@ function showBlogForm(id = null) {
             image_url: e.target.image_url.value || null,
             content: dashboardState.quill.root.innerHTML
         };
-        console.log('Blog form data:', data);
+        console.log('Blog form data (before processing):', data);
+        
+        // IMPORTANT: Convert full URLs back to relative paths for the backend
+        // The backend expects relative paths like "/images/blog/filename.jpg"
+        if (data.image_url) {
+            // If it's a full URL (with domain), convert to relative
+            if (data.image_url.startsWith('http')) {
+                try {
+                    const url = new URL(data.image_url);
+                    data.image_url = url.pathname;
+                    console.log('Converted blog image full URL to relative path:', data.image_url);
+                } catch (e) {
+                    console.error('Error parsing blog image URL:', e);
+                    // Keep original if URL parsing fails
+                }
+            }
+            console.log('Final blog image URL for backend:', data.image_url);
+        }
 
         // Determine API endpoint and method
         const url = id ? `/api/admin/blog/posts/${id}` : '/api/admin/blog/posts';

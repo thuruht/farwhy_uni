@@ -165,6 +165,14 @@ publicApi.get('/venues/:venue/events', (c) => handleEvents(c, 'listByVenue'));
 publicApi.get('/blog', (c) => handleBlog(c, 'list'));
 publicApi.get('/blog/:id', (c) => handleBlog(c, 'get'));
 publicApi.get('/venues/:venue/blog', (c) => handleBlog(c, 'listByVenue'));
+publicApi.get('/blog/posts', async (c) => {
+  // Forward to the admin endpoint handler but with public access
+  return await listAllPosts(c);
+});
+publicApi.get('/blog/featured', async (c) => {
+  // Get featured content for public display
+  return await handleFeatured(c, 'get');
+});
 publicApi.get('/featured', (c) => handleFeatured(c, 'list'));
 publicApi.get('/venues/:venue/featured', (c) => handleFeatured(c, 'listByVenue'));
 publicApi.get('/venues/:venue/menu', (c) => handleMenu(c, 'list'));
@@ -244,6 +252,14 @@ adminApi.route('/admin', protectedAdminApi);
 
 // Mount the entire admin API router under /api
 app.route('/api', adminApi);
+
+// --- Public API endpoints ---
+// Add public blog endpoints
+app.get('/api/blog/posts', getPublicPosts);
+app.get('/api/blog/featured', getFeaturedContent);
+
+// --- Event slideshow endpoint ---
+app.get('/api/events/slideshow', (c) => handleEvents(c, 'slideshow'));
 
 
 // ====================================

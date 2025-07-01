@@ -208,36 +208,66 @@ async function createEvent(c: Context<{ Bindings: Env }>) {
     const normalizedData = applyAutoPopulationRules(eventData);
     const newId = `event_${crypto.randomUUID()}`;
 
-    await FWHY_D1.prepare(`
-      INSERT INTO events (
-        id, title, date, venue, ticket_url, flyer_image_url, description,
-        age_restriction, event_time, price, capacity, status, is_featured,
-        event_type, performers, tags, external_links, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-    `).bind(
-      newId,
-      normalizedData.title,
-      normalizedData.date,
-      normalizedData.venue,
-      normalizedData.ticket_url || null,
-      normalizedData.flyer_image_url || null,
-      normalizedData.description || null,
-      normalizedData.age_restriction,
-      normalizedData.event_time,
-      normalizedData.price || null,
-      normalizedData.capacity || null,
-      normalizedData.status || 'active',
-      normalizedData.is_featured || false,
-      normalizedData.event_type || 'music',
-      normalizedData.performers || '[]',
-      normalizedData.tags || '[]',
-      normalizedData.external_links || '{}'
-    ).run();
+    try {
+      await FWHY_D1.prepare(`
+        INSERT INTO events (
+          id, title, date, venue, ticket_url, flyer_image_url, description,
+          age_restriction, event_time, price, capacity, status, is_featured,
+          event_type, performers, tags, external_links, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      `).bind(
+        newId,
+        normalizedData.title,
+        normalizedData.date,
+        normalizedData.venue,
+        normalizedData.ticket_url || null,
+        normalizedData.flyer_image_url || null,
+        normalizedData.description || null,
+        normalizedData.age_restriction,
+        normalizedData.event_time,
+        normalizedData.price || null,
+        normalizedData.capacity || null,
+        normalizedData.status || 'active',
+        normalizedData.is_featured || false,
+        normalizedData.event_type || 'music',
+        normalizedData.performers || '[]',
+        normalizedData.tags || '[]',
+        normalizedData.external_links || '{}'
+      ).run();
+    } catch (dbError) {
+      console.error('Database error creating event:', dbError);
+      console.error('Event data that caused the error:', normalizedData);
+      
+      // More specific error message for database errors
+      let errorMsg = 'Database error';
+      if (dbError instanceof Error) {
+        errorMsg += `: ${dbError.message}`;
+      }
+      
+      return c.json({ 
+        success: false, 
+        error: errorMsg,
+        details: dbError instanceof Error ? dbError.stack : null
+      }, 500);
+    }
 
     return c.json({ success: true, id: newId }, 201);
   } catch (error) {
     console.error('Error creating event:', error);
-    return c.json({ success: false, error: 'Failed to create event' }, 500);
+    
+    // Provide more detailed error information
+    let errorMessage = 'Failed to create event';
+    if (error instanceof Error) {
+      errorMessage += `: ${error.message}`;
+    } else if (typeof error === 'string') {
+      errorMessage += `: ${error}`;
+    }
+    
+    return c.json({ 
+      success: false, 
+      error: errorMessage,
+      details: error instanceof Error ? error.stack : null
+    }, 500);
   }
 }
 

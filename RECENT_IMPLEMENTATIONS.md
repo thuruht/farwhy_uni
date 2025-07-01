@@ -2,6 +2,29 @@
 
 This document outlines the most recent implementations, bug fixes, and enhancements to the Farewell/Howdy Unified Project.
 
+## Public Blog and Featured Content Fix (July 1, 2025)
+
+- **Status**: ✅ Fixed
+- **Description**: Fixed 404 errors on the blog and news page where posts and featured content weren't loading.
+- **Implementation Details**:
+  - Added missing public API endpoints for `/blog/posts` and `/blog/featured`
+  - Fixed font file paths in the public blog CSS to use the correct directory
+  - Ensured proper error handling for API failures
+  - Added cross-compatibility between admin and public endpoints
+  - Improved accessibility for non-loading content
+  - Enhanced console logging for easier debugging
+
+## URL Handling Fix for Event and Blog Images (July 1, 2025)
+
+- **Status**: ✅ Fixed
+- **Description**: Fixed the image upload functionality to properly handle URLs for display and backend storage.
+- **Implementation Details**:
+  - Improved URL processing to show full URLs (with domain) in the UI for better usability
+  - Added proper URL conversion before form submission to maintain backend compatibility
+  - Enhanced error handling for URL parsing and conversion
+  - Added comprehensive logging for debugging URL processing
+  - Fixed backend communication to ensure proper URL formats are used throughout the application
+
 ## Event and Blog Image Upload Fix (July 1, 2025)
 
 - **Status**: ✅ Fixed
@@ -190,6 +213,18 @@ This document outlines the most recent implementations, bug fixes, and enhanceme
   - Enhanced YouTube carousel controls with consistent styling
   - Improved error handling and user feedback
   - Added proper focus management for accessibility
+
+## Event Creation Error Handling Improvement (July 1, 2025)
+
+- **Status**: ✅ Fixed
+- **Description**: Enhanced error handling for event creation failures in both frontend and backend.
+- **Implementation Details**:
+  - Added comprehensive frontend validation for event form data
+  - Improved error handling with detailed error messages
+  - Added more robust URL handling to prevent URL-related issues
+  - Enhanced backend error reporting with stack traces and detailed diagnostics
+  - Added data validation for dates, numeric fields, and JSON strings
+  - Fixed form submission to properly handle full vs. relative URLs
 
 ## Current Status
 
