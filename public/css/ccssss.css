@@ -127,7 +127,7 @@ body {
 
 /* Normal text class for content paragraphs */
 .nrml {
-  font-family: var(--font-db);
+  font-family: var(--font-secondary); /* Using kb font via the secondary font variable */
   color: var(--text-color);
   text-align: left;
   margin-bottom: 1rem;
@@ -145,7 +145,7 @@ p {
 
 /* Add this class for pages that need the header font as body text */
 .header-font-body p {
-  font-family: var(--font-db);
+  font-family: var(--font-secondary);
   font-size: 1.1rem;
   line-height: 1.6;
   letter-spacing: 0.01em;
