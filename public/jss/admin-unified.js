@@ -3002,4 +3002,6 @@ async function syncExternalCalendar() {
 }
 
 // Close the main DOMContentLoaded event handler from line 310
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded');
 });
