@@ -2,6 +2,18 @@
 
 This document outlines the most recent implementations, bug fixes, and enhancements to the Farewell/Howdy Unified Project.
 
+## Event and Blog Image Upload Fix (July 1, 2025)
+
+- **Status**: ✅ Fixed
+- **Description**: Fixed the image upload functionality for events and blog posts to ensure URLs are usable.
+- **Implementation Details**:
+  - Modified the image upload handlers to use full URLs (with domain) instead of relative paths
+  - Fixed the URL input field to display and store complete, usable URLs for uploaded images
+  - Added tooltips for long URLs to improve user experience
+  - Enhanced logging for better debugging
+  - Ensured preview images use the full URL
+  - Standardized the approach across both event flyer and blog image uploads
+
 ## Menu Management UI Fix (July 1, 2025)
 
 - **Status**: ✅ Fixed

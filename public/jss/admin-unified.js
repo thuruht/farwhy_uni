@@ -1143,7 +1143,14 @@ function showEventForm(id = null) {
                     let uploadedUrl = result.imageUrl || result.url || '';
                     console.log('Raw URL from server:', uploadedUrl);
                     
-                    // Clean the URL for backend storage (remove origin)
+                    // Create the full URL for display and usage
+                    let fullUrl = uploadedUrl;
+                    if (!fullUrl.startsWith('http') && !fullUrl.startsWith('//')) {
+                        fullUrl = window.location.origin + uploadedUrl;
+                    }
+                    console.log('Full URL for usage:', fullUrl);
+                    
+                    // Clean the URL for backend storage (still needs to be a relative URL)
                     let backendUrl = uploadedUrl;
                     if (backendUrl.startsWith(window.location.origin)) {
                         backendUrl = backendUrl.replace(window.location.origin, '');
@@ -1153,13 +1160,14 @@ function showEventForm(id = null) {
                     // Update the hidden form field with the clean URL
                     const flyerUrlInput = document.querySelector('input[name="flyer_image_url"]');
                     if (flyerUrlInput) {
-                        flyerUrlInput.value = backendUrl;
+                        flyerUrlInput.value = fullUrl; // Use the FULL URL here for direct usability
                         console.log('Set flyer URL input value to:', flyerUrlInput.value);
                         
                         // Update the display field
                         const flyerUrlDisplay = document.getElementById('flyer-image-url-display');
                         if (flyerUrlDisplay) {
-                            flyerUrlDisplay.textContent = backendUrl;
+                            flyerUrlDisplay.textContent = fullUrl; // Display the FULL URL
+                            flyerUrlDisplay.title = fullUrl; // Add tooltip for long URLs
                             console.log('Updated flyer URL display to:', flyerUrlDisplay.textContent);
                         } else {
                             console.warn('Could not find flyer-image-url-display element');
@@ -1168,7 +1176,7 @@ function showEventForm(id = null) {
                         // Update the preview
                         const flyerPreview = document.getElementById('flyer-preview');
                         if (flyerPreview) {
-                            flyerPreview.innerHTML = `<img src="${uploadedUrl}" alt="Event flyer">`;
+                            flyerPreview.innerHTML = `<img src="${fullUrl}" alt="Event flyer">`;
                             flyerPreview.classList.add('has-image');
                         } else {
                             console.warn('Could not find flyer-preview element');
@@ -1780,21 +1788,29 @@ function patchBlogImageUpload() {
                     if (result.success && result.imageUrl) {
                         console.log('Image uploaded successfully:', result.imageUrl);
                         
+                        // Create the full URL for display and usage
+                        let imageUrl = result.imageUrl;
+                        if (!imageUrl.startsWith('http') && !imageUrl.startsWith('//')) {
+                            imageUrl = window.location.origin + imageUrl;
+                        }
+                        console.log('Full image URL for usage:', imageUrl);
+                        
                         // Update the hidden URL input field
                         if (urlInput) {
-                            urlInput.value = result.imageUrl;
+                            urlInput.value = imageUrl; // Use the FULL URL
                             console.log('Updated urlInput value:', urlInput.value);
                         }
                         
                         // Update the display element
                         if (urlDisplay) {
-                            urlDisplay.textContent = result.imageUrl;
+                            urlDisplay.textContent = imageUrl; // Display the FULL URL
+                            urlDisplay.title = imageUrl; // Add tooltip for long URLs
                             console.log('Updated urlDisplay text:', urlDisplay.textContent);
                         }
                         
                         // Update the preview
                         if (preview) {
-                            preview.innerHTML = `<img src="${result.imageUrl}" alt="Featured image">`;
+                            preview.innerHTML = `<img src="${imageUrl}" alt="Featured image">`;
                             preview.classList.add('has-image');
                         }
                         
