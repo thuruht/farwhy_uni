@@ -93,7 +93,7 @@ async function createMenuItem(c: Context<{ Bindings: Env }>) {
 
 async function updateMenuItem(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
-  const itemId = c.req.param('itemId');
+  const itemId = c.req.param('id');
   const { name, description, price, category, display_order, active } = await c.req.json();
   
   await FWHY_D1.prepare(`
@@ -107,7 +107,7 @@ async function updateMenuItem(c: Context<{ Bindings: Env }>) {
 
 async function deleteMenuItem(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
-  const itemId = c.req.param('itemId');
+  const itemId = c.req.param('id');
   
   // Soft delete by setting active to 0
   await FWHY_D1.prepare("UPDATE menu_items SET active = 0, updated_at = datetime('now') WHERE id = ?")
