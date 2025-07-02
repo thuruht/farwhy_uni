@@ -34,6 +34,12 @@
     gap: 8px;
 }
 
+.menu-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
 .menu-items-container {
     padding: 15px;
     max-height: 300px;
@@ -137,4 +143,63 @@
     .menu-container {
         grid-template-columns: 1fr;
     }
+}
+
+/* Menu reordering styles */
+#menu-list.reordering .menu-item {
+    cursor: grab;
+    transition: background-color 0.2s ease;
+}
+
+#menu-list.reordering .menu-item:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+#menu-list.reordering .menu-item.dragging {
+    opacity: 0.5;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+#menu-list.reordering .menu-item.drag-over {
+    border-top: 2px solid #007bff;
+}
+
+/* Make menu table more responsive */
+.menu-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.menu-list tr.menu-item td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.menu-list tr.menu-item:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.menu-list .admin-table-actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.menu-list .admin-table-actions button {
+    margin: 0 2px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+}
+
+.menu-list .edit-menu-btn {
+    background-color: #4a7aaf;
+    color: white;
+    border: none;
+    border-radius: 3px;
+}
+
+.menu-list .delete-menu-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 3px;
 }

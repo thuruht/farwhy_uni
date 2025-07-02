@@ -1834,473 +1834,94 @@ function showBlogForm(id = null) {
     });
 }
 
-// Patch blog image upload to update input and preview
-function patchBlogImageUpload() {
-    document.body.addEventListener('change', async function(e) {
-        if (e.target && e.target.id === 'blog-image-upload-input') {
-            const file = e.target.files[0];
-            if (!file) return;
-            const btn = document.getElementById('blog-image-upload-btn');
-            const urlInput = document.querySelector('input[name="image_url"]');
-            const urlDisplay = document.getElementById('blog-image-url-display');
-            const preview = document.getElementById('blog-image-preview');
-            const clearBtn = document.getElementById('blog-image-clear-btn');
-            
-            // Show loading state
-            if (btn) { btn.disabled = true; btn.textContent = 'Uploading...'; }
-            showToast('Uploading image...', 'info');
-            
-            try {
-                const formData = new FormData();
-                formData.append('image', file);
-                const res = await fetch('/api/admin/blog/upload-image', { 
-                    method: 'POST', 
-                    body: formData,
-                    credentials: 'include'
-                });
-                
-                if (res.ok) {
-                    const result = await res.json();
-                    if (result.success && result.imageUrl) {
-                        console.log('Image uploaded successfully:', result.imageUrl);
-                        
-                        // Create the full URL for display and usage
-                        let imageUrl = result.imageUrl;
-                        if (!imageUrl.startsWith('http') && !imageUrl.startsWith('//')) {
-                            imageUrl = window.location.origin + imageUrl;
-                        }
-                        console.log('Full image URL for usage:', imageUrl);
-                        
-                        // Update the hidden URL input field
-                        if (urlInput) {
-                            urlInput.value = imageUrl; // Use the FULL URL
-                            console.log('Updated urlInput value:', urlInput.value);
-                        }
-                        
-                        // Update the display element
-                        if (urlDisplay) {
-                            urlDisplay.textContent = imageUrl; // Display the FULL URL
-                            urlDisplay.title = imageUrl; // Add tooltip for long URLs
-                            console.log('Updated urlDisplay text:', urlDisplay.textContent);
-                        }
-                        
-                        // Update the preview
-                        if (preview) {
-                            preview.innerHTML = `<img src="${imageUrl}" alt="Featured image">`;
-                            preview.classList.add('has-image');
-                        }
-                        
-                        // Show the clear button
-                        if (clearBtn) {
-                            clearBtn.style.display = '';
-                        }
-                        
-                        showToast('Image uploaded successfully!', 'success');
-                    } else {
-                        showToast(result.error || 'Image upload failed.', 'error');
-                    }
-                } else {
-                    showToast('Image upload failed with status: ' + res.status, 'error');
-                }
-            } catch (err) {
-                console.error('Error uploading image:', err);
-                showToast('Error uploading image: ' + (err.message || 'Unknown error'), 'error');
-            } finally {
-                if (btn) { btn.disabled = false; btn.textContent = 'Upload Image'; }
-            }
+// Drag and drop handlers for menu reordering
+let dragSrcElement = null;
+
+function handleDragStart(e) {
+    dragSrcElement = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.outerHTML);
+    this.classList.add('dragging');
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+}
+
+function handleDragEnter(e) {
+    this.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+    
+    if (dragSrcElement !== this) {
+        // Get table reference
+        const table = this.closest('tbody');
+        
+        // Get positions
+        const rows = Array.from(table.querySelectorAll('tr.menu-item'));
+        const srcIndex = rows.indexOf(dragSrcElement);
+        const destIndex = rows.indexOf(this);
+        
+        // Insert at new position
+        if (srcIndex < destIndex) {
+            // Insert after
+            this.parentNode.insertBefore(dragSrcElement, this.nextSibling);
+        } else {
+            // Insert before
+            this.parentNode.insertBefore(dragSrcElement, this);
         }
+    }
+    
+    this.classList.remove('drag-over');
+    return false;
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    
+    // Remove drag-over class from all items
+    const menuItems = document.querySelectorAll('tr.menu-item');
+    menuItems.forEach(item => {
+        item.classList.remove('drag-over');
     });
 }
-patchBlogImageUpload();
 
-// Patch blog form input styles for visibility
-const style = document.createElement('style');
-style.textContent = `
-#blog-form input, #blog-form textarea {
-  background: #fff !important;
-  color: #222 !important;
-  border: 1px solid #bbb;
-}
-#blog-form input:focus, #blog-form textarea:focus {
-  border-color: #333;
-}
-`;
-document.head.appendChild(style);
-
-// Only add the styles once when the dashboard is initialized
-function setupDashboardStyles() {
-    console.log('Setting up dashboard styles...');
-    if (!document.getElementById('admin-table-styles')) {
-        const tableStyles = document.createElement('style');
-        tableStyles.id = 'admin-table-styles';
-        tableStyles.textContent = `
-            .admin-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-bottom: 1rem;
-                font-size: 14px;
-            }
-            
-            .admin-table thead th {
-                text-align: left;
-                padding: 12px 8px;
-                background-color: #f5f5f5;
-                border-bottom: 2px solid #ddd;
-                font-weight: bold;
-                color: #333;
-            }
-            
-            .admin-table tbody td {
-                padding: 10px 8px;
-                border-bottom: 1px solid #eee;
-                vertical-align: middle;
-            }
-            
-            .event-list-thumbnail, .thumbnail {
-                display: inline-block;
-                width: 70px;
-                height: 70px;
-                border-radius: 4px;
-                overflow: hidden;
-                background-color: #f0f0f0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 1px solid #ddd;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            }
-            
-            .event-list-thumbnail img, .thumbnail img {
-                max-width: 100%;
-                max-height: 100%;
-                object-fit: cover;
-            }
-            
-            .admin-table-actions {
-                white-space: nowrap;
-            }
-            
-            .admin-table-actions button {
-                margin-right: 5px;
-                padding: 4px 8px;
-                border-radius: 4px;
-                border: 1px solid #ddd;
-                background-color: #f5f5f5;
-                cursor: pointer;
-                transition: all 0.2s ease;
-            }
-            
-            .admin-table-actions button:hover {
-                background-color: #e0e0e0;
-            }
-            
-            .admin-table-actions button.edit-event-btn, 
-            .admin-table-actions button.edit-blog-btn {
-                background-color: #e7f5ff;
-                border-color: #90c8f2;
-                color: #0066cc;
-            }
-            
-            .admin-table-actions button.edit-event-btn:hover, 
-            .admin-table-actions button.edit-blog-btn:hover {
-                background-color: #d0e8ff;
-            }
-            
-            .admin-table-actions button.delete-event-btn, 
-            .admin-table-actions button.delete-blog-btn {
-                background-color: #fff2f2;
-                border-color: #ffb8b8;
-                color: #cc0000;
-            }
-            
-            .admin-table-actions button.delete-event-btn:hover, 
-            .admin-table-actions button.delete-blog-btn:hover {
-                background-color: #ffe0e0;
-            }
-            
-            .event-divider, .blog-divider {
-                display: none;
-            }
-            
-            .empty-thumbnail, .no-image {
-                background-color: #eee;
-                color: #999;
-                font-size: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-                width: 100%;
-                border-radius: 4px;
-            }
-            
-            .venue-tag {
-                display: inline-block;
-                padding: 3px 8px;
-                border-radius: 4px;
-                font-size: 12px;
-                font-weight: bold;
-            }
-            
-            .venue-farewell {
-                background-color: #f8e9b0;
-                color: #8a6d3b;
-            }
-            
-            .venue-howdy {
-                background-color: #d4edda;
-                color: #155724;
-            }
-            
-            .thumbnail-cell {
-                text-align: center;
-            }
-            
-            .status-tag {
-                display: inline-block;
-                padding: 3px 8px;
-                border-radius: 4px;
-                font-size: 12px;
-                font-weight: bold;
-            }
-            
-            .event-past {
-                background-color: #f2f2f2;
-                color: #666;
-            }
-            
-            .event-upcoming {
-                background-color: #e0f7fa;
-                color: #006064;
-            }
-            
-            .post-recent {
-                background-color: #e8f5e9;
-                color: #2e7d32;
-            }
-            
-            .post-older {
-                background-color: #f5f5f5;
-                color: #616161;
-            }
-            
-            .featured-indicator {
-                margin-top: 4px;
-                font-size: 12px;
-                color: #ff6d00;
-            }
-            
-            .ticket-info {
-                margin-top: 4px;
-                font-size: 12px;
-            }
-            
-            .ticket-link {
-                color: #0066cc;
-                text-decoration: none;
-            }
-            
-            .ticket-link:hover {
-                text-decoration: underline;
-            }
-            
-            .event-row:hover, .blog-row:hover, .admin-table tbody tr:hover {
-                background-color: #f9f9f9;
-            }
-        `;
-        document.head.appendChild(tableStyles);
-        console.log('Added table styles to document head');
+async function saveMenuOrder(orderedItems) {
+    console.log('Saving menu order:', orderedItems);
+    
+    try {
+        // Call API to update the order
+        const response = await api.post('/api/menu-items/reorder', {
+            items: orderedItems
+        });
+        
+        if (response && response.success) {
+            showToast('Menu order saved successfully!', 'success');
+        } else {
+            showToast('Error saving menu order. Please try again.', 'error');
+            console.error('Error saving menu order:', response);
+        }
+    } catch (error) {
+        console.error('Error saving menu order:', error);
+        showToast('Error saving menu order. Please try again.', 'error');
     }
 }
 
-// Setup smooth scrolling for help section links
-function setupHelpSectionLinks() {
-    const helpLinks = document.querySelectorAll('.help-toc a');
-    
-    helpLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            
-            if (targetElement) {
-                // Smooth scroll to the section
-                targetElement.scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-                
-                // Add a temporary highlight
-                targetElement.classList.add('help-section-highlight');
-                setTimeout(() => {
-                    targetElement.classList.remove('help-section-highlight');
-                }, 2000);
-            }
-        });
-    });
-    
-    console.log('Help section links initialized');
-}
-
-// Event Filters Implementation
-function setupEventFilters() {
-    console.log('Setting up event filters');
-    const eventList = document.getElementById('event-list');
-    if (!eventList) return;
-    
-    // Add filter controls if they don't exist yet
-    if (!document.getElementById('event-filters')) {
-        const filtersContainer = document.createElement('div');
-        filtersContainer.id = 'event-filters';
-        filtersContainer.className = 'filters-container';
-        filtersContainer.innerHTML = `
-            <div class="filter-group">
-                <button class="filter-btn active" data-filter="all">All Events</button>
-                <button class="filter-btn" data-filter="upcoming">Upcoming</button>
-                <button class="filter-btn" data-filter="past">Past</button>
-            </div>
-            <div class="filter-group">
-                <button class="filter-btn" data-filter="farewell">Farewell Only</button>
-                <button class="filter-btn" data-filter="howdy">Howdy Only</button>
-            </div>
-        `;
-        
-        eventList.parentNode.insertBefore(filtersContainer, eventList);
-        
-        // Add event listeners to filter buttons
-        filtersContainer.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Toggle active state on buttons in the same group
-                const group = btn.closest('.filter-group');
-                group.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                // Apply filters
-                applyEventFilters();
-            });
-        });
-    }
-    
-    // Initial filter application
-    applyEventFilters();
-}
-
-function applyEventFilters() {
-    // Get active filters
-    const venueFilterBtn = document.querySelector('.filter-group:nth-child(2) .filter-btn.active');
-    const statusFilterBtn = document.querySelector('.filter-group:nth-child(1) .filter-btn.active');
-    
-    const venueFilter = venueFilterBtn ? venueFilterBtn.getAttribute('data-filter') : 'all';
-    const statusFilter = statusFilterBtn ? statusFilterBtn.getAttribute('data-filter') : 'all';
-    
-    console.log(`Applying filters: venue=${venueFilter}, status=${statusFilter}`);
-    
-    // Apply filters to rows
-    const rows = document.querySelectorAll('.event-row');
-    rows.forEach(row => {
-        let showRow = true;
-        
-        // Apply venue filter
-        if (venueFilter !== 'all') {
-            if (!row.classList.contains(`venue-${venueFilter}`)) {
-                showRow = false;
-            }
-        }
-        
-        // Apply status filter
-        if (statusFilter !== 'all') {
-            const statusTag = row.querySelector('.status-tag');
-            if (statusTag) {
-                if (statusFilter === 'upcoming' && !statusTag.classList.contains('event-upcoming')) {
-                    showRow = false;
-                } else if (statusFilter === 'past' && !statusTag.classList.contains('event-past')) {
-                    showRow = false;
-                }
-            }
-        }
-        
-        // Show or hide the row
-        row.style.display = showRow ? '' : 'none';
-    });
-    
-    // Update counter
-    const visibleRows = document.querySelectorAll('.event-row[style=""]').length;
-    console.log(`${visibleRows} events visible after filtering`);
-}
-
-// Blog Filters Implementation
-function setupBlogFilters() {
-    console.log('Setting up blog filters');
-    const blogList = document.getElementById('blog-list');
-    if (!blogList) return;
-    
-    // Add filter controls if they don't exist yet
-    if (!document.getElementById('blog-filters')) {
-        const filtersContainer = document.createElement('div');
-        filtersContainer.id = 'blog-filters';
-        filtersContainer.className = 'filters-container';
-        filtersContainer.innerHTML = `
-            <div class="filter-group">
-                <button class="filter-btn active" data-filter="all">All Posts</button>
-                <button class="filter-btn" data-filter="recent">Recent</button>
-                <button class="filter-btn" data-filter="featured">Featured</button>
-            </div>
-        `;
-        
-        blogList.parentNode.insertBefore(filtersContainer, blogList);
-        
-        // Add event listeners to filter buttons
-        filtersContainer.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Toggle active state on buttons
-                filtersContainer.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                // Apply filters
-                applyBlogFilters();
-            });
-        });
-    }
-    
-    // Initial filter application
-    applyBlogFilters();
-}
-
-function applyBlogFilters() {
-    // Get active filter
-    const filterBtn = document.querySelector('#blog-filters .filter-btn.active');
-    const filter = filterBtn ? filterBtn.getAttribute('data-filter') : 'all';
-    
-    console.log(`Applying blog filter: ${filter}`);
-    
-    // Apply filter to rows
-    const rows = document.querySelectorAll('.blog-row');
-    rows.forEach(row => {
-        let showRow = true;
-        
-        if (filter === 'recent') {
-            const statusTag = row.querySelector('.status-tag');
-            if (statusTag && !statusTag.classList.contains('post-recent')) {
-                showRow = false;
-            }
-        } else if (filter === 'featured') {
-            const featuredIndicator = row.querySelector('.featured-indicator');
-            if (!featuredIndicator) {
-                showRow = false;
-            }
-        }
-        
-        // Show or hide the row
-        row.style.display = showRow ? '' : 'none';
-    });
-    
-    // Update counter
-    const visibleRows = document.querySelectorAll('.blog-row[style=""]').length;
-    console.log(`${visibleRows} blog posts visible after filtering`);
-}
-
-// Venue Settings Implementation
+// ====================================
+// VENUE SETTINGS IMPLEMENTATION
+// ====================================
 function loadVenueSettings() {
     console.log('Loading venue settings');
     
@@ -2332,13 +1953,13 @@ function loadVenueSettings() {
         </div>
         
         <div class="venue-food-menu-section">
-            <h3>Menu Management</h3>
+            <h3>Farewell Drink Menu</h3>
             <div class="menu-controls">
                 <button id="add-menu-btn" class="btn btn-secondary">Add Menu Item</button>
                 <button id="reorder-menu-btn" class="btn btn-secondary">Reorder Menu</button>
             </div>
             <div id="menu-list" class="menu-list">
-                <div class="status-message status-info">Select a venue tab to view menu items.</div>
+                <div class="status-message status-loading">Loading menu items...</div>
             </div>
         </div>
     `;
@@ -2598,9 +2219,19 @@ function loadVenueMenu(venue) {
 // Function to fetch menu data from API or fallback to static data
 async function fetchVenueMenu(venue) {
     try {
+        console.log(`Fetching menu items for ${venue} from API...`);
+        
+        // Try venue-specific menu items endpoint first
+        const menuItemsResponse = await api.get(`/api/admin/venues/${venue}/menu-items`);
+        if (menuItemsResponse && menuItemsResponse.success && menuItemsResponse.data && menuItemsResponse.data.length > 0) {
+            console.log(`Successfully fetched ${menuItemsResponse.data.length} menu items from venue-specific endpoint`);
+            return menuItemsResponse.data;
+        }
+        
         // Try to get menu from API
         const response = await api.get(`/api/admin/venues/${venue}/menu`);
         if (response && response.success && response.data && response.data.length > 0) {
+            console.log(`Successfully fetched menu data from venues endpoint`);
             return response.data;
         }
         
@@ -2610,10 +2241,12 @@ async function fetchVenueMenu(venue) {
             // Filter by venue if needed
             const filteredItems = altResponse.data.filter(item => !item.venue || item.venue === venue);
             if (filteredItems.length > 0) {
+                console.log(`Successfully fetched ${filteredItems.length} menu items from unified endpoint`);
                 return filteredItems;
             }
         }
         
+        console.log('All API attempts failed, using static menu data fallback');
         // Fallback to static menu data if API fails or returns empty
         return getStaticMenuData(venue);
     } catch (error) {
@@ -2776,28 +2409,40 @@ function showMenuItemForm(id = null) {
     if (!modal || !modalBody) return;
     
     // Get item data if editing
-    let item = null;
     if (id) {
-        // Try to find the item from the current menu items via API
+        console.log(`Fetching menu item data for id: ${id}`);
+        // Try to find the item from the API
         api.get(`/api/admin/menu-items/${id}`)
             .then(response => {
                 if (response && response.success && response.data) {
+                    console.log(`Successfully fetched menu item: ${id}`);
                     populateMenuItemForm(response.data, modal, modalBody);
                 } else {
+                    console.warn(`API fetch failed for menu item: ${id}, using static data`);
                     // Fallback to static data
                     const venue = dashboardState.currentVenue;
                     const menuItems = getStaticMenuData(venue);
-                    item = menuItems.find(item => item.id === id);
-                    populateMenuItemForm(item, modal, modalBody);
+                    const item = menuItems.find(item => item.id === id);
+                    if (item) {
+                        populateMenuItemForm(item, modal, modalBody);
+                    } else {
+                        showToast('Error: Menu item not found', 'error');
+                        modal.classList.remove('active');
+                    }
                 }
             })
             .catch(error => {
-                console.error('Error fetching menu item:', error);
+                console.error(`Error fetching menu item: ${id}`, error);
                 // Fallback to static data
                 const venue = dashboardState.currentVenue;
                 const menuItems = getStaticMenuData(venue);
-                item = menuItems.find(item => item.id === id);
-                populateMenuItemForm(item, modal, modalBody);
+                const item = menuItems.find(item => item.id === id);
+                if (item) {
+                    populateMenuItemForm(item, modal, modalBody);
+                } else {
+                    showToast('Error: Menu item not found', 'error');
+                    modal.classList.remove('active');
+                }
             });
     } else {
         // New item
@@ -2945,15 +2590,140 @@ function toggleMenuReordering() {
         console.log('Enabling menu reordering');
         document.getElementById('reorder-menu-btn').textContent = 'Save Order';
         showToast('Drag items to reorder, then click Save Order', 'info');
+        
+        // Enable drag and drop for menu items
+        const menuItems = menuList.querySelectorAll('tr.menu-item');
+        menuItems.forEach(item => {
+            item.setAttribute('draggable', 'true');
+            
+            // Add drag event listeners
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragover', handleDragOver);
+            item.addEventListener('dragenter', handleDragEnter);
+            item.addEventListener('dragleave', handleDragLeave);
+            item.addEventListener('drop', handleDrop);
+            item.addEventListener('dragend', handleDragEnd);
+        });
     } else {
         // Save the new order
         console.log('Saving menu order');
         document.getElementById('reorder-menu-btn').textContent = 'Reorder Menu';
-        showToast('Menu order saved!', 'success');
+        
+        // Get the new order of menu items
+        const menuItems = menuList.querySelectorAll('tr.menu-item');
+        const orderedIds = Array.from(menuItems).map((item, index) => {
+            return {
+                id: item.getAttribute('data-id'),
+                display_order: index + 1
+            };
+        });
+        
+        // Save the new order via API
+        saveMenuOrder(orderedIds);
+        
+        // Disable drag and drop
+        menuItems.forEach(item => {
+            item.removeAttribute('draggable');
+            
+            // Remove drag event listeners
+            item.removeEventListener('dragstart', handleDragStart);
+            item.removeEventListener('dragover', handleDragOver);
+            item.removeEventListener('dragenter', handleDragEnter);
+            item.removeEventListener('dragleave', handleDragLeave);
+            item.removeEventListener('drop', handleDrop);
+            item.removeEventListener('dragend', handleDragEnd);
+        });
     }
 }
 
-// Import Handlers Implementation
+// Drag and drop handlers for menu reordering
+let dragSrcElement = null;
+
+function handleDragStart(e) {
+    dragSrcElement = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.outerHTML);
+    this.classList.add('dragging');
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+}
+
+function handleDragEnter(e) {
+    this.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+    
+    if (dragSrcElement !== this) {
+        // Get table reference
+        const table = this.closest('tbody');
+        
+        // Get positions
+        const rows = Array.from(table.querySelectorAll('tr.menu-item'));
+        const srcIndex = rows.indexOf(dragSrcElement);
+        const destIndex = rows.indexOf(this);
+        
+        // Insert at new position
+        if (srcIndex < destIndex) {
+            // Insert after
+            this.parentNode.insertBefore(dragSrcElement, this.nextSibling);
+        } else {
+            // Insert before
+            this.parentNode.insertBefore(dragSrcElement, this);
+        }
+    }
+    
+    this.classList.remove('drag-over');
+    return false;
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    
+    // Remove drag-over class from all items
+    const menuItems = document.querySelectorAll('tr.menu-item');
+    menuItems.forEach(item => {
+        item.classList.remove('drag-over');
+    });
+}
+
+async function saveMenuOrder(orderedItems) {
+    console.log('Saving menu order:', orderedItems);
+    
+    try {
+        // Call API to update the order
+        const response = await api.post('/api/menu-items/reorder', {
+            items: orderedItems
+        });
+        
+        if (response && response.success) {
+            showToast('Menu order saved successfully!', 'success');
+        } else {
+            showToast('Error saving menu order. Please try again.', 'error');
+            console.error('Error saving menu order:', response);
+        }
+    } catch (error) {
+        console.error('Error saving menu order:', error);
+        showToast('Error saving menu order. Please try again.', 'error');
+    }
+}
+
+// ====================================
+// IMPORT HANDLERS IMPLEMENTATION
+// ====================================
 function setupImportHandlers() {
     console.log('Setting up import handlers');
     
@@ -3091,4 +2861,18 @@ async function syncExternalCalendar() {
 // Close the main DOMContentLoaded event handler from line 310
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded');
+    
+    // Set up event handlers for menu management
+    const addMenuBtn = document.getElementById('add-menu-btn');
+    const reorderMenuBtn = document.getElementById('reorder-menu-btn');
+    
+    if (addMenuBtn) {
+        addMenuBtn.addEventListener('click', () => showMenuItemForm());
+        console.log('Added click handler to add menu button');
+    }
+    
+    if (reorderMenuBtn) {
+        reorderMenuBtn.addEventListener('click', toggleMenuReordering);
+        console.log('Added click handler to reorder menu button');
+    }
 });

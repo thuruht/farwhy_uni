@@ -176,20 +176,48 @@ publicApi.get('/blog/featured', async (c) => {
 publicApi.get('/featured', (c) => handleFeatured(c, 'list'));
 publicApi.get('/venues/:venue/featured', (c) => handleFeatured(c, 'listByVenue'));
 publicApi.get('/venues/:venue/menu', (c) => handleMenu(c, 'list'));
+publicApi.get('/venues/:venue/menu-items', async (c) => {
+  const { FWHY_D1 } = c.env;
+  const venue = c.req.param('venue');
+  
+  try {
+    // Get all menu items for the specified venue
+    const { results } = await FWHY_D1.prepare(`
+      SELECT mi.* 
+      FROM menu_items mi
+      JOIN menus m ON mi.menu_id = m.id
+      WHERE m.venue = ? AND mi.active = 1
+      ORDER BY mi.category, mi.display_order ASC, mi.name ASC
+    `).bind(venue).all();
+    
+    if (!results || results.length === 0) {
+      console.log(`No menu items found for venue ${venue}`);
+      return c.json({ success: false, error: `No menu items found for ${venue}` }, 404);
+    }
+    
+    console.log(`Found ${results.length} menu items for venue ${venue}`);
+    return c.json({ success: true, data: results });
+  } catch (error) {
+    console.error(`Error fetching menu items for ${venue}:`, error);
+    return c.json({ success: false, error: `Failed to fetch menu items for ${venue}` }, 500);
+  }
+});
 publicApi.get('/menu', async (c) => {
   const { FWHY_D1 } = c.env;
   try {
     // Get all menu items for Farewell (venue specific)
     const { results } = await FWHY_D1.prepare(`
       SELECT * FROM menu_items 
-      WHERE menu_id = 1 AND active = 1
+      WHERE active = 1
       ORDER BY category, display_order ASC, name ASC
     `).all();
     
     if (!results || results.length === 0) {
+      console.log('No menu items found in database');
       return c.json({ success: false, error: "No menu items found" }, 404);
     }
     
+    console.log(`Found ${results.length} menu items to return`);
     return c.json({ success: true, data: results });
   } catch (error) {
     console.error('Error fetching unified menu:', error);
@@ -234,9 +262,57 @@ protectedAdminApi.post('/venues/:venue/menu', (c) => handleMenu(c, 'create'));
 protectedAdminApi.put('/venues/:venue/menu/:id', (c) => handleMenu(c, 'update'));
 protectedAdminApi.delete('/venues/:venue/menu/:id', (c) => handleMenu(c, 'delete'));
 protectedAdminApi.get('/menu/:id', (c) => handleMenu(c, 'items'));
-protectedAdminApi.post('/venues/:venue/menu-items', (c) => handleMenu(c, 'create-item'));
+protectedAdminApi.post('/venues/:venue/menu-items', async (c) => {
+    const { menu_id, name, description, price, category, display_order = 0 } = await c.req.json();
+    
+    if (!menu_id || !name) {
+        return c.json({ success: false, error: "Menu ID and name are required" }, 400);
+    }
+    
+    try {
+        const { FWHY_D1 } = c.env;
+        const result = await FWHY_D1.prepare(`
+            INSERT INTO menu_items (menu_id, name, description, price, category, display_order, active, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, 1, datetime('now'), datetime('now'))
+        `).bind(menu_id, name, description, price, category, display_order).run();
+        
+        return c.json({ success: true, id: result.meta.last_row_id }, 201);
+    } catch (error) {
+        console.error('Error creating menu item:', error);
+        return c.json({ success: false, error: "Failed to create menu item" }, 500);
+    }
+});
 protectedAdminApi.put('/menu-items/:id', (c) => handleMenu(c, 'update-item'));
 protectedAdminApi.delete('/menu-items/:id', (c) => handleMenu(c, 'delete-item'));
+
+// New endpoint for menu item reordering
+protectedAdminApi.post('/menu-items/reorder', async (c) => {
+    try {
+        const { items } = await c.req.json();
+        
+        if (!items || !Array.isArray(items)) {
+            return c.json({ success: false, error: "Invalid items array" }, 400);
+        }
+        
+        const { FWHY_D1 } = c.env;
+        
+        // Update each item's display_order
+        for (const item of items) {
+            if (!item.id || !item.display_order) continue;
+            
+            await FWHY_D1.prepare(`
+                UPDATE menu_items 
+                SET display_order = ?, updated_at = datetime('now')
+                WHERE id = ?
+            `).bind(item.display_order, item.id).run();
+        }
+        
+        return c.json({ success: true });
+    } catch (error) {
+        console.error('Error updating menu order:', error);
+        return c.json({ success: false, error: "Failed to update menu order" }, 500);
+    }
+});
 
 // Hours management endpoints
 protectedAdminApi.get('/hours', (c) => handleHours(c, 'list'));
@@ -246,6 +322,47 @@ protectedAdminApi.put('/venues/:venue/hours', (c) => handleHours(c, 'update'));
 // Featured content management endpoints
 protectedAdminApi.get('/featured', (c) => handleFeatured(c, 'get'));
 protectedAdminApi.post('/featured', (c) => handleFeatured(c, 'update'));
+
+// New endpoint for getting menu items for a specific venue
+protectedAdminApi.get('/venues/:venue/menu-items', async (c) => {
+    try {
+        const venue = c.req.param('venue');
+        const { FWHY_D1 } = c.env;
+        
+        // Attempt to fetch menu items directly (without menu_id join)
+        const { results } = await FWHY_D1.prepare(`
+            SELECT * FROM menu_items 
+            WHERE active = 1
+            ORDER BY category, display_order, name
+        `).all();
+        
+        return c.json({ success: true, data: results || [] });
+    } catch (error) {
+        console.error('Error getting venue menu items:', error);
+        return c.json({ success: false, error: "Failed to get venue menu items" }, 500);
+    }
+});
+
+// New endpoint for getting a single menu item by ID
+protectedAdminApi.get('/menu-items/:id', async (c) => {
+    try {
+        const itemId = c.req.param('id');
+        const { FWHY_D1 } = c.env;
+        
+        const { results } = await FWHY_D1.prepare(`
+            SELECT * FROM menu_items WHERE id = ? AND active = 1
+        `).bind(itemId).all();
+        
+        if (!results || results.length === 0) {
+            return c.json({ success: false, error: "Menu item not found" }, 404);
+        }
+        
+        return c.json({ success: true, data: results[0] });
+    } catch (error) {
+        console.error('Error getting menu item:', error);
+        return c.json({ success: false, error: "Failed to get menu item" }, 500);
+    }
+});
 
 // Mount the protected routes under the /admin path
 adminApi.route('/admin', protectedAdminApi);

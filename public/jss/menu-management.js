@@ -120,7 +120,8 @@ async function loadMenus(venue) {
     menuList.innerHTML = '<div class="loading-spinner"></div>';
     
     try {
-        const response = await fetch(`/api/venues/${venue}/menu`);
+        // Call the admin API endpoint
+        const response = await fetch(`/admin/api/venues/${venue}/menu`);
         if (!response.ok) {
             throw new Error(`Failed to load menus: ${response.status} ${response.statusText}`);
         }
@@ -136,16 +137,55 @@ async function loadMenus(venue) {
                 menuList.appendChild(menuCard);
             });
         } else {
+            // Handle case with no menu data
             menuList.innerHTML = `<div class="empty-state">
                 <p>No menu sections found for ${venue}. Click "Add Menu Section" to create one.</p>
             </div>`;
+            
+            // For debugging, create a default menu if none exists
+            if (venue === 'farewell') {
+                console.log('Creating default Farewell menu');
+                try {
+                    await createDefaultMenu(venue);
+                    // Try loading again after creating default
+                    loadMenus(venue);
+                } catch (defaultError) {
+                    console.error('Error creating default menu:', defaultError);
+                }
+            }
         }
     } catch (error) {
         console.error('Error loading menus:', error);
         menuList.innerHTML = `<div class="error-message">
             <p>Failed to load menus: ${error.message}</p>
+            <button class="btn btn-secondary retry-load-btn">Retry</button>
         </div>`;
+        
+        // Add retry button functionality
+        const retryBtn = menuList.querySelector('.retry-load-btn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => loadMenus(venue));
+        }
     }
+}
+
+// Helper function to create a default menu if none exists
+async function createDefaultMenu(venue) {
+    const response = await fetch(`/admin/api/venues/${venue}/menu`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            venue,
+            name: 'Drinks Menu',
+            display_order: 0
+        })
+    });
+    
+    if (!response.ok) throw new Error('Failed to create default menu');
+    
+    return await response.json();
 }
 
 // Create a menu card
@@ -203,12 +243,14 @@ function createMenuCard(menu, venue) {
 // Load menu items for a specific menu
 async function loadMenuItems(menuId, container) {
     try {
-        const response = await fetch(`/api/menu/${menuId}`);
-        if (!response.ok) throw new Error('Failed to load menu items');
+        // Use the admin API endpoint
+        const response = await fetch(`/admin/api/menu/${menuId}`);
+        if (!response.ok) throw new Error(`Failed to load menu items: ${response.status} ${response.statusText}`);
         
         const data = await response.json();
+        console.log('Menu items data:', data);
         
-        if (data.success && data.data.length > 0) {
+        if (data.success && data.data && data.data.length > 0) {
             container.innerHTML = '';
             
             // Create a table for menu items
@@ -220,34 +262,45 @@ async function loadMenuItems(menuId, container) {
                         <th>Name</th>
                         <th>Category</th>
                         <th>Price</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
             `;
             
-            // Add menu items to the table
+// Add menu items to the table
             const tbody = table.querySelector('tbody');
             data.data.forEach(item => {
+                console.log('Processing menu item:', item);
                 const row = document.createElement('tr');
+                row.className = item.active ? 'item-active' : 'item-inactive';
                 
                 row.innerHTML = `
                     <td>${escapeHTML(item.name)}</td>
                     <td>${escapeHTML(item.category || '')}</td>
                     <td>$${parseFloat(item.price).toFixed(2)}</td>
+                    <td>${item.active ? '<span class="status-active">Active</span>' : '<span class="status-inactive">Inactive</span>'}</td>
                     <td>
                         <button class="btn btn-sm btn-primary item-edit-btn" title="Edit Item">
-                            <i class="fas fa-edit"></i>
+                            <i class="fas fa-edit"></i> Edit
                         </button>
                         <button class="btn btn-sm btn-danger item-delete-btn" title="Delete Item">
-                            <i class="fas fa-trash"></i>
+                            <i class="fas fa-trash"></i> Delete
                         </button>
                     </td>
                 `;
                 
                 // Add event listeners
-                row.querySelector('.item-edit-btn').addEventListener('click', () => openMenuItemModal(item, menuId));
-                row.querySelector('.item-delete-btn').addEventListener('click', () => deleteMenuItem(item.id));
+                row.querySelector('.item-edit-btn').addEventListener('click', () => {
+                    console.log('Edit item clicked for:', item);
+                    openMenuItemModal(item, menuId);
+                });
+                
+                row.querySelector('.item-delete-btn').addEventListener('click', () => {
+                    console.log('Delete item clicked for:', item);
+                    deleteMenuItem(item.id, menuId);
+                });
                 
                 tbody.appendChild(row);
             });
@@ -258,7 +311,16 @@ async function loadMenuItems(menuId, container) {
         }
     } catch (error) {
         console.error('Error loading menu items:', error);
-        container.innerHTML = '<p class="error-message">Failed to load menu items. Please try again later.</p>';
+        container.innerHTML = `
+            <p class="error-message">Failed to load menu items: ${error.message}</p>
+            <button class="btn btn-sm btn-secondary retry-load-items-btn">Retry</button>
+        `;
+        
+        // Add retry button functionality
+        const retryBtn = container.querySelector('.retry-load-items-btn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => loadMenuItems(menuId, container));
+        }
     }
 }
 
@@ -327,8 +389,9 @@ function openMenuModal(menu = null) {
             let response;
             
             if (isEdit) {
-                // Update existing menu
-                response = await fetch(`/api/venues/${venue}/menu/${menu.id}`, {
+                // Update existing menu - use admin API
+                console.log(`Updating menu ${menu.id} with:`, { venue, name, display_order, active });
+                response = await fetch(`/admin/api/venues/${venue}/menu/${menu.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -341,8 +404,9 @@ function openMenuModal(menu = null) {
                     })
                 });
             } else {
-                // Create new menu
-                response = await fetch(`/api/venues/${venue}/menu`, {
+                // Create new menu - use admin API
+                console.log(`Creating new menu with:`, { venue, name, display_order });
+                response = await fetch(`/admin/api/venues/${venue}/menu`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -350,12 +414,16 @@ function openMenuModal(menu = null) {
                     body: JSON.stringify({
                         venue,
                         name,
-                        display_order
+                        display_order,
+                        active: true
                     })
                 });
             }
             
-            if (!response.ok) throw new Error('Failed to save menu');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Failed to save menu: ${errorData.error || response.statusText}`);
+            }
             
             // Reload menus and hide modal
             loadMenus(venue);
@@ -363,7 +431,7 @@ function openMenuModal(menu = null) {
             showStatusMessage('success', `Menu ${isEdit ? 'updated' : 'created'} successfully!`);
         } catch (error) {
             console.error('Error saving menu:', error);
-            showStatusMessage('error', 'Failed to save menu. Please try again.');
+            showStatusMessage('error', `Failed to save menu: ${error.message}`);
         }
     });
 }
@@ -473,10 +541,13 @@ function openMenuItemModal(item = null, menuId) {
         
         try {
             let response;
+            console.log(`${isEdit ? 'Updating' : 'Creating'} menu item with:`, {
+                menuId, name, category, price, description, display_order, active
+            });
             
             if (isEdit) {
-                // Update existing menu item
-                response = await fetch(`/api/menu-items/${item.id}`, {
+                // Update existing menu item - use admin API
+                response = await fetch(`/admin/api/menu-items/${item.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -491,8 +562,9 @@ function openMenuItemModal(item = null, menuId) {
                     })
                 });
             } else {
-                // Create new menu item
-                response = await fetch(`/api/venues/farewell/menu-items`, {
+                // Create new menu item - use admin API with correct endpoint
+                const venue = document.querySelector('.venue-tabs .tab-btn.active')?.dataset.venue || 'farewell';
+                response = await fetch(`/admin/api/venues/${venue}/menu-items`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -503,12 +575,16 @@ function openMenuItemModal(item = null, menuId) {
                         description,
                         price,
                         category,
-                        display_order
+                        display_order,
+                        active: true
                     })
                 });
             }
             
-            if (!response.ok) throw new Error('Failed to save menu item');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Failed to save menu item: ${errorData.error || response.statusText}`);
+            }
             
             // Reload menu items and hide modal
             const menuCard = document.querySelector(`.menu-card[data-menu-id="${menuId}"]`);
@@ -520,7 +596,7 @@ function openMenuItemModal(item = null, menuId) {
             showStatusMessage('success', `Menu item ${isEdit ? 'updated' : 'created'} successfully!`);
         } catch (error) {
             console.error('Error saving menu item:', error);
-            showStatusMessage('error', 'Failed to save menu item. Please try again.');
+            showStatusMessage('error', `Failed to save menu item: ${error.message}`);
         }
     });
 }
@@ -534,13 +610,17 @@ async function deleteMenu(menuId, venue) {
     }
     
     try {
-        // Try the correct endpoint for the backend
-        const response = await fetch(`/api/venues/${venue}/menu/${menuId}`, {
-            method: 'DELETE'
+        // Use the admin API endpoint
+        const response = await fetch(`/admin/api/venues/${venue}/menu/${menuId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
         
         if (!response.ok) {
-            throw new Error(`Failed to delete menu: ${response.status} ${response.statusText}`);
+            const errorData = await response.json();
+            throw new Error(`Failed to delete menu: ${errorData.error || response.statusText}`);
         }
         
         // Reload menus
@@ -555,29 +635,39 @@ async function deleteMenu(menuId, venue) {
 }
 
 // Delete a menu item
-async function deleteMenuItem(itemId) {
+async function deleteMenuItem(itemId, menuId) {
     if (!confirm('Are you sure you want to delete this menu item?')) {
         return;
     }
     
     try {
-        const response = await fetch(`/api/menu-items/${itemId}`, {
-            method: 'DELETE'
+        // Use the admin API endpoint
+        const response = await fetch(`/admin/api/menu-items/${itemId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
         
-        if (!response.ok) throw new Error('Failed to delete menu item');
-        
-        // Reload the menu items
-        const menuCard = document.querySelector(`.menu-card`);
-        if (menuCard) {
-            const menuId = menuCard.dataset.menuId;
-            loadMenuItems(menuId, menuCard.querySelector('.menu-items-container'));
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Failed to delete menu item: ${errorData.error || response.statusText}`);
         }
         
-        showStatusMessage('success', 'Menu item deleted successfully!');
+        // Reload the menu items
+        const menuCard = document.querySelector(`.menu-card[data-menu-id="${menuId}"]`);
+        if (menuCard) {
+            loadMenuItems(menuId, menuCard.querySelector('.menu-items-container'));
+            showStatusMessage('success', 'Menu item deleted successfully!');
+        } else {
+            // Fallback if menu card is not found - reload all menus
+            const activeVenue = document.querySelector('.venue-tabs .tab-btn.active')?.dataset.venue || 'farewell';
+            loadMenus(activeVenue);
+            showStatusMessage('success', 'Menu item deleted successfully!');
+        }
     } catch (error) {
         console.error('Error deleting menu item:', error);
-        showStatusMessage('error', 'Failed to delete menu item. Please try again.');
+        showStatusMessage('error', `Failed to delete menu item: ${error.message}`);
     }
 }
 

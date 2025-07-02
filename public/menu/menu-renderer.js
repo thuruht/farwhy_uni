@@ -28,7 +28,7 @@ async function loadMenuData() {
         
         // If that fails, try the venue-specific endpoint
         console.log('Attempting to fetch menu data from venue-specific endpoint');
-        const response = await fetch('/api/venues/farewell/menu');
+        const response = await fetch('/api/venues/farewell/menu-items');
         if (response.ok) {
             const data = await response.json();
             console.log('Venue-specific API response:', data);
