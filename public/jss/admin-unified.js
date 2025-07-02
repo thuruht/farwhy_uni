@@ -2637,7 +2637,8 @@ function toggleMenuReordering() {
 }
 
 // Drag and drop handlers for menu reordering
-let dragSrcElement = null;
+// Variable already declared at line 1838
+// let dragSrcElement = null;
 
 function handleDragStart(e) {
     dragSrcElement = this;
@@ -2862,17 +2863,6 @@ async function syncExternalCalendar() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded');
     
-    // Set up event handlers for menu management
-    const addMenuBtn = document.getElementById('add-menu-btn');
-    const reorderMenuBtn = document.getElementById('reorder-menu-btn');
-    
-    if (addMenuBtn) {
-        addMenuBtn.addEventListener('click', () => showMenuItemForm());
-        console.log('Added click handler to add menu button');
-    }
-    
-    if (reorderMenuBtn) {
-        reorderMenuBtn.addEventListener('click', toggleMenuReordering);
-        console.log('Added click handler to reorder menu button');
-    }
+    // Menu button handlers are already set up in the loadVenueSettings function
+    // No need to duplicate them here
 });
