@@ -213,8 +213,8 @@ async function createEvent(c: Context<{ Bindings: Env }>) {
         INSERT INTO events (
           id, title, date, venue, ticket_url, flyer_image_url, description,
           age_restriction, event_time, price, capacity, status, is_featured,
-          event_type, performers, tags, external_links, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+          performers, tags, external_links, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
       `).bind(
         newId,
         normalizedData.title,
@@ -229,7 +229,6 @@ async function createEvent(c: Context<{ Bindings: Env }>) {
         normalizedData.capacity || null,
         normalizedData.status || 'active',
         normalizedData.is_featured || false,
-        normalizedData.event_type || 'music',
         normalizedData.performers || '[]',
         normalizedData.tags || '[]',
         normalizedData.external_links || '{}'
