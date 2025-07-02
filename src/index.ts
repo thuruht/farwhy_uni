@@ -285,7 +285,7 @@ protectedAdminApi.post('/venues/:venue/menu-items', async (c) => {
 protectedAdminApi.put('/menu-items/:id', (c) => handleMenu(c, 'update-item'));
 protectedAdminApi.delete('/menu-items/:id', (c) => handleMenu(c, 'delete-item'));
 
-// New endpoint for menu item reordering
+// Menu item reordering endpoint
 protectedAdminApi.post('/menu-items/reorder', async (c) => {
     try {
         const { items } = await c.req.json();
@@ -298,7 +298,7 @@ protectedAdminApi.post('/menu-items/reorder', async (c) => {
         
         // Update each item's display_order
         for (const item of items) {
-            if (!item.id || !item.display_order) continue;
+            if (!item.id || item.display_order === undefined) continue;
             
             await FWHY_D1.prepare(`
                 UPDATE menu_items 
@@ -319,11 +319,11 @@ protectedAdminApi.get('/venues/:venue/menu-items', async (c) => {
         const venue = c.req.param('venue');
         const { FWHY_D1 } = c.env;
         
-        // Attempt to fetch menu items directly (without menu_id join)
+        // Get all menu items since there's only one menu for Farewell
         const { results } = await FWHY_D1.prepare(`
             SELECT * FROM menu_items 
             WHERE active = 1
-            ORDER BY category, display_order, name
+            ORDER BY category, display_order ASC, name ASC
         `).all();
         
         return c.json({ success: true, data: results || [] });
