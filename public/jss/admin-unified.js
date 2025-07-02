@@ -1313,3 +1313,458 @@ function setupBlogFilters() {
     // Initial filter application
     filterBlogPosts();
 }
+
+
+// ====================================
+// VENUE SETTINGS & MENU MANAGEMENT
+// ====================================
+
+async function loadVenueSettings() {
+    console.log('Loading venue settings...');
+    
+    // Get the venue settings container
+    const venueSection = document.getElementById('section-venue');
+    if (!venueSection) {
+        console.error('Venue section not found');
+        return;
+    }
+    
+    // Initialize menu management elements
+    const addMenuBtn = document.getElementById('add-menu-btn');
+    const reorderMenuBtn = document.getElementById('reorder-menu-btn');
+    const menuList = document.getElementById('menu-list');
+    
+    console.log('Menu management elements:', { addMenuBtn, reorderMenuBtn, menuList });
+    
+    if (!addMenuBtn || !reorderMenuBtn || !menuList) {
+        console.error('Menu management elements not found');
+        return;
+    }
+    
+    // Clear and show loading state
+    menuList.innerHTML = '<div class="loading">Loading menu items...</div>';
+    
+    try {
+        // Load menu items for the current venue (hardcoded to 'farewell' for now)
+        const venue = dashboardState.currentVenue || 'farewell';
+        const response = await api.get(`/api/admin/venues/${venue}/menu-items`);
+        
+        console.log('Menu items response:', response);
+        
+        if (response && response.success && response.data) {
+            // Group menu items by category
+            const menuItemsByCategory = groupMenuItemsByCategory(response.data);
+            
+            // Render the menu items by category
+            renderMenuItems(menuItemsByCategory, menuList);
+        } else {
+            menuList.innerHTML = '<div class="empty-state">No menu items found. Click "Add Menu Item" to create one.</div>';
+        }
+    } catch (error) {
+        console.error('Error loading menu items:', error);
+        menuList.innerHTML = '<div class="error-state">Failed to load menu items. Please try again.</div>';
+    }
+    
+    // Add event listeners to menu management buttons
+    addMenuBtn.addEventListener('click', () => {
+        console.log('Add menu item button clicked');
+        showMenuItemForm();
+    });
+    
+    reorderMenuBtn.addEventListener('click', () => {
+        console.log('Reorder menu button clicked');
+        toggleMenuReorderMode();
+    });
+}
+
+// Helper function to group menu items by category
+function groupMenuItemsByCategory(menuItems) {
+    const grouped = {};
+    
+    menuItems.forEach(item => {
+        const category = item.category || 'Uncategorized';
+        if (!grouped[category]) {
+            grouped[category] = [];
+        }
+        grouped[category].push(item);
+    });
+    
+    return grouped;
+}
+
+// Render menu items grouped by category
+function renderMenuItems(menuItemsByCategory, container) {
+    // Clear the container
+    container.innerHTML = '';
+    
+    // Check if we have any menu items
+    const categories = Object.keys(menuItemsByCategory);
+    if (categories.length === 0) {
+        container.innerHTML = '<div class="empty-state">No menu items found. Click "Add Menu Item" to create one.</div>';
+        return;
+    }
+    
+    // Create a section for each category
+    categories.sort().forEach(category => {
+        const items = menuItemsByCategory[category];
+        
+        const categorySection = document.createElement('div');
+        categorySection.className = 'menu-category';
+        
+        categorySection.innerHTML = `
+            <div class="menu-category-header">
+                <h4>${escapeHTML(category)}</h4>
+                <span class="item-count">${items.length} item${items.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div class="menu-items"></div>
+        `;
+        
+        const menuItemsContainer = categorySection.querySelector('.menu-items');
+        
+        // Add each menu item to the category section
+        items.forEach(item => {
+            const menuItemEl = document.createElement('div');
+            menuItemEl.className = `menu-item ${item.active ? 'active' : 'inactive'}`;
+            menuItemEl.dataset.itemId = item.id;
+            
+            menuItemEl.innerHTML = `
+                <div class="menu-item-details">
+                    <div class="menu-item-name">${escapeHTML(item.name)}</div>
+                    <div class="menu-item-price">$${parseFloat(item.price || 0).toFixed(2)}</div>
+                </div>
+                <div class="menu-item-description">${escapeHTML(item.description || '')}</div>
+                <div class="menu-item-actions">
+                    <button class="btn btn-sm btn-primary edit-menu-item-btn">Edit</button>
+                    <button class="btn btn-sm btn-danger delete-menu-item-btn">Delete</button>
+                </div>
+            `;
+            
+            // Add event listeners
+            menuItemEl.querySelector('.edit-menu-item-btn').addEventListener('click', () => {
+                editMenuItem(item);
+            });
+            
+            menuItemEl.querySelector('.delete-menu-item-btn').addEventListener('click', () => {
+                deleteMenuItem(item);
+            });
+            
+            menuItemsContainer.appendChild(menuItemEl);
+        });
+        
+        container.appendChild(categorySection);
+    });
+}
+
+// Helper function to escape HTML to prevent XSS
+function escapeHTML(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+// Show form to add or edit a menu item
+function showMenuItemForm(item = null) {
+    console.log('Showing menu item form', item);
+    
+    const isEditing = !!item;
+    const modalTitle = isEditing ? 'Edit Menu Item' : 'Add Menu Item';
+    
+    const formModal = document.getElementById('form-modal');
+    const modalBody = document.getElementById('modal-form-body');
+    
+    if (!formModal || !modalBody) {
+        console.error('Modal elements not found');
+        return;
+    }
+    
+    // Set modal title
+    formModal.querySelector('.modal-title').textContent = modalTitle;
+    
+    // Create the form
+    modalBody.innerHTML = `
+        <form id="menu-item-form">
+            <div class="form-group">
+                <label for="menu-item-name">Name</label>
+                <input type="text" id="menu-item-name" name="name" class="form-control" required value="${item ? escapeHTML(item.name) : ''}">
+            </div>
+            <div class="form-group">
+                <label for="menu-item-category">Category</label>
+                <select id="menu-item-category" name="category" class="form-control">
+                    <option value="Domestics" ${item && item.category === 'Domestics' ? 'selected' : ''}>Domestics</option>
+                    <option value="Boulevard" ${item && item.category === 'Boulevard' ? 'selected' : ''}>Boulevard</option>
+                    <option value="Craft/Import" ${item && item.category === 'Craft/Import' ? 'selected' : ''}>Craft/Import</option>
+                    <option value="Well" ${item && item.category === 'Well' ? 'selected' : ''}>Well</option>
+                    <option value="Single" ${item && item.category === 'Single' ? 'selected' : ''}>Single</option>
+                    <option value="Wine" ${item && item.category === 'Wine' ? 'selected' : ''}>Wine</option>
+                    <option value="Food" ${item && item.category === 'Food' ? 'selected' : ''}>Food</option>
+                    <option value="Specials" ${item && item.category === 'Specials' ? 'selected' : ''}>Specials</option>
+                    <option value="Other" ${item && item.category === 'Other' ? 'selected' : ''}>Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="menu-item-description">Description</label>
+                <textarea id="menu-item-description" name="description" class="form-control" rows="3">${item ? escapeHTML(item.description || '') : ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="menu-item-price">Price</label>
+                <input type="number" id="menu-item-price" name="price" class="form-control" step="0.01" min="0" value="${item ? (item.price || 0) : ''}">
+            </div>
+            <div class="form-group">
+                <label for="menu-item-display-order">Display Order</label>
+                <input type="number" id="menu-item-display-order" name="display_order" class="form-control" value="${item ? (item.display_order || 0) : 0}">
+            </div>
+            <div class="form-check">
+                <input type="checkbox" id="menu-item-active" name="active" class="form-check-input" ${!item || item.active ? 'checked' : ''}>
+                <label class="form-check-label" for="menu-item-active">Active (visible on menu)</label>
+            </div>
+            
+            ${item ? `<input type="hidden" name="id" value="${item.id}">` : ''}
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-menu-item-btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">${isEditing ? 'Update' : 'Add'} Menu Item</button>
+            </div>
+        </form>
+    `;
+    
+    // Add event listeners
+    const form = modalBody.querySelector('#menu-item-form');
+    const cancelBtn = modalBody.querySelector('#cancel-menu-item-btn');
+    
+    cancelBtn.addEventListener('click', () => {
+        formModal.classList.remove('active');
+    });
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await saveMenuItem(form, isEditing);
+    });
+    
+    // Show the modal
+    formModal.classList.add('active');
+}
+
+// Save a menu item (create or update)
+async function saveMenuItem(form, isEditing) {
+    const formData = new FormData(form);
+    const menuItem = {
+        name: formData.get('name'),
+        category: formData.get('category'),
+        description: formData.get('description'),
+        price: parseFloat(formData.get('price') || 0),
+        display_order: parseInt(formData.get('display_order') || 0, 10),
+        active: formData.get('active') === 'on'
+    };
+    
+    console.log('Saving menu item:', menuItem, 'isEditing:', isEditing);
+    
+    try {
+        let response;
+        const venue = dashboardState.currentVenue || 'farewell';
+        
+        if (isEditing) {
+            const itemId = formData.get('id');
+            response = await api.put(`/api/admin/menu-items/${itemId}`, menuItem);
+        } else {
+            // For new menu items, we need a menu_id - we'll create one if needed
+            // This is a simplification; in a full implementation you'd select from existing menus
+            menuItem.menu_id = 1; // Assume the first menu for simplicity
+            response = await api.post(`/api/admin/venues/${venue}/menu-items`, menuItem);
+        }
+        
+        console.log('Save menu item response:', response);
+        
+        if (response && response.success) {
+            // Close modal and reload menu items
+            document.getElementById('form-modal').classList.remove('active');
+            showToast(`Menu item ${isEditing ? 'updated' : 'added'} successfully`, 'success');
+            loadVenueSettings();
+        } else {
+            showToast(`Failed to ${isEditing ? 'update' : 'add'} menu item: ${response ? response.error : 'Unknown error'}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error saving menu item:', error);
+        showToast(`Error: ${error.message || 'Failed to save menu item'}`, 'error');
+    }
+}
+
+// Edit a menu item
+function editMenuItem(item) {
+    console.log('Editing menu item:', item);
+    showMenuItemForm(item);
+}
+
+// Delete a menu item
+async function deleteMenuItem(item) {
+    console.log('Deleting menu item:', item);
+    
+    if (!confirm(`Are you sure you want to delete "${item.name}"?`)) {
+        return;
+    }
+    
+    try {
+        const response = await api.delete(`/api/admin/menu-items/${item.id}`);
+        
+        console.log('Delete menu item response:', response);
+        
+        if (response && response.ok) {
+            showToast('Menu item deleted successfully', 'success');
+            loadVenueSettings();
+        } else {
+            showToast(`Failed to delete menu item: ${response ? response.statusText : 'Unknown error'}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error deleting menu item:', error);
+        showToast(`Error: ${error.message || 'Failed to delete menu item'}`, 'error');
+    }
+}
+
+// Toggle menu reorder mode
+function toggleMenuReorderMode() {
+    console.log('Toggling menu reorder mode');
+    
+    const menuList = document.getElementById('menu-list');
+    const reorderBtn = document.getElementById('reorder-menu-btn');
+    
+    if (!menuList || !reorderBtn) {
+        console.error('Menu elements not found');
+        return;
+    }
+    
+    const isReorderMode = menuList.classList.toggle('reorder-mode');
+    
+    if (isReorderMode) {
+        reorderBtn.textContent = 'Save Order';
+        reorderBtn.classList.add('btn-primary');
+        reorderBtn.classList.remove('btn-secondary');
+        
+        // Enable drag and drop functionality
+        enableDragAndDrop();
+        
+        showToast('Reorder mode activated. Drag items to reorder, then click "Save Order"', 'info');
+    } else {
+        reorderBtn.textContent = 'Reorder Menu';
+        reorderBtn.classList.add('btn-secondary');
+        reorderBtn.classList.remove('btn-primary');
+        
+        // Save the new order
+        saveMenuOrder();
+        
+        // Disable drag and drop
+        disableDragAndDrop();
+    }
+}
+
+// Enable drag and drop for menu items
+function enableDragAndDrop() {
+    console.log('Enabling drag and drop');
+    
+    const menuItems = document.querySelectorAll('.menu-item');
+    
+    menuItems.forEach(item => {
+        item.setAttribute('draggable', 'true');
+        
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragover', handleDragOver);
+        item.addEventListener('drop', handleDrop);
+        item.addEventListener('dragend', handleDragEnd);
+    });
+}
+
+// Disable drag and drop for menu items
+function disableDragAndDrop() {
+    console.log('Disabling drag and drop');
+    
+    const menuItems = document.querySelectorAll('.menu-item');
+    
+    menuItems.forEach(item => {
+        item.removeAttribute('draggable');
+        
+        item.removeEventListener('dragstart', handleDragStart);
+        item.removeEventListener('dragover', handleDragOver);
+        item.removeEventListener('drop', handleDrop);
+        item.removeEventListener('dragend', handleDragEnd);
+    });
+}
+
+// Handle drag start event
+function handleDragStart(e) {
+    e.dataTransfer.setData('text/plain', e.target.dataset.itemId);
+    e.target.classList.add('dragging');
+}
+
+// Handle drag over event
+function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+}
+
+// Handle drop event
+function handleDrop(e) {
+    e.preventDefault();
+    
+    const sourceId = e.dataTransfer.getData('text/plain');
+    const sourceItem = document.querySelector(`.menu-item[data-item-id="${sourceId}"]`);
+    const targetItem = e.target.closest('.menu-item');
+    
+    if (sourceItem && targetItem && sourceItem !== targetItem) {
+        const menuItemsContainer = targetItem.parentNode;
+        
+        // Check if dragging within the same category
+        if (sourceItem.parentNode === menuItemsContainer) {
+            // Determine if we're inserting before or after the target
+            const rect = targetItem.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+            
+            if (e.clientY < midY) {
+                menuItemsContainer.insertBefore(sourceItem, targetItem);
+            } else {
+                menuItemsContainer.insertBefore(sourceItem, targetItem.nextSibling);
+            }
+        }
+    }
+}
+
+// Handle drag end event
+function handleDragEnd(e) {
+    e.target.classList.remove('dragging');
+}
+
+// Save the new menu order
+async function saveMenuOrder() {
+    console.log('Saving menu order');
+    
+    try {
+        // For each category, save the new order of menu items
+        const categories = document.querySelectorAll('.menu-category');
+        const venue = dashboardState.currentVenue || 'farewell';
+        
+        let promises = [];
+        
+        categories.forEach(category => {
+            const menuItems = category.querySelectorAll('.menu-item');
+            
+            menuItems.forEach((item, index) => {
+                const itemId = item.dataset.itemId;
+                
+                // Update the display order
+                promises.push(
+                    api.put(`/api/admin/menu-items/${itemId}`, {
+                        display_order: index
+                    })
+                );
+            });
+        });
+        
+        await Promise.all(promises);
+        
+        showToast('Menu order saved successfully', 'success');
+    } catch (error) {
+        console.error('Error saving menu order:', error);
+        showToast(`Error: ${error.message || 'Failed to save menu order'}`, 'error');
+    }
+}
