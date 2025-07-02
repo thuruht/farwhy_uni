@@ -91,12 +91,17 @@ npx wrangler deploy
 
 ## Documentation
 
-For detailed documentation, see [DOCUMENTATION.md](DOCUMENTATION.md).
-For project progress and todo list, see [PROGRESS_REPORT.md](PROGRESS_REPORT.md).
+For detailed documentation, see [CONSOLIDATED_DOCUMENTATION.md](CONSOLIDATED_DOCUMENTATION.md).
+For project progress and roadmap, see [PROJECT_CHECKLIST_AND_ROADMAP.md](PROJECT_CHECKLIST_AND_ROADMAP.md).
+For blog system documentation, see [BLOG_SYSTEM_DOCUMENTATION.md](BLOG_SYSTEM_DOCUMENTATION.md).
+For recent implementations and updates, see [RECENT_IMPLEMENTATIONS.md](RECENT_IMPLEMENTATIONS.md).
+For technical architecture details, see [TECHNICAL_MAP.md](TECHNICAL_MAP.md).
 
 ## Project Status
 
-The project is in active development with core features implemented. See [PROGRESS_REPORT.md](PROGRESS_REPORT.md) for the latest status and upcoming tasks.
+The project is in active development with core features implemented. See [PROJECT_CHECKLIST_AND_ROADMAP.md](PROJECT_CHECKLIST_AND_ROADMAP.md) for the latest status and upcoming tasks.
+
+> **Note**: Historical documentation can be found in the `ye_olde_docs` directory but should not be used for current development as it may contain outdated information.
 
 ### Obsolete Documentation
 
