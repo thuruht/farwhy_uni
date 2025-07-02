@@ -9,6 +9,7 @@ export interface Env {
   ADMIN_USERNAME: string;
   ADMIN_PASSWORD_HASH: string;
   JWT_SECRET: string;
+  MIGRATION_SECRET?: string; // Secret for database migrations
 }
 
 export interface User {
