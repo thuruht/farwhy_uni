@@ -80,12 +80,31 @@
             .about-image-main,
             .sad-cookie-aside {
                 float: none;
-                width: 80%; /* Adjust mobile width */
-                max-width: 250px; /* Adjust mobile max-width */
-                margin-left: auto;
-                margin-right: auto;
-                margin-top: 15px;
-                margin-bottom: 15px;
+                width: 90%; /* Wider image on mobile */
+                max-width: 300px; /* Increased max-width for better visibility */
+                margin-left: auto !important; /* Override any inline styles */
+                margin-right: auto !important;
+                margin-top: 20px;
+                margin-bottom: 25px;
+                display: block;
+            }
+            
+            /* Ensure proper content flow on mobile */
+            .about-content-card section {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .about-content-card h2 {
+                order: 1; /* Title first */
+            }
+            
+            .about-content-card .about-image-main {
+                order: 2; /* Image second */
+            }
+            
+            .about-content-card p.nrml {
+                order: 3; /* Text last */
             }
         }
     </style>
@@ -119,7 +138,7 @@
 
                 
 
-                <img src="./img/fp2.png" class="about-image-main" alt="Farewell venue" style="border:2px solid var(--lima); border-radius: 4px; margin-left: 75px;">
+                <img src="./img/fp2.png" class="about-image-main" alt="Farewell venue" style="border:2px solid var(--lima); border-radius: 4px;">
 
                 <p class="nrml" style="font-size:1.6rem; line-height:1.8rem; font-weight:100; letter-spacing: 0.033rem;">
                     Farewell is a music venue made of equal parts friendship, psycho-nonstop-construction, and love for DIY ethos and community.
