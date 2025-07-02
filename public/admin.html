@@ -363,6 +363,40 @@
         </div>
     </div>
 
+    <!-- Menu Item Modal -->
+    <div id="menu-item-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="menu-item-modal-title">Add Menu Item</h3>
+                <button class="modal-close-btn" onclick="closeMenuItemForm()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="menu-item-form">
+                    <div class="form-group">
+                        <label for="menu-item-name">Name:</label>
+                        <input type="text" id="menu-item-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="menu-item-description">Description:</label>
+                        <textarea id="menu-item-description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="menu-item-price">Price:</label>
+                        <input type="number" id="menu-item-price" name="price" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="menu-item-category">Category:</label>
+                        <input type="text" id="menu-item-category" name="category" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="closeMenuItemForm()">Cancel</button>
+                        <button type="submit" id="menu-item-submit-btn">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
 

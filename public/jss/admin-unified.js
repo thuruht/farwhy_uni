@@ -1471,18 +1471,33 @@ function showMenuItemForm(item = null) {
     console.log('Showing menu item form', item);
     
     const isEditing = !!item;
-    const modalTitle = isEditing ? 'Edit Menu Item' : 'Add Menu Item';
+    const modal = document.getElementById('menu-item-modal');
+    const modalTitle = document.getElementById('menu-item-modal-title');
     
-    const formModal = document.getElementById('form-modal');
-    const modalBody = document.getElementById('modal-form-body');
-    
-    if (!formModal || !modalBody) {
-        console.error('Modal elements not found');
+    if (!modal) {
+        console.error('Menu item modal not found');
         return;
     }
     
     // Set modal title
-    formModal.querySelector('.modal-title').textContent = modalTitle;
+    if (modalTitle) {
+        modalTitle.textContent = isEditing ? 'Edit Menu Item' : 'Add Menu Item';
+    }
+    
+    // Populate form if editing
+    if (item) {
+        document.getElementById('menu-item-name').value = item.name || '';
+        document.getElementById('menu-item-description').value = item.description || '';
+        document.getElementById('menu-item-price').value = item.price || '';
+        document.getElementById('menu-item-category').value = item.category || '';
+        modal.dataset.itemId = item.id;
+    } else {
+        document.getElementById('menu-item-form').reset();
+        delete modal.dataset.itemId;
+    }
+    
+    // Show modal
+    modal.style.display = 'block';
     
     // Create the form
     modalBody.innerHTML = `
@@ -1766,5 +1781,184 @@ async function saveMenuOrder() {
     } catch (error) {
         console.error('Error saving menu order:', error);
         showToast(`Error: ${error.message || 'Failed to save menu order'}`, 'error');
+    }
+}
+
+// Missing event management functions
+function editEvent(eventId) {
+    console.log('Edit event clicked for id:', eventId);
+    // Find the event data
+    const eventData = currentEvents?.find(e => e.id === eventId);
+    if (eventData) {
+        showEventForm(eventData);
+    } else {
+        console.error('Event not found for editing:', eventId);
+    }
+}
+
+function showEventForm(eventData = null) {
+    console.log('Showing event form for:', eventData ? 'edit' : 'new');
+    
+    // Get or create the modal
+    let modal = document.getElementById('event-modal');
+    if (!modal) {
+        // Create the modal if it doesn't exist
+        modal = document.createElement('div');
+        modal.id = 'event-modal';
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="event-modal-title">${eventData ? 'Edit Event' : 'Add New Event'}</h3>
+                    <span class="close" onclick="closeEventForm()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="event-form">
+                        <div class="form-group">
+                            <label for="event-title">Title:</label>
+                            <input type="text" id="event-title" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-description">Description:</label>
+                            <textarea id="event-description" name="description" rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-date">Date:</label>
+                            <input type="date" id="event-date" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-venue">Venue:</label>
+                            <select id="event-venue" name="venue" required>
+                                <option value="farewell">Farewell</option>
+                                <option value="howdy">Howdy</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-ticket-link">Ticket Link:</label>
+                            <input type="url" id="event-ticket-link" name="ticketLink">
+                        </div>
+                        <div class="form-group">
+                            <label for="event-flyer">Flyer Image:</label>
+                            <input type="file" id="event-flyer" accept="image/*">
+                            <input type="hidden" id="event-flyer-url" name="flyer_image_url">
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" onclick="closeEventForm()">Cancel</button>
+                            <button type="submit">${eventData ? 'Update' : 'Create'} Event</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Add form submit handler
+        document.getElementById('event-form').addEventListener('submit', handleEventSubmit);
+    }
+    
+    // Populate form if editing
+    if (eventData) {
+        document.getElementById('event-title').value = eventData.title || '';
+        document.getElementById('event-description').value = eventData.description || '';
+        document.getElementById('event-date').value = eventData.date ? eventData.date.split('T')[0] : '';
+        document.getElementById('event-venue').value = eventData.venue || 'farewell';
+        document.getElementById('event-ticket-link').value = eventData.ticketLink || '';
+        document.getElementById('event-flyer-url').value = eventData.flyer_image_url || '';
+        document.getElementById('event-modal-title').textContent = 'Edit Event';
+        modal.dataset.eventId = eventData.id;
+    } else {
+        document.getElementById('event-form').reset();
+        document.getElementById('event-modal-title').textContent = 'Add New Event';
+        delete modal.dataset.eventId;
+    }
+    
+    modal.style.display = 'block';
+}
+
+function closeEventForm() {
+    const modal = document.getElementById('event-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+async function handleEventSubmit(e) {
+    e.preventDefault();
+    
+    const modal = document.getElementById('event-modal');
+    const isEdit = modal.dataset.eventId;
+    const formData = new FormData(e.target);
+    
+    // Handle file upload if present
+    const flyerFile = document.getElementById('event-flyer').files[0];
+    if (flyerFile) {
+        // Upload flyer image first
+        const flyerFormData = new FormData();
+        flyerFormData.append('flyer', flyerFile);
+        
+        try {
+            const uploadResponse = await apiCall('/api/admin/events/flyer', {
+                method: 'POST',
+                body: flyerFormData
+            });
+            
+            if (uploadResponse && uploadResponse.imageUrl) {
+                formData.set('flyer_image_url', uploadResponse.imageUrl);
+            }
+        } catch (error) {
+            console.error('Error uploading flyer:', error);
+        }
+    }
+    
+    // Convert FormData to JSON
+    const eventData = {};
+    for (let [key, value] of formData.entries()) {
+        if (key !== 'flyer') { // Skip the file input
+            eventData[key] = value;
+        }
+    }
+    
+    try {
+        let response;
+        if (isEdit) {
+            response = await apiCall(`/api/admin/events/${isEdit}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData)
+            });
+        } else {
+            response = await apiCall('/api/admin/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData)
+            });
+        }
+        
+        if (response && response.success) {
+            closeEventForm();
+            loadEvents(); // Reload the events list
+            showMessage(isEdit ? 'Event updated successfully!' : 'Event created successfully!', 'success');
+        } else {
+            showMessage(response?.error || 'Failed to save event', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving event:', error);
+        showMessage('Failed to save event', 'error');
+    }
+}
+
+// Missing help section setup function
+function setupHelpSectionLinks() {
+    console.log('Setting up help section links');
+    // Help section is now static HTML, no dynamic setup needed
+    // This function exists to prevent the error
+}
+
+// Missing menu item modal functions
+function closeMenuItemForm() {
+    const modal = document.getElementById('menu-item-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.getElementById('menu-item-form').reset();
     }
 }

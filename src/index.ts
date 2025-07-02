@@ -247,6 +247,12 @@ protectedAdminApi.delete('/blog/posts/:id', deletePostById);
 protectedAdminApi.post('/blog/featured', setFeaturedContent);
 protectedAdminApi.post('/blog/upload-image', uploadBlogImage); // New endpoint for blog image uploads
 
+// Featured content management endpoints
+protectedAdminApi.get('/featured', (c) => handleFeatured(c, 'list'));
+protectedAdminApi.post('/featured', (c) => handleFeatured(c, 'create'));
+protectedAdminApi.put('/featured/:id', (c) => handleFeatured(c, 'update'));
+protectedAdminApi.delete('/featured/:id', (c) => handleFeatured(c, 'delete'));
+
 // Event management endpoints (admin)
 protectedAdminApi.get('/events', (c) => handleEvents(c, 'list'));
 protectedAdminApi.post('/events', (c) => handleEvents(c, 'create'));
@@ -285,6 +291,10 @@ protectedAdminApi.post('/venues/:venue/menu-items', async (c) => {
 protectedAdminApi.put('/menu-items/:id', (c) => handleMenu(c, 'update-item'));
 protectedAdminApi.delete('/menu-items/:id', (c) => handleMenu(c, 'delete-item'));
 
+// Business hours management endpoints
+protectedAdminApi.get('/venues/:venue/hours', (c) => handleHours(c, 'list'));
+protectedAdminApi.put('/venues/:venue/hours', (c) => handleHours(c, 'update'));
+
 // Menu item reordering endpoint
 protectedAdminApi.post('/menu-items/reorder', async (c) => {
     try {
@@ -319,10 +329,12 @@ protectedAdminApi.get('/venues/:venue/menu-items', async (c) => {
         const venue = c.req.param('venue');
         const { FWHY_D1 } = c.env;
         
-        // Get all menu items since there's only one menu for Farewell
+        // Get unique menu items since there's only one menu for Farewell
         const { results } = await FWHY_D1.prepare(`
-            SELECT * FROM menu_items 
+            SELECT DISTINCT id, name, description, price, category, display_order, active 
+            FROM menu_items 
             WHERE active = 1
+            GROUP BY name, category
             ORDER BY category, display_order ASC, name ASC
         `).all();
         
