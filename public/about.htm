@@ -15,7 +15,6 @@
     <style>
         
         .about-content-card {
-            
             width: 93%; 
             margin: 0 auto; /* Center the card */
         }
@@ -25,7 +24,7 @@
           width: 60%;  /* Adjust width */
           max-width: 469px; 
           margin: 32px;
-          margin-left: 75px; /* Balanced margin between text and image */
+          margin-left: 55px; /* Reduced margin between text and image for desktop */
           display: block;
         }
 
@@ -36,7 +35,7 @@
           margin-left: 20px; /* Space between text and image */
           margin-bottom: 10px; /* Space below */
           margin-top: 5px;
-          margin-right:32px;
+          margin-right: 32px;
           text-align: center;
         }
 
@@ -63,48 +62,77 @@
 
         /* Style for paragraphs to ensure they don't crowd the image */
         .about-content-card .nrml {
-            max-width: calc(100% - 550px); /* Leave space for the image plus margin */
+            max-width: calc(100% - 500px); /* Leave space for the image plus margin */
             margin-right: 20px; /* Add margin on the right side of text */
         }
         
-        /* Mobile overrides for paragraph width */
-        @media (max-width: 640px) {
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            /* Ensure text flows properly around floated elements */
             .about-content-card .nrml {
                 max-width: 100%; /* Full width on mobile */
                 margin-right: 0;
-            }
-        }
-
-         /* Mobile overrides for floats */
-        @media (max-width: 640px) {
-            .about-image-main,
-            .sad-cookie-aside {
-                float: none;
-                width: 90%; /* Wider image on mobile */
-                max-width: 300px; /* Increased max-width for better visibility */
-                margin-left: auto !important; /* Override any inline styles */
-                margin-right: auto !important;
-                margin-top: 20px;
-                margin-bottom: 25px;
-                display: block;
+                clear: both; /* Clear floats to prevent wrapping */
             }
             
-            /* Ensure proper content flow on mobile */
+            /* Stack elements on mobile */
             .about-content-card section {
                 display: flex;
                 flex-direction: column;
+                align-items: center; /* Center items horizontally */
             }
             
+            /* Order elements properly */
             .about-content-card h2 {
                 order: 1; /* Title first */
+                align-self: flex-start; /* Align left */
+                width: 100%;
             }
             
             .about-content-card .about-image-main {
                 order: 2; /* Image second */
+                float: none;
+                width: 90%; /* Wider image on mobile */
+                max-width: 350px; /* Increased max-width for better visibility */
+                margin: 20px auto 25px; /* Simplified margin - top, left/right, bottom */
+                display: block;
+            }
+            
+            .about-content-card .sad-cookie-aside {
+                order: 3; /* Cookie image third */
+                float: none;
+                width: 85%; 
+                max-width: 160px;
+                margin: 15px auto;
+                display: block;
             }
             
             .about-content-card p.nrml {
-                order: 3; /* Text last */
+                order: 4; /* Text last */
+                width: 90%; /* Narrower than container for better readability */
+                margin-left: auto;
+                margin-right: auto;
+                font-size: 1.4rem !important; /* Slightly smaller font on mobile */
+                line-height: 1.6rem !important;
+            }
+        }
+        
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+            .about-content-card .about-image-main {
+                width: 95%;
+                max-width: 280px;
+            }
+            
+            .about-content-card p.nrml {
+                width: 95%;
+                font-size: 1.3rem !important;
+                line-height: 1.5rem !important;
+                letter-spacing: 0.02rem !important;
+            }
+            
+            .about-content-card h2 {
+                margin-left: 15px !important;
             }
         }
     </style>
@@ -135,8 +163,6 @@
         <div class="card about-content-card" id="tri">
             <section>
                 <h2 style="color:var(--lima); text-align:left; margin-left:var(--padding-large);">ABOUT US</h2>
-
-                
 
                 <img src="./img/fp2.png" class="about-image-main" alt="Farewell venue" style="border:2px solid var(--lima); border-radius: 4px;">
 
