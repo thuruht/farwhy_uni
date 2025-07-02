@@ -29,12 +29,24 @@
         display: grid;
         grid-template-columns: minmax(0, 50%) 1fr;
         grid-template-rows: auto auto auto;
-        grid-gap: 32px;
-        gap: 32px;
+        grid-gap: 24px; /* Reduced gap */
+        gap: 24px;
         padding: var(--padding-medium);
-        width: 93%;
+        width: 98%; /* Wider container by default */
         margin: 0 auto;
         align-items: stretch;
+        box-sizing: border-box; /* Include padding in width calculation */
+    }
+    
+    /* Base card styles */
+    .card {
+        box-sizing: border-box;
+        overflow-wrap: break-word; /* Ensure text wraps */
+    }
+    
+    /* Base section styles */
+    .card section {
+        padding: var(--padding-medium);
     }
     
     /* Make buttons responsive */
@@ -48,25 +60,102 @@
         .griddy {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px; /* Reduced gap */
+            width: 100%; /* Full width on mobile */
+            padding: 8px; /* Minimal padding */
+            max-width: 100%;
         }
         
         .card {
             width: 100% !important;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            max-width: none !important; /* Remove max-width constraints */
+            box-sizing: border-box; /* Include padding in width calculation */
         }
         
         /* Ensure all content is visible and readable */
         .card section {
-            padding: 15px;
+            padding: 8px 6px; /* Further reduced padding */
+        }
+        
+        /* Reduce margins on headings */
+        h2 {
+            margin-left: 8px !important; /* Override any inline styles */
+            margin-right: 8px !important;
+            margin-top: 10px !important;
+            margin-bottom: 10px !important;
+        }
+        
+        /* Adjust text for better fit */
+        .nrml {
+            font-size: 1.3rem !important; /* Smaller text on very narrow screens */
+            word-wrap: break-word; /* Ensure long words wrap */
+            line-height: 1.4 !important; /* Improved line height for readability */
         }
         
         /* Make buttons more tappable and full-width on mobile */
         button, .menu-button, .form-button, .thrift-button {
             min-height: 44px;
-            margin: 10px 0;
+            margin: 8px 0;
             width: 100%;
             max-width: 100%;
+            padding: 8px 2px; /* Reduced padding */
+        }
+    }
+    
+    /* Extra narrow screens */
+    @media (max-width: 480px) {
+        .griddy {
+            width: 100%; /* Full width */
+            padding: 4px; /* Minimal padding */
+        }
+        
+        /* Further reduce paddings */
+        .card section {
+            padding: 6px 4px;
+        }
+        
+        /* Adjust list display */
+        ul {
+            padding-left: 8px !important;
+            margin-left: 0 !important;
+        }
+        
+        /* Make text more readable on very small screens */
+        .nrml {
+            font-size: 1.2rem !important;
+        }
+        
+        /* Further adjust headings */
+        h2 {
+            margin-left: 6px !important;
+            margin-right: 6px !important;
+            font-size: 1.6rem !important;
+        }
+        
+        /* Fix extra spacing */
+        hr {
+            padding: 12px !important;
+        }
+    }
+    
+    /* Extra extra narrow screens */
+    @media (max-width: 320px) {
+        body {
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+        
+        .griddy {
+            padding: 2px;
+        }
+        
+        .card section {
+            padding: 4px 2px;
+        }
+        
+        /* Ensure buttons remain usable */
+        button, .menu-button, .form-button, .thrift-button {
+            font-size: 0.9rem !important;
         }
     }
     </style>
@@ -132,12 +221,12 @@
                 <p class="nrml" style="font-size:1.6rem;"> Check out the goods: <button class="thrift-button" onclick="openBleep()">Howdy DIY Thrift</button></p>
             </section>
             
-            <hr style="color: transparent; padding:24px; border: 0 transparent;">
-            <section><img src="./img/fm.png" style="width:256px; height:auto;" class="drop-crawl conic" alt="logo"></section>
-            <hr style="color: transparent; padding:24px; border: 0 transparent;">
+            <hr style="color: transparent; padding:16px; border: 0 transparent;">
+            <section><img src="./img/fm.png" style="width:100%; max-width:256px; height:auto;" class="drop-crawl conic" alt="logo"></section>
+            <hr style="color: transparent; padding:16px; border: 0 transparent;">
         </div>
-                <div class="card" id="tew" style="padding:0; background:#000;">
-            <img src="./img/fp3.png" class="insect" alt="rock on">
+                <div class="card" id="tew" style="padding:0; background:#000; width:100%;">
+            <img src="./img/fp3.png" class="insect" alt="rock on" style="width:100%; max-width:100%; height:auto;">
         </div>
         
     </main>

@@ -121,7 +121,7 @@ async function loadMenus(venue) {
     
     try {
         // Call the admin API endpoint
-        const response = await fetch(`/admin/api/venues/${venue}/menu`);
+        const response = await fetch(`/api/admin/venues/${venue}/menu-items`);
         if (!response.ok) {
             throw new Error(`Failed to load menus: ${response.status} ${response.statusText}`);
         }
@@ -171,7 +171,7 @@ async function loadMenus(venue) {
 
 // Helper function to create a default menu if none exists
 async function createDefaultMenu(venue) {
-    const response = await fetch(`/admin/api/venues/${venue}/menu`, {
+    const response = await fetch(`/api/admin/venues/${venue}/menu`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -244,7 +244,7 @@ function createMenuCard(menu, venue) {
 async function loadMenuItems(menuId, container) {
     try {
         // Use the admin API endpoint
-        const response = await fetch(`/admin/api/menu/${menuId}`);
+        const response = await fetch(`/api/admin/menu/${menuId}`);
         if (!response.ok) throw new Error(`Failed to load menu items: ${response.status} ${response.statusText}`);
         
         const data = await response.json();
@@ -391,7 +391,7 @@ function openMenuModal(menu = null) {
             if (isEdit) {
                 // Update existing menu - use admin API
                 console.log(`Updating menu ${menu.id} with:`, { venue, name, display_order, active });
-                response = await fetch(`/admin/api/venues/${venue}/menu/${menu.id}`, {
+                response = await fetch(`/api/admin/venues/${venue}/menu/${menu.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -406,7 +406,7 @@ function openMenuModal(menu = null) {
             } else {
                 // Create new menu - use admin API
                 console.log(`Creating new menu with:`, { venue, name, display_order });
-                response = await fetch(`/admin/api/venues/${venue}/menu`, {
+                response = await fetch(`/api/admin/venues/${venue}/menu`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -547,7 +547,7 @@ function openMenuItemModal(item = null, menuId) {
             
             if (isEdit) {
                 // Update existing menu item - use admin API
-                response = await fetch(`/admin/api/menu-items/${item.id}`, {
+                response = await fetch(`/api/admin/menu-items/${item.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -564,7 +564,7 @@ function openMenuItemModal(item = null, menuId) {
             } else {
                 // Create new menu item - use admin API with correct endpoint
                 const venue = document.querySelector('.venue-tabs .tab-btn.active')?.dataset.venue || 'farewell';
-                response = await fetch(`/admin/api/venues/${venue}/menu-items`, {
+                response = await fetch(`/api/admin/venues/${venue}/menu-items`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -611,7 +611,7 @@ async function deleteMenu(menuId, venue) {
     
     try {
         // Use the admin API endpoint
-        const response = await fetch(`/admin/api/venues/${venue}/menu/${menuId}`, {
+        const response = await fetch(`/api/admin/venues/${venue}/menu/${menuId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -642,7 +642,7 @@ async function deleteMenuItem(itemId, menuId) {
     
     try {
         // Use the admin API endpoint
-        const response = await fetch(`/admin/api/menu-items/${itemId}`, {
+        const response = await fetch(`/api/admin/menu-items/${itemId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'

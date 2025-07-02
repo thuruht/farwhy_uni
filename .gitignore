@@ -72,5 +72,11 @@ Thumbs.db
 tmp/
 temp/
 
+# Old/archived files
+ye_olde/
+ye_olde_*/
+**/crap_unused_old/
+**/*.old
+
 # Cloudflare
 .dev.vars

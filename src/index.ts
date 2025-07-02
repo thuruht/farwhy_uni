@@ -364,6 +364,38 @@ protectedAdminApi.get('/menu-items/:id', async (c) => {
     }
 });
 
+// Database migration endpoint (only accessible to admin with MIGRATION_SECRET)
+protectedAdminApi.post('/execute-migration', async (c) => {
+    try {
+        // Check for a special migration secret in the Authorization header
+        const authHeader = c.req.header('Authorization');
+        const migrationSecret = process.env.MIGRATION_SECRET || 'migration-secret-key';
+        
+        if (!authHeader || !authHeader.startsWith('Bearer ') || authHeader.substring(7) !== migrationSecret) {
+            return c.json({ success: false, error: 'Unauthorized' }, 401);
+        }
+        
+        // Get the SQL from the request body
+        const { sql } = await c.req.json();
+        if (!sql) {
+            return c.json({ success: false, error: 'No SQL provided' }, 400);
+        }
+        
+        // Execute the SQL using D1
+        const { FWHY_D1 } = c.env;
+        await FWHY_D1.exec(sql);
+        
+        return c.json({ success: true, message: 'Migration executed successfully' });
+    } catch (error) {
+        console.error('Error executing migration:', error);
+        return c.json({ 
+            success: false, 
+            error: 'Failed to execute migration', 
+            details: error.message 
+        }, 500);
+    }
+});
+
 // Mount the protected routes under the /admin path
 adminApi.route('/admin', protectedAdminApi);
 
