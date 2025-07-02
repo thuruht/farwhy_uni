@@ -10,6 +10,253 @@ let dashboardState = {
     editingPostId: null
 };
 
+// ================================
+// MISSING CRITICAL FUNCTIONS - EMERGENCY FIX
+// ================================
+
+// Global variables for admin data
+let currentEvents = [];
+let currentBlogPosts = [];
+let currentMenuItems = [];
+
+// Event Management Functions
+function showEventForm(eventData = null) {
+    console.log('Showing event form for:', eventData ? eventData.id : 'new');
+    
+    const modal = document.getElementById('form-modal');
+    const modalBody = document.getElementById('modal-form-body');
+    
+    if (!modal || !modalBody) {
+        console.error('Modal elements not found');
+        return;
+    }
+    
+    const isEdit = eventData !== null;
+    const title = isEdit ? 'Edit Event' : 'New Event';
+    
+    modalBody.innerHTML = `
+        <h3>${title}</h3>
+        <form id="event-form">
+            <div class="form-group">
+                <label for="event-title">Title:</label>
+                <input type="text" id="event-title" name="title" required value="${isEdit ? (eventData.title || '') : ''}">
+            </div>
+            <div class="form-group">
+                <label for="event-date">Date:</label>
+                <input type="date" id="event-date" name="date" required value="${isEdit ? (eventData.date || '') : ''}">
+            </div>
+            <div class="form-group">
+                <label for="event-venue">Venue:</label>
+                <select id="event-venue" name="venue" required>
+                    <option value="farewell" ${isEdit && eventData.venue === 'farewell' ? 'selected' : ''}>Farewell</option>
+                    <option value="howdy" ${isEdit && eventData.venue === 'howdy' ? 'selected' : ''}>Howdy</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="event-description">Description:</label>
+                <textarea id="event-description" name="description">${isEdit ? (eventData.description || '') : ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="event-flyer">Flyer URL:</label>
+                <input type="url" id="event-flyer" name="flyer_image_url" value="${isEdit ? (eventData.flyer_image_url || '') : ''}">
+            </div>
+            <div class="form-group">
+                <label for="event-ticket-url">Ticket URL:</label>
+                <input type="url" id="event-ticket-url" name="ticket_url" value="${isEdit ? (eventData.ticket_url || '') : ''}">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">${isEdit ? 'Update' : 'Create'} Event</button>
+                <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
+            </div>
+        </form>
+    `;
+    
+    modal.style.display = 'flex';
+    
+    // Handle form submission
+    const form = document.getElementById('event-form');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const eventData = Object.fromEntries(formData);
+        
+        if (isEdit) {
+            eventData.id = eventData.id;
+        }
+        
+        try {
+            const url = isEdit ? `/api/admin/events/${eventData.id}` : '/api/admin/events';
+            const method = isEdit ? 'PUT' : 'POST';
+            
+            const response = await apiCall(url, { method, body: JSON.stringify(eventData) });
+            
+            if (response.success) {
+                showToast(isEdit ? 'Event updated successfully!' : 'Event created successfully!', 'success');
+                modal.style.display = 'none';
+                loadEvents(); // Reload events
+            } else {
+                showToast('Error saving event: ' + response.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error saving event:', error);
+            showToast('Error saving event', 'error');
+        }
+    });
+}
+
+function editEvent(eventId) {
+    console.log('Edit event clicked for id:', eventId);
+    const event = currentEvents.find(e => e.id === eventId);
+    if (event) {
+        showEventForm(event);
+    } else {
+        console.error('Event not found:', eventId);
+    }
+}
+
+// Blog Management Functions
+function showBlogForm(blogData = null) {
+    console.log('Showing blog form for:', blogData ? blogData.id : 'new');
+    
+    const modal = document.getElementById('form-modal');
+    const modalBody = document.getElementById('modal-form-body');
+    
+    if (!modal || !modalBody) {
+        console.error('Modal elements not found');
+        return;
+    }
+    
+    const isEdit = blogData !== null;
+    const title = isEdit ? 'Edit Blog Post' : 'New Blog Post';
+    
+    modalBody.innerHTML = `
+        <h3>${title}</h3>
+        <form id="blog-form">
+            <div class="form-group">
+                <label for="blog-title">Title:</label>
+                <input type="text" id="blog-title" name="title" required value="${isEdit ? (blogData.title || '') : ''}">
+            </div>
+            <div class="form-group">
+                <label for="blog-content">Content:</label>
+                <textarea id="blog-content" name="content" rows="10">${isEdit ? (blogData.content || '') : ''}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="blog-author">Author:</label>
+                <input type="text" id="blog-author" name="author" value="${isEdit ? (blogData.author || '') : ''}">
+            </div>
+            <div class="form-group">
+                <label for="blog-image">Featured Image URL:</label>
+                <input type="url" id="blog-image" name="featured_image_url" value="${isEdit ? (blogData.featured_image_url || '') : ''}">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">${isEdit ? 'Update' : 'Create'} Post</button>
+                <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
+            </div>
+        </form>
+    `;
+    
+    modal.style.display = 'flex';
+    
+    // Handle form submission
+    const form = document.getElementById('blog-form');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const postData = Object.fromEntries(formData);
+        
+        try {
+            const url = isEdit ? `/api/admin/blog/posts/${blogData.id}` : '/api/admin/blog/posts';
+            const method = isEdit ? 'PUT' : 'POST';
+            
+            const response = await apiCall(url, { method, body: JSON.stringify(postData) });
+            
+            if (response.success) {
+                showToast(isEdit ? 'Post updated successfully!' : 'Post created successfully!', 'success');
+                modal.style.display = 'none';
+                loadBlogPosts(); // Reload blog posts
+            } else {
+                showToast('Error saving post: ' + response.error, 'error');
+            }
+        } catch (error) {
+            console.error('Error saving blog post:', error);
+            showToast('Error saving post', 'error');
+        }
+    });
+}
+
+function editBlogPost(postId) {
+    console.log('Edit blog post clicked for id:', postId);
+    const post = currentBlogPosts.find(p => p.id === postId);
+    if (post) {
+        showBlogForm(post);
+    } else {
+        console.error('Blog post not found:', postId);
+    }
+}
+
+// Menu Management Functions
+function editMenuItem(itemId) {
+    console.log('Edit menu item clicked for id:', itemId);
+    const item = currentMenuItems.find(i => i.id == itemId);
+    if (item) {
+        showMenuItemForm(item);
+    } else {
+        console.error('Menu item not found:', itemId);
+    }
+}
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    console.log(`Toast (${type}):`, message);
+    
+    // Create toast element if it doesn't exist
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+    
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.style.cssText = `
+        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#007bff'};
+        color: white;
+        padding: 12px 20px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    `;
+    toast.textContent = message;
+    
+    toastContainer.appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+        toast.style.transform = 'translateX(0)';
+    }, 10);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
+}
+
 // ====================================
 // CORE APP LOGIC (Login/Dashboard Rendering)
 // ====================================
@@ -1004,6 +1251,7 @@ async function loadEvents() {
     if (events) {
         console.log(`Loaded ${events.length} events`);
         dashboardState.events = events;
+        currentEvents = events; // Set global variable for other functions
         renderEvents(events);
 
         const addEventBtn = document.getElementById('add-event-btn');
@@ -1107,6 +1355,7 @@ async function loadBlogPosts() {
     const result = await api.get('/api/admin/blog/posts');
     if (result && result.data) {
         dashboardState.blogPosts = result.data;
+        currentBlogPosts = result.data; // Set global variable for other functions
         renderBlogPosts(result.data, true);
 
         const addBlogBtn = document.getElementById('add-blog-btn');
@@ -1355,6 +1604,7 @@ async function loadVenueSettings() {
         console.log('Menu items response:', response);
         
         if (response && response.success && response.data) {
+            currentMenuItems = response.data; // Set global variable for other functions
             // Group menu items by category
             const menuItemsByCategory = groupMenuItemsByCategory(response.data);
             
