@@ -543,6 +543,216 @@ async function initializeDashboard() {
     console.log('initializeDashboard completed');
 }
 
+/**
+ * Sets up any dynamic styling needed for the dashboard
+ */
+function setupDashboardStyles() {
+    console.log('Setting up dashboard styles');
+    
+    // Apply any dynamic styles needed for the dashboard
+    // This ensures proper display of dashboard elements across browsers
+    
+    // Set theme-based styles
+    const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (isDarkMode) {
+        document.body.classList.add('dark-theme');
+    }
+    
+    // Ensure responsive layout
+    const dashboardContainer = document.getElementById('dashboard-container');
+    if (dashboardContainer) {
+        // Make sure grid layout is properly applied
+        if (window.innerWidth < 768) {
+            dashboardContainer.classList.add('mobile-layout');
+        } else {
+            dashboardContainer.classList.remove('mobile-layout');
+        }
+    }
+    
+    // Add table styles if not already present
+    if (!document.getElementById('admin-table-styles')) {
+        const tableStyles = document.createElement('style');
+        tableStyles.id = 'admin-table-styles';
+        tableStyles.textContent = `
+            .admin-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 1rem;
+                font-size: 14px;
+            }
+            
+            .admin-table thead th {
+                text-align: left;
+                padding: 12px 8px;
+                background-color: #f5f5f5;
+                border-bottom: 2px solid #ddd;
+                font-weight: bold;
+                color: #333;
+            }
+            
+            .admin-table tbody td {
+                padding: 10px 8px;
+                border-bottom: 1px solid #eee;
+                vertical-align: middle;
+            }
+            
+            .event-list-thumbnail, .thumbnail {
+                display: inline-block;
+                width: 70px;
+                height: 70px;
+                border-radius: 4px;
+                overflow: hidden;
+                background-color: #f0f0f0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #ddd;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            
+            .event-list-thumbnail img, .thumbnail img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: cover;
+            }
+            
+            .admin-table-actions {
+                white-space: nowrap;
+            }
+            
+            .admin-table-actions button {
+                margin-right: 5px;
+                padding: 4px 8px;
+                border-radius: 4px;
+                border: 1px solid #ddd;
+                background-color: #f5f5f5;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            
+            .admin-table-actions button:hover {
+                background-color: #e0e0e0;
+            }
+            
+            .admin-table-actions button.edit-event-btn, 
+            .admin-table-actions button.edit-blog-btn {
+                background-color: #e7f5ff;
+                border-color: #90c8f2;
+                color: #0066cc;
+            }
+            
+            .admin-table-actions button.edit-event-btn:hover, 
+            .admin-table-actions button.edit-blog-btn:hover {
+                background-color: #d0e8ff;
+            }
+            
+            .admin-table-actions button.delete-event-btn, 
+            .admin-table-actions button.delete-blog-btn {
+                background-color: #fff2f2;
+                border-color: #ffb8b8;
+                color: #cc0000;
+            }
+            
+            .admin-table-actions button.delete-event-btn:hover, 
+            .admin-table-actions button.delete-blog-btn:hover {
+                background-color: #ffe0e0;
+            }
+            
+            .event-divider, .blog-divider {
+                display: none;
+            }
+            
+            .empty-thumbnail, .no-image {
+                background-color: #eee;
+                color: #999;
+                font-size: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                width: 100%;
+                border-radius: 4px;
+            }
+            
+            .venue-tag {
+                display: inline-block;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            
+            .venue-farewell {
+                background-color: #f8e9b0;
+                color: #8a6d3b;
+            }
+            
+            .venue-howdy {
+                background-color: #d4edda;
+                color: #155724;
+            }
+            
+            .thumbnail-cell {
+                text-align: center;
+            }
+            
+            .status-tag {
+                display: inline-block;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            
+            .event-past {
+                background-color: #f2f2f2;
+                color: #666;
+            }
+            
+            .event-upcoming {
+                background-color: #e0f7fa;
+                color: #006064;
+            }
+            
+            .post-recent {
+                background-color: #e8f5e9;
+                color: #2e7d32;
+            }
+            
+            .post-older {
+                background-color: #f5f5f5;
+                color: #616161;
+            }
+            
+            .featured-indicator {
+                margin-top: 4px;
+                font-size: 12px;
+                color: #ff6d00;
+            }
+            
+            .ticket-info {
+                margin-top: 4px;
+                font-size: 12px;
+            }
+            
+            .ticket-link {
+                color: #0066cc;
+                text-decoration: none;
+            }
+            
+            .ticket-link:hover {
+                text-decoration: underline;
+            }
+            
+            .event-row:hover, .blog-row:hover, .admin-table tbody tr:hover {
+                background-color: #f9f9f9;
+            }
+        `;
+        document.head.appendChild(tableStyles);
+        console.log('Added table styles to document head');
+    }
+}
+
 function showSection(sectionName) {
     console.log(`Showing section: ${sectionName}`);
     const sections = document.querySelectorAll('.admin-section');
