@@ -283,7 +283,7 @@ function deleteMenuItem(item) {
         const itemId = item.id;
         
         // Call the API to delete the item
-        api.delete(`/admin/menu-items/${itemId}`)
+        apiCall(`/api/admin/menu-items/${itemId}`, { method: 'DELETE' })
             .then(response => {
                 if (response && response.success) {
                     showToast('Menu item deleted successfully', 'success');
@@ -1184,11 +1184,24 @@ function setupNavigation() {
     const breadcrumb = document.getElementById('breadcrumb');
 
     navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
+        item.addEventListener('click', async (e) => {
             e.preventDefault();
             const target = item.getAttribute('data-target');
             navItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
+            
+            // Load specific data based on the section
+            if (target === 'venue') {
+                console.log('Venue section clicked, loading venue settings...');
+                await loadVenueSettings();
+            } else if (target === 'events') {
+                console.log('Events section clicked, loading events...');
+                await loadEvents();
+            } else if (target === 'blog') {
+                console.log('Blog section clicked, loading blog posts...');
+                await loadBlogPosts();
+            }
+            
             showSection(target);
             const sectionNames = { 'dashboard': 'Dashboard', 'events': 'Event Management', 'blog': 'Blog Management', 'venue': 'Venue Settings', 'import': 'Import Legacy Data' };
             if (sectionIndicator) sectionIndicator.textContent = sectionNames[target] || target;
@@ -1342,6 +1355,30 @@ async function loadInitialData() {
 
     // Load dashboard stats
     await loadDashboardStats();
+    
+    // Load venue settings including menu items
+    console.log('Preloading venue settings...');
+    await loadVenueSettings();
+    
+    // Initialize event listeners for venue settings
+    console.log('Setting up venue settings event listeners...');
+    const addMenuBtn = document.getElementById('add-menu-btn');
+    if (addMenuBtn) {
+        console.log('Adding click listener to add menu button');
+        addMenuBtn.addEventListener('click', () => {
+            console.log('Add menu item button clicked');
+            showMenuItemForm();
+        });
+    }
+    
+    const reorderMenuBtn = document.getElementById('reorder-menu-btn');
+    if (reorderMenuBtn) {
+        console.log('Adding click listener to reorder menu button');
+        reorderMenuBtn.addEventListener('click', () => {
+            console.log('Reorder menu button clicked');
+            toggleMenuReorderMode();
+        });
+    }
 }
 
 async function loadDashboardStats() {
@@ -1725,6 +1762,9 @@ async function loadVenueSettings() {
         return;
     }
     
+    // Make sure menu form is set up
+    setupMenuItemForm();
+    
     // Clear and show loading state
     menuList.innerHTML = '<div class="loading">Loading menu items...</div>';
     
@@ -1732,7 +1772,9 @@ async function loadVenueSettings() {
         // Load menu items for the current venue (hardcoded to 'farewell' for now)
         const venue = 'farewell'; // Always use 'farewell' for now
         console.log(`Loading menu items for venue: ${venue}`);
-        const response = await api.get(`/admin/venues/${venue}/menu-items`);
+        
+        // Use the apiCall wrapper to ensure proper URL formatting
+        const response = await apiCall(`/api/admin/venues/${venue}/menu-items`);
         
         console.log('Menu items response:', response);
         
@@ -1884,8 +1926,16 @@ async function saveMenuOrder() {
         });
     });
     
+    console.log('Saving menu order with items:', items);
+    
     try {
-        const response = await api.post('/admin/menu-items/reorder', { items });
+        const response = await apiCall('/api/admin/menu-items/reorder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items })
+        });
+        
+        console.log('Menu reorder response:', response);
         
         if (response && response.success) {
             showToast('Menu order saved successfully', 'success');
@@ -2046,14 +2096,23 @@ function closeMenuItemForm() {
 function setupMenuItemForm() {
     const form = document.getElementById('menu-item-form');
     if (form) {
-        form.addEventListener('submit', async (e) => {
+        console.log('Setting up menu item form submission handler');
+        
+        // Remove any existing event listeners
+        const newForm = form.cloneNode(true);
+        if (form.parentNode) {
+            form.parentNode.replaceChild(newForm, form);
+        }
+        
+        newForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('Menu item form submitted');
             
             const modal = document.getElementById('menu-item-modal');
             const isEditing = modal && modal.dataset.itemId;
             const itemId = isEditing ? modal.dataset.itemId : null;
             
-            const formData = new FormData(form);
+            const formData = new FormData(e.target);
             const data = {
                 name: formData.get('name'),
                 description: formData.get('description'),
@@ -2062,13 +2121,27 @@ function setupMenuItemForm() {
                 menu_id: 1 // Default menu ID for Farewell
             };
             
+            console.log('Submitting menu item data:', data);
+            
             try {
                 let response;
                 if (isEditing) {
-                    response = await api.put(`/admin/menu-items/${itemId}`, data);
+                    console.log(`Updating menu item ${itemId} with:`, data);
+                    response = await apiCall(`/api/admin/menu-items/${itemId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
                 } else {
-                    response = await api.post('/admin/venues/farewell/menu-items', data);
+                    console.log('Creating new menu item with:', data);
+                    response = await apiCall('/api/admin/venues/farewell/menu-items', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
                 }
+                
+                console.log('Menu item save response:', response);
                 
                 if (response && response.success) {
                     showToast('Menu item saved successfully', 'success');
@@ -2082,6 +2155,8 @@ function setupMenuItemForm() {
                 showToast('Error saving menu item', 'error');
             }
         });
+    } else {
+        console.error('Menu item form not found');
     }
 }
 

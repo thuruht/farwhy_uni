@@ -140,14 +140,28 @@ async function getArchives(c: Context<{ Bindings: Env }>, options?: { venue?: st
 
 async function getSlideshow(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
-
+  const includePast = c.req.query('includePast') === 'true';
+  
   try {
-    // Modified to fetch all active events regardless of date
-    const { results } = await FWHY_D1.prepare(`
+    const today = new Date().toISOString().split('T')[0]; // Current date in YYYY-MM-DD format
+    
+    // Build query based on whether past events should be included
+    let query = `
       SELECT * FROM events
-      WHERE status = 'active'
-      ORDER BY date ASC
-    `).all();
+      WHERE status = 'active'`;
+    
+    // Only filter by date if not including past events
+    if (!includePast) {
+      query += ` AND date >= ?`;
+    }
+    
+    // Always sort by date (upcoming first, then past if included)
+    query += ` ORDER BY date ASC LIMIT 20`;
+    
+    // Execute query with or without the date parameter
+    const { results } = !includePast 
+      ? await FWHY_D1.prepare(query).bind(today).all()
+      : await FWHY_D1.prepare(query).all();
 
     const events = (results as Event[] ?? []).map(event => {
       // Ensure consistent date format
@@ -159,7 +173,7 @@ async function getSlideshow(c: Context<{ Bindings: Env }>) {
       }
       
       // Log for debugging
-      console.log(`Event "${event.title}" date: ${event.date} → ${formattedDate}`);
+      console.log(`Slideshow event "${event.title}" date: ${event.date} → ${formattedDate}`);
       
       return {
         id: event.id,
