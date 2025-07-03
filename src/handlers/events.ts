@@ -141,6 +141,7 @@ async function getArchives(c: Context<{ Bindings: Env }>, options?: { venue?: st
 async function getSlideshow(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
   const includePast = c.req.query('includePast') === 'true';
+  const venue = c.req.query('venue');
   
   try {
     const today = new Date().toISOString().split('T')[0]; // Current date in YYYY-MM-DD format
@@ -150,18 +151,30 @@ async function getSlideshow(c: Context<{ Bindings: Env }>) {
       SELECT * FROM events
       WHERE status = 'active'`;
     
+    // Filter by venue if specified
+    if (venue) {
+      query += ` AND venue = ?`;
+    }
+    
     // Only filter by date if not including past events
     if (!includePast) {
-      query += ` AND date >= ?`;
+      query += venue ? ` AND date >= ?` : ` AND date >= ?`;
     }
     
     // Always sort by date (upcoming first, then past if included)
     query += ` ORDER BY date ASC LIMIT 20`;
     
-    // Execute query with or without the date parameter
-    const { results } = !includePast 
-      ? await FWHY_D1.prepare(query).bind(today).all()
-      : await FWHY_D1.prepare(query).all();
+    // Execute query with appropriate parameters
+    let results: any;
+    if (venue && !includePast) {
+      results = (await FWHY_D1.prepare(query).bind(venue, today).all()).results;
+    } else if (venue) {
+      results = (await FWHY_D1.prepare(query).bind(venue).all()).results;
+    } else if (!includePast) {
+      results = (await FWHY_D1.prepare(query).bind(today).all()).results;
+    } else {
+      results = (await FWHY_D1.prepare(query).all()).results;
+    }
 
     const events = (results as Event[] ?? []).map(event => {
       // Ensure consistent date format

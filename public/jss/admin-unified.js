@@ -2080,6 +2080,9 @@ function showMenuItemForm(item = null) {
     
     // Show modal
     modal.style.display = 'block';
+    
+    // Make sure the form submit handler is set up
+    setupMenuItemForm();
 }
 
 // Close menu item form

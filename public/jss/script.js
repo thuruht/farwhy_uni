@@ -148,10 +148,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Try both endpoint formats - direct and /api prefixed
-      const urls = showPast
-        ? [`${BASE_URL}/archives?type=${state}`, `${BASE_URL}/api/archives?type=${state}`]
-        : [`${BASE_URL}/list/${state}`, `${BASE_URL}/api/list/${state}`];
+      // Use the updated slideshow endpoint with includePast parameter
+      const urls = [
+        `${BASE_URL}/api/slideshow?venue=${state}&includePast=${showPast}`,
+        `${BASE_URL}/slideshow?venue=${state}&includePast=${showPast}`
+      ];
 
       let data = [];
       let successUrl = null;
@@ -238,7 +239,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentState = body?.dataset.state; // 'farewell' or 'howdy'
     const sortValue = sortSelect ? sortSelect.value : 'soonest'; // default to soonest if undefined
 
-    const showPast = (sortValue === 'past'); // Decide if we fetch archives or upcoming
+    // Get show past events toggle status
+    const showPast = window.showPastEvents || false;
+    
+    // Update the toggle button text based on current state
+    const togglePastBtn = document.getElementById('toggle-past-events');
+    if (togglePastBtn) {
+      togglePastBtn.textContent = showPast ? 'hide past events' : 'show past events';
+    }
+
     allFlyers = await fetchFlyers(currentState, showPast);
 
     // You could do further sorting here if needed.
@@ -505,6 +514,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize the slideshow (default to soonest events)
   initSlideshow();
 
+  // Setup past events toggle
+  window.showPastEvents = false;
+  const togglePastBtn = document.getElementById('toggle-past-events');
+  if (togglePastBtn) {
+    togglePastBtn.addEventListener('click', () => {
+      // Toggle the state
+      window.showPastEvents = !window.showPastEvents;
+      
+      // Update button text
+      togglePastBtn.textContent = window.showPastEvents ? 'hide past events' : 'show past events';
+      
+      // Reload the slideshow
+      initSlideshow();
+    });
+  }
+  
+  // Setup events page functionality
+  setupEventsPage();
+
   // Initialize hidden fields on page load
   updateHiddenFields();
 
@@ -560,4 +588,112 @@ document.addEventListener('DOMContentLoaded', () => {
     observer.observe(document.body, { attributes: true });
   }
 });
+
+// Function to handle the events page functionality
+function setupEventsPage() {
+  const eventsLink = document.getElementById('events-page-link');
+  const eventsModal = document.getElementById('events-page-modal');
+  const closeButton = document.querySelector('.events-page-close');
+  const venueFilter = document.getElementById('events-venue-filter');
+  const togglePastButton = document.getElementById('events-toggle-past');
+  const eventsList = document.getElementById('events-list');
+  
+  // State variables
+  let allEvents = [];
+  let showPastInPage = false;
+  
+  // Function to fetch all events for the page
+  async function fetchAllEvents() {
+    eventsList.innerHTML = '<div class="loading">Loading events...</div>';
+    
+    try {
+      // Fetch events from both venues
+      const farewellEvents = await fetchFlyers('farewell', showPastInPage);
+      const howdyEvents = await fetchFlyers('howdy', showPastInPage);
+      
+      // Combine and sort by date
+      allEvents = [...farewellEvents, ...howdyEvents].sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateA - dateB;
+      });
+      
+      renderEvents();
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      eventsList.innerHTML = '<div class="error">Failed to load events. Please try again.</div>';
+    }
+  }
+  
+  // Function to render events based on current filters
+  function renderEvents() {
+    if (!eventsList) return;
+    
+    // Apply venue filter
+    let filteredEvents = allEvents;
+    if (venueFilter && venueFilter.value !== 'all') {
+      filteredEvents = allEvents.filter(event => event.venue === venueFilter.value);
+    }
+    
+    if (filteredEvents.length === 0) {
+      eventsList.innerHTML = '<div class="empty-state">No events found matching your criteria.</div>';
+      return;
+    }
+    
+    // Generate HTML for each event
+    eventsList.innerHTML = filteredEvents.map(event => {
+      const formattedDate = event.date ? new Date(event.date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }) : 'Date TBD';
+      
+      return `
+        <div class="event-card">
+          <div class="event-card-image">
+            ${event.imageUrl ? `<img src="${event.imageUrl}" alt="${event.title}">` : '<div class="no-image">No Image Available</div>'}
+          </div>
+          <div class="event-card-content">
+            <h3 class="event-card-title">${event.title}</h3>
+            <div class="event-card-date">${formattedDate}</div>
+            <div class="event-card-venue ${event.venue}">${event.venue}</div>
+            <div class="event-card-description">${event.description ? event.description.substring(0, 100) + '...' : 'No description available.'}</div>
+            ${event.ticketLink ? `<a href="${event.ticketLink}" target="_blank" class="event-card-link">Tickets</a>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  
+  // Event handlers
+  if (eventsLink) {
+    eventsLink.addEventListener('click', () => {
+      if (eventsModal) {
+        eventsModal.style.display = 'block';
+        fetchAllEvents();
+      }
+    });
+  }
+  
+  if (closeButton) {
+    closeButton.addEventListener('click', () => {
+      if (eventsModal) {
+        eventsModal.style.display = 'none';
+      }
+    });
+  }
+  
+  if (venueFilter) {
+    venueFilter.addEventListener('change', renderEvents);
+  }
+  
+  if (togglePastButton) {
+    togglePastButton.addEventListener('click', () => {
+      showPastInPage = !showPastInPage;
+      togglePastButton.textContent = showPastInPage ? 'Hide Past Events' : 'Show Past Events';
+      fetchAllEvents();
+    });
+  }
+}
 
