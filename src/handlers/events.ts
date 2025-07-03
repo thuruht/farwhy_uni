@@ -21,29 +21,58 @@ async function deleteFlyerFromR2(env: Env, flyerUrl?: string | null) {
   }
 }
 
+// NEW & IMPROVED: Helper function to robustly normalize image URLs
+function normalizeImageUrl(flyerUrl: string | null | undefined, legacyUrl: string | null | undefined): string {
+    // Priority 1: Modern flyer URL. These should already be correctly formatted.
+    if (flyerUrl) {
+        return flyerUrl;
+    }
+
+    // Priority 2: Legacy flyer URL. This requires careful handling.
+    if (legacyUrl) {
+        // If it's already a full URL, use it as is.
+        if (legacyUrl.startsWith('http')) {
+            return legacyUrl;
+        }
+        // If it already starts with the correct path, use it.
+        if (legacyUrl.startsWith('/images/')) {
+            return legacyUrl;
+        }
+        // Otherwise, assume it's a relative path from the old system and prepend the /images/ path.
+        return `/images/${legacyUrl.replace(/^\//, '')}`; // Prepend /images/ and remove any leading slash to prevent //
+    }
+
+    // Priority 3: No image found.
+    return '';
+}
+
+
 // Helper function to normalize event data for display
-function normalizeEventForDisplay(event: Event): any {
+function normalizeEventForDisplay(event: Event | LegacyEvent): any {
+  // This function now robustly handles both modern and legacy event structures.
+  const isLegacy = 'suggestedPrice' in event; // A simple check to see if it's a legacy event object
+
+  const imageUrl = normalizeImageUrl(event.flyer_image_url, event.legacy_image_url);
+
   return {
     id: event.id,
     title: event.title || 'Untitled Event',
     venue: event.venue || 'unknown',
     date: event.date || '',
-    time: event.event_time || 'Time TBD',
-    imageUrl: event.flyer_image_url || event.legacy_image_url || '',
+    time: event.event_time || (isLegacy ? (event as LegacyEvent).time : 'Time TBD') || 'Doors at 7pm / Music at 8pm',
+    imageUrl: imageUrl,
     description: event.description || '',
-    suggestedPrice: event.price || '', // Legacy field mapping
-    ticketLink: event.ticket_url || '',
-    ageRestriction: event.age_restriction || '',
+    suggestedPrice: isLegacy ? (event as LegacyEvent).suggestedPrice : event.price || '',
+    ticketLink: event.ticket_url || (isLegacy ? (event as LegacyEvent).ticketLink : '') || '',
+    ageRestriction: event.age_restriction || (isLegacy ? (event as LegacyEvent).ageRestriction : '') || '',
     status: event.status || 'active',
     is_featured: event.is_featured || false,
     capacity: event.capacity || null,
-    // Include new CMS fields
-    event_type: event.event_type || 'music', // Default to music
-    performers: event.performers || '[]', // Empty JSON array as default
-    tags: event.tags || '[]', // Empty JSON array as default
-    external_links: event.external_links || '{}', // Empty JSON object as default
-    // Include legacy data if present
-    legacy_id: event.legacy_id || null,
+    event_type: event.event_type || 'music',
+    performers: event.performers || '[]',
+    tags: event.tags || '[]',
+    external_links: event.external_links || '{}',
+    legacy_id: event.legacy_id || (isLegacy ? event.id : null),
     created_at: event.created_at,
     updated_at: event.updated_at
   };
@@ -146,66 +175,38 @@ async function getSlideshow(c: Context<{ Bindings: Env }>) {
   try {
     const today = new Date().toISOString().split('T')[0]; // Current date in YYYY-MM-DD format
     
-    // Build query based on whether past events should be included
+    // Explicitly list all required columns for clarity and performance.
+    // This ensures we get all necessary data, including legacy fields.
     let query = `
-      SELECT * FROM events
-      WHERE status = 'active'`;
-    
-    // Filter by venue if specified
+      SELECT 
+        id, title, venue, date, event_time, 
+        flyer_image_url, legacy_image_url, 
+        description, is_featured, ticket_url, price, 
+        age_restriction, event_type, performers, tags, external_links, status
+      FROM events 
+      WHERE status = 'active'
+    `;
+    const params: any[] = [];
+
     if (venue) {
-      query += ` AND venue = ?`;
-    }
-    
-    // Only filter by date if not including past events
-    if (!includePast) {
-      query += venue ? ` AND date >= ?` : ` AND date >= ?`;
-    }
-    
-    // Always sort by date (upcoming first, then past if included)
-    query += ` ORDER BY date ASC LIMIT 20`;
-    
-    // Execute query with appropriate parameters
-    let results: any;
-    if (venue && !includePast) {
-      results = (await FWHY_D1.prepare(query).bind(venue, today).all()).results;
-    } else if (venue) {
-      results = (await FWHY_D1.prepare(query).bind(venue).all()).results;
-    } else if (!includePast) {
-      results = (await FWHY_D1.prepare(query).bind(today).all()).results;
-    } else {
-      results = (await FWHY_D1.prepare(query).all()).results;
+      query += ' AND venue = ?';
+      params.push(venue);
     }
 
-    const events = (results as Event[] ?? []).map(event => {
-      // Ensure consistent date format
-      let formattedDate = event.date || '';
-      
-      // If we have a datetime with time, extract just the date part
-      if (formattedDate && formattedDate.includes('T')) {
-        formattedDate = formattedDate.split('T')[0];
-      }
-      
-      // Log for debugging
-      console.log(`Slideshow event "${event.title}" date: ${event.date} → ${formattedDate}`);
-      
-      return {
-        id: event.id,
-        title: event.title || 'Untitled Event',
-        venue: event.venue || 'unknown',
-        date: formattedDate,
-        time: event.event_time || 'Doors at 7pm / Music at 8pm',
-        imageUrl: event.flyer_image_url || event.legacy_image_url || '',
-        description: event.description || '',
-        is_featured: event.is_featured || false,
-        ticketLink: event.ticket_url || '',
-        price: event.price || '',
-        ageRestriction: event.age_restriction || '',
-        event_type: event.event_type || 'music',
-        performers: event.performers || '[]',
-        tags: event.tags || '[]',
-        external_links: event.external_links || '{}'
-      };
-    });
+    if (!includePast) {
+      query += ' AND date >= ?';
+      params.push(today);
+    }
+    
+    query += ' ORDER BY date ASC LIMIT 20';
+    
+    console.log(`[SLIDESHOW_QUERY] Query: ${query}`);
+    console.log(`[SLIDESHOW_QUERY] Params: ${JSON.stringify(params)}`);
+
+    const { results } = await FWHY_D1.prepare(query).bind(...params).all();
+
+    // Use the single, robust normalization function here as well.
+    const events = (results as Event[] ?? []).map(normalizeEventForDisplay);
 
     return c.json(events, 200, {
       'Cache-Control': 'no-cache, no-store, must-revalidate',

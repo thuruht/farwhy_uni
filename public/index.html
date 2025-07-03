@@ -9,18 +9,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="./css/ccssss.css">
     <link rel="stylesheet" href="./css/events-modal.css">
-    
-    <!-- GSAP and Plugins -->
-    <script src="./jss/gsap-public/minified/gsap.min.js"></script>
-    <script src="./jss/gsap-public/minified/ScrollTrigger.min.js"></script>
-    <script src="./jss/gsap-public/minified/MotionPathPlugin.min.js"></script>
-    <script src="./jss/gsap-public/minified/CustomEase.min.js"></script>
-
-    <!--  Custom JS -->
-      <script defer src="./jss/ifrevl.js"></script>
-    <script defer src="./jss/ansik.js"></script>
-    <script defer src="./jss/events-modal.js"></script>
-    <!--<script defer src="./jss/modal.js"></script>-->
+    <link rel="stylesheet" href="css/fleeting-journey.css">
     <style>
       .card {
         position: relative;
@@ -64,7 +53,186 @@
      #credEt a:hover {
         text-decoration: underline;
     }
-    
+
+    #events-modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            z-index: 10001;
+        }
+
+        #events-modal-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        #events-modal-close:hover,
+        #events-modal-close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .modal-header-fixed {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #events-modal-content .modal-body {
+            padding-top: 15px;
+        }
+
+        /* Events Page Modal Styles */
+        #events-page-modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(29, 2, 2, 0.85);
+            backdrop-filter: blur(3px);
+        }
+
+        .events-page-content {
+            background-color: #1a1a1a;
+            color: #f1f1f1;
+            margin: 5% auto;
+            padding: 20px;
+            border: 2px solid var(--nav-border-color);
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            box-shadow: -8px 8px 0 rgba(0, 0, 0, 0.2);
+            font-family: var(--font-main);
+        }
+
+        .events-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .events-page-header h2 {
+            margin: 0;
+            font-family: var(--font-db, 'Lora', serif);
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            text-shadow: -2px 2px 0 rgba(0,0,0,0.2);
+        }
+
+        .events-page-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .events-page-close:hover,
+        .events-page-close:focus {
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .events-filters {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .events-filters select,
+        .events-filters button {
+            padding: 8px 12px;
+            font-family: var(--font-main);
+            background-color: #333;
+            color: #f1f1f1;
+            border: 1px solid #555;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        
+        .events-filters button.active {
+            background-color: var(--accent-color);
+            color: black;
+        }
+
+        .events-list {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 10px; /* for scrollbar */
+        }
+
+        .event-item {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border: 1px solid #444;
+        }
+
+        .event-details h3 {
+            margin: 0 0 5px;
+            color: var(--accent-color);
+            font-family: var(--font-hnm11);
+        }
+
+        .event-details p {
+            margin: 0 0 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Nav for small screens */
+        @media (max-width: 480px) {
+            .nav-links a {
+                font-size: 14px;
+                padding: 5px 8px;
+            }
+        }
+        @media (max-width: 400px) {
+            .nav-links a {
+                font-size: 12px;
+                padding: 5px 6px;
+            }
+        }
+        @media (max-width: 360px) {
+            .nav-links a {
+                font-size: 11px;
+                padding: 5px 4px;
+            }
+        }
     </style>
 </head>
 

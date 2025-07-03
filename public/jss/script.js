@@ -132,73 +132,58 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   async function fetchFlyers(state, showPast = false) {
     try {
-      // Use a simple cache key
       const cacheKey = `${state}-${showPast ? 'past' : 'upcoming'}`;
       const now = Date.now();
 
-      // Check cache
       if (cache.has(cacheKey)) {
         const cached = cache.get(cacheKey);
         if (now - cached.timestamp < CACHE_EXPIRY_MS) {
           console.log(`Using cached flyer data for ${cacheKey}`);
           return cached.data;
-        } else {
-          // Expired
-          cache.delete(cacheKey);
         }
+        cache.delete(cacheKey);
       }
 
-      // Use the updated slideshow endpoint with includePast parameter
-      const urls = [
-        `${BASE_URL}/api/slideshow?venue=${state}&includePast=${showPast}`,
-        `${BASE_URL}/slideshow?venue=${state}&includePast=${showPast}`
-      ];
+      const url = `${BASE_URL}/api/slideshow?venue=${state}&includePast=${showPast}`;
+      console.log(`Trying to fetch flyers from: ${url}`);
 
-      let data = [];
-      let successUrl = null;
-      
-      // Try each URL until one works
-      for (const url of urls) {
-        try {
-          console.log(`Trying to fetch flyers from: ${url}`);
-          const controller = new AbortController();
-          // Set a timeout for the fetch
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
-          
-          const response = await fetch(url, {
-            signal: controller.signal,
-            cache: 'no-store',
-            headers: {
-              'Cache-Control': 'no-cache'
-            }
-          });
-          
-          clearTimeout(timeoutId);
-          
-          if (response.ok) {
-            data = await response.json();
-            successUrl = url;
-            console.log(`Successfully fetched ${data.length} flyers from ${url}`);
-            break; // Exit the loop if successful
-          }
-        } catch (err) {
-          console.warn(`Failed to fetch from ${url}:`, err);
-          // Continue to the next URL
-        }
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8-second timeout
+
+      const response = await fetch(url, {
+        signal: controller.signal,
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.error(`Failed to fetch flyers from ${url}. Status: ${response.status}`);
+        // Return empty array but don't cache the failure
+        return [];
+      }
+
+      const data = await response.json();
+      console.log(`Successfully fetched ${data.length} flyers from ${url}`);
+
+      if (data.length > 0) {
+        console.log('First flyer object received:', JSON.stringify(data[0], null, 2));
       }
 
       if (data.length === 0) {
-        console.warn('No flyers found from any endpoint. Check network connectivity and endpoints.');
-      } else {
-        console.log(`Using data from ${successUrl}`);
+        console.warn('No flyers were returned from the API.');
       }
 
-      // Store in cache
       cache.set(cacheKey, { data, timestamp: now });
       return data;
     } catch (error) {
-      console.error('Error fetching flyers:', error);
-      return [];
+      if (error.name === 'AbortError') {
+        console.error('Error fetching flyers: The request timed out.');
+      } else {
+        console.error('Error fetching flyers:', error);
+      }
+      return []; // Return empty array on any error
     }
   }
 
@@ -592,6 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Function to handle the events page functionality
 function setupEventsPage() {
   const eventsLink = document.getElementById('events-page-link');
+  const eventsTriggers = document.querySelectorAll('.events-modal-trigger');
   const eventsModal = document.getElementById('events-page-modal');
   const closeButton = document.querySelector('.events-page-close');
   const venueFilter = document.getElementById('events-venue-filter');
@@ -601,6 +587,19 @@ function setupEventsPage() {
   // State variables
   let allEvents = [];
   let showPastInPage = false;
+
+  function openEventsModal() {
+    if (eventsModal) {
+      eventsModal.style.display = 'block';
+      fetchAllEvents();
+    }
+  }
+
+  function closeEventsModal() {
+    if (eventsModal) {
+      eventsModal.style.display = 'none';
+    }
+  }
   
   // Function to fetch all events for the page
   async function fetchAllEvents() {
@@ -650,16 +649,14 @@ function setupEventsPage() {
       }) : 'Date TBD';
       
       return `
-        <div class="event-card">
-          <div class="event-card-image">
-            ${event.imageUrl ? `<img src="${event.imageUrl}" alt="${event.title}">` : '<div class="no-image">No Image Available</div>'}
-          </div>
-          <div class="event-card-content">
-            <h3 class="event-card-title">${event.title}</h3>
-            <div class="event-card-date">${formattedDate}</div>
-            <div class="event-card-venue ${event.venue}">${event.venue}</div>
-            <div class="event-card-description">${event.description ? event.description.substring(0, 100) + '...' : 'No description available.'}</div>
-            ${event.ticketLink ? `<a href="${event.ticketLink}" target="_blank" class="event-card-link">Tickets</a>` : ''}
+        <div class="event-item">
+          ${event.imageUrl ? `<img src="${event.imageUrl}" alt="${event.title || 'Event Flyer'}">` : '<div class="no-image" style="width: 100px; height: 100px; background: #333; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px;">No Image</div>'}
+          <div class="event-details">
+            <h3>${event.title}</h3>
+            <p>${formattedDate}</p>
+            <p><strong>Venue:</strong> <span class="venue-${event.venue}">${event.venue}</span></p>
+            <p>${event.description || ''}</p>
+            ${event.ticketLink ? `<a href="${event.ticketLink}" target="_blank">Get Tickets</a>` : ''}
           </div>
         </div>
       `;
@@ -668,18 +665,21 @@ function setupEventsPage() {
   
   // Event handlers
   if (eventsLink) {
-    eventsLink.addEventListener('click', () => {
-      if (eventsModal) {
-        eventsModal.style.display = 'block';
-        fetchAllEvents();
-      }
-    });
+    eventsLink.addEventListener('click', openEventsModal);
   }
+
+  eventsTriggers.forEach(trigger => {
+    trigger.addEventListener('click', openEventsModal);
+  });
   
   if (closeButton) {
-    closeButton.addEventListener('click', () => {
-      if (eventsModal) {
-        eventsModal.style.display = 'none';
+    closeButton.addEventListener('click', closeEventsModal);
+  }
+
+  if (eventsModal) {
+    eventsModal.addEventListener('click', (e) => {
+      if (e.target === eventsModal) { // Click on the overlay background
+        closeEventsModal();
       }
     });
   }
@@ -692,6 +692,7 @@ function setupEventsPage() {
     togglePastButton.addEventListener('click', () => {
       showPastInPage = !showPastInPage;
       togglePastButton.textContent = showPastInPage ? 'Hide Past Events' : 'Show Past Events';
+      togglePastButton.classList.toggle('active', showPastInPage);
       fetchAllEvents();
     });
   }
