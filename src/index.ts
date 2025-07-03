@@ -224,6 +224,36 @@ publicApi.get('/menu', async (c) => {
     return c.json({ success: false, error: "Failed to fetch menu items" }, 500);
   }
 });
+publicApi.get('/hours', async (c) => {
+  const { FWHY_D1 } = c.env;
+  
+  try {
+    // Get all hours for all venues
+    const { results } = await FWHY_D1.prepare(`
+      SELECT * FROM business_hours ORDER BY venue, day_of_week
+    `).all();
+    
+    if (!results || results.length === 0) {
+      console.log('No business hours found in database');
+      return c.json({ success: false, error: "No business hours found" }, 404);
+    }
+    
+    // Group hours by venue
+    const hoursByVenue = {};
+    results.forEach(hour => {
+      if (!hoursByVenue[hour.venue]) {
+        hoursByVenue[hour.venue] = [];
+      }
+      hoursByVenue[hour.venue].push(hour);
+    });
+    
+    console.log(`Found business hours for ${Object.keys(hoursByVenue).length} venues`);
+    return c.json({ success: true, data: hoursByVenue });
+  } catch (error) {
+    console.error('Error fetching business hours:', error);
+    return c.json({ success: false, error: "Failed to fetch business hours" }, 500);
+  }
+});
 
 // Authentication
 // --- Admin API Routes ---

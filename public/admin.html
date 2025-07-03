@@ -665,6 +665,93 @@
         </div>
     </div>
 
+    <!-- Event Modal -->
+    <div id="event-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="event-modal-title">Add Event</h3>
+                <button class="modal-close-btn" onclick="closeEventForm()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="event-form">
+                    <div class="form-group">
+                        <label for="event-title">Title:</label>
+                        <input type="text" id="event-title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-date">Date:</label>
+                        <input type="date" id="event-date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-venue">Venue:</label>
+                        <select id="event-venue" name="venue" required>
+                            <option value="farewell">Farewell</option>
+                            <option value="howdy">Howdy</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-description">Description:</label>
+                        <textarea id="event-description" name="description" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-flyer-upload">Flyer Image:</label>
+                        <input type="file" id="event-flyer-upload" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label for="event-flyer-url">Flyer URL:</label>
+                        <input type="url" id="event-flyer-url" name="flyer_image_url">
+                    </div>
+                    <div class="form-group">
+                        <label for="event-ticket-url">Ticket URL:</label>
+                        <input type="url" id="event-ticket-url" name="ticket_url">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="closeEventForm()" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Event</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Post Modal -->
+    <div id="blog-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="blog-modal-title">Add Blog Post</h3>
+                <button class="modal-close-btn" onclick="closeBlogForm()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="blog-form">
+                    <div class="form-group">
+                        <label for="blog-title">Title:</label>
+                        <input type="text" id="blog-title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog-content">Content:</label>
+                        <textarea id="blog-content" name="content" rows="6"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="blog-author">Author:</label>
+                        <input type="text" id="blog-author" name="author">
+                    </div>
+                    <div class="form-group">
+                        <label for="blog-image-upload">Featured Image:</label>
+                        <input type="file" id="blog-image-upload" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label for="blog-image-url">Image URL:</label>
+                        <input type="url" id="blog-image-url" name="featured_image_url">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="closeBlogForm()" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Menu Item Modal -->
     <div id="menu-item-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">

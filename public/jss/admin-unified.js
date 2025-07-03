@@ -23,86 +23,110 @@ let currentMenuItems = [];
 function showEventForm(eventData = null) {
     console.log('Showing event form for:', eventData ? eventData.id : 'new');
     
-    const modal = document.getElementById('form-modal');
-    const modalBody = document.getElementById('modal-form-body');
+    const modal = document.getElementById('event-modal');
+    const modalTitle = document.getElementById('event-modal-title');
     
-    if (!modal || !modalBody) {
-        console.error('Modal elements not found');
+    if (!modal) {
+        console.error('Event modal not found');
         return;
     }
     
     const isEdit = eventData !== null;
-    const title = isEdit ? 'Edit Event' : 'New Event';
     
-    modalBody.innerHTML = `
-        <h3>${title}</h3>
-        <form id="event-form">
-            <div class="form-group">
-                <label for="event-title">Title:</label>
-                <input type="text" id="event-title" name="title" required value="${isEdit ? (eventData.title || '') : ''}">
-            </div>
-            <div class="form-group">
-                <label for="event-date">Date:</label>
-                <input type="date" id="event-date" name="date" required value="${isEdit ? (eventData.date || '') : ''}">
-            </div>
-            <div class="form-group">
-                <label for="event-venue">Venue:</label>
-                <select id="event-venue" name="venue" required>
-                    <option value="farewell" ${isEdit && eventData.venue === 'farewell' ? 'selected' : ''}>Farewell</option>
-                    <option value="howdy" ${isEdit && eventData.venue === 'howdy' ? 'selected' : ''}>Howdy</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="event-description">Description:</label>
-                <textarea id="event-description" name="description">${isEdit ? (eventData.description || '') : ''}</textarea>
-            </div>
-            <div class="form-group">
-                <label for="event-flyer">Flyer URL:</label>
-                <input type="url" id="event-flyer" name="flyer_image_url" value="${isEdit ? (eventData.flyer_image_url || '') : ''}">
-            </div>
-            <div class="form-group">
-                <label for="event-ticket-url">Ticket URL:</label>
-                <input type="url" id="event-ticket-url" name="ticket_url" value="${isEdit ? (eventData.ticket_url || '') : ''}">
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">${isEdit ? 'Update' : 'Create'} Event</button>
-                <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
-            </div>
-        </form>
-    `;
+    // Set modal title
+    if (modalTitle) {
+        modalTitle.textContent = isEdit ? 'Edit Event' : 'Add Event';
+    }
     
-    modal.style.display = 'flex';
+    // Store event ID if editing
+    if (isEdit) {
+        modal.dataset.eventId = eventData.id;
+    } else {
+        delete modal.dataset.eventId;
+    }
     
-    // Handle form submission
+    // Populate form if editing
+    if (isEdit) {
+        document.getElementById('event-title').value = eventData.title || '';
+        document.getElementById('event-date').value = eventData.date ? eventData.date.split('T')[0] : '';
+        document.getElementById('event-venue').value = eventData.venue || 'farewell';
+        document.getElementById('event-description').value = eventData.description || '';
+        document.getElementById('event-flyer-url').value = eventData.flyer_image_url || '';
+        document.getElementById('event-ticket-url').value = eventData.ticket_url || '';
+    } else {
+        document.getElementById('event-form').reset();
+    }
+    
+    // Show modal
+    modal.style.display = 'block';
+    
+    // Make sure the form submit handler is attached only once
     const form = document.getElementById('event-form');
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(form);
-        const eventData = Object.fromEntries(formData);
-        
-        if (isEdit) {
-            eventData.id = eventData.id;
-        }
-        
+    form.removeEventListener('submit', handleEventFormSubmit);
+    form.addEventListener('submit', handleEventFormSubmit);
+}
+
+// Handle event form submission
+async function handleEventFormSubmit(e) {
+    e.preventDefault();
+    
+    const modal = document.getElementById('event-modal');
+    const isEdit = modal.dataset.eventId;
+    const eventId = isEdit ? modal.dataset.eventId : null;
+    
+    const formData = new FormData(e.target);
+    const eventData = Object.fromEntries(formData);
+    
+    // Handle file upload if present
+    const flyerFile = document.getElementById('event-flyer-upload').files[0];
+    if (flyerFile) {
         try {
-            const url = isEdit ? `/api/admin/events/${eventData.id}` : '/api/admin/events';
-            const method = isEdit ? 'PUT' : 'POST';
+            const uploadFormData = new FormData();
+            uploadFormData.append('flyer', flyerFile);
             
-            const response = await apiCall(url, { method, body: JSON.stringify(eventData) });
+            const uploadResponse = await apiCall('/api/admin/events/flyer', {
+                method: 'POST',
+                body: uploadFormData
+            });
             
-            if (response.success) {
-                showToast(isEdit ? 'Event updated successfully!' : 'Event created successfully!', 'success');
-                modal.style.display = 'none';
-                loadEvents(); // Reload events
-            } else {
-                showToast('Error saving event: ' + response.error, 'error');
+            if (uploadResponse && uploadResponse.imageUrl) {
+                eventData.flyer_image_url = uploadResponse.imageUrl;
             }
         } catch (error) {
-            console.error('Error saving event:', error);
-            showToast('Error saving event', 'error');
+            console.error('Error uploading flyer:', error);
         }
-    });
+    }
+    
+    try {
+        const url = isEdit ? `/api/admin/events/${eventId}` : '/api/admin/events';
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        const response = await apiCall(url, { 
+            method, 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(eventData) 
+        });
+        
+        if (response.success) {
+            showToast(isEdit ? 'Event updated successfully!' : 'Event created successfully!', 'success');
+            closeEventForm();
+            loadEvents(); // Reload events
+        } else {
+            showToast('Error saving event: ' + (response.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error saving event:', error);
+        showToast('Error saving event', 'error');
+    }
+}
+
+// Close event form modal
+function closeEventForm() {
+    const modal = document.getElementById('event-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.getElementById('event-form').reset();
+    }
 }
 
 function editEvent(eventId) {
@@ -119,71 +143,108 @@ function editEvent(eventId) {
 function showBlogForm(blogData = null) {
     console.log('Showing blog form for:', blogData ? blogData.id : 'new');
     
-    const modal = document.getElementById('form-modal');
-    const modalBody = document.getElementById('modal-form-body');
+    const modal = document.getElementById('blog-modal');
+    const modalTitle = document.getElementById('blog-modal-title');
     
-    if (!modal || !modalBody) {
-        console.error('Modal elements not found');
+    if (!modal) {
+        console.error('Blog modal not found');
         return;
     }
     
     const isEdit = blogData !== null;
-    const title = isEdit ? 'Edit Blog Post' : 'New Blog Post';
     
-    modalBody.innerHTML = `
-        <h3>${title}</h3>
-        <form id="blog-form">
-            <div class="form-group">
-                <label for="blog-title">Title:</label>
-                <input type="text" id="blog-title" name="title" required value="${isEdit ? (blogData.title || '') : ''}">
-            </div>
-            <div class="form-group">
-                <label for="blog-content">Content:</label>
-                <textarea id="blog-content" name="content" rows="10">${isEdit ? (blogData.content || '') : ''}</textarea>
-            </div>
-            <div class="form-group">
-                <label for="blog-author">Author:</label>
-                <input type="text" id="blog-author" name="author" value="${isEdit ? (blogData.author || '') : ''}">
-            </div>
-            <div class="form-group">
-                <label for="blog-image">Featured Image URL:</label>
-                <input type="url" id="blog-image" name="featured_image_url" value="${isEdit ? (blogData.featured_image_url || '') : ''}">
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">${isEdit ? 'Update' : 'Create'} Post</button>
-                <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
-            </div>
-        </form>
-    `;
+    // Set modal title
+    if (modalTitle) {
+        modalTitle.textContent = isEdit ? 'Edit Blog Post' : 'Add Blog Post';
+    }
     
-    modal.style.display = 'flex';
+    // Store blog post ID if editing
+    if (isEdit) {
+        modal.dataset.blogId = blogData.id;
+    } else {
+        delete modal.dataset.blogId;
+    }
     
-    // Handle form submission
+    // Populate form if editing
+    if (isEdit) {
+        document.getElementById('blog-title').value = blogData.title || '';
+        document.getElementById('blog-content').value = blogData.content || '';
+        document.getElementById('blog-author').value = blogData.author || '';
+        document.getElementById('blog-image-url').value = blogData.featured_image_url || '';
+    } else {
+        document.getElementById('blog-form').reset();
+    }
+    
+    // Show modal
+    modal.style.display = 'block';
+    
+    // Make sure the form submit handler is attached only once
     const form = document.getElementById('blog-form');
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(form);
-        const postData = Object.fromEntries(formData);
-        
+    form.removeEventListener('submit', handleBlogFormSubmit);
+    form.addEventListener('submit', handleBlogFormSubmit);
+}
+
+// Handle blog form submission
+async function handleBlogFormSubmit(e) {
+    e.preventDefault();
+    
+    const modal = document.getElementById('blog-modal');
+    const isEdit = modal.dataset.blogId;
+    const blogId = isEdit ? modal.dataset.blogId : null;
+    
+    const formData = new FormData(e.target);
+    const blogData = Object.fromEntries(formData);
+    
+    // Handle file upload if present
+    const imageFile = document.getElementById('blog-image-upload').files[0];
+    if (imageFile) {
         try {
-            const url = isEdit ? `/api/admin/blog/posts/${blogData.id}` : '/api/admin/blog/posts';
-            const method = isEdit ? 'PUT' : 'POST';
+            const uploadFormData = new FormData();
+            uploadFormData.append('image', imageFile);
             
-            const response = await apiCall(url, { method, body: JSON.stringify(postData) });
+            const uploadResponse = await apiCall('/api/admin/blog/upload-image', {
+                method: 'POST',
+                body: uploadFormData
+            });
             
-            if (response.success) {
-                showToast(isEdit ? 'Post updated successfully!' : 'Post created successfully!', 'success');
-                modal.style.display = 'none';
-                loadBlogPosts(); // Reload blog posts
-            } else {
-                showToast('Error saving post: ' + response.error, 'error');
+            if (uploadResponse && uploadResponse.imageUrl) {
+                blogData.featured_image_url = uploadResponse.imageUrl;
             }
         } catch (error) {
-            console.error('Error saving blog post:', error);
-            showToast('Error saving post', 'error');
+            console.error('Error uploading blog image:', error);
         }
-    });
+    }
+    
+    try {
+        const url = isEdit ? `/api/admin/blog/posts/${blogId}` : '/api/admin/blog/posts';
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        const response = await apiCall(url, { 
+            method, 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(blogData) 
+        });
+        
+        if (response.success) {
+            showToast(isEdit ? 'Blog post updated successfully!' : 'Blog post created successfully!', 'success');
+            closeBlogForm();
+            loadBlogPosts(); // Reload blog posts
+        } else {
+            showToast('Error saving blog post: ' + (response.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error saving blog post:', error);
+        showToast('Error saving blog post', 'error');
+    }
+}
+
+// Close blog form modal
+function closeBlogForm() {
+    const modal = document.getElementById('blog-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.getElementById('blog-form').reset();
+    }
 }
 
 function editBlogPost(postId) {
