@@ -383,6 +383,46 @@
                 margin-bottom: 10px !important;
             }
         }
+
+        /* Menu reordering styles */
+        .menu-container.reorder-mode .menu-item {
+            cursor: move;
+            position: relative;
+            transition: background-color 0.2s;
+        }
+
+        .menu-container.reorder-mode .menu-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .menu-container.reorder-mode .menu-item.dragging {
+            opacity: 0.6;
+        }
+
+        .menu-container.reorder-mode .menu-item.drag-over {
+            border-top: 2px solid #007bff;
+        }
+
+        .drag-handle {
+            display: none;
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: move;
+            color: #666;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .menu-container.reorder-mode .drag-handle {
+            display: block;
+        }
+
+        .menu-container.reorder-mode .menu-item-details,
+        .menu-container.reorder-mode .menu-item-description {
+            margin-left: 20px;
+        }
     </style>
 </head>
 <body data-state="farewell">

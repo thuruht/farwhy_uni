@@ -33,22 +33,70 @@ This document describes critical system components that should not be modified w
 - **Notes**: This endpoint groups hours by venue name, allowing for easy display of hours for both venues. The endpoint must return data in this exact format to ensure the hours display correctly on the public site.
 
 ### 1.2 Menu Management Endpoints
-- **Admin Routes**:
-  - GET `/api/admin/venues/:venue/menu-items` - List menu items
-  - POST `/api/admin/venues/:venue/menu-items` - Create menu item
-  - PUT `/api/admin/menu-items/:id` - Update menu item
-  - DELETE `/api/admin/menu-items/:id` - Delete menu item
-- **Public Routes**:
-  - GET `/api/venues/:venue/menu-items` - Get menu items for venue
-  - GET `/api/menu` - Get all menu items (mainly for Farewell)
-- **Database Tables**: `menu_items`, `menus`
-- **Handler**: Uses both the `handleMenu` function in `src/handlers/menu.ts` and custom implementations in `src/index.ts`
 
-### 1.3 Image Upload Endpoints
-- **Blog Images**: POST `/api/admin/blog/upload-image`
-- **Event Flyers**: POST `/api/admin/events/flyer`
-- **Storage**: Uses R2 bucket `FWHY_IMAGES`
-- **Image Serving**: Via `/images/*` route with proper authorization checks
+- **Public Routes**:
+  - GET `/api/venues/:venue/menu-items` - Get menu items for a specific venue
+  - GET `/api/menu` - Get all menu items for Farewell (legacy endpoint)
+
+- **Admin Routes** (require authentication):
+  - GET `/api/admin/venues/:venue/menu-items` - Get menu items for admin dashboard
+  - POST `/api/admin/venues/:venue/menu-items` - Create a new menu item
+  - PUT `/api/admin/menu-items/:id` - Update an existing menu item
+  - DELETE `/api/admin/menu-items/:id` - Delete a menu item
+  - POST `/api/admin/menu-items/reorder` - Update the display order of menu items
+
+- **Database Table**: `menu_items`
+- **Response Format Example**:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "menu_id": 1,
+      "name": "Cappuccino",
+      "description": "Espresso with steamed milk and foam",
+      "price": 4.5,
+      "category": "Coffee",
+      "display_order": 1,
+      "active": 1
+    },
+    // Additional items...
+  ]
+}
+```
+
+## 2. Frontend Components
+
+### 2.1 Menu Management UI
+
+- **Admin Dashboard File**: `public/admin.html`
+- **JavaScript**: `public/jss/admin-unified.js`
+- **Key Functions**:
+  - `loadVenueSettings()` - Loads menu items and business hours for the venue
+  - `editMenuItem(item)` - Opens the edit modal for a menu item
+  - `deleteMenuItem(item)` - Deletes a menu item after confirmation
+  - `showMenuItemForm(item)` - Opens the menu item form for creating/editing
+  - `toggleMenuReorderMode()` - Toggles the reorder mode for menu items
+  
+- **UI Components**:
+  - Menu item form modal: `<div id="menu-item-modal">`
+  - Menu list container: `<div id="menu-list">`
+  - Add menu item button: `<button id="add-menu-btn">`
+  - Reorder menu button: `<button id="reorder-menu-btn">`
+
+- **Data Flow**:
+  1. User clicks "Add Menu Item" button -> `showMenuItemForm()` -> Modal opens
+  2. User submits form -> API call to create/update item -> `loadVenueSettings()` refreshes the list
+  3. User clicks "Reorder Menu" -> `toggleMenuReorderMode()` -> Drag and drop enabled
+  4. User saves reordered menu -> API call to update display order
+
+- **Required CSS Classes**: 
+  - `menu-container` - Container for all menu items
+  - `menu-category` - Container for category of menu items
+  - `menu-item` - Individual menu item
+  - `reorder-mode` - Added to container when reordering is active
 
 ## 2. Admin Modal System
 

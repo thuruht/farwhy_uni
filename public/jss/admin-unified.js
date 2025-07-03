@@ -258,13 +258,44 @@ function editBlogPost(postId) {
 }
 
 // Menu Management Functions
-function editMenuItem(itemId) {
-    console.log('Edit menu item clicked for id:', itemId);
-    const item = currentMenuItems.find(i => i.id == itemId);
-    if (item) {
+function editMenuItem(item) {
+    console.log('Edit menu item clicked for:', item);
+    if (typeof item === 'object' && item !== null) {
         showMenuItemForm(item);
+    } else if (typeof item === 'string' || typeof item === 'number') {
+        // If ID was passed instead of object, find the item
+        const itemObj = currentMenuItems.find(i => i.id == item);
+        if (itemObj) {
+            showMenuItemForm(itemObj);
+        } else {
+            console.error('Menu item not found with ID:', item);
+        }
     } else {
-        console.error('Menu item not found:', itemId);
+        console.error('Invalid menu item:', item);
+    }
+}
+
+// Function to delete a menu item
+function deleteMenuItem(item) {
+    console.log('Delete menu item clicked for:', item);
+    
+    if (confirm(`Are you sure you want to delete "${item.name}"?`)) {
+        const itemId = item.id;
+        
+        // Call the API to delete the item
+        api.delete(`/api/admin/menu-items/${itemId}`)
+            .then(response => {
+                if (response && response.success) {
+                    showToast('Menu item deleted successfully', 'success');
+                    loadVenueSettings(); // Reload the menu
+                } else {
+                    showToast('Failed to delete menu item: ' + (response?.error || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting menu item:', error);
+                showToast('Error deleting menu item', 'error');
+            });
     }
 }
 
@@ -789,6 +820,33 @@ const api = {
         return await this._call(endpoint, { method: 'DELETE' });
     }
 };
+
+// Helper function to wrap api calls and handle URL path conversion
+function apiCall(url, options = {}) {
+    // Convert URL paths to match the backend
+    // Replace /api/admin/menu-items/:id with /api/admin/menu-items/:id
+    // Replace /api/admin/venues/farewell/menu-items with /api/admin/venues/farewell/menu-items
+    
+    // Define the method based on options
+    const method = options.method || 'GET';
+    
+    // Remove /api prefix if present as the api object already adds it
+    const cleanUrl = url.startsWith('/api/') ? url.substring(4) : url;
+    
+    // Call the appropriate api method based on the HTTP method
+    switch (method.toUpperCase()) {
+        case 'GET':
+            return api.get(cleanUrl);
+        case 'POST':
+            return api.post(cleanUrl, JSON.parse(options.body || '{}'));
+        case 'PUT':
+            return api.put(cleanUrl, JSON.parse(options.body || '{}'));
+        case 'DELETE':
+            return api.delete(cleanUrl);
+        default:
+            throw new Error(`Unsupported HTTP method: ${method}`);
+    }
+}
 
 function formatDate(dateString) {
     if (!dateString) return '';
@@ -1691,6 +1749,141 @@ async function loadVenueSettings() {
     });
 }
 
+// Function to toggle menu reorder mode
+function toggleMenuReorderMode() {
+    console.log('Toggling menu reorder mode');
+    
+    const menuList = document.getElementById('menu-list');
+    const reorderBtn = document.getElementById('reorder-menu-btn');
+    
+    if (!menuList || !reorderBtn) {
+        console.error('Menu list or reorder button not found');
+        return;
+    }
+    
+    // Check if we're already in reorder mode
+    const isInReorderMode = menuList.classList.contains('reorder-mode');
+    
+    if (isInReorderMode) {
+        // Exit reorder mode
+        menuList.classList.remove('reorder-mode');
+        reorderBtn.textContent = 'Reorder Menu';
+        
+        // Get the new order and save it
+        saveMenuOrder();
+    } else {
+        // Enter reorder mode
+        menuList.classList.add('reorder-mode');
+        reorderBtn.textContent = 'Save Order';
+        
+        // Add drag handles and make items draggable
+        setupDragAndDrop();
+    }
+}
+
+// Setup drag and drop for menu items
+function setupDragAndDrop() {
+    const menuItems = document.querySelectorAll('.menu-item');
+    
+    menuItems.forEach(item => {
+        // Add drag handle if not already present
+        if (!item.querySelector('.drag-handle')) {
+            const dragHandle = document.createElement('div');
+            dragHandle.className = 'drag-handle';
+            dragHandle.innerHTML = '⋮⋮';
+            item.insertBefore(dragHandle, item.firstChild);
+        }
+        
+        // Make draggable
+        item.setAttribute('draggable', 'true');
+        
+        // Add drag events
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragover', handleDragOver);
+        item.addEventListener('drop', handleDrop);
+        item.addEventListener('dragend', handleDragEnd);
+    });
+}
+
+// Drag event handlers
+function handleDragStart(e) {
+    this.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', this.dataset.itemId);
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    this.classList.add('drag-over');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    const draggedItemId = e.dataTransfer.getData('text/plain');
+    const draggedItem = document.querySelector(`.menu-item[data-item-id="${draggedItemId}"]`);
+    
+    if (draggedItem && this !== draggedItem) {
+        // Get the category container
+        const thisCategory = this.closest('.menu-category');
+        const draggedCategory = draggedItem.closest('.menu-category');
+        
+        if (thisCategory === draggedCategory) {
+            // Same category, just reorder
+            const itemsContainer = thisCategory.querySelector('.menu-items');
+            
+            if (this.nextSibling === draggedItem) {
+                itemsContainer.insertBefore(draggedItem, this);
+            } else {
+                itemsContainer.insertBefore(draggedItem, this.nextSibling);
+            }
+        } else {
+            // Different category, update the category
+            const itemsContainer = thisCategory.querySelector('.menu-items');
+            itemsContainer.insertBefore(draggedItem, this.nextSibling);
+            
+            // Update the item's category
+            const categoryName = thisCategory.querySelector('.menu-category-header h4').textContent;
+            draggedItem.dataset.category = categoryName;
+        }
+    }
+    
+    this.classList.remove('drag-over');
+}
+
+function handleDragEnd() {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.drag-over').forEach(item => {
+        item.classList.remove('drag-over');
+    });
+}
+
+// Save the new menu order
+async function saveMenuOrder() {
+    const menuItems = document.querySelectorAll('.menu-item');
+    const items = [];
+    
+    // Collect all items with their new order
+    menuItems.forEach((item, index) => {
+        items.push({
+            id: item.dataset.itemId,
+            display_order: index,
+            category: item.dataset.category || item.closest('.menu-category').querySelector('.menu-category-header h4').textContent
+        });
+    });
+    
+    try {
+        const response = await api.post('/admin/menu-items/reorder', { items });
+        
+        if (response && response.success) {
+            showToast('Menu order saved successfully', 'success');
+        } else {
+            showToast('Failed to save menu order: ' + (response?.error || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        console.error('Error saving menu order:', error);
+        showToast('Error saving menu order', 'error');
+    }
+}
+
 // Helper function to group menu items by category
 function groupMenuItemsByCategory(menuItems) {
     const grouped = {};
@@ -1858,17 +2051,9 @@ function setupMenuItemForm() {
             try {
                 let response;
                 if (isEditing) {
-                    response = await apiCall(`/api/admin/menu-items/${itemId}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
+                    response = await api.put(`/api/admin/menu-items/${itemId}`, data);
                 } else {
-                    response = await apiCall('/api/admin/venues/farewell/menu-items', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
+                    response = await api.post('/api/admin/venues/farewell/menu-items', data);
                 }
                 
                 if (response && response.success) {
@@ -1890,4 +2075,29 @@ function setupMenuItemForm() {
 function editEvent(eventId) {
     console.log('Edit event clicked for id:', eventId);
     const event = currentEvents.find(e => e.id === eventId);
-    if
+    if (event) {
+        showEventForm(event);
+    } else {
+        console.error('Event not found:', eventId);
+    }
+}
+
+function deleteEvent(eventId) {
+    console.log('Delete event clicked for id:', eventId);
+    const event = currentEvents.find(e => e.id === eventId);
+    if (event && confirm(`Are you sure you want to delete the event "${event.title}"?`)) {
+        api.delete(`/api/admin/events/${eventId}`)
+            .then(response => {
+                if (response && response.success) {
+                    showToast('Event deleted successfully', 'success');
+                    loadEvents(); // Reload events
+                } else {
+                    showToast('Error deleting event: ' + (response.error || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting event:', error);
+                showToast('Error deleting event', 'error');
+            });
+    }
+}
