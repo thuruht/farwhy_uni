@@ -283,7 +283,7 @@ function deleteMenuItem(item) {
         const itemId = item.id;
         
         // Call the API to delete the item
-        api.delete(`/api/admin/menu-items/${itemId}`)
+        api.delete(`/admin/menu-items/${itemId}`)
             .then(response => {
                 if (response && response.success) {
                     showToast('Menu item deleted successfully', 'success');
@@ -765,6 +765,13 @@ const api = {
             console.log(`API call to ${endpoint}`, options);
             const response = await fetch(endpoint, { ...options, credentials: 'include', cache: 'no-store' });
             console.log(`API response status: ${response.status}`);
+            
+            // Log full response for debugging
+            if (endpoint.includes('menu')) {
+                response.clone().text().then(text => {
+                    console.log(`API response for ${endpoint}:`, text);
+                });
+            }
 
             if (response.status === 401) {
                 console.error('API Auth failed (401)');
@@ -824,14 +831,19 @@ const api = {
 // Helper function to wrap api calls and handle URL path conversion
 function apiCall(url, options = {}) {
     // Convert URL paths to match the backend
-    // Replace /api/admin/menu-items/:id with /api/admin/menu-items/:id
-    // Replace /api/admin/venues/farewell/menu-items with /api/admin/venues/farewell/menu-items
-    
+    // Replace /api/admin/ with /admin/ to match the api object
     // Define the method based on options
     const method = options.method || 'GET';
     
     // Remove /api prefix if present as the api object already adds it
-    const cleanUrl = url.startsWith('/api/') ? url.substring(4) : url;
+    let cleanUrl = url;
+    if (url.startsWith('/api/admin/')) {
+        cleanUrl = url.replace('/api/admin/', '/admin/');
+    } else if (url.startsWith('/api/')) {
+        cleanUrl = url.substring(4);
+    }
+    
+    console.log(`Converting API URL: ${url} to ${cleanUrl}`);
     
     // Call the appropriate api method based on the HTTP method
     switch (method.toUpperCase()) {
@@ -1692,6 +1704,7 @@ function setupBlogFilters() {
 
 async function loadVenueSettings() {
     console.log('Loading venue settings...');
+    console.trace('loadVenueSettings called from');
     
     // Get the venue settings container
     const venueSection = document.getElementById('section-venue');
@@ -1717,8 +1730,9 @@ async function loadVenueSettings() {
     
     try {
         // Load menu items for the current venue (hardcoded to 'farewell' for now)
-        const venue = dashboardState.currentVenue || 'farewell';
-        const response = await api.get(`/api/admin/venues/${venue}/menu-items`);
+        const venue = 'farewell'; // Always use 'farewell' for now
+        console.log(`Loading menu items for venue: ${venue}`);
+        const response = await api.get(`/admin/venues/${venue}/menu-items`);
         
         console.log('Menu items response:', response);
         
@@ -2051,9 +2065,9 @@ function setupMenuItemForm() {
             try {
                 let response;
                 if (isEditing) {
-                    response = await api.put(`/api/admin/menu-items/${itemId}`, data);
+                    response = await api.put(`/admin/menu-items/${itemId}`, data);
                 } else {
-                    response = await api.post('/api/admin/venues/farewell/menu-items', data);
+                    response = await api.post('/admin/venues/farewell/menu-items', data);
                 }
                 
                 if (response && response.success) {
@@ -2101,3 +2115,19 @@ function deleteEvent(eventId) {
             });
     }
 }
+
+// Add a menu management link at document load to force initialization
+window.addEventListener('DOMContentLoaded', () => {
+    const navContainer = document.querySelector('.nav-items');
+    if (navContainer) {
+        const menuButton = document.createElement('button');
+        menuButton.textContent = 'Debug: Load Menu Management';
+        menuButton.className = 'btn btn-secondary';
+        menuButton.style.margin = '10px';
+        menuButton.addEventListener('click', () => {
+            console.log('Debug menu button clicked');
+            loadVenueSettings();
+        });
+        document.body.appendChild(menuButton);
+    }
+});
