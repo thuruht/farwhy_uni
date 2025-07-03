@@ -51,8 +51,8 @@ app.get('/images/*', async (c) => {
       return new Response('Not found', { status: 404 });
     }
     
-    // For admin-uploaded content (like blog images, flyers), check authorization
-    if (path.startsWith('blog/') || path.startsWith('flyers/') || path.startsWith('admin/')) {
+    // For admin-uploaded content, some paths might require authorization
+    if (path.startsWith('admin/')) { // REMOVED 'flyers/' and 'blog/' from this check
       // Check if user has admin access for private images
       const { JWT_SECRET, SESSIONS_KV } = c.env;
       let isAuthorized = false;
