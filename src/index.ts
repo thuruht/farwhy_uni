@@ -31,6 +31,11 @@ const app = new Hono<{ Bindings: Env }>();
 app.use('/api/*', timing());
 app.use('/api/*', cors());
 
+// Authentication endpoints (login, logout, session check)
+app.post('/api/login', c => handleAuth(c, 'login'));
+app.post('/api/logout', c => handleAuth(c, 'logout'));
+app.get('/api/check', c => handleAuth(c, 'check'));
+
 // --- Image serving from R2 ---
 app.get('/images/*', async (c) => {
   const path = c.req.path.replace('/images/', '');
@@ -228,9 +233,36 @@ publicApi.get('/hours', (c) => handleHours(c, 'list-all'));
 
 // Add the slideshow endpoint to the public API
 publicApi.get('/slideshow', (c) => handleEvents(c, 'slideshow'));
+// Public authentication endpoints (login/logout/check)
+publicApi.post('/login', (c) => handleAuth(c, 'login'));
+publicApi.post('/logout', (c) => handleAuth(c, 'logout'));
+publicApi.get('/check', (c) => handleAuth(c, 'check'));
 
-app.route('/api', publicApi);
+// --- Admin API Routes ---
+const adminApi = new Hono<{ Bindings: Env }>();
+// Protect all admin endpoints with authentication middleware
+adminApi.use('/*', authMiddleware());
+
+// Add all admin routes here
+adminApi.get('/health', (c) => c.json({ status: 'admin-ok' }));
+adminApi.post('/events', (c) => handleEvents(c, 'create'));
+adminApi.put('/events/:id', (c) => handleEvents(c, 'update'));
+adminApi.delete('/events/:id', (c) => handleEvents(c, 'delete'));
+adminApi.post('/menu', (c) => handleMenu(c, 'create'));
+adminApi.put('/menu/:id', (c) => handleMenu(c, 'update'));
+adminApi.delete('/menu/:id', (c) => handleMenu(c, 'delete'));
+adminApi.post('/hours', (c) => handleHours(c, 'create'));
+adminApi.put('/hours/:id', (c) => handleHours(c, 'update'));
+adminApi.delete('/hours/:id', (c) => handleHours(c, 'delete'));
+adminApi.post('/featured', (c) => handleFeatured(c, 'update'));
+adminApi.post('/blog', createPost);
+adminApi.put('/blog/:id', updatePostById);
+adminApi.delete('/blog/:id', deletePostById);
+adminApi.post('/blog/images', uploadBlogImage);
+
+// Mount admin API before public API to avoid prefix conflicts
 app.route('/api/admin', adminApi);
+app.route('/api', publicApi);
 
 // ====================================
 // FRONTEND & ASSET SERVING

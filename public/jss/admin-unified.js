@@ -18,6 +18,7 @@ let dashboardState = {
 let currentEvents = [];
 let currentBlogPosts = [];
 let currentMenuItems = [];
+let currentVenue = 'farewell'; // Default venue
 
 // Event Management Functions
 function showEventForm(eventData = null) {
@@ -585,6 +586,7 @@ async function handleLoginSubmit(e) {
     try {
         const response = await fetch('/api/login', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
@@ -714,35 +716,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Now check authentication and show the appropriate screen
-    const sessionToken = getCookie('sessionToken');
-    
+    // Directly check authentication validity without relying on reading cookies via JS
     try {
-        if (!sessionToken) {
-            console.log('[Admin] No session token found. Showing login screen.');
-            showLoginScreen();
-        } else {
-            console.log('[Admin] Session token found, checking validity...');
-            const authResponse = await fetch('/api/check', { credentials: 'include', cache: 'no-store' });
-            if (authResponse && authResponse.ok) {
-                const authData = await authResponse.json();
-                if (authData.success && authData.user) {
-                    console.log('[Admin] Valid user session, showing dashboard');
-                    currentUser = authData.user;
-                    showDashboard();
-                } else {
-                    console.log('[Admin] Invalid user session data, showing login');
-                    document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                    showLoginScreen();
-                }
+        console.log('[Admin] Checking session validity...');
+        const authResponse = await fetch('/api/check', { credentials: 'include', cache: 'no-store' });
+        if (authResponse.ok) {
+            const authData = await authResponse.json();
+            if (authData.success && authData.user) {
+                console.log('[Admin] Valid user session, showing dashboard');
+                currentUser = authData.user;
+                showDashboard();
             } else {
-                console.log('[Admin] Auth check failed, showing login');
-                document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                console.log('[Admin] Invalid user session data, showing login');
                 showLoginScreen();
             }
+        } else {
+            console.log('[Admin] Auth check failed with status:', authResponse.status);
+            showLoginScreen();
         }
     } catch (error) {
-        console.error("[Admin] Auth check error, showing login screen.", error);
-        document.cookie = 'sessionToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        console.error('[Admin] Auth check error, showing login screen.', error);
         showLoginScreen();
     }
 });
@@ -831,28 +824,38 @@ const api = {
 // Helper function to wrap api calls and handle URL path conversion
 function apiCall(url, options = {}) {
     // Convert URL paths to match the backend
-    // Replace /api/admin/ with /admin/ to match the api object
     // Define the method based on options
     const method = options.method || 'GET';
     
-    // Remove /api prefix if present as the api object already adds it
+    // Clean up URL for consistency
     let cleanUrl = url;
-    if (url.startsWith('/api/admin/')) {
-        cleanUrl = url.replace('/api/admin/', '/admin/');
-    } else if (url.startsWith('/api/')) {
-        cleanUrl = url.substring(4);
+    
+    // Make sure we have the /api prefix
+    if (!url.startsWith('/api/')) {
+        cleanUrl = `/api${url.startsWith('/') ? '' : '/'}${url}`;
     }
     
-    console.log(`Converting API URL: ${url} to ${cleanUrl}`);
+    console.log(`API call: ${method} ${cleanUrl}`);
+    
+    // Handle FormData properly - don't try to JSON.parse FormData
+    const isFormData = options.body instanceof FormData;
     
     // Call the appropriate api method based on the HTTP method
     switch (method.toUpperCase()) {
         case 'GET':
             return api.get(cleanUrl);
         case 'POST':
-            return api.post(cleanUrl, JSON.parse(options.body || '{}'));
+            if (isFormData) {
+                return api._call(cleanUrl, { method: 'POST', body: options.body })
+                    .then(res => res && res.json());
+            }
+            return api.post(cleanUrl, options.body ? JSON.parse(options.body) : {});
         case 'PUT':
-            return api.put(cleanUrl, JSON.parse(options.body || '{}'));
+            if (isFormData) {
+                return api._call(cleanUrl, { method: 'PUT', body: options.body })
+                    .then(res => res && res.json());
+            }
+            return api.put(cleanUrl, options.body ? JSON.parse(options.body) : {});
         case 'DELETE':
             return api.delete(cleanUrl);
         default:
@@ -1739,52 +1742,47 @@ function setupBlogFilters() {
 // VENUE SETTINGS & MENU MANAGEMENT
 // ====================================
 
-async function loadVenueSettings() {
-    console.log('Loading venue settings...');
-    console.trace('loadVenueSettings called from');
-    
-    // Get the venue settings container
-    const venueSection = document.getElementById('section-venue');
-    if (!venueSection) {
-        console.error('Venue section not found');
-        return;
+async function loadVenueSettings(venue) {
+    // Get the current active venue if not provided
+    if (!venue) {
+        const venueSelector = document.getElementById('venue-selector');
+        venue = venueSelector ? venueSelector.value || 'farewell' : 'farewell';
     }
     
-    // Initialize menu management elements
+    console.log(`Loading venue settings for venue: ${venue}`);
+    window.currentVenue = venue; // Store the current venue globally
+    
+    const menuManagement = document.getElementById('menu-management');
+    if (!menuManagement) return;
+
     const addMenuBtn = document.getElementById('add-menu-btn');
     const reorderMenuBtn = document.getElementById('reorder-menu-btn');
     const menuList = document.getElementById('menu-list');
-    
     console.log('Menu management elements:', { addMenuBtn, reorderMenuBtn, menuList });
-    
-    if (!addMenuBtn || !reorderMenuBtn || !menuList) {
-        console.error('Menu management elements not found');
-        return;
+
+
+    if (addMenuBtn) {
+        addMenuBtn.onclick = () => {
+            console.log('Add menu item button clicked');
+            showMenuItemForm(null, venue);
+        };
+    }
+
+    if (reorderMenuBtn) {
+        reorderMenuBtn.onclick = () => {
+            console.log('Reorder menu items button clicked');
+            toggleReorderMode(venue);
+        };
     }
     
-    // Make sure menu form is set up
-    setupMenuItemForm();
-    
-    // Clear and show loading state
-    menuList.innerHTML = '<div class="loading">Loading menu items...</div>';
-    
+    console.log(`Loading menu items for venue: ${venue}`);
     try {
-        // Load menu items for the current venue (hardcoded to 'farewell' for now)
-        const venue = 'farewell'; // Always use 'farewell' for now
-        console.log(`Loading menu items for venue: ${venue}`);
-        
-        // Use the apiCall wrapper to ensure proper URL formatting
-        const response = await apiCall(`/api/admin/venues/${venue}/menu-items`);
-        
-        console.log('Menu items response:', response);
-        
-        if (response && response.success && response.data) {
-            currentMenuItems = response.data; // Set global variable for other functions
-            // Group menu items by category
-            const menuItemsByCategory = groupMenuItemsByCategory(response.data);
-            
-            // Render the menu items by category
-            renderMenuItems(menuItemsByCategory, menuList);
+        // Corrected the API path to include /api/
+        const menuItems = await api.get(`/api/admin/venues/${venue}/menu-items`);
+        console.log('Menu items response:', menuItems);
+        if (menuItems && Array.isArray(menuItems)) {
+            window.globalMenuData = menuItems;
+            renderMenuItems(menuItems, venue);
         } else {
             menuList.innerHTML = '<div class="empty-state">No menu items found. Click "Add Menu Item" to create one.</div>';
         }
@@ -1792,17 +1790,6 @@ async function loadVenueSettings() {
         console.error('Error loading menu items:', error);
         menuList.innerHTML = '<div class="error-state">Failed to load menu items. Please try again.</div>';
     }
-    
-    // Add event listeners to menu management buttons
-    addMenuBtn.addEventListener('click', () => {
-        console.log('Add menu item button clicked');
-        showMenuItemForm();
-    });
-    
-    reorderMenuBtn.addEventListener('click', () => {
-        console.log('Reorder menu button clicked');
-        toggleMenuReorderMode();
-    });
 }
 
 // Function to toggle menu reorder mode
@@ -2038,8 +2025,11 @@ function escapeHTML(str) {
 }
 
 // Show form to add or edit a menu item
-function showMenuItemForm(item = null) {
-    console.log('Showing menu item form', item);
+function showMenuItemForm(item = null, venue = null) {
+    // Use provided venue or global currentVenue
+    if (!venue) venue = currentVenue;
+    
+    console.log(`Showing menu item form for venue: ${venue}`, item);
     
     const isEditing = !!item;
     const modal = document.getElementById('menu-item-modal');
@@ -2061,6 +2051,9 @@ function showMenuItemForm(item = null) {
     } else {
         delete modal.dataset.itemId;
     }
+    
+    // Store the venue in the modal data
+    modal.dataset.venue = venue;
     
     // Populate form if editing
     if (item) {
@@ -2114,6 +2107,7 @@ function setupMenuItemForm() {
             const modal = document.getElementById('menu-item-modal');
             const isEditing = modal && modal.dataset.itemId;
             const itemId = isEditing ? modal.dataset.itemId : null;
+            const venue = modal?.dataset.venue || currentVenue;
             
             const formData = new FormData(e.target);
             const data = {
@@ -2131,25 +2125,29 @@ function setupMenuItemForm() {
                 if (isEditing) {
                     console.log(`Updating menu item ${itemId} with:`, data);
                     response = await apiCall(`/api/admin/menu-items/${itemId}`, {
+{
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
                     });
                 } else {
                     console.log('Creating new menu item with:', data);
-                    response = await apiCall('/api/admin/venues/farewell/menu-items', {
+                    console.log(`Using venue for new menu item: ${venue}`);
+                    
+                    response = await apiCall(`/api/admin/venues/${venue}/menu-items`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
                     });
                 }
                 
-                console.log('Menu item save response:', response);
+                
                 
                 if (response && response.success) {
+                    console.log(`Menu item saved successfully for venue: ${venue}`);
                     showToast('Menu item saved successfully', 'success');
                     closeMenuItemForm();
-                    loadVenueSettings(); // Reload the menu
+                    loadVenueSettings(venue); // Reload the menu with the current venue
                 } else {
                     showToast('Failed to save menu item: ' + (response?.error || 'Unknown error'), 'error');
                 }

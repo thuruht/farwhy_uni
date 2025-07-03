@@ -2,7 +2,7 @@
 import { Context } from 'hono';
 import { Env } from '../types/env';
 
-type HoursAction = 'list' | 'update';
+type HoursAction = 'list' | 'update' | 'list-all' | 'create' | 'delete';
 
 export async function handleHours(c: Context<{ Bindings: Env }>, action: HoursAction) {
   const { FWHY_D1 } = c.env;
@@ -10,8 +10,14 @@ export async function handleHours(c: Context<{ Bindings: Env }>, action: HoursAc
   switch (action) {
     case 'list':
       return listHours(c);
+    case 'list-all':
+      return listAllHours(c);
     case 'update':
       return updateHours(c);
+    case 'create':
+      return createHours(c);
+    case 'delete':
+      return deleteHours(c);
     default:
       return c.json({ success: false, error: "Invalid action" }, 400);
   }
@@ -107,5 +113,90 @@ async function updateHours(c: Context<{ Bindings: Env }>) {
   } catch (error) {
     console.error('Error updating hours:', error);
     return c.json({ success: false, error: "Failed to update hours" }, 500);
+  }
+}
+
+async function listAllHours(c: Context<{ Bindings: Env }>) {
+  const { FWHY_D1 } = c.env;
+  
+  try {
+    const { results } = await FWHY_D1.prepare(
+      "SELECT * FROM business_hours ORDER BY venue, day_of_week"
+    ).all();
+    
+    // Group by venue
+    const formattedResults: Record<string, any[]> = {};
+    
+    if (results && Array.isArray(results)) {
+      results.forEach((hour: any) => {
+        if (!formattedResults[hour.venue]) {
+          formattedResults[hour.venue] = [];
+        }
+        formattedResults[hour.venue].push(hour);
+      });
+    }
+    
+    return c.json({ success: true, data: formattedResults });
+  } catch (error) {
+    console.error('Error fetching all hours:', error);
+    return c.json({ success: false, error: "Failed to fetch business hours" }, 500);
+  }
+}
+
+async function createHours(c: Context<{ Bindings: Env }>) {
+  const { FWHY_D1 } = c.env;
+  const { venue, hours } = await c.req.json();
+  
+  if (!venue || !hours || !Array.isArray(hours)) {
+    return c.json({ success: false, error: "Invalid input format" }, 400);
+  }
+  
+  try {
+    // Process each hour in sequence
+    for (const hour of hours) {
+      const { day_of_week, open_time, close_time, is_closed, notes } = hour;
+      
+      if (day_of_week === undefined || day_of_week < 0 || day_of_week > 6) {
+        return c.json({ success: false, error: `Invalid day_of_week: ${day_of_week}` }, 400);
+      }
+      
+      await FWHY_D1.prepare(`
+        INSERT INTO business_hours (
+          venue, day_of_week, open_time, close_time, is_closed, notes, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+      `).bind(
+        venue,
+        day_of_week,
+        open_time,
+        close_time,
+        is_closed ? 1 : 0,
+        notes || ''
+      ).run();
+    }
+    
+    return c.json({ success: true });
+  } catch (error) {
+    console.error('Error creating hours:', error);
+    return c.json({ success: false, error: "Failed to create business hours" }, 500);
+  }
+}
+
+async function deleteHours(c: Context<{ Bindings: Env }>) {
+  const { FWHY_D1 } = c.env;
+  const id = c.req.param('id');
+  
+  if (!id) {
+    return c.json({ success: false, error: "ID is required" }, 400);
+  }
+  
+  try {
+    await FWHY_D1.prepare(
+      "DELETE FROM business_hours WHERE id = ?"
+    ).bind(id).run();
+    
+    return c.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting hours:', error);
+    return c.json({ success: false, error: "Failed to delete business hours" }, 500);
   }
 }
