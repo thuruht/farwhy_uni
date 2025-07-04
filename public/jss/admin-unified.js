@@ -2204,3 +2204,10 @@ window.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(menuButton);
     }
 });
+
+// Help section setup
+function setupHelpSectionLinks() {
+    console.log('Setting up help section links');
+    // This function sets up any interactive elements in the help section
+    // Currently just a placeholder - help section is mostly static
+}

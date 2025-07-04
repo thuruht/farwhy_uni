@@ -247,6 +247,7 @@ adminApi.use('/*', authMiddleware());
 
 // Add all admin routes here
 adminApi.get('/health', (c) => c.json({ status: 'admin-ok' }));
+adminApi.get('/events', (c) => handleEvents(c, 'list'));
 adminApi.post('/events', (c) => handleEvents(c, 'create'));
 adminApi.put('/events/:id', (c) => handleEvents(c, 'update'));
 adminApi.delete('/events/:id', (c) => handleEvents(c, 'delete'));
@@ -257,6 +258,8 @@ adminApi.post('/hours', (c) => handleHours(c, 'create'));
 adminApi.put('/hours/:id', (c) => handleHours(c, 'update'));
 adminApi.delete('/hours/:id', (c) => handleHours(c, 'delete'));
 adminApi.post('/featured', (c) => handleFeatured(c, 'update'));
+adminApi.get('/featured', (c) => handleFeatured(c, 'list'));
+adminApi.get('/blog/posts', listAllPosts);
 adminApi.post('/blog', createPost);
 adminApi.put('/blog/:id', updatePostById);
 adminApi.delete('/blog/:id', deletePostById);
