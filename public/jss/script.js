@@ -577,7 +577,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // Function to handle the events page functionality
 function setupEventsPage() {
   const eventsLink = document.getElementById('events-page-link');
-  const eventsTriggers = document.querySelectorAll('.events-modal-trigger');
   const eventsModal = document.getElementById('events-page-modal');
   const closeButton = document.querySelector('.events-page-close');
   const venueFilter = document.getElementById('events-venue-filter');
@@ -667,10 +666,6 @@ function setupEventsPage() {
   if (eventsLink) {
     eventsLink.addEventListener('click', openEventsModal);
   }
-
-  eventsTriggers.forEach(trigger => {
-    trigger.addEventListener('click', openEventsModal);
-  });
   
   if (closeButton) {
     closeButton.addEventListener('click', closeEventsModal);

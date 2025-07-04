@@ -2125,7 +2125,6 @@ function setupMenuItemForm() {
                 if (isEditing) {
                     console.log(`Updating menu item ${itemId} with:`, data);
                     response = await apiCall(`/api/admin/menu-items/${itemId}`, {
-{
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
@@ -2140,8 +2139,6 @@ function setupMenuItemForm() {
                         body: JSON.stringify(data)
                     });
                 }
-                
-                
                 
                 if (response && response.success) {
                     console.log(`Menu item saved successfully for venue: ${venue}`);

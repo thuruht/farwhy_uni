@@ -173,8 +173,10 @@ publicApi.get('/events/:id', (c) => {
   return c.json({ success: true, message: `Get event by ID endpoint` });
 });
 publicApi.get('/blog', getPublicPosts);
+publicApi.get('/blog/posts', getPublicPosts); // Alternative endpoint that frontend uses
 publicApi.get('/blog/:id', getPostById);
 publicApi.get('/featured', (c) => handleFeatured(c, 'get'));
+publicApi.get('/blog/featured', getFeaturedContent); // Specific endpoint for blog featured content
 publicApi.get('/venues/:venue/featured', (c) => {
   // Custom handler for venue-specific featured content
   const venue = c.req.param('venue');

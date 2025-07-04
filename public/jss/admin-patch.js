@@ -135,8 +135,11 @@ function setupBlogFilters() {
 
 // Fix for event form submission
 // Patch the API post method to handle missing database columns
-const originalPost = api.post;
-api.post = async function(endpoint, data) {
+// Wait for api to be available
+function patchApiWhenReady() {
+    if (typeof window.api !== 'undefined' && window.api && window.api.post) {
+        const originalPost = window.api.post;
+        window.api.post = async function(endpoint, data) {
     // Check if this is an event submission
     if (endpoint === '/api/admin/events' && data) {
         console.log('Patching event submission data', data);
@@ -174,5 +177,17 @@ api.post = async function(endpoint, data) {
     // For non-event submissions, call original method
     return originalPost.call(this, endpoint, data);
 };
+    } else {
+        // If api not ready, wait and try again
+        setTimeout(patchApiWhenReady, 100);
+    }
+}
+
+// Start patching when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', patchApiWhenReady);
+} else {
+    patchApiWhenReady();
+}
 
 console.log('Admin dashboard patch script loaded');

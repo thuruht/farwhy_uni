@@ -24,10 +24,6 @@
     {
       "binding": "SESSIONS_KV",
       "id": "2038b95e785545af8486bc353c3cbe62"
-    },
-    {
-      "binding": "BLOG_KV",
-      "id": "6ee9ab6b71634a4eb3e66de82d8dfcdc"
     }
   ],
   "vars": {
