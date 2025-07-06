@@ -32,5 +32,67 @@
   </div>
 
   <script src="./news.js"></script>
+  <script>
+    // Auto-resize iframe communication script
+    function reportHeight() {
+      try {
+        // Calculate the total content height
+        const body = document.body;
+        const html = document.documentElement;
+        
+        const contentHeight = Math.max(
+          body.scrollHeight,
+          body.offsetHeight,
+          html.clientHeight,
+          html.scrollHeight,
+          html.offsetHeight
+        );
+        
+        // Send height to parent window
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({
+            type: 'setHeight',
+            height: contentHeight
+          }, '*');
+          console.log('Iframe reported height:', contentHeight);
+        }
+      } catch (error) {
+        console.log('Failed to report height:', error);
+      }
+    }
+    
+    // Listen for height requests from parent
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'getHeight') {
+        reportHeight();
+      }
+    });
+    
+    // Report height when content loads
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(reportHeight, 100);
+    });
+    
+    // Report height when window loads
+    window.addEventListener('load', function() {
+      setTimeout(reportHeight, 100);
+    });
+    
+    // Report height when content changes
+    const observer = new MutationObserver(function() {
+      // Debounce the height reporting
+      clearTimeout(window._heightReportTimeout);
+      window._heightReportTimeout = setTimeout(reportHeight, 250);
+    });
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true
+    });
+    
+    // Also report height periodically for dynamic content
+    setInterval(reportHeight, 2000);
+  </script>
 </body>
 </html>

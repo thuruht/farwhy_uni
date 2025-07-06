@@ -27,6 +27,9 @@ function showEventForm(eventData = null) {
     const modal = document.getElementById('event-modal');
     const modalTitle = document.getElementById('event-modal-title');
     
+    console.log('Modal element found:', modal);
+    console.log('Modal classes before:', modal ? modal.className : 'modal not found');
+    
     if (!modal) {
         console.error('Event modal not found');
         return;
@@ -59,12 +62,31 @@ function showEventForm(eventData = null) {
     }
     
     // Show modal
-    modal.style.display = 'block';
+    console.log('Adding show class to modal');
+    modal.classList.add('show');
+    modal.style.display = 'flex'; // Fallback in case CSS class doesn't work
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.zIndex = '99999';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+    modal.style.opacity = '1'; // CRITICAL: Force opacity to 1
+    console.log('Modal classes after:', modal.className);
+    console.log('Modal style display:', getComputedStyle(modal).display);
+    console.log('Modal z-index:', getComputedStyle(modal).zIndex);
+    console.log('Modal position:', getComputedStyle(modal).position);
+    console.log('Modal visibility:', getComputedStyle(modal).visibility);
+    console.log('Modal opacity:', getComputedStyle(modal).opacity);
     
     // Make sure the form submit handler is attached only once
     const form = document.getElementById('event-form');
     form.removeEventListener('submit', handleEventFormSubmit);
     form.addEventListener('submit', handleEventFormSubmit);
+    
+    // Set up file upload handlers
+    setupFileUploadHandlers();
 }
 
 // Handle event form submission
@@ -82,6 +104,9 @@ async function handleEventFormSubmit(e) {
     const flyerFile = document.getElementById('event-flyer-upload').files[0];
     if (flyerFile) {
         try {
+            console.log('Starting flyer upload for file:', flyerFile.name);
+            showToast('Uploading image...', 'info');
+            
             const uploadFormData = new FormData();
             uploadFormData.append('flyer', flyerFile);
             
@@ -90,11 +115,21 @@ async function handleEventFormSubmit(e) {
                 body: uploadFormData
             });
             
+            console.log('Upload response:', uploadResponse);
+            
             if (uploadResponse && uploadResponse.imageUrl) {
                 eventData.flyer_image_url = uploadResponse.imageUrl;
+                // Update the URL input field so user can see the uploaded URL
+                document.getElementById('event-flyer-url').value = uploadResponse.imageUrl;
+                showToast('Image uploaded successfully!', 'success');
+                console.log('Image URL set to:', uploadResponse.imageUrl);
+            } else {
+                console.error('Upload response missing imageUrl:', uploadResponse);
+                showToast('Image upload failed - no URL returned', 'error');
             }
         } catch (error) {
             console.error('Error uploading flyer:', error);
+            showToast('Error uploading image: ' + error.message, 'error');
         }
     }
     
@@ -125,7 +160,9 @@ async function handleEventFormSubmit(e) {
 function closeEventForm() {
     const modal = document.getElementById('event-modal');
     if (modal) {
-        modal.style.display = 'none';
+        modal.classList.remove('show');
+        modal.style.display = 'none'; // Ensure it's hidden
+        modal.style.opacity = '0'; // Ensure it's invisible
         document.getElementById('event-form').reset();
     }
 }
@@ -137,6 +174,32 @@ function editEvent(eventId) {
         showEventForm(event);
     } else {
         console.error('Event not found:', eventId);
+    }
+}
+
+// Delete event function
+async function deleteEvent(eventId) {
+    console.log('Delete event clicked for id:', eventId);
+    const event = currentEvents.find(e => e.id === eventId);
+    if (!event) {
+        console.error('Event not found:', eventId);
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to delete "${event.title}"?`)) {
+        try {
+            const response = await apiCall(`/api/admin/events/${eventId}`, { method: 'DELETE' });
+            
+            if (response && response.success) {
+                showToast('Event deleted successfully', 'success');
+                loadEvents(); // Reload events
+            } else {
+                showToast('Failed to delete event: ' + (response?.error || 'Unknown error'), 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting event:', error);
+            showToast('Error deleting event', 'error');
+        }
     }
 }
 
@@ -176,13 +239,27 @@ function showBlogForm(blogData = null) {
         document.getElementById('blog-form').reset();
     }
     
-    // Show modal
-    modal.style.display = 'block';
+    // Show modal with forced styling
+    console.log('Adding show class to blog modal');
+    modal.classList.add('show');
+    modal.style.display = 'flex'; // Fallback in case CSS class doesn't work
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.zIndex = '99999';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+    modal.style.opacity = '1'; // CRITICAL: Force opacity to 1
+    console.log('Blog modal classes after:', modal.className);
     
     // Make sure the form submit handler is attached only once
     const form = document.getElementById('blog-form');
     form.removeEventListener('submit', handleBlogFormSubmit);
     form.addEventListener('submit', handleBlogFormSubmit);
+    
+    // Set up file upload handlers
+    setupFileUploadHandlers();
 }
 
 // Handle blog form submission
@@ -210,6 +287,8 @@ async function handleBlogFormSubmit(e) {
             
             if (uploadResponse && uploadResponse.imageUrl) {
                 blogData.featured_image_url = uploadResponse.imageUrl;
+                // Update the URL input field so user can see the uploaded URL
+                document.getElementById('blog-image-url').value = uploadResponse.imageUrl;
             }
         } catch (error) {
             console.error('Error uploading blog image:', error);
@@ -243,18 +322,51 @@ async function handleBlogFormSubmit(e) {
 function closeBlogForm() {
     const modal = document.getElementById('blog-modal');
     if (modal) {
-        modal.style.display = 'none';
+        modal.classList.remove('show');
+        modal.style.display = 'none'; // Ensure it's hidden
+        modal.style.opacity = '0'; // Ensure it's invisible
         document.getElementById('blog-form').reset();
     }
 }
 
 function editBlogPost(postId) {
     console.log('Edit blog post clicked for id:', postId);
-    const post = currentBlogPosts.find(p => p.id === postId);
+    // Convert to number to ensure proper comparison
+    const numericId = parseInt(postId);
+    const post = currentBlogPosts.find(p => p.id === numericId || p.id === postId);
     if (post) {
+        console.log('Found blog post:', post);
         showBlogForm(post);
     } else {
+        console.error('Blog post not found for id:', postId, 'in posts:', currentBlogPosts.map(p => p.id));
+    }
+}
+
+// Delete blog post function
+async function deleteBlogPost(postId) {
+    console.log('Delete blog post clicked for id:', postId);
+    // Convert to number to ensure proper comparison
+    const numericId = parseInt(postId);
+    const post = currentBlogPosts.find(p => p.id === numericId || p.id === postId);
+    if (!post) {
         console.error('Blog post not found:', postId);
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to delete "${post.title}"?`)) {
+        try {
+            const response = await apiCall(`/api/admin/blog/posts/${postId}`, { method: 'DELETE' });
+            
+            if (response && response.success) {
+                showToast('Blog post deleted successfully', 'success');
+                loadBlogPosts(); // Reload blog posts
+            } else {
+                showToast('Failed to delete blog post: ' + (response?.error || 'Unknown error'), 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting blog post:', error);
+            showToast('Error deleting blog post', 'error');
+        }
     }
 }
 
@@ -679,41 +791,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('click', (e) => {
         // Handle New Event button click
         if (e.target.id === 'add-event-btn' || e.target.closest('#add-event-btn')) {
-            console.log('New Event button clicked via global handler');
+            console.log('New Event button clicked');
             e.preventDefault();
+            e.stopPropagation(); // Prevent duplicate calls
             showEventForm();
+            return;
         }
 
         // Handle New Blog Post button click
         if (e.target.id === 'add-blog-btn' || e.target.closest('#add-blog-btn')) {
-            console.log('New Blog button clicked via global handler');
+            console.log('New Blog button clicked');
             e.preventDefault();
+            e.stopPropagation(); // Prevent duplicate calls
             showBlogForm();
+            return;
         }
-
-        // Debug clicked element for troubleshooting
-        console.log('Clicked element:', e.target);
     });
-
-    // Add direct event handlers for additional reliability
-    const addEventBtn = document.getElementById('add-event-btn');
-    if (addEventBtn) {
-        console.log('Found add event button, adding direct click handler');
-        addEventBtn.addEventListener('click', () => {
-            console.log('Add event button clicked via direct handler');
-            showEventForm();
-        });
-    }
-    
-    // Add direct handler for the Add Blog Post button as well
-    const addBlogBtn = document.getElementById('add-blog-btn');
-    if (addBlogBtn) {
-        console.log('Found add blog button, adding direct click handler');
-        addBlogBtn.addEventListener('click', () => {
-            console.log('Add blog button clicked via direct handler');
-            showBlogForm();
-        });
-    }
 
     // Now check authentication and show the appropriate screen
     // Directly check authentication validity without relying on reading cookies via JS
@@ -847,13 +940,13 @@ function apiCall(url, options = {}) {
         case 'POST':
             if (isFormData) {
                 return api._call(cleanUrl, { method: 'POST', body: options.body })
-                    .then(res => res && res.json());
+                    .then(res => res ? res.json() : null);
             }
             return api.post(cleanUrl, options.body ? JSON.parse(options.body) : {});
         case 'PUT':
             if (isFormData) {
                 return api._call(cleanUrl, { method: 'PUT', body: options.body })
-                    .then(res => res && res.json());
+                    .then(res => res ? res.json() : null);
             }
             return api.put(cleanUrl, options.body ? JSON.parse(options.body) : {});
         case 'DELETE':
@@ -1425,22 +1518,8 @@ async function loadEvents() {
         currentEvents = events; // Set global variable for other functions
         renderEvents(events);
 
-        const addEventBtn = document.getElementById('add-event-btn');
-        console.log('Add Event button element:', addEventBtn);
-        if (addEventBtn) {
-            // To prevent multiple listeners on re-renders, we clone and replace the button
-            const newAddEventBtn = addEventBtn.cloneNode(true);
-            addEventBtn.parentNode.replaceChild(newAddEventBtn, addEventBtn);
-            // And add the listener to the new button
-            newAddEventBtn.addEventListener('click', (e) => {
-                console.log('New Event button clicked via direct handler');
-                e.preventDefault();
-                showEventForm();
-            });
-            console.log('New Event button listener attached');
-        } else {
-            console.log('Add Event button not found in the DOM');
-        }
+        // Button listeners are handled by global click handler, no need to duplicate
+        console.log('Add Event button element:', document.getElementById('add-event-btn'));
     } else {
         console.log('Failed to load events or received empty response');
     }
@@ -1529,15 +1608,7 @@ async function loadBlogPosts() {
         currentBlogPosts = result.data; // Set global variable for other functions
         renderBlogPosts(result.data, true);
 
-        const addBlogBtn = document.getElementById('add-blog-btn');
-        if (addBlogBtn) {
-            // To prevent multiple listeners on re-renders, we clone and replace the button
-            const newAddBlogBtn = addBlogBtn.cloneNode(true);
-            addBlogBtn.parentNode.replaceChild(newAddBlogBtn, addBlogBtn);
-            // And add the listener to the new button
-            newAddBlogBtn.addEventListener('click', () => showBlogForm());
-            console.log('New Blog Post button listener attached');
-        }
+        // Button listeners are handled by global click handler, no need to duplicate
     }
 }
 
@@ -1571,9 +1642,16 @@ function renderBlogPosts(posts, setupFilters = true) {
             
             return `<tr class="blog-row">
                 <td class="thumbnail-cell" style="width: 80px; vertical-align: middle; text-align: center;">
-                    ${post.image_url ? 
-                        `<div class="thumbnail"><img src="${post.image_url}" alt="${post.title}" loading="lazy" style="max-width: 70px; max-height: 70px; object-fit: cover;"></div>` : 
-                        `<div class="thumbnail empty-thumbnail"><span>No Image</span></div>`}
+                    ${post.featured_image_url ? 
+                        `<div class="thumbnail"><img src="${post.featured_image_url}" alt="${post.title}" loading="lazy" style="max-width: 70px; max-height: 70px; object-fit: cover;"></div>` : 
+                        (() => {
+                            // Check if legacy post has image in content
+                            const imgMatch = post.content?.match(/<img[^>]+src="([^"]+)"/);
+                            if (imgMatch && imgMatch[1]) {
+                                return `<div class="thumbnail"><img src="${imgMatch[1]}" alt="${post.title}" loading="lazy" style="max-width: 70px; max-height: 70px; object-fit: cover;"></div>`;
+                            }
+                            return `<div class="thumbnail empty-thumbnail"><span>No Image</span></div>`;
+                        })()}
                 </td>
                 <td style="vertical-align: middle;">
                     <strong>${post.title}</strong>
@@ -1777,13 +1855,14 @@ async function loadVenueSettings(venue) {
     
     console.log(`Loading menu items for venue: ${venue}`);
     try {
-        // Corrected the API path to include /api/
-        const menuItems = await api.get(`/api/admin/venues/${venue}/menu-items`);
-        console.log('Menu items response:', menuItems);
-        if (menuItems && Array.isArray(menuItems)) {
-            window.globalMenuData = menuItems;
-            renderMenuItems(menuItems, venue);
+        const response = await api.get(`/api/admin/venues/${venue}/menu-items`);
+        console.log('Menu items response:', response);
+        if (response && response.success && Array.isArray(response.data)) {
+            window.globalMenuData = response.data;
+            currentMenuItems = response.data; // Set global variable for consistency
+            renderMenuItems(response.data, venue);
         } else {
+            console.log('No menu items found or invalid response:', response);
             menuList.innerHTML = '<div class="empty-state">No menu items found. Click "Add Menu Item" to create one.</div>';
         }
     } catch (error) {
@@ -2061,28 +2140,46 @@ function showMenuItemForm(item = null, venue = null) {
         const descInput = document.getElementById('menu-item-description');
         const priceInput = document.getElementById('menu-item-price');
         const categoryInput = document.getElementById('menu-item-category');
+        const imageUrlInput = document.getElementById('menu-item-image-url');
         
         if (nameInput) nameInput.value = item.name || '';
         if (descInput) descInput.value = item.description || '';
         if (priceInput) priceInput.value = item.price || '';
         if (categoryInput) categoryInput.value = item.category || '';
+        if (imageUrlInput) imageUrlInput.value = item.image_url || '';
     } else {
         const form = document.getElementById('menu-item-form');
         if (form) form.reset();
     }
     
-    // Show modal
-    modal.style.display = 'block';
+    // Show modal with forced styling
+    console.log('Adding show class to menu item modal');
+    modal.classList.add('show');
+    modal.style.display = 'flex'; // Fallback in case CSS class doesn't work
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.zIndex = '99999';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+    modal.style.opacity = '1'; // CRITICAL: Force opacity to 1
+    console.log('Menu modal classes after:', modal.className);
     
     // Make sure the form submit handler is set up
     setupMenuItemForm();
+    
+    // Set up file upload handlers (even though commented out, keeps consistency)
+    setupFileUploadHandlers();
 }
 
 // Close menu item form
 function closeMenuItemForm() {
     const modal = document.getElementById('menu-item-modal');
     if (modal) {
-        modal.style.display = 'none';
+        modal.classList.remove('show');
+        modal.style.display = 'none'; // Ensure it's hidden
+        modal.style.opacity = '0'; // Ensure it's invisible
         const form = document.getElementById('menu-item-form');
         if (form) form.reset();
     }
@@ -2115,6 +2212,7 @@ function setupMenuItemForm() {
                 description: formData.get('description'),
                 price: parseFloat(formData.get('price')) || 0,
                 category: formData.get('category'),
+                image_url: formData.get('image_url'),
                 menu_id: 1 // Default menu ID for Farewell
             };
             
@@ -2158,56 +2256,213 @@ function setupMenuItemForm() {
     }
 }
 
-// Missing event management functions
-function editEvent(eventId) {
-    console.log('Edit event clicked for id:', eventId);
-    const event = currentEvents.find(e => e.id === eventId);
-    if (event) {
-        showEventForm(event);
-    } else {
-        console.error('Event not found:', eventId);
-    }
-}
-
-function deleteEvent(eventId) {
-    console.log('Delete event clicked for id:', eventId);
-    const event = currentEvents.find(e => e.id === eventId);
-    if (event && confirm(`Are you sure you want to delete the event "${event.title}"?`)) {
-        api.delete(`/api/admin/events/${eventId}`)
-            .then(response => {
-                if (response && response.success) {
-                    showToast('Event deleted successfully', 'success');
-                    loadEvents(); // Reload events
-                } else {
-                    showToast('Error deleting event: ' + (response.error || 'Unknown error'), 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error deleting event:', error);
-                showToast('Error deleting event', 'error');
-            });
-    }
-}
-
-// Add a menu management link at document load to force initialization
-window.addEventListener('DOMContentLoaded', () => {
-    const navContainer = document.querySelector('.nav-items');
-    if (navContainer) {
-        const menuButton = document.createElement('button');
-        menuButton.textContent = 'Debug: Load Menu Management';
-        menuButton.className = 'btn btn-secondary';
-        menuButton.style.margin = '10px';
-        menuButton.addEventListener('click', () => {
-            console.log('Debug menu button clicked');
-            loadVenueSettings();
-        });
-        document.body.appendChild(menuButton);
-    }
-});
-
 // Help section setup
 function setupHelpSectionLinks() {
     console.log('Setting up help section links');
     // This function sets up any interactive elements in the help section
     // Currently just a placeholder - help section is mostly static
+}
+
+// Import handlers setup
+function setupImportHandlers() {
+    console.log('Setting up import handlers');
+    
+    const importButtons = document.querySelectorAll('.import-btn');
+    importButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const importType = btn.dataset.importType;
+            console.log(`Import ${importType} clicked`);
+            
+            // Show appropriate import modal or process
+            switch (importType) {
+                case 'events':
+                    showImportEventsModal();
+                    break;
+                case 'blog':
+                    showImportBlogModal();
+                    break;
+                case 'menu':
+                    showImportMenuModal();
+                    break;
+                default:
+                    showToast('Import type not implemented yet', 'info');
+            }
+        });
+    });
+}
+
+function showImportEventsModal() {
+    console.log('Show import events modal');
+    showToast('Event import feature coming soon', 'info');
+}
+
+function showImportBlogModal() {
+    console.log('Show import blog modal');
+    showToast('Blog import feature coming soon', 'info');
+}
+
+function showImportMenuModal() {
+    console.log('Show import menu modal');
+    showToast('Menu import feature coming soon', 'info');
+}
+
+// Featured videos manager placeholder
+if (!window.featuredVideosManager) {
+    window.featuredVideosManager = {
+        init: function() {
+            console.log('Featured Videos Manager initialized');
+            this.loadVideos();
+            this.setupEventHandlers();
+        },
+        
+        loadVideos: async function() {
+            try {
+                const videos = await api.get('/api/admin/featured');
+                console.log('Featured videos loaded:', videos);
+                this.renderVideos(videos?.data || []);
+            } catch (error) {
+                console.error('Error loading featured videos:', error);
+                showToast('Failed to load featured videos', 'error');
+            }
+        },
+        
+        renderVideos: function(videos) {
+            const container = document.getElementById('featured-videos-list');
+            if (!container) return;
+            
+            if (!videos || videos.length === 0) {
+                container.innerHTML = '<div class="empty-state">No featured videos found. Add some videos to get started.</div>';
+                return;
+            }
+            
+            container.innerHTML = videos.map(video => `
+                <div class="video-item" data-id="${video.id}">
+                    <div class="video-thumbnail">
+                        <img src="${video.thumbnail_url}" alt="${video.title}" loading="lazy">
+                    </div>
+                    <div class="video-info">
+                        <h4>${video.title}</h4>
+                        <p>${video.description || ''}</p>
+                        <div class="video-actions">
+                            <button class="btn btn-sm edit-video-btn" data-id="${video.id}">Edit</button>
+                            <button class="btn btn-sm btn-danger delete-video-btn" data-id="${video.id}">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        },
+        
+        setupEventHandlers: function() {
+            const addVideoBtn = document.getElementById('add-featured-video-btn');
+            if (addVideoBtn) {
+                addVideoBtn.addEventListener('click', () => this.showVideoForm());
+            }
+            
+            // Delegate click events for edit/delete buttons
+            document.addEventListener('click', (e) => {
+                if (e.target.matches('.edit-video-btn')) {
+                    const videoId = e.target.dataset.id;
+                    this.editVideo(videoId);
+                } else if (e.target.matches('.delete-video-btn')) {
+                    const videoId = e.target.dataset.id;
+                    this.deleteVideo(videoId);
+                }
+            });
+        },
+        
+        showVideoForm: function(video = null) {
+            console.log('Show video form:', video);
+            showToast('Featured video management coming soon', 'info');
+        },
+        
+        editVideo: function(videoId) {
+            console.log('Edit video:', videoId);
+            showToast('Video editing coming soon', 'info');
+        },
+        
+        deleteVideo: function(videoId) {
+            console.log('Delete video:', videoId);
+            if (confirm('Are you sure you want to delete this video?')) {
+                showToast('Video deletion coming soon', 'info');
+            }
+        }
+    };
+}
+
+// Add file upload feedback
+function setupFileUploadHandlers() {
+    const eventFlyerUpload = document.getElementById('event-flyer-upload');
+    const blogImageUpload = document.getElementById('blog-image-upload');
+    // const menuImageUpload = document.getElementById('menu-item-image-upload'); // COMMENTED OUT - Menu items don't support images yet
+    
+    if (eventFlyerUpload) {
+        eventFlyerUpload.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('Event flyer file selected:', file.name, file.size, 'bytes');
+                showToast(`File selected: ${file.name}`, 'info');
+                
+                // Auto-upload and populate URL field
+                await uploadAndPopulateUrl(file, 'event-flyer-url', '/api/admin/events/flyer');
+            }
+        });
+    }
+    
+    if (blogImageUpload) {
+        blogImageUpload.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('Blog image file selected:', file.name, file.size, 'bytes');
+                showToast(`File selected: ${file.name}`, 'info');
+                
+                // Auto-upload and populate URL field
+                await uploadAndPopulateUrl(file, 'blog-image-url', '/api/admin/blog/upload-image');
+            }
+        });
+    }
+    
+    /* COMMENTED OUT - Menu items don't support images yet
+    // Menu item images not currently supported - commenting out
+    /*
+    if (menuImageUpload) {
+        menuImageUpload.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('Menu item image file selected:', file.name, file.size, 'bytes');
+                showToast(`File selected: ${file.name}`, 'info');
+                
+                // Auto-upload and populate URL field
+                await uploadAndPopulateUrl(file, 'menu-item-image-url', '/api/admin/menu-items/upload-image');
+            }
+        });
+    }
+    */
+}
+
+// Helper function to upload file and populate URL field
+async function uploadAndPopulateUrl(file, urlFieldId, uploadEndpoint) {
+    try {
+        showToast('Uploading image...', 'info');
+        
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        const response = await api.post(uploadEndpoint, formData);
+        
+        if (response && response.success && response.url) {
+            const urlField = document.getElementById(urlFieldId);
+            if (urlField) {
+                urlField.value = response.url;
+                showToast('Image uploaded successfully!', 'success');
+                console.log('Image uploaded, URL populated:', response.url);
+            } else {
+                console.warn('URL field not found:', urlFieldId);
+            }
+        } else {
+            throw new Error(response?.error || 'Upload failed');
+        }
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        showToast('Error uploading image: ' + error.message, 'error');
+    }
 }

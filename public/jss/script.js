@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
    * @param {string} state - 'howdy' or 'farewell'
    * @param {boolean} showPast - whether to fetch archives or upcoming
    */
-  async function fetchFlyers(state, showPast = false) {
+  window.fetchFlyers = async function fetchFlyers(state, showPast = false) {
     try {
       const cacheKey = `${state}-${showPast ? 'past' : 'upcoming'}`;
       const now = Date.now();
@@ -692,4 +692,118 @@ function setupEventsPage() {
     });
   }
 }
+
+// ====================================
+// MISSING FUNCTION FIXES
+// ====================================
+
+/**
+ * Handle iframe load events - called when news iframe finishes loading
+ */
+function onIframeLoad(iframe) {
+  console.log('Iframe loaded:', iframe.src);
+  
+  // Function to resize iframe based on content
+  function resizeIframe() {
+    try {
+      // Try to access iframe content (may fail due to CORS for external content)
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      if (iframeDoc) {
+        console.log('Iframe content accessible');
+        
+        // Get the full content height
+        const body = iframeDoc.body;
+        const html = iframeDoc.documentElement;
+        
+        // Calculate the maximum height needed
+        const contentHeight = Math.max(
+          body ? body.scrollHeight : 0,
+          body ? body.offsetHeight : 0,
+          html ? html.clientHeight : 0,
+          html ? html.scrollHeight : 0,
+          html ? html.offsetHeight : 0
+        );
+        
+        console.log('Iframe content height calculated:', contentHeight);
+        
+        // Set a minimum height and maximum reasonable height
+        const minHeight = 300; // 30vh equivalent
+        const maxHeight = 1200; // Reasonable max to prevent huge iframes
+        const finalHeight = Math.max(minHeight, Math.min(contentHeight + 20, maxHeight)); // Add 20px padding
+        
+        // Apply the height
+        iframe.style.height = finalHeight + 'px';
+        console.log('Iframe height set to:', finalHeight + 'px');
+        
+        // Also try to listen for content changes inside the iframe
+        if (iframeDoc.addEventListener) {
+          // Listen for DOM changes in the iframe
+          const observer = new MutationObserver(function() {
+            // Debounce the resize to avoid excessive calls
+            clearTimeout(iframe._resizeTimeout);
+            iframe._resizeTimeout = setTimeout(resizeIframe, 250);
+          });
+          
+          observer.observe(iframeDoc.body || iframeDoc.documentElement, {
+            childList: true,
+            subtree: true,
+            attributes: true
+          });
+          
+          // Store observer for cleanup
+          iframe._mutationObserver = observer;
+        }
+        
+      } else {
+        console.log('Iframe content not accessible (CORS) - using fallback resize');
+        // Fallback for cross-origin iframes
+        fallbackResize();
+      }
+    } catch (error) {
+      console.log('Iframe content not accessible (CORS):', error.message);
+      // Fallback for cross-origin iframes
+      fallbackResize();
+    }
+  }
+  
+  // Fallback resize method for cross-origin content
+  function fallbackResize() {
+    // Try to use postMessage API for cross-origin communication
+    // Send a message to the iframe asking for its height
+    try {
+      iframe.contentWindow.postMessage({ type: 'getHeight' }, '*');
+    } catch (error) {
+      console.log('PostMessage failed, using static sizing');
+      // Final fallback - set a reasonable static height
+      iframe.style.height = '60vh';
+    }
+  }
+  
+  // Initial resize
+  resizeIframe();
+  
+  // Retry resize after a short delay to account for dynamic content loading
+  setTimeout(resizeIframe, 500);
+  setTimeout(resizeIframe, 1000);
+  setTimeout(resizeIframe, 2000);
+}
+
+// Listen for messages from iframes (for cross-origin height communication)
+window.addEventListener('message', function(event) {
+  if (event.data && event.data.type === 'setHeight' && typeof event.data.height === 'number') {
+    // Find the iframe that sent this message
+    const iframes = document.querySelectorAll('iframe');
+    for (let iframe of iframes) {
+      if (iframe.contentWindow === event.source) {
+        const finalHeight = Math.max(300, Math.min(event.data.height + 20, 1200));
+        iframe.style.height = finalHeight + 'px';
+        console.log('Iframe height set via postMessage:', finalHeight + 'px');
+        break;
+      }
+    }
+  }
+});
+
+// Make function globally available
+window.onIframeLoad = onIframeLoad;
 

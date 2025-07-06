@@ -165,6 +165,7 @@ app.get('/images/*', async (c) => {
 const publicApi = new Hono<{ Bindings: Env }>();
 publicApi.get('/health', (c) => c.json({ status: 'ok' }));
 publicApi.get('/events', (c) => handleEvents(c, 'list'));
+publicApi.get('/events/slideshow', (c) => handleEvents(c, 'slideshow'));
 publicApi.get('/events/:id', (c) => {
   // Custom handler for getting event by ID since it's not in EventAction type
   const eventId = c.req.param('id');
@@ -174,9 +175,9 @@ publicApi.get('/events/:id', (c) => {
 });
 publicApi.get('/blog', getPublicPosts);
 publicApi.get('/blog/posts', getPublicPosts); // Alternative endpoint that frontend uses
+publicApi.get('/blog/featured', getFeaturedContent); // Specific endpoint for blog featured content - MUST come before /blog/:id
 publicApi.get('/blog/:id', getPostById);
-publicApi.get('/featured', (c) => handleFeatured(c, 'get'));
-publicApi.get('/blog/featured', getFeaturedContent); // Specific endpoint for blog featured content
+publicApi.get('/featured', (c) => handleFeatured(c, 'get')); // Main featured endpoint
 publicApi.get('/venues/:venue/featured', (c) => {
   // Custom handler for venue-specific featured content
   const venue = c.req.param('venue');
@@ -232,9 +233,8 @@ publicApi.get('/menu', async (c) => {
   }
 });
 publicApi.get('/hours', (c) => handleHours(c, 'list-all'));
-
-// Add the slideshow endpoint to the public API
 publicApi.get('/slideshow', (c) => handleEvents(c, 'slideshow'));
+
 // Public authentication endpoints (login/logout/check)
 publicApi.post('/login', (c) => handleAuth(c, 'login'));
 publicApi.post('/logout', (c) => handleAuth(c, 'logout'));
@@ -251,19 +251,206 @@ adminApi.get('/events', (c) => handleEvents(c, 'list'));
 adminApi.post('/events', (c) => handleEvents(c, 'create'));
 adminApi.put('/events/:id', (c) => handleEvents(c, 'update'));
 adminApi.delete('/events/:id', (c) => handleEvents(c, 'delete'));
+adminApi.post('/events/flyer', async (c) => {
+  // Handle event flyer uploads
+  try {
+    const formData = await c.req.formData();
+    const file = formData.get('flyer') as File;
+    
+    if (!file) {
+      return c.json({ success: false, error: 'No file provided' }, 400);
+    }
+    
+    // Generate a unique filename
+    const timestamp = Date.now();
+    const extension = file.name.split('.').pop() || 'jpg';
+    const filename = `flyers/event-${timestamp}.${extension}`;
+    
+    // Upload to R2
+    const arrayBuffer = await file.arrayBuffer();
+    await c.env.FWHY_IMAGES.put(filename, arrayBuffer, {
+      httpMetadata: { contentType: file.type }
+    });
+    
+    const imageUrl = `/images/${filename}`;
+    return c.json({ success: true, imageUrl });
+  } catch (error) {
+    console.error('Error uploading event flyer:', error);
+    return c.json({ success: false, error: 'Upload failed' }, 500);
+  }
+});
 adminApi.post('/menu', (c) => handleMenu(c, 'create'));
 adminApi.put('/menu/:id', (c) => handleMenu(c, 'update'));
 adminApi.delete('/menu/:id', (c) => handleMenu(c, 'delete'));
+adminApi.get('/menu-items', async (c) => {
+  const { FWHY_D1 } = c.env;
+  try {
+    // Simplified: Just get all menu items since there's only one menu
+    const { results } = await FWHY_D1.prepare(`
+      SELECT * FROM menu_items 
+      WHERE active = 1
+      ORDER BY category, display_order ASC, name ASC
+    `).all();
+    return c.json({ success: true, data: results || [] });
+  } catch (error) {
+    console.error('Error fetching menu items:', error);
+    return c.json({ success: false, error: 'Failed to fetch menu items' }, 500);
+  }
+});
+adminApi.get('/venues/:venue/menu-items', async (c) => {
+  const { FWHY_D1 } = c.env;
+  const venue = c.req.param('venue');
+  
+  try {
+    // Simplified: Since there's only one menu (farewell), just get all menu items
+    const { results } = await FWHY_D1.prepare(`
+      SELECT * FROM menu_items 
+      WHERE active = 1
+      ORDER BY category, display_order ASC, name ASC
+    `).all();
+    
+    console.log(`Found ${results?.length || 0} menu items for venue ${venue}`);
+    return c.json({ success: true, data: results || [] });
+  } catch (error) {
+    console.error(`Error fetching menu items for ${venue}:`, error);
+    return c.json({ success: false, error: `Failed to fetch menu items for ${venue}` }, 500);
+  }
+});
+adminApi.post('/menu-items', (c) => handleMenu(c, 'create'));
+adminApi.put('/menu-items/:id', (c) => handleMenu(c, 'update'));
+adminApi.delete('/menu-items/:id', (c) => handleMenu(c, 'delete'));
+adminApi.post('/menu-items/reorder', async (c) => {
+  const { FWHY_D1 } = c.env;
+  const data = await c.req.json();
+  const { items } = data;
+  
+  if (!Array.isArray(items)) {
+    return c.json({ success: false, error: 'Invalid items array' }, 400);
+  }
+  
+  try {
+    // Update display_order for each item
+    const updates = items.map((item, index) => 
+      FWHY_D1.prepare('UPDATE menu_items SET display_order = ? WHERE id = ?')
+        .bind(index + 1, item.id)
+    );
+    
+    await Promise.all(updates.map(stmt => stmt.run()));
+    
+    return c.json({ success: true });
+  } catch (error) {
+    console.error('Error reordering menu items:', error);
+    return c.json({ success: false, error: 'Failed to reorder menu items' }, 500);
+  }
+});
+adminApi.post('/venues/:venue/menu-items', async (c) => {
+  const venue = c.req.param('venue');
+  const data = await c.req.json();
+  const { FWHY_D1 } = c.env;
+  
+  try {
+    // Simplified: Since there's only one menu, just insert directly
+    const { success, meta } = await FWHY_D1.prepare(`
+      INSERT INTO menu_items (name, description, price, category, active, display_order)
+      VALUES (?, ?, ?, ?, 1, COALESCE((SELECT MAX(display_order) FROM menu_items), 0) + 1)
+    `).bind(data.name, data.description, data.price, data.category).run();
+    
+    if (success) {
+      return c.json({ success: true, id: meta.last_row_id });
+    } else {
+      return c.json({ success: false, error: 'Failed to create menu item' }, 500);
+    }
+  } catch (error) {
+    console.error('Error creating menu item:', error);
+    return c.json({ success: false, error: 'Failed to create menu item' }, 500);
+  }
+});
 adminApi.post('/hours', (c) => handleHours(c, 'create'));
 adminApi.put('/hours/:id', (c) => handleHours(c, 'update'));
 adminApi.delete('/hours/:id', (c) => handleHours(c, 'delete'));
 adminApi.post('/featured', (c) => handleFeatured(c, 'update'));
 adminApi.get('/featured', (c) => handleFeatured(c, 'list'));
 adminApi.get('/blog/posts', listAllPosts);
+adminApi.post('/blog/posts', createPost);
+adminApi.put('/blog/posts/:id', updatePostById);
+adminApi.delete('/blog/posts/:id', deletePostById);
+adminApi.post('/blog/featured', setFeaturedContent); // Add missing featured content endpoint
+adminApi.post('/blog/upload-image', async (c) => {
+  // Handle blog image uploads
+  try {
+    const formData = await c.req.formData();
+    const file = formData.get('image') as File;
+    
+    if (!file) {
+      return c.json({ success: false, error: 'No file provided' }, 400);
+    }
+    
+    // Generate a unique filename
+    const timestamp = Date.now();
+    const extension = file.name.split('.').pop() || 'jpg';
+    const filename = `blog/blog-${timestamp}.${extension}`;
+    
+    // Upload to R2
+    const arrayBuffer = await file.arrayBuffer();
+    await c.env.FWHY_IMAGES.put(filename, arrayBuffer, {
+      httpMetadata: { contentType: file.type }
+    });
+    
+    const imageUrl = `/images/${filename}`;
+    return c.json({ success: true, imageUrl });
+  } catch (error) {
+    console.error('Error uploading blog image:', error);
+    return c.json({ success: false, error: 'Upload failed' }, 500);
+  }
+});
 adminApi.post('/blog', createPost);
 adminApi.put('/blog/:id', updatePostById);
 adminApi.delete('/blog/:id', deletePostById);
-adminApi.post('/blog/images', uploadBlogImage);
+
+// Menu cleanup endpoint to remove duplicates
+adminApi.post('/menu/cleanup', async (c) => {
+  const { FWHY_D1 } = c.env;
+  
+  try {
+    console.log('Starting menu cleanup process...');
+    
+    // First, get all menu items grouped by unique combinations
+    const { results: duplicates } = await FWHY_D1.prepare(`
+      SELECT name, description, price, category, menu_id, COUNT(*) as count,
+             GROUP_CONCAT(id) as ids
+      FROM menu_items
+      GROUP BY name, description, price, category, menu_id
+      HAVING COUNT(*) > 1
+    `).all();
+    
+    if (!duplicates || duplicates.length === 0) {
+      return c.json({ success: true, message: 'No duplicates found', cleaned: 0 });
+    }
+    
+    let totalCleaned = 0;
+    
+    // For each group of duplicates, keep the oldest one and delete the rest
+    for (const duplicate of duplicates) {
+      const ids = (duplicate as any).ids.split(',');
+      const idsToDelete = ids.slice(1); // Keep the first (oldest) one
+      
+      for (const id of idsToDelete) {
+        await FWHY_D1.prepare(`DELETE FROM menu_items WHERE id = ?`).bind(id).run();
+        totalCleaned++;
+      }
+    }
+    
+    console.log(`Menu cleanup complete. Removed ${totalCleaned} duplicate items.`);
+    return c.json({ 
+      success: true, 
+      message: `Cleanup complete. Removed ${totalCleaned} duplicate items.`,
+      cleaned: totalCleaned 
+    });
+  } catch (error) {
+    console.error('Error during menu cleanup:', error);
+    return c.json({ success: false, error: 'Cleanup failed' }, 500);
+  }
+});
 
 // Mount admin API before public API to avoid prefix conflicts
 app.route('/api/admin', adminApi);

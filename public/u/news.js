@@ -246,73 +246,63 @@ async function loadPublicPosts() {
  */
 async function loadPublicFeatured() {
     try {
-        // First try the blog/featured endpoint
-        const response = await fetchApi('/blog/featured', { method: 'GET' });
-        console.log('Featured API response:', response);
-        
-        const featured = response.data || {};
-        console.log('Featured data from API:', featured);
-        
-        // Create featured content HTML with enhanced styling
         let featuredHTML = `<div class="featured-content-wrapper">`;
-        
-        // Add featured text
-        if (featured.text) {
-            featuredHTML += `<div class="featured-text">${featured.text.replace(/</g, '&lt;').replace(/\n/g, '<br>')}</div>`;
-        }
-        
-        // Variables to store YouTube URLs
         let youtubeUrls = null;
         
-        // Check all possible properties for YouTube videos
-        if (featured.youtubeUrl) {
-            // blog/featured endpoint format
-            console.log('YouTube URLs from youtubeUrl property:', featured.youtubeUrl);
-            youtubeUrls = featured.youtubeUrl;
-        } else if (featured.youtube) {
-            // Support the alternate 'youtube' property from admin/featured endpoint
-            console.log('YouTube URLs from youtube property:', featured.youtube);
-            youtubeUrls = featured.youtube;
+        // Try the blog/featured endpoint first, but don't fail if it errors
+        try {
+            const response = await fetchApi('/blog/featured', { method: 'GET' });
+            console.log('Featured API response:', response);
+            
+            const featured = response.data || {};
+            console.log('Featured data from API:', featured);
+            
+            // Add featured text if available
+            if (featured.text) {
+                featuredHTML += `<div class="featured-text">${featured.text.replace(/</g, '&lt;').replace(/\n/g, '<br>')}</div>`;
+            }
+            
+            // Check for YouTube videos in the blog featured response
+            if (featured.youtubeUrl) {
+                console.log('YouTube URLs from youtubeUrl property:', featured.youtubeUrl);
+                youtubeUrls = featured.youtubeUrl;
+            } else if (featured.youtube) {
+                console.log('YouTube URLs from youtube property:', featured.youtube);
+                youtubeUrls = featured.youtube;
+            }
+        } catch (blogError) {
+            console.log('Blog featured endpoint failed, trying general featured endpoint:', blogError.message);
         }
         
-        // Add YouTube videos with enhanced carousel if we have URLs
+        // If we didn't find videos yet, try the general featured endpoint
+        if (!youtubeUrls) {
+            try {
+                const { data: generalFeatured } = await fetchApi('/featured', { method: 'GET' });
+                console.log('Featured data from general API:', generalFeatured);
+                
+                if (generalFeatured && generalFeatured.youtube) {
+                    console.log('Found YouTube URLs in general endpoint:', generalFeatured.youtube);
+                    youtubeUrls = generalFeatured.youtube;
+                }
+            } catch (err) {
+                console.warn('Could not load from general featured endpoint:', err);
+            }
+        }
+        
+        // Add YouTube videos if we found any
         if (youtubeUrls) {
             console.log('Adding YouTube carousel with URLs:', youtubeUrls);
             const youtubeEmbed = createYouTubeEmbed(youtubeUrls);
             console.log('Generated YouTube embed HTML:', youtubeEmbed.substring(0, 100) + '...');
             featuredHTML += `<div class="featured-video-container">${youtubeEmbed}</div>`;
         } else {
-            console.log('No YouTube URLs found in primary endpoint');
+            console.log('No YouTube URLs found in any endpoint');
+            featuredHTML += `<div class="no-featured">No featured content available</div>`;
         }
         
         featuredHTML += `</div>`;
         
         publicFeaturedContentEl.innerHTML = featuredHTML;
-        
-        // If we didn't find videos in the first endpoint, try the generic featured endpoint
-        if (!youtubeUrls) {
-            try {
-                const { data: generalFeatured } = await fetchApi('/featured', { method: 'GET' });
-                console.log('Featured data from general API:', generalFeatured);
-                
-                if (generalFeatured.youtube) {
-                    console.log('Found YouTube URLs in general endpoint:', generalFeatured.youtube);
-                    // If we have videos, update the container
-                    const youtubeContainer = publicFeaturedContentEl.querySelector('.featured-content-wrapper');
-                    if (youtubeContainer) {
-                        const youtubeEmbed = createYouTubeEmbed(generalFeatured.youtube);
-                        console.log('Generated YouTube embed HTML from general endpoint:', youtubeEmbed.substring(0, 100) + '...');
-                        youtubeContainer.innerHTML += `
-                            <div class="featured-video-container">
-                                ${youtubeEmbed}
-                            </div>
-                        `;
-                    }
-                }
-            } catch (err) {
-                console.warn('Could not load from general featured endpoint:', err);
-            }
-        }
         
         // After content is loaded, ensure all carousels are properly initialized
         setTimeout(() => {

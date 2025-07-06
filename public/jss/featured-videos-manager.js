@@ -345,20 +345,16 @@ async function saveFeaturedVideos() {
             youtube: featuredVideos
         });
         
-        // Also save to blog/featured to ensure compatibility
+        // Also save to main featured endpoint to ensure compatibility
         // This ensures the videos appear in both admin and public views
         try {
-            const blogFeaturedResponse = await api.get('/api/blog/featured');
-            const currentFeatured = blogFeaturedResponse.data || {};
-            
-            await api.post('/api/admin/blog/featured', {
-                text: currentFeatured.text || '',
-                youtubeUrl: featuredVideos.join(',')
+            await api.post('/api/admin/featured', {
+                youtube: featuredVideos
             });
             
-            console.log('Featured videos saved to both endpoints');
+            console.log('Featured videos saved to main endpoint');
         } catch (e) {
-            console.warn('Could not save to blog/featured endpoint:', e);
+            console.warn('Could not save to featured endpoint:', e);
         }
         
         showStatus(videosStatusEl, 'Featured videos saved successfully', 'success', 3000);

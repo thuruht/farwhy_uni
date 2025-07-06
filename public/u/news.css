@@ -1,15 +1,15 @@
 @font-face {
   font-family: 'hnb2';
-  src: url('/fonts/hnb2.woff2') format('woff2'),
-       url('/fonts/hnb2.woff') format('woff');
+  src: url('/fnt/hnb2.woff2') format('woff2'),
+       url('/fnt/hnb2.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'kb';
-  src: url('/fonts/kb.woff2') format('woff2'),
-       url('/fonts/kb.woff') format('woff');
+  src: url('/fnt/kb.woff2') format('woff2'),
+       url('/fnt/kb.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }

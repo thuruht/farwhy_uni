@@ -243,8 +243,9 @@ function createMenuCard(menu, venue) {
 // Load menu items for a specific menu
 async function loadMenuItems(menuId, container) {
     try {
-        // Use the admin API endpoint
-        const response = await fetch(`/api/admin/menu/${menuId}`);
+        // Since our system is venue-based, use the venue endpoint instead of menu ID
+        // For now, we assume 'farewell' venue - this could be made dynamic later
+        const response = await fetch(`/api/admin/venues/farewell/menu-items`);
         if (!response.ok) throw new Error(`Failed to load menu items: ${response.status} ${response.statusText}`);
         
         const data = await response.json();

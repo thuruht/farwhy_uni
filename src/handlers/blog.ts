@@ -109,18 +109,28 @@ export async function getPublicPosts(c: Context<{ Bindings: Env }>): Promise<Res
 
 export async function getFeaturedContent(c: Context<{ Bindings: Env }>): Promise<Response> {
     try {
-        const featuredData = await c.env.BLOG_KV.get('blog:featured');
-        const featured = featuredData ? JSON.parse(featuredData) : { text: '', youtubeUrl: '' };
+        // Use the same KV key as the working /api/featured endpoint
+        const featuredData = await c.env.BLOG_KV.get('featured');
+        const featured = featuredData ? JSON.parse(featuredData) : { 
+            text: 'Welcome to the Farewell/Howdy blog! Stay tuned for updates and news.', 
+            youtubeUrl: null,
+            youtube: null
+        };
         return c.json({
             success: true,
             data: featured
         });
     } catch (error) {
         console.error('Get featured content error:', error);
+        // Return default content instead of error to prevent frontend issues
         return c.json({ 
-            success: false,
-            error: 'Failed to fetch featured content' 
-        }, 500);
+            success: true,
+            data: {
+                text: 'Welcome to the Farewell/Howdy blog! Stay tuned for updates and news.',
+                youtubeUrl: null,
+                youtube: null
+            }
+        });
     }
 }
 
@@ -229,21 +239,47 @@ export async function deletePostById(c: Context<{ Bindings: Env }>): Promise<Res
 export async function setFeaturedContent(c: Context<{ Bindings: Env }>): Promise<Response> {
     try {
         const featuredData = await c.req.json<any>();
-        // Normalize YouTube URLs - could be array, comma-separated string, or single string
+        
+        // Get current featured content - use same key as working /api/featured endpoint
+        const currentFeaturedData = await c.env.BLOG_KV.get('featured');
+        const currentFeatured = currentFeaturedData ? JSON.parse(currentFeaturedData) : {};
+        
+        // Handle different data structures for compatibility
         let youtubeUrls = '';
-        if (Array.isArray(featuredData.youtubeUrl)) {
-            youtubeUrls = featuredData.youtubeUrl.join(',');
-        } else if (featuredData.youtubeUrl && typeof featuredData.youtubeUrl === 'string') {
-            // Use as is if it's already a string
-            youtubeUrls = featuredData.youtubeUrl;
+        let youtubeArray: string[] = [];
+        
+        // Handle youtube field (from admin)
+        if (featuredData.youtube) {
+            if (Array.isArray(featuredData.youtube)) {
+                youtubeArray = featuredData.youtube;
+                youtubeUrls = featuredData.youtube.join(',');
+            } else if (typeof featuredData.youtube === 'string') {
+                youtubeUrls = featuredData.youtube;
+                youtubeArray = featuredData.youtube.split(',').map((url: string) => url.trim()).filter(Boolean);
+            }
+        }
+        
+        // Handle youtubeUrl field (from blog)
+        if (featuredData.youtubeUrl) {
+            if (Array.isArray(featuredData.youtubeUrl)) {
+                youtubeUrls = featuredData.youtubeUrl.join(',');
+                youtubeArray = featuredData.youtubeUrl;
+            } else if (typeof featuredData.youtubeUrl === 'string') {
+                youtubeUrls = featuredData.youtubeUrl;
+                youtubeArray = featuredData.youtubeUrl.split(',').map((url: string) => url.trim()).filter(Boolean);
+            }
         }
         
         const featured = {
-            text: featuredData.text || '',
+            ...currentFeatured,
+            text: featuredData.text !== undefined ? featuredData.text : currentFeatured.text || '',
             youtubeUrl: youtubeUrls,
+            youtube: youtubeArray,
             updated_at: new Date().toISOString()
         };
-        await c.env.BLOG_KV.put('blog:featured', JSON.stringify(featured));
+        
+        // Use same key as working /api/featured endpoint
+        await c.env.BLOG_KV.put('featured', JSON.stringify(featured));
         return c.json({ success: true, data: featured });
     } catch (error) {
         console.error('Set featured content error:', error);
