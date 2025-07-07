@@ -152,7 +152,7 @@ async function createHours(c: Context<{ Bindings: Env }>) {
   }
   
   try {
-    // Process each hour in sequence
+    // Use the same upsert logic as updateHours since this is essentially an upsert operation
     for (const hour of hours) {
       const { day_of_week, open_time, close_time, is_closed, notes } = hour;
       
@@ -160,24 +160,50 @@ async function createHours(c: Context<{ Bindings: Env }>) {
         return c.json({ success: false, error: `Invalid day_of_week: ${day_of_week}` }, 400);
       }
       
-      await FWHY_D1.prepare(`
-        INSERT INTO business_hours (
-          venue, day_of_week, open_time, close_time, is_closed, notes, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-      `).bind(
-        venue,
-        day_of_week,
-        open_time,
-        close_time,
-        is_closed ? 1 : 0,
-        notes || ''
-      ).run();
+      // Check if a record already exists for this venue and day
+      const { results } = await FWHY_D1.prepare(
+        "SELECT id FROM business_hours WHERE venue = ? AND day_of_week = ?"
+      ).bind(venue, day_of_week).all();
+      
+      if (results && results.length > 0) {
+        // Update existing record
+        await FWHY_D1.prepare(`
+          UPDATE business_hours SET 
+            open_time = ?, 
+            close_time = ?, 
+            is_closed = ?, 
+            notes = ?,
+            updated_at = datetime('now')
+          WHERE venue = ? AND day_of_week = ?
+        `).bind(
+          open_time, 
+          close_time, 
+          is_closed ? 1 : 0, 
+          notes || '',
+          venue,
+          day_of_week
+        ).run();
+      } else {
+        // Insert new record
+        await FWHY_D1.prepare(`
+          INSERT INTO business_hours (
+            venue, day_of_week, open_time, close_time, is_closed, notes, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+        `).bind(
+          venue,
+          day_of_week,
+          open_time,
+          close_time,
+          is_closed ? 1 : 0,
+          notes || ''
+        ).run();
+      }
     }
     
     return c.json({ success: true });
   } catch (error) {
-    console.error('Error creating hours:', error);
-    return c.json({ success: false, error: "Failed to create business hours" }, 500);
+    console.error('Error creating/updating hours:', error);
+    return c.json({ success: false, error: "Failed to create/update business hours" }, 500);
   }
 }
 

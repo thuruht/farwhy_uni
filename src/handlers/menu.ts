@@ -63,30 +63,30 @@ async function deleteMenu(c: Context<{ Bindings: Env }>) {
 
 async function listMenuItems(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
-  const menuId = c.req.param('id');
   
+  // Simplified for single-menu architecture - get all active menu items
   const { results } = await FWHY_D1.prepare(`
     SELECT * FROM menu_items 
-    WHERE menu_id = ? AND active = 1 
-    ORDER BY display_order ASC, name ASC
-  `).bind(menuId).all();
+    WHERE active = 1 
+    ORDER BY category, display_order ASC, name ASC
+  `).all();
   
   return c.json({ success: true, data: results || [] });
 }
 
 async function createMenuItem(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
-  const menuId = c.req.param('id');
-  const { name, description, price, category, display_order = 0 } = await c.req.json();
+  const { name, description, price, category, image_url, display_order } = await c.req.json();
   
   if (!name) {
     return c.json({ success: false, error: "Name is required" }, 400);
   }
   
+  // Simplified for single-menu architecture - no menu_id needed
   const result = await FWHY_D1.prepare(`
-    INSERT INTO menu_items (menu_id, name, description, price, category, display_order, created_at, updated_at) 
-    VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-  `).bind(menuId, name, description, price, category, display_order).run();
+    INSERT INTO menu_items (name, description, price, category, image_url, display_order, active, created_at, updated_at) 
+    VALUES (?, ?, ?, ?, ?, COALESCE(?, (SELECT COALESCE(MAX(display_order), 0) + 1 FROM menu_items)), 1, datetime('now'), datetime('now'))
+  `).bind(name, description, price, category, image_url, display_order).run();
   
   return c.json({ success: true, id: result.meta.last_row_id }, 201);
 }
@@ -94,13 +94,13 @@ async function createMenuItem(c: Context<{ Bindings: Env }>) {
 async function updateMenuItem(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
   const itemId = c.req.param('id');
-  const { name, description, price, category, display_order, active } = await c.req.json();
+  const { name, description, price, category, image_url, display_order, active } = await c.req.json();
   
   await FWHY_D1.prepare(`
     UPDATE menu_items SET 
-      name = ?, description = ?, price = ?, category = ?, display_order = ?, active = ?, updated_at = datetime('now')
+      name = ?, description = ?, price = ?, category = ?, image_url = ?, display_order = ?, active = ?, updated_at = datetime('now')
     WHERE id = ?
-  `).bind(name, description, price, category, display_order, active ? 1 : 0, itemId).run();
+  `).bind(name, description, price, category, image_url, display_order, active ? 1 : 0, itemId).run();
   
   return c.json({ success: true });
 }
@@ -123,21 +123,13 @@ export async function handleMenu(
   try {
     switch (action) {
       case 'list':
-        return listMenus(c);
+        return listMenuItems(c); // Simplified to list menu items directly
       case 'create':
-        return createMenu(c);
+        return createMenuItem(c); // Simplified to create menu items directly
       case 'update':
-        return updateMenu(c);
+        return updateMenuItem(c); // Simplified to update menu items directly
       case 'delete':
-        return deleteMenu(c);
-      case 'items':
-        return listMenuItems(c);
-      case 'create-item':
-        return createMenuItem(c);
-      case 'update-item':
-        return updateMenuItem(c);
-      case 'delete-item':
-        return deleteMenuItem(c);
+        return deleteMenuItem(c); // Simplified to delete menu items directly
       default:
         return c.json({ success: false, error: 'Invalid action' }, 400);
     }

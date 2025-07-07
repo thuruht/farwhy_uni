@@ -1000,7 +1000,7 @@ async function initializeDashboard() {
     setupNavigation();
     
     console.log('Setting up mobile menu...');
-    setupMobileMenu();
+    setupDropdownNavigation();
     
     console.log('Setting up modal...');
     setupModal();
@@ -1240,6 +1240,12 @@ function showSection(sectionName) {
         targetSection.classList.add('active');
         dashboardState.currentSection = sectionName;
         
+        // Update dropdown selection
+        const navSelect = document.getElementById('admin-nav-select');
+        if (navSelect) {
+            navSelect.value = sectionName;
+        }
+        
         // Call appropriate loading function based on section
         switch (sectionName) {
             case 'dashboard': 
@@ -1252,7 +1258,11 @@ function showSection(sectionName) {
                 loadBlogPosts(); 
                 break;
             case 'venue': 
-                loadVenueSettings(); 
+                loadVenueSettings();
+                // Auto-load menu for Farewell since there's only one venue
+                if (typeof loadMenus === 'function') {
+                    loadMenus('farewell');
+                }
                 break;
             case 'import': 
                 setupImportHandlers(); 
@@ -1312,79 +1322,31 @@ function setupNavigation() {
     });
 }
 
-function setupMobileMenu() {
-    console.log('Setting up mobile menu toggle');
-    const mobileToggle = document.getElementById('mobile-menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-
-    console.log('Mobile menu elements:', mobileToggle, sidebar, overlay);
-
-    if (mobileToggle && sidebar) {
-        // Add better click handling for mobile
-        const toggleMobileMenu = (e) => {
-            console.log('Mobile menu toggle clicked');
-            e.preventDefault();
-            e.stopPropagation();
-            sidebar.classList.toggle('open');
-            
-            // Toggle overlay
-            if (overlay) {
-                overlay.classList.toggle('active');
-            }
-            
-            console.log('Sidebar classes after toggle:', sidebar.classList);
-        };
-
-        // Use both click and touchend events for better mobile response
-        mobileToggle.addEventListener('click', toggleMobileMenu);
-        mobileToggle.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            toggleMobileMenu(e);
-        });
-
-        // Add overlay click handler
-        if (overlay) {
-            overlay.addEventListener('click', () => {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
-            });
-            
-            overlay.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
-            });
-        }
-
-        // Close sidebar when clicking outside of it
-        document.addEventListener('click', (e) => {
-            if (sidebar &&
-                sidebar.classList.contains('open') &&
-                !sidebar.contains(e.target) &&
-                !mobileToggle.contains(e.target)) {
-                sidebar.classList.remove('open');
-                if (overlay) overlay.classList.remove('active');
-            }
-        });
-        
-        // Close sidebar when a nav item is clicked
-        const navItems = sidebar.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    setTimeout(() => {
-                        sidebar.classList.remove('open');
-                        if (overlay) overlay.classList.remove('active');
-                    }, 150);
-                }
-            });
-        });
-
-        console.log('Mobile menu handlers set up successfully');
-    } else {
-        console.error('Mobile menu elements not found');
+function setupDropdownNavigation() {
+    console.log('Setting up dropdown navigation');
+    
+    const navSelect = document.getElementById('admin-nav-select');
+    if (!navSelect) {
+        console.error('Navigation dropdown not found');
+        return;
     }
+    
+    // Handle navigation changes
+    navSelect.addEventListener('change', (e) => {
+        const selectedSection = e.target.value;
+        console.log('Navigation changed to:', selectedSection);
+        
+        if (selectedSection === 'logout') {
+            // Handle logout
+            logout();
+            return;
+        }
+        
+        // Navigate to section
+        showSection(selectedSection);
+    });
+    
+    console.log('Dropdown navigation setup complete');
 }
 
 function setupModal() {
@@ -1830,45 +1792,18 @@ async function loadVenueSettings(venue) {
     console.log(`Loading venue settings for venue: ${venue}`);
     window.currentVenue = venue; // Store the current venue globally
     
-    const menuManagement = document.getElementById('menu-management');
-    if (!menuManagement) return;
-
-    const addMenuBtn = document.getElementById('add-menu-btn');
-    const reorderMenuBtn = document.getElementById('reorder-menu-btn');
-    const menuList = document.getElementById('menu-list');
-    console.log('Menu management elements:', { addMenuBtn, reorderMenuBtn, menuList });
-
-
-    if (addMenuBtn) {
-        addMenuBtn.onclick = () => {
-            console.log('Add menu item button clicked');
-            showMenuItemForm(null, venue);
-        };
-    }
-
-    if (reorderMenuBtn) {
-        reorderMenuBtn.onclick = () => {
-            console.log('Reorder menu items button clicked');
-            toggleReorderMode(venue);
-        };
+    // Load business hours for Farewell (only venue that needs dynamic hours management)
+    if (venue === 'farewell') {
+        await loadHours();
     }
     
-    console.log(`Loading menu items for venue: ${venue}`);
-    try {
-        const response = await api.get(`/api/admin/venues/${venue}/menu-items`);
-        console.log('Menu items response:', response);
-        if (response && response.success && Array.isArray(response.data)) {
-            window.globalMenuData = response.data;
-            currentMenuItems = response.data; // Set global variable for consistency
-            renderMenuItems(response.data, venue);
-        } else {
-            console.log('No menu items found or invalid response:', response);
-            menuList.innerHTML = '<div class="empty-state">No menu items found. Click "Add Menu Item" to create one.</div>';
-        }
-    } catch (error) {
-        console.error('Error loading menu items:', error);
-        menuList.innerHTML = '<div class="error-state">Failed to load menu items. Please try again.</div>';
-    }
+    // Menu management is now handled by menu-management.js
+    // Skip old menu management code to avoid conflicts
+    console.log(`Menu management for venue ${venue} is handled by menu-management.js`);
+    
+    // Load other venue settings if needed (business hours, etc.)
+    // but skip menu items since that's handled by the new system
+    return;
 }
 
 // Function to toggle menu reorder mode
@@ -2389,80 +2324,209 @@ if (!window.featuredVideosManager) {
     };
 }
 
-// Add file upload feedback
-function setupFileUploadHandlers() {
-    const eventFlyerUpload = document.getElementById('event-flyer-upload');
-    const blogImageUpload = document.getElementById('blog-image-upload');
-    // const menuImageUpload = document.getElementById('menu-item-image-upload'); // COMMENTED OUT - Menu items don't support images yet
-    
-    if (eventFlyerUpload) {
-        eventFlyerUpload.addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                console.log('Event flyer file selected:', file.name, file.size, 'bytes');
-                showToast(`File selected: ${file.name}`, 'info');
-                
-                // Auto-upload and populate URL field
-                await uploadAndPopulateUrl(file, 'event-flyer-url', '/api/admin/events/flyer');
-            }
-        });
-    }
-    
-    if (blogImageUpload) {
-        blogImageUpload.addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                console.log('Blog image file selected:', file.name, file.size, 'bytes');
-                showToast(`File selected: ${file.name}`, 'info');
-                
-                // Auto-upload and populate URL field
-                await uploadAndPopulateUrl(file, 'blog-image-url', '/api/admin/blog/upload-image');
-            }
-        });
-    }
-    
-    /* COMMENTED OUT - Menu items don't support images yet
-    // Menu item images not currently supported - commenting out
-    /*
-    if (menuImageUpload) {
-        menuImageUpload.addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                console.log('Menu item image file selected:', file.name, file.size, 'bytes');
-                showToast(`File selected: ${file.name}`, 'info');
-                
-                // Auto-upload and populate URL field
-                await uploadAndPopulateUrl(file, 'menu-item-image-url', '/api/admin/menu-items/upload-image');
-            }
-        });
-    }
-    */
-}
+// ================================
+// HOURS MANAGEMENT (FAREWELL ONLY)
+// ================================
 
-// Helper function to upload file and populate URL field
-async function uploadAndPopulateUrl(file, urlFieldId, uploadEndpoint) {
+// Days of the week mapping
+const DAYS_OF_WEEK = [
+    { value: 0, name: 'Sunday' },
+    { value: 1, name: 'Monday' },
+    { value: 2, name: 'Tuesday' },
+    { value: 3, name: 'Wednesday' },
+    { value: 4, name: 'Thursday' },
+    { value: 5, name: 'Friday' },
+    { value: 6, name: 'Saturday' }
+];
+
+async function loadHours() {
+    console.log('Loading business hours for Farewell...');
+    
     try {
-        showToast('Uploading image...', 'info');
+        const response = await fetch('/api/hours?venue=farewell', {
+            method: 'GET',
+            credentials: 'include'
+        });
         
-        const formData = new FormData();
-        formData.append('image', file);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
         
-        const response = await api.post(uploadEndpoint, formData);
+        const result = await response.json();
+        console.log('Hours API response:', result);
         
-        if (response && response.success && response.url) {
-            const urlField = document.getElementById(urlFieldId);
-            if (urlField) {
-                urlField.value = response.url;
-                showToast('Image uploaded successfully!', 'success');
-                console.log('Image uploaded, URL populated:', response.url);
-            } else {
-                console.warn('URL field not found:', urlFieldId);
-            }
+        if (result.success) {
+            displayHoursEditor(result.data.farewell || []);
         } else {
-            throw new Error(response?.error || 'Upload failed');
+            console.error('Failed to load hours:', result.error);
+            displayHoursEditor([]); // Show empty form if no hours exist
         }
     } catch (error) {
-        console.error('Error uploading image:', error);
-        showToast('Error uploading image: ' + error.message, 'error');
+        console.error('Error loading hours:', error);
+        showAlert('Error loading business hours. Please try again.', 'error');
+        displayHoursEditor([]); // Show empty form on error
+    }
+}
+
+function displayHoursEditor(hours) {
+    const container = document.getElementById('hours-editor');
+    if (!container) {
+        console.error('Hours editor container not found');
+        return;
+    }
+    
+    // Create hours data with defaults
+    const hoursData = {};
+    
+    // Initialize with existing hours or defaults
+    DAYS_OF_WEEK.forEach(day => {
+        const existingHour = hours.find(h => h.day_of_week === day.value);
+        hoursData[day.value] = existingHour || {
+            day_of_week: day.value,
+            open_time: '09:00',
+            close_time: '17:00',
+            is_closed: false,
+            notes: ''
+        };
+    });
+    
+    container.innerHTML = `
+        <div class="alert alert-info" style="margin-bottom: 20px;">
+            <strong>Farewell Cafe Hours:</strong> Set the regular business hours for Farewell Cafe. 
+            These will be displayed on the public website.
+        </div>
+        
+        <table class="hours-table">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Open Time</th>
+                    <th>Close Time</th>
+                    <th>Closed</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${DAYS_OF_WEEK.map(day => {
+                    const dayData = hoursData[day.value];
+                    return `
+                        <tr class="${dayData.is_closed ? 'closed' : ''}">
+                            <td><strong>${day.name}</strong></td>
+                            <td>
+                                <input type="time" 
+                                       id="open-${day.value}" 
+                                       value="${dayData.open_time || '09:00'}"
+                                       ${dayData.is_closed ? 'disabled' : ''} />
+                            </td>
+                            <td>
+                                <input type="time" 
+                                       id="close-${day.value}" 
+                                       value="${dayData.close_time || '17:00'}"
+                                       ${dayData.is_closed ? 'disabled' : ''} />
+                            </td>
+                            <td>
+                                <input type="checkbox" 
+                                       id="closed-${day.value}"
+                                       ${dayData.is_closed ? 'checked' : ''}
+                                       onchange="toggleDayStatus(${day.value})" />
+                            </td>
+                            <td>
+                                <input type="text" 
+                                       id="notes-${day.value}" 
+                                       value="${dayData.notes || ''}"
+                                       placeholder="Special notes..."
+                                       ${dayData.is_closed ? 'disabled' : ''} />
+                            </td>
+                        </tr>
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 20px;">
+            <button type="button" class="btn-primary" onclick="saveHours()">
+                Save Hours
+            </button>
+            <button type="button" class="btn-secondary" onclick="loadHours()">
+                Reset
+            </button>
+        </div>
+    `;
+}
+
+function toggleDayStatus(dayValue) {
+    const isClosedCheckbox = document.getElementById(`closed-${dayValue}`);
+    const openInput = document.getElementById(`open-${dayValue}`);
+    const closeInput = document.getElementById(`close-${dayValue}`);
+    const notesInput = document.getElementById(`notes-${dayValue}`);
+    const row = isClosedCheckbox.closest('tr');
+    
+    const isClosed = isClosedCheckbox.checked;
+    
+    // Enable/disable time inputs
+    openInput.disabled = isClosed;
+    closeInput.disabled = isClosed;
+    notesInput.disabled = isClosed;
+    
+    // Update row styling
+    if (isClosed) {
+        row.classList.add('closed');
+    } else {
+        row.classList.remove('closed');
+    }
+}
+
+async function saveHours() {
+    console.log('Saving business hours...');
+    
+    try {
+        // Collect hours data from the form
+        const hoursData = DAYS_OF_WEEK.map(day => {
+            const isClosedCheckbox = document.getElementById(`closed-${day.value}`);
+            const openInput = document.getElementById(`open-${day.value}`);
+            const closeInput = document.getElementById(`close-${day.value}`);
+            const notesInput = document.getElementById(`notes-${day.value}`);
+            
+            const isClosed = isClosedCheckbox.checked;
+            
+            return {
+                day_of_week: day.value,
+                open_time: isClosed ? null : openInput.value,
+                close_time: isClosed ? null : closeInput.value,
+                is_closed: isClosed,
+                notes: notesInput.value.trim()
+            };
+        });
+        
+        console.log('Hours data to save:', hoursData);
+        
+        const response = await fetch('/api/admin/hours', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                venue: 'farewell',
+                hours: hoursData
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showAlert('Business hours updated successfully!', 'success');
+            console.log('Hours saved successfully');
+        } else {
+            console.error('Failed to save hours:', result.error);
+            showAlert(`Failed to save hours: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        console.error('Error saving hours:', error);
+        showAlert('Error saving business hours. Please try again.', 'error');
     }
 }

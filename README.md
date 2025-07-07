@@ -91,21 +91,32 @@ npx wrangler deploy
 
 ## Documentation
 
-For detailed documentation, see [CONSOLIDATED_DOCUMENTATION.md](CONSOLIDATED_DOCUMENTATION.md).
-For project progress and roadmap, see [PROJECT_CHECKLIST_AND_ROADMAP.md](PROJECT_CHECKLIST_AND_ROADMAP.md).
-For blog system documentation, see [BLOG_SYSTEM_DOCUMENTATION.md](BLOG_SYSTEM_DOCUMENTATION.md).
-For recent implementations and updates, see [RECENT_IMPLEMENTATIONS.md](RECENT_IMPLEMENTATIONS.md).
-For technical architecture details, see [TECHNICAL_MAP.md](TECHNICAL_MAP.md).
+### Primary Documentation
+- **[SYSTEM_DOCUMENTATION.md](SYSTEM_DOCUMENTATION.md)** - Complete technical reference and architecture guide
+- **[API_REFERENCE.md](API_REFERENCE.md)** - Comprehensive API endpoint documentation  
+- **[CHANGELOG.md](CHANGELOG.md)** - Recent updates, fixes, and version history
+
+### Quick Reference
+- **Admin Dashboard**: Access at `/admin.html` (requires login)
+- **Public API**: All endpoints under `/api/` (some require authentication)
+- **Image Uploads**: Stored in R2 with automatic URL generation
+- **Database**: Cloudflare D1 with SQLite-compatible schema
 
 ## Project Status
 
-The project is in active development with core features implemented. See [PROJECT_CHECKLIST_AND_ROADMAP.md](PROJECT_CHECKLIST_AND_ROADMAP.md) for the latest status and upcoming tasks.
+✅ **Production Ready** - Core features implemented and tested  
+📱 **Mobile Optimized** - Responsive admin dashboard and public site  
+🔒 **Secure** - JWT authentication with protected admin routes  
+📚 **Well Documented** - Comprehensive technical documentation  
 
-> **Note**: Historical documentation can be found in the `ye_olde_docs` directory but should not be used for current development as it may contain outdated information.
+### Recent Updates (July 2025)
+- Complete API consistency verification and fixes
+- Mobile-responsive admin dashboard redesign  
+- Consolidated documentation (reduced from 27 to 5 files)
+- Enhanced menu management system with drag-and-drop
+- Multi-video featured content carousel
 
-### Obsolete Documentation
-
-Note: Documents in the `ye_olde_docs/` directory are historical and may contain outdated information. Refer to the current documentation in the root directory for the most up-to-date information.
+> **Historical Documentation**: Files in `ye_olde_docs/` are archived and may be outdated.
 
 ## License
 

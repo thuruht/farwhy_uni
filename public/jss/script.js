@@ -655,7 +655,7 @@ function setupEventsPage() {
             <p>${formattedDate}</p>
             <p><strong>Venue:</strong> <span class="venue-${event.venue}">${event.venue}</span></p>
             <p>${event.description || ''}</p>
-            ${event.ticketLink ? `<a href="${event.ticketLink}" target="_blank">Get Tickets</a>` : ''}
+            ${event.ticketLink ? `<a href="${event.ticketLink}" target="_blank" rel="noopener noreferrer" class="event-ticket-link">${event.price ? `Tickets ${event.price}` : 'Get Tickets'}</a>` : ''}
           </div>
         </div>
       `;

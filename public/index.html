@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>FAREWELL | HOWDY | KCMO - Howdy and Farewell - Kansas City</title>
-    <link rel="icon" type="image/x-icon" href="./img/favicon.png">
+    <link rel="icon" type="image/x-icon" href="./img/flavicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
     
@@ -219,6 +219,156 @@
         .event-details p {
             margin: 0 0 5px;
             font-size: 0.9rem;
+        }
+
+        .event-ticket-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: var(--accent-color);
+            color: #000;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .event-ticket-link:hover {
+            background-color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Mobile styles for events page modal */
+        @media (max-width: 768px) {
+            .events-page-content {
+                margin: 2% auto;
+                padding: 15px;
+                width: 95%;
+                max-height: 96vh;
+                overflow-y: auto;
+            }
+
+            .events-page-header h2 {
+                font-size: 1.4rem;
+            }
+
+            .events-page-close {
+                font-size: 24px;
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .events-filters {
+                flex-direction: column;
+                gap: 8px;
+                align-items: stretch;
+            }
+
+            .events-filters select,
+            .events-filters button {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+                min-height: 44px; /* Touch-friendly */
+                width: 100%;
+            }
+
+            .events-list {
+                max-height: 70vh;
+                padding-right: 5px;
+            }
+
+            .event-item {
+                grid-template-columns: 80px 1fr;
+                gap: 12px;
+                margin-bottom: 12px;
+                padding-bottom: 12px;
+            }
+
+            .event-item img {
+                width: 80px;
+                height: 80px;
+            }
+
+            .event-details h3 {
+                font-size: 1rem;
+                line-height: 1.3;
+            }
+
+            .event-details p {
+                font-size: 0.85rem;
+                line-height: 1.4;
+            }
+
+            .event-ticket-link {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                margin-top: 8px;
+                display: block;
+                text-align: center;
+                width: fit-content;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .events-page-content {
+                margin: 0;
+                padding: 10px;
+                width: 100%;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
+
+            .events-page-header {
+                padding-bottom: 8px;
+                margin-bottom: 10px;
+            }
+
+            .events-page-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .events-page-close {
+                font-size: 20px;
+                width: 35px;
+                height: 35px;
+            }
+
+            .events-list {
+                max-height: 75vh;
+            }
+
+            .event-item {
+                grid-template-columns: 60px 1fr;
+                gap: 10px;
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+            }
+
+            .event-item img {
+                width: 60px;
+                height: 60px;
+            }
+
+            .event-details h3 {
+                font-size: 0.9rem;
+            }
+
+            .event-details p {
+                font-size: 0.8rem;
+            }
+
+            .event-ticket-link {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
         }
 
     </style>

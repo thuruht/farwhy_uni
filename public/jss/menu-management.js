@@ -120,52 +120,32 @@ async function loadMenus(venue) {
     menuList.innerHTML = '<div class="loading-spinner"></div>';
     
     try {
-        // Call the admin API endpoint
-        const response = await fetch(`/api/admin/venues/${venue}/menu-items`);
-        if (!response.ok) {
-            throw new Error(`Failed to load menus: ${response.status} ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        console.log('Menu data:', data);
-        
-        if (data.success && data.data && data.data.length > 0) {
-            menuList.innerHTML = '';
-            
-            data.data.forEach(menu => {
-                const menuCard = createMenuCard(menu, venue);
-                menuList.appendChild(menuCard);
-            });
-        } else {
-            // Handle case with no menu data
-            menuList.innerHTML = `<div class="empty-state">
-                <p>No menu sections found for ${venue}. Click "Add Menu Section" to create one.</p>
+        // SIMPLIFIED LOGIC: Only Farewell has a menu, Howdy doesn't
+        if (venue !== 'farewell') {
+            menuList.innerHTML = `<div class="info-message">
+                <p>Howdy Thrift doesn't have a digital menu. Only Farewell Cafe has menu management.</p>
             </div>`;
-            
-            // For debugging, create a default menu if none exists
-            if (venue === 'farewell') {
-                console.log('Creating default Farewell menu');
-                try {
-                    await createDefaultMenu(venue);
-                    // Try loading again after creating default
-                    loadMenus(venue);
-                } catch (defaultError) {
-                    console.error('Error creating default menu:', defaultError);
-                }
-            }
+            return;
         }
+        
+        // For Farewell, create ONE menu section containing all menu items
+        menuList.innerHTML = '';
+        
+        const farewellMenu = {
+            id: 1,
+            name: 'Farewell Cafe Menu',
+            venue: 'farewell'
+        };
+        
+        const menuCard = createMenuCard(farewellMenu, venue);
+        menuList.appendChild(menuCard);
+        
     } catch (error) {
         console.error('Error loading menus:', error);
-        menuList.innerHTML = `<div class="error-message">
-            <p>Failed to load menus: ${error.message}</p>
-            <button class="btn btn-secondary retry-load-btn">Retry</button>
+        menuList.innerHTML = `<div class="error-state">
+            <p>Error loading menu: ${error.message}</p>
+            <button class="btn btn-primary" onclick="loadMenus('${venue}')">Retry</button>
         </div>`;
-        
-        // Add retry button functionality
-        const retryBtn = menuList.querySelector('.retry-load-btn');
-        if (retryBtn) {
-            retryBtn.addEventListener('click', () => loadMenus(venue));
-        }
     }
 }
 

@@ -115,6 +115,7 @@
             position: relative;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             margin: 0 auto;
+            display: block; /* Ensure proper display */
         }
         
         /* Modal Header */
@@ -168,6 +169,8 @@
         /* Form Styles in Modal */
         .modal-content .form-group {
             margin-bottom: 20px;
+            display: block;
+            width: 100%;
         }
         
         .modal-content .form-group label {
@@ -175,6 +178,7 @@
             margin-bottom: 8px;
             font-weight: 600;
             color: #333;
+            width: 100%;
         }
         
         .modal-content .form-group input,
@@ -187,6 +191,7 @@
             font-size: 14px;
             transition: border-color 0.2s ease;
             box-sizing: border-box;
+            display: block;
         }
         
         .modal-content .form-group input:focus,
@@ -423,6 +428,60 @@
         .menu-container.reorder-mode .menu-item-description {
             margin-left: 20px;
         }
+
+        /* Venue Management Layout Fixes */
+        .venue-content {
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        .venue-section {
+            width: 100%;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: var(--bg-light);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .venue-section h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+        }
+        
+        .section-description {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .menu-container {
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        /* Fix menu card to take full width */
+        .menu-card {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+        }
+        
+        .menu-items-container {
+            width: 100%;
+        }
+        
+        .menu-items-table {
+            width: 100%;
+        }
+        
+        /* Remove venue tabs since we only have one venue */
+        .venue-tabs {
+            display: none;
+        }
     </style>
 </head>
 <body data-state="farewell">
@@ -431,28 +490,21 @@
     </div>
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <div id="dashboard-container" class="admin-grid-container">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>Admin</h2>
-            </div>
-            <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" data-target="dashboard">Dashboard</a>
-                <a href="#" class="nav-item" data-target="events">Events</a>
-                <a href="#" class="nav-item" data-target="blog">Blog</a>
-                <a href="#" class="nav-item" data-target="featured-videos">Featured Videos</a>
-                <a href="#" class="nav-item" data-target="venue">Venue Management</a>
-                <a href="#" class="nav-item" data-target="help">Help</a>
-                <a href="#" id="logout-btn" class="nav-item">Logout</a>
-            </nav>
-            <div class="user-info">
-                <span id="current-user">Loading...</span>
-                <small id="user-role">admin</small>
-            </div>
-        </aside>
+        <nav class="admin-dropdown-nav">
+            <label for="admin-nav-select" class="visually-hidden">Admin Navigation</label>
+            <select id="admin-nav-select" class="admin-nav-select">
+                <option value="dashboard">Dashboard</option>
+                <option value="events">Events</option>
+                <option value="blog">Blog</option>
+                <option value="featured-videos">Featured Videos</option>
+                <option value="venue">Venue Management</option>
+                <option value="help">Help</option>
+                <option value="logout">Logout</option>
+            </select>
+        </nav>
         <main class="main-content">
             <header class="main-header">
                 <div class="header-left">
-                    <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle mobile menu">☰</button>
                     <span id="section-indicator">Dashboard</span>
                 </div>
                 <div class="header-right">
@@ -502,8 +554,7 @@
                 <div id="blog-list" class="item-list-container"></div>
             </section>
             <section id="section-venue" class="admin-section">
-                <div class="section-header"><h2>Venue Management</h2></div>
-                <div class="venue-tabs"><button class="tab-btn active" data-venue="farewell">Farewell Cafe</button></div>
+                <div class="section-header"><h2>Venue Management - Farewell Cafe</h2></div>
                 <div class="venue-content">
                     <div class="venue-section">
                         <h3>Menu Management</h3>
