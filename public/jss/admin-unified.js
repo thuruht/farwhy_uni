@@ -1532,9 +1532,157 @@ async function loadDashboardStats() {
         } else {
             console.error('Stats total posts element not found or blogData invalid', blogData);
         }
+        
+        // Update recent activity
+        updateRecentActivity(events, blogData?.data || []);
     } catch (error) {
         console.error('Error loading dashboard stats:', error);
     }
+}
+
+// Function to show recent activity in the dashboard
+function updateRecentActivity(events, blogPosts) {
+    const activityList = document.getElementById('recent-activity-list');
+    if (!activityList) {
+        console.error('Recent activity list element not found');
+        return;
+    }
+    
+    // Combine events and blog posts into a single array of activities
+    const activities = [];
+    
+    // Add events
+    if (Array.isArray(events)) {
+        events.forEach(event => {
+            // Use created_at timestamp, or updated_at if available, or fallback to current time
+            const timestamp = event.updated_at || event.created_at || Date.now();
+            activities.push({
+                type: 'event',
+                title: event.title,
+                date: new Date(event.date),
+                venue: event.venue,
+                timestamp: new Date(timestamp),
+                action: event.updated_at ? 'updated' : 'created',
+                id: event.id
+            });
+        });
+    }
+    
+    // Add blog posts
+    if (Array.isArray(blogPosts)) {
+        blogPosts.forEach(post => {
+            // Use updated_at if available, otherwise created_at
+            const timestamp = post.updated_at || post.created_at || Date.now();
+            activities.push({
+                type: 'blog',
+                title: post.title,
+                date: new Date(post.created_at || Date.now()),
+                timestamp: new Date(timestamp),
+                action: post.updated_at && post.updated_at !== post.created_at ? 'updated' : 'created',
+                id: post.id
+            });
+        });
+    }
+    
+    // Sort by timestamp, most recent first
+    activities.sort((a, b) => b.timestamp - a.timestamp);
+    
+    // Take the 5 most recent
+    const recentActivities = activities.slice(0, 5);
+    
+    if (recentActivities.length === 0) {
+        activityList.innerHTML = '<div class="empty-message">No recent activity</div>';
+        return;
+    }
+    
+    // Generate HTML
+    activityList.innerHTML = recentActivities.map(activity => {
+        const isEvent = activity.type === 'event';
+        const icon = isEvent ? '🎪' : '📝';
+        const typeLabel = isEvent ? 'Event' : 'Blog Post';
+        const dateStr = formatDate(activity.date);
+        const detailText = isEvent ? `${activity.venue?.toUpperCase() || ''} | ${dateStr}` : dateStr;
+        const actionText = activity.action === 'updated' ? 'Updated' : 'Added';
+        const timeAgo = getTimeAgo(activity.timestamp);
+        
+        return `
+            <div class="activity-item">
+                <span class="activity-icon">${icon}</span>
+                <div class="activity-content">
+                    <div class="activity-title">${activity.title}</div>
+                    <div class="activity-meta">
+                        <span class="activity-type">${actionText} ${timeAgo}</span>
+                        <span class="activity-details">${typeLabel}: ${detailText}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Add some basic styles if not already present
+    if (!document.getElementById('activity-feed-styles')) {
+        const style = document.createElement('style');
+        style.id = 'activity-feed-styles';
+        style.textContent = `
+            .activity-feed {
+                max-height: 300px;
+                overflow-y: auto;
+            }
+            .activity-item {
+                display: flex;
+                padding: 10px;
+                border-bottom: 1px solid #eee;
+                align-items: center;
+            }
+            .activity-item:last-child {
+                border-bottom: none;
+            }
+            .activity-icon {
+                font-size: 1.5rem;
+                margin-right: 15px;
+            }
+            .activity-content {
+                flex: 1;
+            }
+            .activity-title {
+                font-weight: bold;
+                margin-bottom: 3px;
+            }
+            .activity-meta {
+                font-size: 0.8rem;
+                color: #666;
+                display: flex;
+                justify-content: space-between;
+            }
+            .empty-message {
+                padding: 20px;
+                text-align: center;
+                color: #888;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+// Helper function to format "time ago" text
+function getTimeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+    
+    if (diffDay > 0) {
+        return diffDay === 1 ? '1 day ago' : `${diffDay} days ago`;
+    }
+    if (diffHour > 0) {
+        return diffHour === 1 ? '1 hour ago' : `${diffHour} hours ago`;
+    }
+    if (diffMin > 0) {
+        return diffMin === 1 ? '1 minute ago' : `${diffMin} minutes ago`;
+    }
+    return 'just now';
 }
 
 async function loadEvents() {
