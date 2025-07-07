@@ -380,7 +380,7 @@
           <div class="left">
               <nav>
                   <ul>
-                      <li><a href="./events.html">EVENTS</a></li>
+                      <li><a href="javascript:void(0);" onclick="openEventsPopup()">EVENTS</a></li>
                       <li><a href="./booking.htm">BOOKING</a></li>
                       <li><a href="./more.htm">MORE</a></li>
                       <li><a href="./about.htm">ABOUT</a></li>
@@ -652,6 +652,16 @@ document.addEventListener('DOMContentLoaded', function() {
   <script src="./jss/script.js"></script>
   <script src="./jss/ics-generator.js"></script>
   <script src="./jss/events-modal.js"></script>
-
+  <script>
+    function openEventsPopup() {
+      // First try to open in a popup
+      const popup = window.open('./events.html', 'farewell-events', 'width=1024,height=800,scrollbars=yes');
+      
+      // If popup is blocked or null, try opening in a new tab
+      if (!popup) {
+        window.open('./events.html', '_blank');
+      }
+    }
+  </script>
 
 </body></html>
