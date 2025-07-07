@@ -1,0 +1,87 @@
+<!-- Menu Item Component Template -->
+<div class="menu-item" data-item-id="{{ITEM_ID}}">
+    <div class="menu-item-content">
+        {{#if ITEM_IMAGE}}
+        <div class="menu-item-image">
+            <img src="{{ITEM_IMAGE}}" 
+                 alt="{{ITEM_NAME}}"
+                 loading="lazy">
+        </div>
+        {{/if}}
+        
+        <div class="menu-item-details">
+            <header class="menu-item-header">
+                <h4 class="menu-item-name">{{ITEM_NAME}}</h4>
+                <span class="menu-item-price">{{ITEM_PRICE}}</span>
+            </header>
+            
+            {{#if ITEM_DESCRIPTION}}
+            <div class="menu-item-description">
+                <p>{{ITEM_DESCRIPTION}}</p>
+            </div>
+            {{/if}}
+            
+            {{#if ITEM_TAGS}}
+            <div class="menu-item-tags">
+                {{#each ITEM_TAGS}}
+                <span class="tag tag-{{this}}">{{this}}</span>
+                {{/each}}
+            </div>
+            {{/if}}
+            
+            {{#unless IS_AVAILABLE}}
+            <div class="unavailable-notice">Currently Unavailable</div>
+            {{/unless}}
+        </div>
+    </div>
+</div>
+
+<!-- Menu Category Template -->
+<section class="menu-category" data-category-id="{{CATEGORY_ID}}">
+    <header class="category-header">
+        <h3 class="category-title">{{CATEGORY_NAME}}</h3>
+        {{#if CATEGORY_DESCRIPTION}}
+        <p class="category-description">{{CATEGORY_DESCRIPTION}}</p>
+        {{/if}}
+    </header>
+    
+    <div class="category-items">
+        {{#each CATEGORY_ITEMS}}
+        <!-- Individual menu items go here -->
+        {{/each}}
+    </div>
+</section>
+
+<!-- Complete Menu Template -->
+<div class="menu-container">
+    <header class="menu-header">
+        <h2 class="menu-title">{{VENUE_NAME}} Menu</h2>
+        {{#if MENU_DESCRIPTION}}
+        <p class="menu-description">{{MENU_DESCRIPTION}}</p>
+        {{/if}}
+        
+        {{#if LAST_UPDATED}}
+        <p class="menu-updated">Last updated: {{LAST_UPDATED}}</p>
+        {{/if}}
+    </header>
+    
+    <nav class="menu-navigation">
+        <ul class="menu-nav-list">
+            {{#each MENU_CATEGORIES}}
+            <li>
+                <a href="#category-{{ID}}" class="menu-nav-link">{{NAME}}</a>
+            </li>
+            {{/each}}
+        </ul>
+    </nav>
+    
+    <main class="menu-content">
+        {{#each MENU_CATEGORIES}}
+        <!-- Menu categories go here -->
+        {{/each}}
+    </main>
+    
+    <footer class="menu-footer">
+        <p class="menu-notice">Prices and availability subject to change. Please ask your server about daily specials.</p>
+    </footer>
+</div>

@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="/css/fleeting-journey.css">
     <link rel="stylesheet" href="/css/literary-admin.css">
     <link rel="stylesheet" href="/css/image-upload.css">
-    <link rel="stylesheet" href="/css/admin-button-fix.css">
     <link rel="stylesheet" href="/css/featured-videos.css">
     <link rel="stylesheet" href="/css/unified-buttons.css">
     <link rel="stylesheet" href="/css/admin-help.css">
@@ -482,6 +481,16 @@
         .venue-tabs {
             display: none;
         }
+
+        .section-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .section-actions .btn {
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body data-state="farewell">
@@ -520,7 +529,13 @@
                 <div class="recent-activity"><h3>Recent Activity</h3><div id="recent-activity-list" class="activity-feed"></div></div>
             </section>
             <section id="section-events" class="admin-section">
-                <div class="section-header"><h2>Event Management</h2><button class="btn btn-primary" id="add-event-btn">+ New Event</button></div>
+                <div class="section-header">
+                    <h2>Event Management</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" id="repair-legacy-events-btn" title="Repair legacy events with missing flyer URLs">🔧 Repair Legacy</button>
+                        <button class="btn btn-primary" id="add-event-btn">+ New Event</button>
+                    </div>
+                </div>
                 <div class="filters-bar">
                     <div class="filter-group filter-dropdown-group">
                         <label for="event-venue-filter">Filter by venue:</label>
@@ -772,6 +787,10 @@
                     <div class="form-group">
                         <label for="event-date">Date:</label>
                         <input type="date" id="event-date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-time">Time:</label>
+                        <input type="text" id="event-time" name="event_time" placeholder="e.g., Doors 7pm / Music 8pm">
                     </div>
                     <div class="form-group">
                         <label for="event-venue">Venue:</label>

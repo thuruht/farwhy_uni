@@ -51,12 +51,16 @@ function showEventForm(eventData = null) {
     
     // Populate form if editing
     if (isEdit) {
-        document.getElementById('event-title').value = eventData.title || '';
-        document.getElementById('event-date').value = eventData.date ? eventData.date.split('T')[0] : '';
-        document.getElementById('event-venue').value = eventData.venue || 'farewell';
-        document.getElementById('event-description').value = eventData.description || '';
-        document.getElementById('event-flyer-url').value = eventData.flyer_image_url || '';
-        document.getElementById('event-ticket-url').value = eventData.ticket_url || '';
+        // Normalize legacy event data to ensure all fields are properly mapped
+        const normalizedEvent = normalizeLegacyEventForEditing(eventData);
+        
+        document.getElementById('event-title').value = normalizedEvent.title;
+        document.getElementById('event-date').value = normalizedEvent.date ? normalizedEvent.date.split('T')[0] : '';
+        document.getElementById('event-time').value = normalizedEvent.event_time;
+        document.getElementById('event-venue').value = normalizedEvent.venue;
+        document.getElementById('event-description').value = normalizedEvent.description;
+        document.getElementById('event-flyer-url').value = normalizedEvent.flyer_image_url;
+        document.getElementById('event-ticket-url').value = normalizedEvent.ticket_url;
     } else {
         document.getElementById('event-form').reset();
     }
@@ -82,8 +86,17 @@ function showEventForm(eventData = null) {
     
     // Make sure the form submit handler is attached only once
     const form = document.getElementById('event-form');
-    form.removeEventListener('submit', handleEventFormSubmit);
-    form.addEventListener('submit', handleEventFormSubmit);
+    if (form) {
+        // Remove any existing listeners first
+        form.removeEventListener('submit', handleEventFormSubmit);
+        form.addEventListener('submit', handleEventFormSubmit);
+        
+        // Clear any existing dataset to prevent conflicts
+        form.removeAttribute('data-event-id');
+        if (isEdit) {
+            form.setAttribute('data-event-id', eventData.id);
+        }
+    }
     
     // Set up file upload handlers
     setupFileUploadHandlers();
@@ -93,47 +106,54 @@ function showEventForm(eventData = null) {
 async function handleEventFormSubmit(e) {
     e.preventDefault();
     
+    // Prevent multiple submissions
+    const submitButton = e.target.querySelector('button[type="submit"]');
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Saving...';
+    }
+    
     const modal = document.getElementById('event-modal');
     const isEdit = modal.dataset.eventId;
     const eventId = isEdit ? modal.dataset.eventId : null;
     
-    const formData = new FormData(e.target);
-    const eventData = Object.fromEntries(formData);
-    
-    // Handle file upload if present
-    const flyerFile = document.getElementById('event-flyer-upload').files[0];
-    if (flyerFile) {
-        try {
-            console.log('Starting flyer upload for file:', flyerFile.name);
-            showToast('Uploading image...', 'info');
-            
-            const uploadFormData = new FormData();
-            uploadFormData.append('flyer', flyerFile);
-            
-            const uploadResponse = await apiCall('/api/admin/events/flyer', {
-                method: 'POST',
-                body: uploadFormData
-            });
-            
-            console.log('Upload response:', uploadResponse);
-            
-            if (uploadResponse && uploadResponse.imageUrl) {
-                eventData.flyer_image_url = uploadResponse.imageUrl;
-                // Update the URL input field so user can see the uploaded URL
-                document.getElementById('event-flyer-url').value = uploadResponse.imageUrl;
-                showToast('Image uploaded successfully!', 'success');
-                console.log('Image URL set to:', uploadResponse.imageUrl);
-            } else {
-                console.error('Upload response missing imageUrl:', uploadResponse);
-                showToast('Image upload failed - no URL returned', 'error');
-            }
-        } catch (error) {
-            console.error('Error uploading flyer:', error);
-            showToast('Error uploading image: ' + error.message, 'error');
-        }
-    }
-    
     try {
+        const formData = new FormData(e.target);
+        const eventData = Object.fromEntries(formData);
+        
+        // Handle file upload if present
+        const flyerFile = document.getElementById('event-flyer-upload').files[0];
+        if (flyerFile) {
+            try {
+                console.log('Starting flyer upload for file:', flyerFile.name);
+                showToast('Uploading image...', 'info');
+                
+                const uploadFormData = new FormData();
+                uploadFormData.append('flyer', flyerFile);
+                
+                const uploadResponse = await apiCall('/api/admin/events/flyer', {
+                    method: 'POST',
+                    body: uploadFormData
+                });
+                
+                console.log('Upload response:', uploadResponse);
+                
+                if (uploadResponse && uploadResponse.imageUrl) {
+                    eventData.flyer_image_url = uploadResponse.imageUrl;
+                    // Update the URL input field so user can see the uploaded URL
+                    document.getElementById('event-flyer-url').value = uploadResponse.imageUrl;
+                    showToast('Image uploaded successfully!', 'success');
+                    console.log('Image URL set to:', uploadResponse.imageUrl);
+                } else {
+                    console.error('Upload response missing imageUrl:', uploadResponse);
+                    showToast('Image upload failed - no URL returned', 'error');
+                }
+            } catch (error) {
+                console.error('Error uploading flyer:', error);
+                showToast('Error uploading image: ' + error.message, 'error');
+            }
+        }
+        
         const url = isEdit ? `/api/admin/events/${eventId}` : '/api/admin/events';
         const method = isEdit ? 'PUT' : 'POST';
         
@@ -143,16 +163,22 @@ async function handleEventFormSubmit(e) {
             body: JSON.stringify(eventData) 
         });
         
-        if (response.success) {
+        if (response && response.success) {
             showToast(isEdit ? 'Event updated successfully!' : 'Event created successfully!', 'success');
             closeEventForm();
             loadEvents(); // Reload events
         } else {
-            showToast('Error saving event: ' + (response.error || 'Unknown error'), 'error');
+            showToast('Error saving event: ' + (response?.error || 'Unknown error'), 'error');
         }
     } catch (error) {
         console.error('Error saving event:', error);
-        showToast('Error saving event', 'error');
+        showToast('Error saving event: ' + error.message, 'error');
+    } finally {
+        // Re-enable submit button
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = isEdit ? 'Update Event' : 'Create Event';
+        }
     }
 }
 
@@ -798,6 +824,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        // Handle Repair Legacy Events button click
+        if (e.target.id === 'repair-legacy-events-btn' || e.target.closest('#repair-legacy-events-btn')) {
+            console.log('Repair Legacy Events button clicked');
+            e.preventDefault();
+            e.stopPropagation();
+            if (confirm('This will scan all events and restore missing flyer URLs and event times from legacy data. Continue?')) {
+                repairLegacyEvents();
+            }
+            return;
+        }
+
         // Handle New Blog Post button click
         if (e.target.id === 'add-blog-btn' || e.target.closest('#add-blog-btn')) {
             console.log('New Blog button clicked');
@@ -910,7 +947,9 @@ const api = {
         return null;
     },
     delete: async function (endpoint) {
-        return await this._call(endpoint, { method: 'DELETE' });
+        const res = await this._call(endpoint, { method: 'DELETE' });
+        if (res) return await res.json();
+        return null;
     }
 };
 
@@ -970,20 +1009,6 @@ function formatDate(dateString) {
     } catch (e) {
         return dateString;
     }
-}
-
-function showToast(message, type = 'info') {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) return;
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    toastContainer.appendChild(toast);
-    setTimeout(() => toast.classList.add('show'), 10);
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toastContainer.removeChild(toast), 300);
-    }, 3000);
 }
 
 // ====================================
@@ -2558,5 +2583,177 @@ async function saveHours() {
     } catch (error) {
         console.error('Error saving hours:', error);
         showAlert('Error saving business hours. Please try again.', 'error');
+    }
+}
+
+// Legacy event field mapping helper
+function normalizeLegacyEventForEditing(eventData) {
+    // Create a normalized event object that works with the form
+    const normalized = {
+        id: eventData.id,
+        title: eventData.title || '',
+        date: eventData.date || '',
+        venue: eventData.venue || 'farewell',
+        description: eventData.description || '',
+        // Handle both legacy and modern field names
+        event_time: eventData.event_time || eventData.time || '',
+        flyer_image_url: eventData.flyer_image_url || eventData.imageUrl || '',
+        ticket_url: eventData.ticket_url || eventData.ticketLink || '',
+        // Additional legacy fields
+        price: eventData.price || eventData.suggestedPrice || '',
+        age_restriction: eventData.age_restriction || eventData.ageRestriction || '',
+        status: eventData.status || 'active',
+        is_featured: eventData.is_featured || false
+    };
+    
+    console.log('Normalized legacy event:', normalized);
+    return normalized;
+}
+
+// Function to repair legacy events and restore missing flyer URLs
+async function repairLegacyEvents() {
+    try {
+        showToast('Starting legacy event repair...', 'info');
+        
+        // Get all events to check for legacy issues
+        const events = await api.get('/api/admin/events');
+        if (!events || !Array.isArray(events)) {
+            showToast('Failed to load events for repair', 'error');
+            return;
+        }
+        
+        let repairedCount = 0;
+        
+        for (const event of events) {
+            let needsUpdate = false;
+            const updates = { id: event.id };
+            
+            // Check if event has legacy imageUrl but no flyer_image_url
+            if (!event.flyer_image_url && event.imageUrl) {
+                updates.flyer_image_url = event.imageUrl;
+                needsUpdate = true;
+                console.log(`Repairing flyer URL for event ${event.id}: ${event.imageUrl}`);
+            }
+            
+            // Check if event has legacy time but no event_time
+            if (!event.event_time && event.time) {
+                updates.event_time = event.time;
+                needsUpdate = true;
+                console.log(`Repairing event time for event ${event.id}: ${event.time}`);
+            }
+            
+            // Check if event has legacy ticketLink but no ticket_url
+            if (!event.ticket_url && event.ticketLink) {
+                updates.ticket_url = event.ticketLink;
+                needsUpdate = true;
+                console.log(`Repairing ticket URL for event ${event.id}: ${event.ticketLink}`);
+            }
+            
+            if (needsUpdate) {
+                try {
+                    const response = await apiCall(`/api/admin/events/${event.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updates)
+                    });
+                    
+                    if (response && response.success) {
+                        repairedCount++;
+                    } else {
+                        console.error(`Failed to repair event ${event.id}:`, response);
+                    }
+                } catch (error) {
+                    console.error(`Error repairing event ${event.id}:`, error);
+                }
+            }
+        }
+        
+        if (repairedCount > 0) {
+            showToast(`Successfully repaired ${repairedCount} legacy events!`, 'success');
+            loadEvents(); // Reload events to show updated data
+        } else {
+            showToast('No legacy events needed repair', 'info');
+        }
+        
+    } catch (error) {
+        console.error('Error during legacy event repair:', error);
+        showToast('Error during legacy event repair: ' + error.message, 'error');
+    }
+}
+
+// File upload handlers setup
+function setupFileUploadHandlers() {
+    console.log('Setting up file upload handlers');
+    
+    // Set up event flyer upload handler
+    const eventFlyerUpload = document.getElementById('event-flyer-upload');
+    if (eventFlyerUpload) {
+        eventFlyerUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('Event flyer file selected:', file.name);
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showToast('Please select an image file', 'error');
+                    e.target.value = '';
+                    return;
+                }
+                // Validate file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('File size must be less than 5MB', 'error');
+                    e.target.value = '';
+                    return;
+                }
+                showToast('Image selected: ' + file.name, 'info');
+            }
+        });
+    }
+    
+    // Set up blog image upload handler
+    const blogImageUpload = document.getElementById('blog-image-upload');
+    if (blogImageUpload) {
+        blogImageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('Blog image file selected:', file.name);
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showToast('Please select an image file', 'error');
+                    e.target.value = '';
+                    return;
+                }
+                // Validate file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('File size must be less than 5MB', 'error');
+                    e.target.value = '';
+                    return;
+                }
+                showToast('Image selected: ' + file.name, 'info');
+            }
+        });
+    }
+    
+    // Set up menu item image upload handler
+    const menuImageUpload = document.getElementById('menu-item-image-upload');
+    if (menuImageUpload) {
+        menuImageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('Menu item image file selected:', file.name);
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showToast('Please select an image file', 'error');
+                    e.target.value = '';
+                    return;
+                }
+                // Validate file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('File size must be less than 5MB', 'error');
+                    e.target.value = '';
+                    return;
+                }
+                showToast('Image selected: ' + file.name, 'info');
+            }
+        });
     }
 }

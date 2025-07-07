@@ -1,0 +1,64 @@
+<!-- Event Card Component Template -->
+<article class="event-card" data-event-id="{{EVENT_ID}}">
+    <div class="event-image">
+        <img src="{{EVENT_IMAGE_URL}}" 
+             alt="{{EVENT_TITLE}} flyer"
+             onerror="this.onerror=null; this.src='/img/placeholder.png';"
+             loading="lazy">
+        
+        {{#if IS_FEATURED}}
+        <div class="featured-badge">Featured</div>
+        {{/if}}
+        
+        {{#if EVENT_STATUS}}
+        <div class="status-badge status-{{EVENT_STATUS}}">{{EVENT_STATUS}}</div>
+        {{/if}}
+    </div>
+    
+    <div class="event-details">
+        <header class="event-header">
+            <h3 class="event-title">{{EVENT_TITLE}}</h3>
+            <div class="event-venue">{{EVENT_VENUE}}</div>
+        </header>
+        
+        <div class="event-meta">
+            <div class="event-date">
+                <time datetime="{{EVENT_DATE_ISO}}">{{EVENT_DATE_DISPLAY}}</time>
+            </div>
+            
+            {{#if EVENT_TIME}}
+            <div class="event-time">{{EVENT_TIME}}</div>
+            {{/if}}
+            
+            {{#if AGE_RESTRICTION}}
+            <div class="age-restriction">{{AGE_RESTRICTION}}</div>
+            {{/if}}
+            
+            {{#if EVENT_PRICE}}
+            <div class="event-price">{{EVENT_PRICE}}</div>
+            {{/if}}
+        </div>
+        
+        {{#if EVENT_DESCRIPTION}}
+        <div class="event-description">
+            <p>{{EVENT_DESCRIPTION}}</p>
+        </div>
+        {{/if}}
+        
+        <footer class="event-actions">
+            {{#if TICKET_URL}}
+            <a href="{{TICKET_URL}}" class="btn btn-primary" target="_blank" rel="noopener">
+                Get Tickets
+            </a>
+            {{/if}}
+            
+            <button class="btn btn-secondary event-share" data-event-id="{{EVENT_ID}}">
+                Share
+            </button>
+            
+            <button class="btn btn-secondary event-calendar" data-event-id="{{EVENT_ID}}">
+                Add to Calendar
+            </button>
+        </footer>
+    </div>
+</article>

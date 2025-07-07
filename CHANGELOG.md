@@ -14,6 +14,26 @@ All notable changes to the Farewell/Howdy Unified Project.
   - No traditional server references or misleading deployment instructions
   - All development and deployment commands use `npx wrangler` correctly
 
+### 🔧 Fixed - Legacy Event Editing
+
+- **Legacy Event Data Retention**: Fixed issue where flyer URLs and event times were not retained when editing legacy events
+  - Added support for legacy `imageUrl` field in addition to current `flyer_image_url` field
+  - Added missing `event_time` form field to admin interface to properly handle legacy `time` data  
+  - Updated JavaScript to populate form fields from both legacy and current field names
+  - Legacy events from https://fygw0.kcmo.xyz/list/farewell and https://fygw0.kcmo.xyz/list/howdy now edit correctly
+  - All legacy event data (flyer images, event times, descriptions) is now preserved during editing
+- **Event Duplication Bug**: Fixed issue where editing events could create duplicate entries
+  - Added form submission protection to prevent multiple submissions
+  - Improved event listener attachment to prevent duplicate handlers
+  - Added proper form state management and button disable/enable logic
+- **Delete Button Fix**: Fixed delete button error on confirm delete
+  - Fixed API delete function to properly parse JSON responses
+  - Added better error handling and user feedback for delete operations
+- **Legacy Event Repair Tool**: Added automated repair function for legacy events
+  - New "🔧 Repair Legacy" button in Event Management section
+  - Automatically restores missing flyer URLs, event times, and ticket URLs from legacy data
+  - Safely updates events without creating duplicates
+
 ### 🔧 Fixed - API Consistency
 
 - **Menu CRUD Endpoints**: Added missing admin menu management endpoints

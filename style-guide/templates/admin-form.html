@@ -1,0 +1,136 @@
+<!-- Admin Form Template -->
+<div class="admin-form-container">
+    <header class="form-header">
+        <h2 class="form-title">{{FORM_TITLE}}</h2>
+        {{#if FORM_DESCRIPTION}}
+        <p class="form-description">{{FORM_DESCRIPTION}}</p>
+        {{/if}}
+    </header>
+    
+    <form class="admin-form" id="{{FORM_ID}}" novalidate>
+        {{#each FORM_SECTIONS}}
+        <fieldset class="form-section">
+            {{#if SECTION_TITLE}}
+            <legend class="section-title">{{SECTION_TITLE}}</legend>
+            {{/if}}
+            
+            <div class="form-fields">
+                {{#each FIELDS}}
+                <div class="form-group {{#if REQUIRED}}required{{/if}}">
+                    <label for="{{FIELD_ID}}" class="form-label">
+                        {{FIELD_LABEL}}
+                        {{#if REQUIRED}}<span class="required-indicator">*</span>{{/if}}
+                    </label>
+                    
+                    {{#eq FIELD_TYPE "text"}}
+                    <input type="text" 
+                           id="{{FIELD_ID}}" 
+                           name="{{FIELD_NAME}}"
+                           class="form-control"
+                           placeholder="{{PLACEHOLDER}}"
+                           {{#if REQUIRED}}required{{/if}}
+                           {{#if PATTERN}}pattern="{{PATTERN}}"{{/if}}
+                           value="{{DEFAULT_VALUE}}">
+                    {{/eq}}
+                    
+                    {{#eq FIELD_TYPE "textarea"}}
+                    <textarea id="{{FIELD_ID}}" 
+                              name="{{FIELD_NAME}}"
+                              class="form-control"
+                              placeholder="{{PLACEHOLDER}}"
+                              rows="{{ROWS}}"
+                              {{#if REQUIRED}}required{{/if}}>{{DEFAULT_VALUE}}</textarea>
+                    {{/eq}}
+                    
+                    {{#eq FIELD_TYPE "select"}}
+                    <select id="{{FIELD_ID}}" 
+                            name="{{FIELD_NAME}}"
+                            class="form-control"
+                            {{#if REQUIRED}}required{{/if}}>
+                        {{#if PLACEHOLDER}}
+                        <option value="">{{PLACEHOLDER}}</option>
+                        {{/if}}
+                        {{#each OPTIONS}}
+                        <option value="{{VALUE}}" {{#if SELECTED}}selected{{/if}}>{{LABEL}}</option>
+                        {{/each}}
+                    </select>
+                    {{/eq}}
+                    
+                    {{#eq FIELD_TYPE "file"}}
+                    <input type="file" 
+                           id="{{FIELD_ID}}" 
+                           name="{{FIELD_NAME}}"
+                           class="form-control file-input"
+                           accept="{{ACCEPT}}"
+                           {{#if REQUIRED}}required{{/if}}>
+                    <div class="file-preview" id="{{FIELD_ID}}-preview"></div>
+                    {{/eq}}
+                    
+                    {{#eq FIELD_TYPE "checkbox"}}
+                    <div class="checkbox-group">
+                        <input type="checkbox" 
+                               id="{{FIELD_ID}}" 
+                               name="{{FIELD_NAME}}"
+                               class="form-checkbox"
+                               value="{{VALUE}}"
+                               {{#if CHECKED}}checked{{/if}}>
+                        <label for="{{FIELD_ID}}" class="checkbox-label">{{CHECKBOX_LABEL}}</label>
+                    </div>
+                    {{/eq}}
+                    
+                    {{#if HELP_TEXT}}
+                    <small class="form-help">{{HELP_TEXT}}</small>
+                    {{/if}}
+                    
+                    {{#if ERROR_MESSAGE}}
+                    <div class="form-error">{{ERROR_MESSAGE}}</div>
+                    {{/if}}
+                </div>
+                {{/each}}
+            </div>
+        </fieldset>
+        {{/each}}
+        
+        <footer class="form-actions">
+            <button type="submit" class="btn btn-primary form-submit" {{#if SUBMITTING}}disabled{{/if}}>
+                {{#if SUBMITTING}}
+                <span class="loading-spinner"></span>
+                {{SUBMIT_LOADING_TEXT}}
+                {{else}}
+                {{SUBMIT_TEXT}}
+                {{/if}}
+            </button>
+            
+            {{#if SHOW_CANCEL}}
+            <button type="button" class="btn btn-secondary form-cancel">
+                {{CANCEL_TEXT}}
+            </button>
+            {{/if}}
+            
+            {{#if SHOW_DELETE}}
+            <button type="button" class="btn btn-danger form-delete" data-confirm="{{DELETE_CONFIRM_TEXT}}">
+                {{DELETE_TEXT}}
+            </button>
+            {{/if}}
+        </footer>
+    </form>
+</div>
+
+<!-- Modal Wrapper Template -->
+<div class="modal" id="{{MODAL_ID}}" tabindex="-1" role="dialog" aria-labelledby="{{MODAL_ID}}-title" aria-hidden="true">
+    <div class="modal-overlay" data-dismiss="modal"></div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3 class="modal-title" id="{{MODAL_ID}}-title">{{MODAL_TITLE}}</h3>
+                <button type="button" class="modal-close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </header>
+            
+            <div class="modal-body">
+                {{MODAL_CONTENT}}
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{PAGE_TITLE}} - {{VENUE_NAME}}</title>
+    
+    <!-- Primary Stylesheets -->
+    <link rel="stylesheet" href="/css/ccssss.css">
+    <link rel="stylesheet" href="/css/fleeting-journey.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/img/flavicon.png">
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="{{PAGE_DESCRIPTION}}">
+    <meta name="keywords" content="{{KEYWORDS}}">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{PAGE_TITLE}} - {{VENUE_NAME}}">
+    <meta property="og:description" content="{{PAGE_DESCRIPTION}}">
+    <meta property="og:image" content="{{OG_IMAGE}}">
+    <meta property="og:url" content="{{CANONICAL_URL}}">
+    <meta property="og:type" content="website">
+    
+    <!-- Additional CSS -->
+    {{ADDITIONAL_CSS}}
+</head>
+<body class="{{BODY_CLASS}}">
+    <!-- Header -->
+    <header class="main-header">
+        <nav class="nav">
+            <div class="nav-container">
+                <a href="/" class="nav-logo">
+                    <img src="/img/{{VENUE_LOGO}}" alt="{{VENUE_NAME}} Logo">
+                </a>
+                
+                <ul class="nav-menu">
+                    <li><a href="/" class="nav-link">Home</a></li>
+                    <li><a href="/events.html" class="nav-link">Events</a></li>
+                    {{#if_farewell}}
+                    <li><a href="/menu.html" class="nav-link">Menu</a></li>
+                    {{/if_farewell}}
+                    <li><a href="/about.htm" class="nav-link">About</a></li>
+                    <li><a href="/more.htm" class="nav-link">More</a></li>
+                </ul>
+                
+                <button class="nav-toggle" aria-label="Toggle navigation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Page Header -->
+        <section class="page-header">
+            <div class="container">
+                <h1 class="page-title">{{PAGE_TITLE}}</h1>
+                {{#if PAGE_SUBTITLE}}
+                <p class="page-subtitle">{{PAGE_SUBTITLE}}</p>
+                {{/if}}
+            </div>
+        </section>
+
+        <!-- Content Sections -->
+        {{CONTENT_SECTIONS}}
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>{{VENUE_NAME}}</h3>
+                    <p>{{VENUE_ADDRESS}}</p>
+                    <p>{{VENUE_PHONE}}</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Hours</h3>
+                    <div id="business-hours">
+                        <!-- Hours loaded dynamically -->
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        {{SOCIAL_LINKS}}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; {{CURRENT_YEAR}} {{VENUE_NAME}}. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="/jss/script.js"></script>
+    {{ADDITIONAL_JS}}
+    
+    <!-- Analytics -->
+    {{ANALYTICS_CODE}}
+</body>
+</html>
