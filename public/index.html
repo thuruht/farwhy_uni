@@ -654,12 +654,16 @@ document.addEventListener('DOMContentLoaded', function() {
   <script src="./jss/events-modal.js"></script>
   <script>
     function openEventsPopup() {
+      // Get current venue state
+      const venueState = document.body.dataset.state || 'farewell';
+      const eventsUrl = `./events.html?venue=${venueState}`;
+      
       // First try to open in a popup
-      const popup = window.open('./events.html', 'farewell-events', 'width=1024,height=800,scrollbars=yes');
+      const popup = window.open(eventsUrl, 'farewell-events', 'width=1024,height=800,scrollbars=yes');
       
       // If popup is blocked or null, try opening in a new tab
       if (!popup) {
-        window.open('./events.html', '_blank');
+        window.open(eventsUrl, '_blank');
       }
     }
   </script>
