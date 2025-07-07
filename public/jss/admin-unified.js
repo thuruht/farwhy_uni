@@ -1322,6 +1322,34 @@ function setupNavigation() {
     });
 }
 
+// Logout function
+async function logout() {
+    console.log('Logging out...');
+    
+    try {
+        const response = await fetch('/api/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            console.log('Logout successful');
+            // Clear any local storage/session data
+            localStorage.clear();
+            // Redirect to login or refresh page
+            window.location.reload();
+        } else {
+            console.error('Logout failed:', response.statusText);
+            // Still redirect on failure to clear any stale auth
+            window.location.reload();
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        // Still redirect on error to clear any stale auth
+        window.location.reload();
+    }
+}
+
 function setupDropdownNavigation() {
     console.log('Setting up dropdown navigation');
     
@@ -1337,6 +1365,8 @@ function setupDropdownNavigation() {
         console.log('Navigation changed to:', selectedSection);
         
         if (selectedSection === 'logout') {
+            // Reset dropdown to current section before logout
+            navSelect.value = dashboardState.currentSection || 'dashboard';
             // Handle logout
             logout();
             return;

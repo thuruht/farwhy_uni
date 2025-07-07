@@ -348,12 +348,34 @@ try {
 - **File Storage**: No automatic image optimization
 - **Caching**: Limited API response caching
 
+### Deployment & Infrastructure
+
+**Platform**: Cloudflare Workers (Edge computing)  
+**CLI Tool**: Wrangler (`npx wrangler deploy`)  
+**Environment**: Serverless, auto-scaling  
+**Database**: Cloudflare D1 (managed SQLite)  
+**Storage**: Cloudflare R2 (object storage)  
+**DNS/CDN**: Cloudflare managed
+
+**Local Development**:
+
+```bash
+npx wrangler dev --local  # Local development with D1 Local
+```
+
+**Production Deployment**:
+
+```bash
+npx wrangler deploy       # Deploy to Cloudflare Workers
+```
+
 ### Maintenance Requirements
 
 - **Session Cleanup**: Periodic removal of expired blocked tokens
 - **Image Storage**: Monitor R2 usage and cleanup unused files
 - **Database Maintenance**: Occasional cleanup of old events/posts
 - **SSL Certificates**: Managed automatically by Cloudflare
+- **Edge Cache**: Auto-managed by Cloudflare Workers runtime
 
 ---
 

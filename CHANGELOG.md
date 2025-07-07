@@ -4,6 +4,16 @@ All notable changes to the Farewell/Howdy Unified Project.
 
 ## [2.1.0] - July 6, 2025
 
+### 📚 Documentation Verification
+
+- **Cloudflare Workers Documentation**: Verified all documentation correctly reflects Cloudflare Workers deployment
+  - README.md properly describes Cloudflare Workers, D1, and R2 stack
+  - SYSTEM_DOCUMENTATION.md includes comprehensive deployment section with Wrangler CLI
+  - package.json correctly configured for Cloudflare Workers with Hono framework
+  - wrangler.jsonc properly configured with D1, R2, and KV bindings
+  - No traditional server references or misleading deployment instructions
+  - All development and deployment commands use `npx wrangler` correctly
+
 ### 🔧 Fixed - API Consistency
 
 - **Menu CRUD Endpoints**: Added missing admin menu management endpoints
@@ -16,6 +26,17 @@ All notable changes to the Farewell/Howdy Unified Project.
   - Added complete JavaScript implementation for Farewell hours editing
   - Fixed hours handler to use upsert logic (update existing or create new)
   - Hours management now properly loads and saves for Farewell venue only
+
+### 🎨 UI/UX Fixes
+
+- **Menu Container Layout**: Fixed menu cards to use full container width instead of 50%
+  - Updated CSS layout from grid to block with 100% width
+  - Menu cards now display properly in admin interface
+- **Admin Dropdown Logout**: Fixed missing logout functionality in dropdown navigation
+  - Added proper logout function with API call to `/api/logout`
+  - Prevents dropdown from staying on "logout" selection
+  - Properly clears session and redirects after logout
+  - No deployment required - frontend JavaScript fix only
 
 ### 🧹 Code Cleanup
 
@@ -142,10 +163,12 @@ All notable changes to the Farewell/Howdy Unified Project.
 ## Breaking Changes
 
 ### 2.1.0
+
 - **Menu API**: Simplified to single-menu architecture (Farewell only)
 - **Admin Navigation**: Replaced sidebar with dropdown (no functional impact)
 
 ### 2.0.0
+
 - **Menu Management**: Complete UI rewrite (old interface removed)
 - **Image Uploads**: Changed to file + URL input pattern (improved UX)
 - **Mobile Layout**: Admin dashboard layout completely restructured
@@ -155,12 +178,14 @@ All notable changes to the Farewell/Howdy Unified Project.
 ## Upgrade Notes
 
 ### From 1.x to 2.x
+
 1. **Database Migration**: Run `POST /api/admin/migrate/events` to add ticket_url column
 2. **Menu Items**: Verify menu items display correctly with new single-menu system
 3. **Admin Users**: Test all admin functionality after UI overhaul
 4. **Image Uploads**: Verify all image upload forms work with new file/URL pattern
 
 ### General Maintenance
+
 - **Sessions**: Periodically clear expired session tokens from KV store
 - **Images**: Monitor R2 storage usage and cleanup unused files
 - **Database**: Occasional cleanup of old events and blog posts
@@ -170,12 +195,14 @@ All notable changes to the Farewell/Howdy Unified Project.
 ## Known Issues
 
 ### Current Limitations
+
 - **Single Menu**: Only supports Farewell menu (Howdy placeholder message)
 - **User Management**: Single admin user model
 - **Caching**: Limited API response caching
 - **File Optimization**: No automatic image compression
 
 ### Future Enhancements
+
 - **Enhanced Menu Features**: Advanced menu customization and seasonal offerings (Farewell only)
 - **User Roles**: Multiple admin users with role-based permissions
 - **Advanced Caching**: API response caching and optimization
