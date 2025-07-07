@@ -18,6 +18,9 @@
             } else {
                 document.body.dataset.state = 'farewell';
             }
+            
+            // Add debug log
+            console.log(`Events page initialized with venue: ${document.body.dataset.state}`);
         });
     </script>
     <style>
@@ -138,6 +141,146 @@
             display: block;
         }
         
+        
+        .event-list-item {
+            border: 1px solid var(--nav-border-color);
+            background-color: rgba(255, 255, 255, 0.85);
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .event-list-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .event-flyer-container {
+            height: 250px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .event-flyer {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: transform 0.3s;
+        }
+        
+        .event-list-item:hover .event-flyer {
+            transform: scale(1.05);
+        }
+        
+        .event-info {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        
+        .event-title {
+            font-family: var(--font-db);
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem;
+            line-height: 1.2;
+            color: var(--accent-color);
+        }
+        
+        .venue-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 2px;
+        }
+        
+        .venue-farewell {
+            background-color: var(--primary-bg-color);
+            color: #000;
+        }
+        
+        .venue-howdy {
+            background-color: var(--secondary-bg-color);
+            color: #000;
+        }
+        
+        .event-date-time {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .event-details-info {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+        
+        .event-info-item {
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .event-description {
+            max-height: 4.2em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        
+        
+        .event-cta {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--button-bg-color);
+            color: var(--button-text-color);
+            text-decoration: none;
+            font-family: var(--font-main);
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            border-radius: 4px;
+            transition: all 0.2s;
+            border: 1px solid var(--nav-border-color);
+        }
+        
+        .event-cta:hover {
+            background-color: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .past-event {
+            opacity: 0.7;
+        }
+        
+        .past-event::after {
+            content: "PAST EVENT";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            font-size: 0.7rem;
+            border-radius: 3px;
+            transform: rotate(5deg);
+        }
+        
         @media (max-width: 768px) {
             .events-controls {
                 flex-direction: column;
@@ -161,14 +304,16 @@
             .close-nav ul li {
                 width: 100%;
             }
+            
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body data-state="farewell">
     <div class="overlay1"></div>
     <div class="overlay2"></div>
-    
-
 
     <div class="main-container">
         <div class="header-nav">
@@ -184,9 +329,9 @@
         
         <div class="events-controls">
             <div class="venue-filter">
-                <button class="venue-tab active" data-venue="farewell">FAREWELL ONLY ✓</button>
+                <button class="venue-tab" data-venue="farewell">FAREWELL ONLY</button>
                 <button class="venue-tab" data-venue="howdy">HOWDY ONLY</button>
-                <button class="venue-tab" data-venue="both">BOTH VENUES</button>
+                <button class="venue-tab active" data-venue="both">BOTH VENUES ✓</button>
             </div>
             
             <div class="archive-filter">
@@ -206,12 +351,6 @@
             <!-- Modal content will be inserted here -->
         </div>
     </div>
-
-    <footer>
-        <div>
-            <p id="address">6515 STADIUM DRIVE, KANSAS CITY, MISSOURI</p>
-        </div>
-    </footer>
 
     <!-- Include the same scripts as the main site -->
     <script src="./jss/gsap-public/minified/gsap.min.js"></script>
@@ -235,7 +374,7 @@
             const venueTabs = document.querySelectorAll('.venue-tab');
             const archiveToggle = document.querySelector('.archive-toggle');
             
-            let currentVenue = 'farewell';
+            let currentVenue = 'both';
             let showArchived = false;
             let allEvents = [];
             
@@ -249,7 +388,7 @@
             // Fetch events
             try {
                 const timestamp = new Date().getTime();
-                const response = await fetch(`/api/events/all?t=${timestamp}`);
+                const response = await fetch(`/api/events/slideshow?t=${timestamp}`);
                 if (!response.ok) throw new Error('Failed to load events');
                 
                 allEvents = await response.json();
@@ -374,7 +513,7 @@
                         eventCard.classList.add('past-event');
                     }
                     
-                    const imageUrl = event.imageUrl || event.flyer_image_url || './img/placeholder-event.jpg';
+                    const imageUrl = event.imageUrl || './img/placeholder-event.jpg';
                     
                     eventCard.innerHTML = `
                         <div class="event-flyer-container">
@@ -386,13 +525,13 @@
                             <div class="event-date-time">${formatDate(event.date)} | ${event.time || 'TBA'}</div>
                             <div class="event-details-info">
                                 ${event.description ? `<div class="event-info-item event-description"><span class="info-label">Info:</span> ${event.description}</div>` : ''}
-                                ${event.price ? `<div class="event-info-item"><span class="info-label">Price:</span> ${event.price}</div>` : ''}
+                                ${event.price || event.suggestedPrice ? `<div class="event-info-item"><span class="info-label">Price:</span> ${event.price || event.suggestedPrice}</div>` : ''}
                                 ${event.ageRestriction ? `<div class="event-info-item"><span class="info-label">Age:</span> ${event.ageRestriction}</div>` : ''}
                             </div>
                             ${event.ticketLink || event.url ? `
                             <div class="event-buttons">
                                 <a href="${event.ticketLink || event.url}" target="_blank" rel="noopener noreferrer" class="event-cta glitch-effect">
-                                    ${event.ticketLink ? `TICKETS ${event.price || ''}` : 'EVENT WEBSITE'}
+                                    ${event.ticketLink ? `TICKETS ${event.price || event.suggestedPrice || ''}` : 'EVENT WEBSITE'}
                                 </a>
                             </div>` : ''}
                         </div>
@@ -426,25 +565,8 @@
                 }
             }
             
-            // Update the address based on current venue
-            function updateAddress() {
-                const addressElement = document.getElementById('address');
-                if (addressElement) {
-                    const venue = document.body.dataset.state || 'farewell';
-                    const addressMap = {
-                        'farewell': '6515 STADIUM DRIVE, KANSAS CITY, MISSOURI',
-                        'howdy': '6523 STADIUM DRIVE, KANSAS CITY, MISSOURI'
-                    };
-                    
-                    addressElement.textContent = addressMap[venue] || addressMap.farewell;
-                }
-            }
-            
-            // Update address initially and when venue changes
-            updateAddress();
-            document.addEventListener('venueStateChange', () => {
-                updateAddress();
-            });
+            // Debug the events we received from API
+            console.log('Events data structure:', allEvents.length > 0 ? allEvents[0] : 'No events loaded');
         });
     </script>
 </body>
