@@ -3,39 +3,392 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Events | FAREWELL / HOWDY</title>
+    <title>EVENTS | FAREWELL / HOWDY | KCMO</title>
     <link rel="icon" type="image/x-icon" href="./img/flavicon.png">
     <link rel="stylesheet" href="./css/ccssss.css">
     <link rel="stylesheet" href="./css/fleeting-journey.css">
-    <link rel="stylesheet" href="./css/events-page.css">
+    <link rel="stylesheet" href="./css/events-modal.css">
+    <style>
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .events-title {
+            font-family: var(--font-db);
+            text-transform: uppercase;
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            color: var(--accent-color);
+        }
+        
+        .events-controls {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .button-group {
+            display: flex;
+            border: 1px solid var(--nav-border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .venue-tab, .archive-toggle {
+            padding: 0.75rem 1.5rem;
+            background: var(--header-bg);
+            border: none;
+            font-family: var(--font-main);
+            font-weight: bold;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            min-width: 140px;
+            text-align: center;
+        }
+        
+        .venue-tab.active, .archive-toggle[aria-pressed="true"] {
+            background: var(--button-bg-color);
+            color: var(--button-text-color);
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .header-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .header-nav a {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: bold;
+            margin: 0 0.5rem;
+        }
+        
+        .header-nav a:hover {
+            color: var(--accent-color);
+        }
+        
+        @media (max-width: 768px) {
+            .events-controls {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .events-title {
+                font-size: 2.5rem;
+            }
+            
+            .main-container {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
-<body class="events-page">
-    <div class="events-container">
-        <header class="events-header">
-            <h1>Events</h1>
-            <div class="events-controls">
-                <div class="control-group">
-                    <label for="venue-select">Venue</label>
-                    <div class="button-group venue-buttons">
-                        <button class="btn-venue active" data-venue="farewell">Farewell</button>
-                        <button class="btn-venue" data-venue="howdy">Howdy</button>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label for="show-select">Show</label>
-                    <div class="button-group show-buttons">
-                        <button class="btn-show active" data-show="upcoming">Upcoming</button>
-                        <button class="btn-show" data-show="archived">Archived</button>
-                    </div>
-                </div>
+<body data-state="farewell">
+    <div class="overlay1"></div>
+    <div class="overlay2"></div>
+    
+    <header class="feader">
+        <div class="contain">
+            <div class="left">
+                <nav>
+                    <ul>
+                        <li><a href="./index.html">HOME</a></li>
+                        <li><a href="./booking.htm">BOOKING</a></li>
+                        <li><a href="./events.html" class="active">EVENTS</a></li>
+                        <li><a href="./about.htm">ABOUT</a></li>
+                    </ul>
+                </nav>
             </div>
-        </header>
+            <div class="right">
+                <h1 class="header-title">
+                    <span class="span2">FAREWELL</span>
+                    <span class="sulk drop-wiggle"> & HOWDY &nbsp;<span id="swico"><img src="./img/swap.png" class="insect flipp cocoon" alt="click-drag"></span></span>
+                </h1>
+            </div>
+        </div>
+    </header>
 
-        <main id="events-grid" class="events-grid">
+    <div class="main-container">
+        <h1 class="events-title">Upcoming Shows</h1>
+        
+        <div class="events-controls">
+            <div class="venue-filter">
+                <button class="venue-tab active" data-venue="farewell">FAREWELL ONLY ✓</button>
+                <button class="venue-tab" data-venue="howdy">HOWDY ONLY</button>
+                <button class="venue-tab" data-venue="both">BOTH VENUES</button>
+            </div>
+            
+            <div class="archive-filter">
+                <button class="archive-toggle" aria-pressed="false">UPCOMING ONLY ✓</button>
+            </div>
+        </div>
+
+        <div id="events-grid" class="events-grid">
             <!-- Events will be loaded here -->
-        </main>
+        </div>
+    </div>
+    
+    <!-- Event Details Modal -->
+    <div class="event-modal">
+        <div class="event-modal-content">
+            <span class="close-modal">&times;</span>
+            <!-- Modal content will be inserted here -->
+        </div>
     </div>
 
-    <script src="./jss/events-page.js"></script>
+    <footer>
+        <div>
+            <p id="address">6515 STADIUM DRIVE, KANSAS CITY, MISSOURI</p>
+        </div>
+    </footer>
+
+    <!-- Include the same scripts as the main site -->
+    <script src="./jss/gsap-public/minified/gsap.min.js"></script>
+    <script src="./jss/gsap-public/minified/ScrollTrigger.min.js"></script>
+    <script src="./jss/ifrevl.js"></script>
+    <script src="./jss/events-modal.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const eventsGrid = document.getElementById('events-grid');
+            const venueTabs = document.querySelectorAll('.venue-tab');
+            const archiveToggle = document.querySelector('.archive-toggle');
+            
+            let currentVenue = 'farewell';
+            let showArchived = false;
+            let allEvents = [];
+            
+            // Show loading state
+            eventsGrid.innerHTML = `
+                <div class="loading-spinner" style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">Loading events...</div>
+                </div>
+            `;
+            
+            // Fetch events
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(`/api/events/all?t=${timestamp}`);
+                if (!response.ok) throw new Error('Failed to load events');
+                
+                allEvents = await response.json();
+                console.log(`Loaded ${allEvents.length} events`);
+                
+                // Initial render
+                filterAndRenderEvents();
+            } catch (error) {
+                console.error('Error loading events:', error);
+                eventsGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                        <div style="font-size: 2rem; color: #f44336; margin-bottom: 1rem;">Error loading events</div>
+                        <div>Please try again later or check the home page.</div>
+                    </div>
+                `;
+            }
+            
+            // Set up event listeners for venue tabs
+            venueTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Update active tab
+                    venueTabs.forEach(t => {
+                        t.classList.remove('active');
+                        // Remove check marks from all tabs
+                        if (t.dataset.venue === 'farewell') {
+                            t.textContent = 'FAREWELL ONLY';
+                        } else if (t.dataset.venue === 'howdy') {
+                            t.textContent = 'HOWDY ONLY';
+                        } else if (t.dataset.venue === 'both') {
+                            t.textContent = 'BOTH VENUES';
+                        }
+                    });
+                    
+                    this.classList.add('active');
+                    
+                    // Update venue filter
+                    currentVenue = this.dataset.venue;
+                    
+                    // Add check mark to the active tab
+                    if (currentVenue === 'farewell') {
+                        this.textContent = 'FAREWELL ONLY ✓';
+                    } else if (currentVenue === 'howdy') {
+                        this.textContent = 'HOWDY ONLY ✓';
+                    } else if (currentVenue === 'both') {
+                        this.textContent = 'BOTH VENUES ✓';
+                    }
+                    
+                    // Update displayed events
+                    filterAndRenderEvents();
+                });
+            });
+            
+            // Set up event listener for archive toggle
+            archiveToggle.addEventListener('click', function() {
+                showArchived = !showArchived;
+                this.setAttribute('aria-pressed', showArchived.toString());
+                this.textContent = showArchived ? 'ALL EVENTS ✓' : 'UPCOMING ONLY ✓';
+                
+                // Update displayed events
+                filterAndRenderEvents();
+            });
+            
+            function filterAndRenderEvents() {
+                // Get current date
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                // Filter events based on current settings
+                const filteredEvents = allEvents.filter(event => {
+                    // Filter by venue
+                    const matchesVenue = currentVenue === 'both' ? true : event.venue === currentVenue;
+                    
+                    // Filter by date (upcoming or archived)
+                    const eventDate = new Date(event.date);
+                    eventDate.setHours(0, 0, 0, 0);
+                    
+                    const isUpcoming = eventDate >= today;
+                    const matchesDate = showArchived ? true : isUpcoming;
+                    
+                    return matchesVenue && matchesDate;
+                });
+                
+                // Sort events - upcoming first by date
+                filteredEvents.sort((a, b) => {
+                    const dateA = new Date(a.date);
+                    const dateB = new Date(b.date);
+                    
+                    return dateA - dateB;
+                });
+                
+                // Render the filtered events
+                renderEvents(filteredEvents);
+            }
+            
+            function renderEvents(events) {
+                // Clear the grid
+                eventsGrid.innerHTML = '';
+                
+                // Check if no events match the filters
+                if (events.length === 0) {
+                    eventsGrid.innerHTML = `
+                        <div class="no-events" style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                            <div style="font-size: 1.5rem; margin-bottom: 1rem;">No events found for these filters</div>
+                            <div>Try changing your venue or date filters.</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Create event cards for each event
+                events.forEach(event => {
+                    const eventCard = document.createElement('div');
+                    eventCard.className = 'event-list-item';
+                    eventCard.dataset.id = event.id;
+                    
+                    // Check if past event
+                    const eventDate = new Date(event.date);
+                    eventDate.setHours(0, 0, 0, 0);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (eventDate < today) {
+                        eventCard.classList.add('past-event');
+                    }
+                    
+                    const imageUrl = event.imageUrl || event.flyer_image_url || './img/placeholder-event.jpg';
+                    
+                    eventCard.innerHTML = `
+                        <div class="event-flyer-container">
+                            <img class="event-flyer" src="${imageUrl}" alt="${event.title}" onerror="this.src='./img/placeholder-event.jpg'">
+                        </div>
+                        <div class="event-info">
+                            <h3 class="event-title">${event.title}</h3>
+                            <div class="venue-badge venue-${event.venue}">${event.venue.toUpperCase()}</div>
+                            <div class="event-date-time">${formatDate(event.date)} | ${event.time || 'TBA'}</div>
+                            <div class="event-details-info">
+                                ${event.description ? `<div class="event-info-item event-description"><span class="info-label">Info:</span> ${event.description}</div>` : ''}
+                                ${event.price ? `<div class="event-info-item"><span class="info-label">Price:</span> ${event.price}</div>` : ''}
+                                ${event.ageRestriction ? `<div class="event-info-item"><span class="info-label">Age:</span> ${event.ageRestriction}</div>` : ''}
+                            </div>
+                            ${event.ticketLink || event.url ? `
+                            <div class="event-buttons">
+                                <a href="${event.ticketLink || event.url}" target="_blank" rel="noopener noreferrer" class="event-cta glitch-effect">
+                                    ${event.ticketLink ? `TICKETS ${event.price || ''}` : 'EVENT WEBSITE'}
+                                </a>
+                            </div>` : ''}
+                        </div>
+                    `;
+                    
+                    eventsGrid.appendChild(eventCard);
+                });
+            }
+            
+            function formatDate(dateString) {
+                if (!dateString) return 'TBD';
+                
+                try {
+                    // Handle ISO date format
+                    if (dateString.length === 10 && dateString.includes('-')) {
+                        const [year, month, day] = dateString.split('-').map(Number);
+                        const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+                        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+                        return date.toLocaleDateString('en-US', options);
+                    }
+                    
+                    // Standard date handling
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) return dateString;
+                    
+                    const options = { weekday: 'short', month: 'short', day: 'numeric' };
+                    return date.toLocaleDateString('en-US', options);
+                } catch (error) {
+                    console.error(`Error formatting date: ${dateString}`, error);
+                    return dateString;
+                }
+            }
+            
+            // Update the address based on current venue
+            function updateAddress() {
+                const addressElement = document.getElementById('address');
+                if (addressElement) {
+                    const venue = document.body.dataset.state || 'farewell';
+                    const addressMap = {
+                        'farewell': '6515 STADIUM DRIVE, KANSAS CITY, MISSOURI',
+                        'howdy': '6523 STADIUM DRIVE, KANSAS CITY, MISSOURI'
+                    };
+                    
+                    addressElement.textContent = addressMap[venue] || addressMap.farewell;
+                }
+            }
+            
+            // Update address initially and when venue changes
+            updateAddress();
+            document.addEventListener('venueStateChange', () => {
+                updateAddress();
+            });
+        });
+    </script>
 </body>
 </html>
