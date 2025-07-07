@@ -2,6 +2,17 @@
 
 All notable changes to the Farewell/Howdy Unified Project.
 
+## [2.1.1] - July 7, 2025
+
+### 🧹 Code Cleanup
+- **Project Root Cleanup**: Archived numerous outdated documentation files, development artifacts, and old backups into a single `project_archive/` directory to significantly clean up the project root.
+
+### 🎨 UI/UX Fixes
+- **Inline Events Modal**: Removed redundant "VENUE:" and "SHOW:" text labels from the filter button rows on the index page modal for a cleaner, more readable interface.
+- **Full-Page Events Modal**:
+  - Redesigned the `/events.html` page with a simplified, modern, and more intuitive layout.
+  - Improved the styling with responsive design, a card-based grid for events, and improved controls using inline CSS.
+
 ## [2.1.0] - July 6, 2025
 
 ### 📚 Documentation Verification
@@ -207,9 +218,9 @@ All notable changes to the Farewell/Howdy Unified Project.
 ### General Maintenance
 
 - **Sessions**: Periodically clear expired session tokens from KV store
-- **Images**: Monitor R2 storage usage and cleanup unused files
-- **Database**: Occasional cleanup of old events and blog posts
-
+- **Images**: Monitor R2 storage usage  **never delete old photos or flyers - they are destined for the archives - see below**
+- **Database**: never delete old events or flyers - they are archived and a special shows archive for both venues will be created eventually to painstakingly document all past events and allow the public to view and contribute to the archive
+ 
 ---
 
 ## Known Issues

@@ -1,0 +1,54 @@
+/* events-calendar-button.css - Styles for the calendar download button in the events modal */
+
+.event-calendar-download {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: #333;
+  color: #fff;
+  border: 2px solid var(--nav-border-color);
+  font-family: var(--font-main);
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  text-transform: uppercase;
+  margin-left: 0.75rem;
+}
+
+.event-calendar-download:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  background: #444;
+}
+
+.calendar-icon {
+  display: inline-block;
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .event-calendar-download {
+    margin-left: 0;
+    margin-top: 0.75rem;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    min-height: 44px; /* Touch-friendly */
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-calendar-download {
+    width: 100%;
+    max-width: none;
+    font-size: 0.9rem;
+  }
+}

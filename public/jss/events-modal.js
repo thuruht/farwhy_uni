@@ -103,10 +103,14 @@
     const venueFilter = document.createElement('div');
     venueFilter.className = 'venue-filter';
     
+    // Set up labels and buttons
     const venueLabel = document.createElement('span');
-    venueLabel.className = 'filter-label';
-    venueLabel.textContent = 'VENUE:';
-    venueFilter.appendChild(venueLabel);
+    venueLabel.className = 'events-modal-label';
+    venueLabel.textContent = '';
+
+    const showLabel = document.createElement('span');
+    showLabel.className = 'events-modal-label';
+    showLabel.textContent = '';
     
     const farewellTab = document.createElement('button');
     farewellTab.className = 'venue-tab' + (currentVenue === 'farewell' ? ' active' : '');
@@ -132,7 +136,7 @@
     
     const archiveLabel = document.createElement('span');
     archiveLabel.className = 'filter-label';
-    archiveLabel.textContent = 'SHOW:';
+    archiveLabel.textContent = '';
     archiveFilter.appendChild(archiveLabel);
     
     const archiveToggle = document.createElement('button');
