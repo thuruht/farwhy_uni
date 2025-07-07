@@ -13,6 +13,28 @@
     <link rel="stylesheet" href="/css/admin-help.css">
     <link rel="stylesheet" href="/css/menu-management.css">
     <style>
+        /* Custom button styles */
+        .btn-link.text-muted.small {
+            min-width: auto;
+            min-height: auto;
+            padding: 4px 8px;
+            margin: 2px;
+            background: none;
+            border: none;
+            box-shadow: none;
+            color: #888;
+            font-size: 0.8rem;
+            text-decoration: underline;
+            opacity: 0.8;
+        }
+        .btn-link.text-muted.small:hover {
+            color: #555;
+            background: none;
+            box-shadow: none;
+            text-decoration: underline;
+            opacity: 1;
+        }
+        
         /* Hours Management Styles */
         .hours-table {
             width: 100%;
@@ -533,6 +555,7 @@
                     <h2>Event Management</h2>
                     <div class="section-actions">
                         <button class="btn btn-secondary" id="repair-legacy-events-btn" title="Repair legacy events with missing flyer URLs">🔧 Repair Legacy</button>
+                        <button class="btn btn-link text-muted small" id="import-legacy-events-btn" title="Import events from legacy system (Admin use only)">📥 Import Legacy</button>
                         <button class="btn btn-primary" id="add-event-btn">+ New Event</button>
                     </div>
                 </div>

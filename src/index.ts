@@ -251,6 +251,7 @@ adminApi.get('/events', (c) => handleEvents(c, 'list'));
 adminApi.post('/events', (c) => handleEvents(c, 'create'));
 adminApi.put('/events/:id', (c) => handleEvents(c, 'update'));
 adminApi.delete('/events/:id', (c) => handleEvents(c, 'delete'));
+adminApi.post('/events/sync', (c) => handleSync(c));
 adminApi.post('/events/flyer', async (c) => {
   // Handle event flyer uploads
   try {

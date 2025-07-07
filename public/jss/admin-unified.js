@@ -834,6 +834,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             return;
         }
+        
+        // Handle Import Legacy Events button click
+        if (e.target.id === 'import-legacy-events-btn' || e.target.closest('#import-legacy-events-btn')) {
+            console.log('Import Legacy Events button clicked');
+            e.preventDefault();
+            e.stopPropagation();
+            if (confirm('This will import events from the legacy system (https://fygw0.kcmo.xyz). This should only be used by administrators when needed. Continue?')) {
+                importLegacyEvents();
+            }
+            return;
+        }
 
         // Handle New Blog Post button click
         if (e.target.id === 'add-blog-btn' || e.target.closest('#add-blog-btn')) {
@@ -2611,20 +2622,47 @@ function normalizeLegacyEventForEditing(eventData) {
 }
 
 // Function to repair legacy events and restore missing flyer URLs
-async function repairLegacyEvents() {
+async function repairLegacyEvents(silentMode = false) {
     try {
-        showToast('Starting legacy event repair...', 'info');
+        if (!silentMode) showToast('Starting legacy event repair...', 'info');
         
         // Get all events to check for legacy issues
         const events = await api.get('/api/admin/events');
         if (!events || !Array.isArray(events)) {
-            showToast('Failed to load events for repair', 'error');
-            return;
+            if (!silentMode) showToast('Failed to load events for repair', 'error');
+            return { success: false, message: 'Failed to load events' };
         }
         
-        let repairedCount = 0;
+        // Log how many events we're checking
+        console.log(`Checking ${events.length} events for legacy field issues`);
         
+        let repairedCount = 0;
+        let errorCount = 0;
+        let skippedCount = 0;
+        let repairedEventIds = [];
+        
+        // Create a Map to track processed events and prevent duplicates
+        const processedEvents = new Map();
+        
+        // First pass: identify and deduplicate events
+        const uniqueEvents = [];
         for (const event of events) {
+            // Skip if we've already processed an event with this title/date/venue combination
+            const eventKey = `${event.title}-${event.date}-${event.venue}`.toLowerCase();
+            if (processedEvents.has(eventKey)) {
+                console.log(`Skipping duplicate event: ${eventKey} (ID: ${event.id})`);
+                skippedCount++;
+                continue;
+            }
+            
+            processedEvents.set(eventKey, true);
+            uniqueEvents.push(event);
+        }
+        
+        console.log(`Found ${uniqueEvents.length} unique events after deduplication`);
+        
+        // Second pass: process each unique event for repair
+        for (const event of uniqueEvents) {
             let needsUpdate = false;
             const updates = { id: event.id };
             
@@ -2649,6 +2687,13 @@ async function repairLegacyEvents() {
                 console.log(`Repairing ticket URL for event ${event.id}: ${event.ticketLink}`);
             }
             
+            // Check if event has legacy ageRestriction but no age_restriction
+            if (!event.age_restriction && event.ageRestriction) {
+                updates.age_restriction = event.ageRestriction;
+                needsUpdate = true;
+                console.log(`Repairing age restriction for event ${event.id}: ${event.ageRestriction}`);
+            }
+            
             if (needsUpdate) {
                 try {
                     const response = await apiCall(`/api/admin/events/${event.id}`, {
@@ -2659,25 +2704,107 @@ async function repairLegacyEvents() {
                     
                     if (response && response.success) {
                         repairedCount++;
+                        repairedEventIds.push(event.id);
                     } else {
+                        errorCount++;
+                        // Only log the error, no need to show toast for each one
                         console.error(`Failed to repair event ${event.id}:`, response);
                     }
                 } catch (error) {
+                    errorCount++;
                     console.error(`Error repairing event ${event.id}:`, error);
                 }
             }
         }
         
-        if (repairedCount > 0) {
-            showToast(`Successfully repaired ${repairedCount} legacy events!`, 'success');
-            loadEvents(); // Reload events to show updated data
-        } else {
-            showToast('No legacy events needed repair', 'info');
+        if (!silentMode) {
+            if (repairedCount > 0) {
+                showToast(`Successfully repaired ${repairedCount} legacy events!`, 'success');
+                loadEvents(); // Reload events to show updated data
+            } else {
+                showToast('No legacy events needed repair', 'info');
+            }
+            
+            if (errorCount > 0) {
+                showToast(`Warning: ${errorCount} events could not be repaired. Check console for details.`, 'warning');
+            }
+            
+            if (skippedCount > 0) {
+                console.log(`Skipped ${skippedCount} duplicate events during repair`);
+            }
         }
+        
+        return { 
+            success: true, 
+            count: repairedCount, 
+            errors: errorCount,
+            skipped: skippedCount,
+            eventIds: repairedEventIds 
+        };
         
     } catch (error) {
         console.error('Error during legacy event repair:', error);
-        showToast('Error during legacy event repair: ' + error.message, 'error');
+        if (!silentMode) showToast('Error during legacy event repair: ' + error.message, 'error');
+        return { success: false, error: error.message };
+    }
+}
+
+// Function to import events from legacy system
+async function importLegacyEvents() {
+    try {
+        const confirmMessage = 'WARNING: This will import events from the legacy system at https://fygw0.kcmo.xyz.\n\n' +
+                              'Events with the same title and date will be SKIPPED to avoid duplicates.\n\n' +
+                              'Existing events will NEVER be overwritten or deleted.\n\n' +
+                              'This operation should only be performed by administrators when needed.\n\n' +
+                              'Are you absolutely sure you want to continue?';
+
+        if (!confirm(confirmMessage)) {
+            console.log('Legacy import cancelled by user');
+            return { success: false, cancelled: true };
+        }
+        
+        showToast('Starting legacy event import... Please wait, this may take a minute.', 'info');
+        
+        // Call the sync endpoint to import events from legacy system
+        const response = await apiCall('/api/admin/events/sync', { method: 'POST' });
+        
+        if (response && (response.success || response.imported > 0)) {
+            // Success if we imported anything or if explicitly marked as success
+            showToast(`Successfully imported ${response.imported} legacy events! (${response.skipped || 0} skipped)`, 'success');
+            console.log('Import response:', response);
+            
+            // Run repair function silently to ensure all imported events have proper field mappings
+            const repairResult = await repairLegacyEvents(true);
+            console.log('Repair after import result:', repairResult);
+            
+            // Reload events to show updated data
+            loadEvents();
+            
+            return { 
+                success: true, 
+                imported: response.imported, 
+                skipped: response.skipped || 0, 
+                repaired: repairResult.count || 0 
+            };
+        } else {
+            const errorMsg = response?.errors ? response.errors[0] : (response?.error || 'Unknown error');
+            console.error('Legacy event import failed:', response);
+            showToast(`Import completed with ${response?.imported || 0} events, but had errors: ${errorMsg}`, 'warning');
+            
+            // Reload events anyway as some might have been imported
+            loadEvents();
+            
+            return { 
+                success: false, 
+                error: errorMsg, 
+                imported: response?.imported || 0,
+                skipped: response?.skipped || 0
+            };
+        }
+    } catch (error) {
+        console.error('Error during legacy event import:', error);
+        showToast('Error during legacy event import: ' + (error.message || 'Unknown error'), 'error');
+        return { success: false, error: error.message };
     }
 }
 

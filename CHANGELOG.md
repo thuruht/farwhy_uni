@@ -2,6 +2,25 @@
 
 All notable changes to the Farewell/Howdy Unified Project.
 
+## [2.1.2] - July 7, 2025
+
+### 🛠️ Improved Legacy Events Management
+
+- **Enhanced Import System**: Significantly improved legacy event import functionality
+  - Modified sync handler to never overwrite existing events 
+  - Added proper duplicate detection to prevent creating identical events
+  - Events with the same title, date and venue will be skipped during import
+  - Added detailed warnings before import to clarify the process
+  - Implemented better error handling with detailed success/failure reporting
+  - Fixed bug that could potentially cause data loss during imports
+
+- **Refined Legacy Repair Function**: Improved the repair function for legacy events
+  - Added more robust deduplication to prevent errors with duplicated events
+  - Improved error handling to reduce unnecessary error notifications
+  - Better handling of image URLs from the legacy system
+  - Fixed bug where duplicate "No Image" events would appear in the interface
+  - Better logging to track exactly which fields were repaired
+
 ## [2.1.1] - July 7, 2025
 
 ### 🧹 Code Cleanup
