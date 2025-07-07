@@ -352,11 +352,9 @@
         </div>
     </div>
 
-    <!-- Include the same scripts as the main site -->
+    <!-- Include necessary scripts -->
     <script src="./jss/gsap-public/minified/gsap.min.js"></script>
     <script src="./jss/gsap-public/minified/ScrollTrigger.min.js"></script>
-    <script src="./jss/ifrevl.js"></script>
-    <script src="./jss/events-modal.js"></script>
     <script>
         // Close function for popup window
         function closeEventsPopup() {
@@ -388,11 +386,25 @@
             // Fetch events
             try {
                 const timestamp = new Date().getTime();
-                const response = await fetch(`/api/events/slideshow?t=${timestamp}`);
+                // Use the 'all' endpoint instead of 'slideshow' to get complete event data
+                const response = await fetch(`/api/events?t=${timestamp}`);
                 if (!response.ok) throw new Error('Failed to load events');
                 
-                allEvents = await response.json();
-                console.log(`Loaded ${allEvents.length} events`);
+                let events = await response.json();
+                console.log(`Loaded ${events.length} events`);
+                
+                // Filter out duplicate events (based on title and date)
+                const eventMap = new Map();
+                events.forEach(event => {
+                    const key = `${event.title}-${event.date}-${event.venue}`;
+                    // If the event already exists, keep the one with more information
+                    if (!eventMap.has(key) || (event.imageUrl && !eventMap.get(key).imageUrl)) {
+                        eventMap.set(key, event);
+                    }
+                });
+                
+                allEvents = Array.from(eventMap.values());
+                console.log(`After deduplication: ${allEvents.length} events`);
                 
                 // Initial render
                 filterAndRenderEvents();
@@ -496,9 +508,7 @@
                         </div>
                     `;
                     return;
-                }
-                
-                // Create event cards for each event
+                }                    // Create event cards for each event
                 events.forEach(event => {
                     const eventCard = document.createElement('div');
                     eventCard.className = 'event-list-item';
@@ -513,7 +523,8 @@
                         eventCard.classList.add('past-event');
                     }
                     
-                    const imageUrl = event.imageUrl || './img/placeholder-event.jpg';
+                    // Handle all possible image URL fields from the API
+                    const imageUrl = event.imageUrl || event.flyer_image_url || event.legacy_image_url || './img/placeholder-event.jpg';
                     
                     eventCard.innerHTML = `
                         <div class="event-flyer-container">
@@ -522,18 +533,24 @@
                         <div class="event-info">
                             <h3 class="event-title">${event.title}</h3>
                             <div class="venue-badge venue-${event.venue}">${event.venue.toUpperCase()}</div>
-                            <div class="event-date-time">${formatDate(event.date)} | ${event.time || 'TBA'}</div>
+                            <div class="event-date-time">${formatDate(event.date)} | ${event.time || event.event_time || 'TBA'}</div>
                             <div class="event-details-info">
                                 ${event.description ? `<div class="event-info-item event-description"><span class="info-label">Info:</span> ${event.description}</div>` : ''}
                                 ${event.price || event.suggestedPrice ? `<div class="event-info-item"><span class="info-label">Price:</span> ${event.price || event.suggestedPrice}</div>` : ''}
                                 ${event.ageRestriction ? `<div class="event-info-item"><span class="info-label">Age:</span> ${event.ageRestriction}</div>` : ''}
                             </div>
-                            ${event.ticketLink || event.url ? `
                             <div class="event-buttons">
-                                <a href="${event.ticketLink || event.url}" target="_blank" rel="noopener noreferrer" class="event-cta glitch-effect">
-                                    ${event.ticketLink ? `TICKETS ${event.price || event.suggestedPrice || ''}` : 'EVENT WEBSITE'}
-                                </a>
-                            </div>` : ''}
+                                ${event.ticketLink || event.ticket_url ? 
+                                    `<a href="${event.ticketLink || event.ticket_url}" target="_blank" rel="noopener noreferrer" class="event-cta glitch-effect">
+                                        TICKETS ${event.price || event.suggestedPrice || ''}
+                                    </a>` : 
+                                    event.url ? 
+                                    `<a href="${event.url}" target="_blank" rel="noopener noreferrer" class="event-cta glitch-effect">
+                                        EVENT WEBSITE
+                                    </a>` : 
+                                    ''
+                                }
+                            </div>
                         </div>
                     `;
                     
@@ -567,6 +584,18 @@
             
             // Debug the events we received from API
             console.log('Events data structure:', allEvents.length > 0 ? allEvents[0] : 'No events loaded');
+            
+            // Add a debug function that can be called from browser console
+            window.debugEvents = function() {
+                console.table(allEvents.map(e => ({
+                    id: e.id,
+                    title: e.title,
+                    date: e.date,
+                    venue: e.venue,
+                    hasImage: !!e.imageUrl || !!e.flyer_image_url || !!e.legacy_image_url
+                })));
+                return "Events data logged to console";
+            };
         });
     </script>
 </body>
