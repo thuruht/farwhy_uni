@@ -9,14 +9,18 @@ This file serves as a reference to the primary documentation files for the Farew
 - [API_REFERENCE.md](API_REFERENCE.md) - API endpoint documentation
 - [CHANGELOG.md](CHANGELOG.md) - Recent updates and version history
 
-## Recent Updates (July 2025)
+## Recent Updates (July 9, 2025)
 
+- Fixed mobile UI issues on events page:
+  - Improved close and home button sizing to prevent text overflow
+  - Optimized header sizing for consistent display between states
+  - Fixed date comparison logic to correctly identify past events
+  - Removed concentric borders in blog posts and featured videos
 - Added comprehensive calendar download functionality with two complementary options:
   - Individual event downloads from event modals
   - Bulk venue calendar downloads from main page
 - Improved events modal system with archive toggle and pagination
 - Added GSAP library for smooth menu animations
-- Fixed date comparison logic for consistent event display
 - Updated API endpoint documentation with new parameters
 - Added events.html navigation links to more pages
 - Expanded system documentation with frontend component details
@@ -59,6 +63,21 @@ Several UI consistency improvements have been implemented to create a more unifi
 - Added fixed height and line-height to header title elements
 - Ensured consistent dimensions when toggling between venues
 - Maintained mobile responsiveness with appropriate sizing
+
+### Mobile-Optimized Buttons
+
+- Increased width and padding for close and home buttons on events page
+- Improved text containment to prevent overflow on smaller screens
+- Ensured consistent button styling across all pages
+- Added proper text overflow handling for narrow viewports
+
+### Blog and Featured Videos Styling
+
+- Removed concentric borders in blog posts and featured videos sections
+- Reduced shadow effects for improved visual clarity
+- Eliminated redundant borders from preview containers
+- Simplified nesting structure to improve UI readability
+- Created cleaner display of content on smaller screens
 
 ### Navigation Consistency
 
