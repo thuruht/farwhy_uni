@@ -1,85 +1,52 @@
-# Dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Documentation files that should be archived
+ADMIN_UI_IMPROVEMENTS.md
+API_CONSISTENCY_FIXES_SUMMARY.md
+API_DEVELOPMENT_WORKFLOW.md
+API_ENDPOINTS_DOCUMENTATION.md
+ARCHITECTURAL_INSIGHTS.md
+BLOG_NEWS_IMPLEMENTATION.md
+BLOG_SYSTEM_DOCUMENTATION.md
+COMMIT_MESSAGE*.txt
+CONSOLIDATED_DOCUMENTATION.md
+CRITICAL_SYSTEM_DOCS.md
+DOCUMENTATION_AUDIT.md
+DOCUMENTATION_CONSOLIDATION_COMPLETE.md
+DOCUMENTATION_UPDATE_SUMMARY.md
+FEATURED_VIDEOS_UPDATE.md
+ICS_CALENDAR_IMPLEMENTATION.md
+MENU_MANAGEMENT_SYSTEM.md
+PROGRESS_REPORT.md
+PROJECT_CHECKLIST_AND_ROADMAP.md
+RECENT_IMPLEMENTATIONS.md
+SECURITY_FIXES_JUNE_2025.md
+TECHNICAL_MAP.md
+implementation-plan.md
+original_more.htm
+wrangler.jsonc.new
 
-# Documentation Archive
+# Archive directories
+project_archive/
 ye_olde_docs/
+ye_olde_src/
+archive/
 
-# Wrangler
-.wrangler/
-wrangler.toml.bak
+# Node modules
+node_modules/
 
-# Environment variables
+# Environment files
 .env
 .env.local
-.env.production.local
-.env.development.local
 
-# Build outputs
+# Build artifacts
 dist/
 build/
 
 # Logs
 *.log
-logs/
+npm-debug.log*
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-
-# nyc test coverage
-.nyc_output
-
-# Dependency directories
-jspm_packages/
-
-# Optional npm cache directory
-.npm
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-
-# IDE files
-.vscode/
+# Editor directories and files
 .idea/
+.vscode/
 *.swp
 *.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Temporary files
-tmp/
-temp/
-
-# Old/archived files
-ye_olde/
-ye_olde_*/
-**/crap_unused_old/
-**/*.old
-
-# Cloudflare
-.dev.vars
