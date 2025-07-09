@@ -1732,26 +1732,18 @@ function renderEvents(events, setupFilters = true) {
             const today = new Date();
             
             // Only consider an event as "past" after the day is completely over (midnight)
-            // This ensures events happening today are still shown as "upcoming"
-            const todayWithoutTime = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-            const eventDateWithoutTime = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+            // Set both dates to midnight for accurate comparison
+            const todayWithoutTime = new Date();
+            todayWithoutTime.setHours(0, 0, 0, 0);
             
-            // Fix date comparison by explicitly comparing year, month, day
-            const isPast = (
-                eventDateWithoutTime.getFullYear() < todayWithoutTime.getFullYear() || 
-                (eventDateWithoutTime.getFullYear() === todayWithoutTime.getFullYear() && 
-                 eventDateWithoutTime.getMonth() < todayWithoutTime.getMonth()) ||
-                (eventDateWithoutTime.getFullYear() === todayWithoutTime.getFullYear() && 
-                 eventDateWithoutTime.getMonth() === todayWithoutTime.getMonth() && 
-                 eventDateWithoutTime.getDate() < todayWithoutTime.getDate())
-            );
+            const eventDateWithoutTime = new Date(eventDate);
+            eventDateWithoutTime.setHours(0, 0, 0, 0);
             
-            // Check if event is happening today
-            const isToday = (
-                eventDateWithoutTime.getFullYear() === todayWithoutTime.getFullYear() &&
-                eventDateWithoutTime.getMonth() === todayWithoutTime.getMonth() &&
-                eventDateWithoutTime.getDate() === todayWithoutTime.getDate()
-            );
+            // Simple comparison - if eventDate is earlier than today, it's past
+            const isPast = eventDateWithoutTime < todayWithoutTime;
+            
+            // Check if it's today by comparing timestamps
+            const isToday = eventDateWithoutTime.getTime() === todayWithoutTime.getTime();
             
             // Mark as upcoming if it's happening today
             const isTrulyPast = isPast && !isToday;

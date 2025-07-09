@@ -195,20 +195,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const eventDate = new Date(event.date);
         eventDate.setHours(0, 0, 0, 0);
         
-        // Fix date comparison by explicitly comparing year, month, day
-        const isPastEvent = (
-            eventDate.getFullYear() < today.getFullYear() || 
-            (eventDate.getFullYear() === today.getFullYear() && 
-             eventDate.getMonth() < today.getMonth()) ||
-            (eventDate.getFullYear() === today.getFullYear() && 
-             eventDate.getMonth() === today.getMonth() && 
-             eventDate.getDate() < today.getDate())
-        );
+        // Simple comparison - if eventDate is earlier than today, it's past
+        const isPastEvent = eventDate < today;
+        
+        // Check if it's today by comparing timestamps
+        const isToday = eventDate.getTime() === today.getTime();
+        
+        // Final determination - only past if it's not today
+        const isTrulyPast = isPastEvent && !isToday;
         
         // Create card container
         const card = document.createElement('div');
         card.className = `event-card venue-${event.venue}`;
-        if (isPastEvent) {
+        if (isTrulyPast) {
             card.classList.add('past-event');
         }
         

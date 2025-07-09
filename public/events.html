@@ -515,34 +515,25 @@
                     eventCard.className = 'event-list-item';
                     eventCard.dataset.id = event.id;
                     
-                    // Check if past event
+                    // Check if past event - using a more reliable date comparison approach
                     const eventDate = new Date(event.date);
                     eventDate.setHours(0, 0, 0, 0);
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
                     
-                    // Fix date comparison for events happening today (July 9, 2025)
-                    // Events on today's date should NOT be marked as past
-                    const isPast = (
-                        eventDate.getFullYear() < today.getFullYear() || 
-                        (eventDate.getFullYear() === today.getFullYear() && 
-                         eventDate.getMonth() < today.getMonth()) ||
-                        (eventDate.getFullYear() === today.getFullYear() && 
-                         eventDate.getMonth() === today.getMonth() && 
-                         eventDate.getDate() < today.getDate())
-                    );
+                    // Simple comparison - if eventDate is earlier than today, it's past
+                    const isPast = eventDate < today;
                     
-                    // Check for today's date and override the isPast flag
-                    const isToday = (
-                        eventDate.getFullYear() === today.getFullYear() &&
-                        eventDate.getMonth() === today.getMonth() &&
-                        eventDate.getDate() === today.getDate()
-                    );
+                    // Check if it's today by comparing timestamps
+                    const isToday = eventDate.getTime() === today.getTime();
                     
+                    // Final determination - only past if it's not today
                     const isTrulyPast = isPast && !isToday;
                     
-                    // Debug log to check date comparison
-                    console.log(`Event: ${event.title}, Date: ${event.date}, Today: ${today.toISOString().split('T')[0]}, isToday: ${isToday}, isPast: ${isTrulyPast}`);
+                    // Debug log to help diagnose date comparison issues
+                    console.log(`Event: ${event.title}, Date: ${event.date}`);
+                    console.log(`Today: ${today.toISOString()}, Event: ${eventDate.toISOString()}`);
+                    console.log(`Comparison: isPast=${isPast}, isToday=${isToday}, isTrulyPast=${isTrulyPast}`);
                     
                     // Only mark as past if it's truly past (not today)
                     if (isTrulyPast) {

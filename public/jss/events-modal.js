@@ -438,24 +438,15 @@
       
       // Debug the date comparison
       console.log(`Comparing dates for ${event.title}: ${eventDate.toISOString()} vs today ${today.toISOString()}`);
-      console.log(`Date comparison result: ${eventDate < today ? 'PAST' : 'UPCOMING'}`);
       
-      // Fix for today's date: Explicitly compare year, month, and day instead of Date objects
-      const isPastEvent = (
-        eventDate.getFullYear() < today.getFullYear() || 
-        (eventDate.getFullYear() === today.getFullYear() && 
-         eventDate.getMonth() < today.getMonth()) ||
-        (eventDate.getFullYear() === today.getFullYear() && 
-         eventDate.getMonth() === today.getMonth() && 
-         eventDate.getDate() < today.getDate())
-      );
+      // Simple comparison - if eventDate is earlier than today, it's past
+      const isPastEvent = eventDate < today;
       
-      // Check if this event is happening today
-      const isToday = (
-        eventDate.getFullYear() === today.getFullYear() &&
-        eventDate.getMonth() === today.getMonth() &&
-        eventDate.getDate() === today.getDate()
-      );
+      // Check if it's today by comparing timestamps
+      const isToday = eventDate.getTime() === today.getTime();
+      
+      // Debug comparison results
+      console.log(`Date comparison result: isPastEvent=${isPastEvent}, isToday=${isToday}`);
       
       // Only mark as past if it's not today
       if (isPastEvent && !isToday) {
