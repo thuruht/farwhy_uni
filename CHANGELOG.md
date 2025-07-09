@@ -2,6 +2,17 @@
 
 All notable changes to the Farewell/Howdy Unified Project.
 
+## [2.1.5] - July 12, 2025
+
+### 🚀 Bug Fixes
+
+- **Menu Animation Fix**: Fixed GSAP animation issue in menu renderer
+  - Added missing GSAP library reference to `/public/menu/index.html`
+  - Resolved "gsap not avail" console error
+  - Enabled smooth animations for menu items and header
+  - Fixed animation functionality without changing core renderer logic
+  - No database or API changes required
+
 ## [2.1.4] - July 11, 2025
 
 ### 🔧 Archive Management Improvements
