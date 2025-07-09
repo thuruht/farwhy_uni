@@ -144,10 +144,13 @@
     archiveToggle.textContent = 'UPCOMING ONLY ✓';
     archiveToggle.setAttribute('aria-pressed', 'false');
     
-    archiveToggle.addEventListener('click', () => {
+    archiveToggle.addEventListener('click', async () => {
       showArchived = !showArchived;
       archiveToggle.textContent = showArchived ? 'ALL EVENTS ✓' : 'UPCOMING ONLY ✓';
       archiveToggle.setAttribute('aria-pressed', showArchived.toString());
+      
+      // Fetch fresh events with the new includePast parameter
+      await fetchEvents();
       filterEvents();
     });
     
@@ -261,10 +264,8 @@
   async function openModal() {
     console.log(`[Events Modal] Opening modal with venue: ${currentVenue}`);
     
-    // Fetch events if we don't have them yet
-    if (allEvents.length === 0) {
-      await fetchEvents();
-    }
+    // Always fetch events when opening the modal to get the latest data
+    await fetchEvents();
     
     // Set the active tab based on currentVenue
     venueFilterTabs.forEach(tab => {
@@ -316,8 +317,11 @@
   async function fetchEvents() {
     try {
       // Fetch events data with cache-busting parameter
+      // Only set includePast=true when showArchived is true (showing all events)
       const timestamp = new Date().getTime();
-      const response = await fetch(`/api/events/slideshow?t=${timestamp}`);
+      const includePastParam = showArchived ? '&includePast=true' : '';
+      // Add limit parameter to fetch more events (100 should be sufficient)
+      const response = await fetch(`/api/events/slideshow?t=${timestamp}${includePastParam}&limit=100`);
       if (!response.ok) {
         throw new Error('Failed to fetch events');
       }

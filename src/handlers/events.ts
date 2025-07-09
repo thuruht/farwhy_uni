@@ -171,6 +171,8 @@ async function getSlideshow(c: Context<{ Bindings: Env }>) {
   const { FWHY_D1 } = c.env;
   const includePast = c.req.query('includePast') === 'true';
   const venue = c.req.query('venue');
+  // Get the limit parameter with a default of 20
+  const limit = parseInt(c.req.query('limit') || '20', 10);
   
   try {
     const today = new Date().toISOString().split('T')[0]; // Current date in YYYY-MM-DD format
@@ -198,7 +200,7 @@ async function getSlideshow(c: Context<{ Bindings: Env }>) {
       params.push(today);
     }
     
-    query += ' ORDER BY date ASC LIMIT 20';
+    query += ` ORDER BY date ASC LIMIT ${limit}`;
     
     console.log(`[SLIDESHOW_QUERY] Query: ${query}`);
     console.log(`[SLIDESHOW_QUERY] Params: ${JSON.stringify(params)}`);

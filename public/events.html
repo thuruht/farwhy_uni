@@ -519,6 +519,8 @@
                     eventDate.setHours(0, 0, 0, 0);
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
+                    // Event is past only if the date is strictly before today
+                    // Events happening today are not considered past
                     if (eventDate < today) {
                         eventCard.classList.add('past-event');
                     }

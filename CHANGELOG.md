@@ -20,6 +20,7 @@ All notable changes to the Farewell/Howdy Unified Project.
   - Improved event filtering logic to properly handle current day events
   - Added consistent openEventsPopup function across all pages
   - Fixed issue where events happening later on the current day were incorrectly marked as "past"
+  - Added includePast=true parameter to API call to show events from all dates, not just current month
 
 ## [2.1.4] - July 11, 2025
 
