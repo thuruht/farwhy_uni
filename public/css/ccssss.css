@@ -162,13 +162,12 @@ p {
   width: 100%; 
   min-height: 212px; /* Consistent minimum height */
   height: auto; /* Changed from fixed height to auto to work better on mobile */
-  min-height: 212px; /* Keep a minimum height */
   box-sizing: border-box; /* Ensures padding doesn't affect the fixed height */
   background: var(--header-bg); /* Use the combined background variable */
   color: var(--text-color);
   padding: 0;
   border: 1px solid var(--nav-border-color);
- 
+  transition: min-height 0.2s ease;
 }
 .howder { background:var(--howder-bg); border:1px solid var(--nav-border-color);  align-items:center; justify-content:center;}
 .contain {
@@ -211,6 +210,18 @@ p {
   margin: 0;
   color: var(--text-color);
   transition: font-size 0.3s ease; /* Smooth transition for resizing */
+  min-height: 120px; /* Minimum consistent height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.header-title .span2 {
+  height: 1.2em; /* Fixed height container */
+  display: inline-block;
+  transition: font-size 0.2s ease, font-family 0.2s ease;
+  line-height: 1.2;
+  vertical-align: middle;
 }
 
 .header-title .sulk {
@@ -616,7 +627,7 @@ nav ul li { font-size:0.8rem;}
 
 body.howdy-active .header-title .span2 {
   height: auto; /* Override fixed height for mobile */
-  min-height: 0; /* Reset min-height for mobile */
+  min-height: 1.2em; /* Ensure minimum height is maintained */
 }
 
 .header-title {text-align:center; align-content:center; align-items:center; padding:20px; padding-top:40px;}

@@ -359,6 +359,52 @@
                 font-size: 0.8rem;
                 min-width: auto;
             }
+            
+            /* Better close/home buttons for small screens */
+            .close-nav ul {
+                width: 80%; /* Wider to fit the text better */
+            }
+            
+            .close-nav ul li {
+                padding: 8px 10px; /* Smaller padding */
+            }
+            
+            .close-nav ul li a {
+                font-size: 0.9rem; /* Even smaller font */
+            }
+        }
+        
+        /* Extra small screen adjustments */
+        @media (max-width: 360px) {
+            .main-container {
+                padding: 0.75rem; /* Smaller padding for tiny screens */
+                width: 94%; /* Ensure it's not too wide */
+                margin: 0 auto;
+            }
+            
+            .event-modal-content {
+                width: 92%; /* Even narrower for tiny screens */
+                margin: 3% auto;
+                padding: 0.5rem;
+                padding-top: 2rem; /* Maintain space for close button */
+            }
+            
+            .close-nav ul {
+                width: 95%; /* Almost full width for better spacing */
+            }
+            
+            .close-nav ul li {
+                padding: 6px 8px; /* Minimal padding */
+            }
+            
+            .close-nav ul li a {
+                font-size: 0.85rem; /* Smallest possible readable size */
+            }
+            
+            .events-title {
+                font-size: 2rem; /* Smaller title */
+                margin-bottom: 1.5rem;
+            }
         }
         
         .past-event {
@@ -395,6 +441,13 @@
             
             .close-nav ul li {
                 width: 100%;
+            }
+            
+            .close-nav ul li a {
+                font-size: 0.95rem; /* Slightly smaller font for mobile */
+                white-space: nowrap; /* Prevent text wrapping */
+                overflow: hidden; /* Hide overflow */
+                text-overflow: ellipsis; /* Add ellipsis for overflow */
             }
             
             .events-grid {
