@@ -2,6 +2,26 @@
 
 All notable changes to the Farewell/Howdy Unified Project.
 
+## [2.1.4] - July 11, 2025
+
+### 🔧 Archive Management Improvements
+
+- **Archive Management Script**: Enhanced archive management workflow
+  - Created new `scripts/archive-and-commit.sh` script for selective archiving
+  - Implemented automatic git tracking for important archived files
+  - Added preservation of file path structure during archiving
+  - Maintained proper git history for archived code
+  - Provided user-friendly interface with detailed instructions
+
+### 🗄️ Archive Repository Optimization
+
+- **Archive Repository Structure**: Optimized archived content in repository
+  - Added critical legacy handlers and middleware to git tracking
+  - Preserved important documentation files from ye_olde_docs
+  - Maintained core TypeScript implementation files for reference
+  - Reduced repository bloat by selectively choosing archived content
+  - Enhanced project history preservation without compromising repository performance
+
 ## [2.1.3] - July 10, 2025
 
 ### 📚 Documentation Updates
