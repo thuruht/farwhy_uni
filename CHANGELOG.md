@@ -2,6 +2,31 @@
 
 All notable changes to the Farewell/Howdy Unified Project.
 
+## [2.1.10] - July 16, 2025
+
+### 🧹 UI Improvements
+
+- **Streamlined Event Controls**: Enhanced usability in homepage slideshow area
+  - Removed redundant "show past events"/"hide past events" toggle link
+  - Made dropdown selector the primary control for filtering past/upcoming events
+  - Clarified calendar download link to specify it's venue-specific
+  - Improved UI consistency by removing duplicate controls
+  - Better tooltip text explains the calendar download functionality
+  - Changed "BOOKING" to "BOOK" in navigation for better fit on mobile
+  - Reduced navigation padding to prevent overflow on narrow screens
+
+## [2.1.9] - July 15, 2025
+
+### 📱 Mobile Optimization
+
+- **Enhanced Mobile Responsiveness**: Fixed layout issues on narrow screens
+  - Improved events.html layout for narrowest phone screens
+  - Fixed close and home button sizing to prevent text overflow
+  - Optimized modals width to prevent horizontal scrolling
+  - Enhanced button visibility with better backgrounds and spacing
+  - Added extra small screen support for devices under 360px width
+  - Implemented better vertical spacing for button stacking
+
 ## [2.1.8] - July 15, 2025
 
 ### 🐞 Bug Fixes

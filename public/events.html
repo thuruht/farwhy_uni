@@ -36,7 +36,9 @@
         .main-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1rem; /* Reduced padding for narrow screens */
+            width: 100%;
+            box-sizing: border-box; /* Ensure padding is included in width */
         }
         
         .events-title {
@@ -105,6 +107,8 @@
         /* Custom navigation styling to match main site */
         .close-nav {
             margin: 0 auto;
+            max-width: 100%;
+            overflow-x: auto; /* Allow horizontal scrolling if needed */
         }
         
         .close-nav ul {
@@ -133,6 +137,26 @@
             font-weight: normal;
             transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
             width: 120px;
+        }
+        
+        /* Responsive styling for navigation */
+        @media (max-width: 480px) {
+            .close-nav ul li {
+                width: auto; /* Allow content to determine width */
+                min-width: 80px; /* Minimum width to ensure buttons are tappable */
+                padding: 10px 8px; /* Reduced padding */
+                font-size: 0.9rem; /* Slightly smaller font */
+            }
+            
+            .events-title {
+                font-size: 2.2rem; /* Smaller title */
+                margin-bottom: 1.5rem;
+            }
+            
+            .events-controls {
+                gap: 1rem; /* Reduced gap */
+                margin-bottom: 1.5rem;
+            }
         }
         
         .close-nav ul li:hover {

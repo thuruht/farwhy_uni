@@ -296,8 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const icsLinks = document.querySelectorAll('.cal-link-ics');
   
   icsLinks.forEach(link => {
-    // Update text to be more descriptive of what this does
-    link.textContent = "Download All Events";
+    // We don't need to update the text here as we've updated it directly in the HTML
     
     link.addEventListener('click', (e) => {
       // Get the current venue state from the body

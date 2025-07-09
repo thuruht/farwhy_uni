@@ -222,12 +222,21 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   async function initSlideshow() {
     const currentState = body?.dataset.state; // 'farewell' or 'howdy'
-    const sortValue = sortSelect ? sortSelect.value : 'soonest'; // default to soonest if undefined
+    
+    // Use the sortSelect value to determine if we should show past events
+    // and update the dropdown selection
+    if (sortSelect) {
+      if (window.showPastEvents) {
+        sortSelect.value = 'past';
+      } else {
+        sortSelect.value = 'soonest';
+      }
+    }
 
     // Get show past events toggle status
     const showPast = window.showPastEvents || false;
     
-    // Update the toggle button text based on current state
+    // Update the toggle button text based on current state if it exists
     const togglePastBtn = document.getElementById('toggle-past-events');
     if (togglePastBtn) {
       togglePastBtn.textContent = showPast ? 'hide past events' : 'show past events';
@@ -481,6 +490,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Sorting drop-down: re-init the slideshow with chosen sort
   if (sortSelect) {
     sortSelect.addEventListener('change', () => {
+      // Check if we should show past events based on dropdown value
+      window.showPastEvents = sortSelect.value === 'past';
+      
+      // Reload the slideshow with the updated setting
       initSlideshow(); 
     });
   }

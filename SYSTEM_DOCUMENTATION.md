@@ -1,7 +1,7 @@
 # Farewell/Howdy System Documentation
 
-> **Last Updated**: July 15, 2025  
-> **Version**: 2.1.8  
+> **Last Updated**: July 16, 2025  
+> **Version**: 2.1.10  
 
 ## Table of Contents
 
@@ -101,6 +101,9 @@ public/
 - **Admin filtering and search** capabilities
 - **Consistent date comparison** for past/upcoming events
 - **Events modal** with archive toggle and pagination support
+- **Calendar downloads** with .ics file generation for venue-specific events
+- **Streamlined UI controls** with consolidated past/upcoming events filtering
+- **Mobile responsive layout** with optimized close buttons and font sizes
 
 ### Blog System
 
@@ -249,6 +252,7 @@ The admin interface header uses a consistent visual style with the public site:
 - **Event handlers** for all admin operations
 - **API communication** with error handling
 - **Modal management** and form validation
+- **Date comparison** for accurate past/upcoming event handling
 
 #### events-modal.js
 
@@ -257,6 +261,18 @@ The admin interface header uses a consistent visual style with the public site:
 - **Date comparison logic** for past/upcoming classification
 - **Pagination support** with configurable limits
 - **Responsive design** with mobile optimization
+
+#### events-modal-calendar.js
+
+- **ICS file generation** for single events
+- **Calendar download buttons** with tooltips
+- **Integrated with event modals** for seamless user experience
+
+#### ifrevl.js
+
+- **Calendar URL generation** for venue-specific events
+- **Link updating** for bulk calendar downloads
+- **Cross-page compatibility** with unified calendar handling
 
 #### menu-management.js
 
@@ -405,8 +421,10 @@ try {
 
 ### Recent Updates (July 2025)
 
+- ✅ **Calendar Integration**: Complete calendar downloads for events with ICS file generation
+- ✅ **Date Comparison Fix**: Consistent past/upcoming event classification across all interfaces
+- ✅ **Mobile Optimization**: Improved modal display with responsive buttons and text sizing
 - ✅ **API Consistency**: All frontend/backend endpoints aligned
-- ✅ **Mobile Optimization**: Admin dashboard fully responsive
 - ✅ **Menu Management**: Consolidated UI with drag-and-drop
 - ✅ **Image Uploads**: Separate file/URL inputs for all forms
 - ✅ **Featured Videos**: Multi-video carousel support
@@ -452,4 +470,4 @@ npx wrangler deploy       # Deploy to Cloudflare Workers
 
 ---
 
-*This documentation reflects the current system state as of July 6, 2025. For the most up-to-date API reference, see `API_REFERENCE.md`.*
+*This documentation reflects the current system state as of July 16, 2025. For the most up-to-date API reference, see `API_REFERENCE.md`.*

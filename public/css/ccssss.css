@@ -272,7 +272,7 @@ nav ul {
 
 nav ul li {
   width: 100%; /* Makes each nav item take full width of nav */
-  padding: 10px 15px; /* Enhanced padding for better click area */
+  padding: 8px 12px; /* Reduced padding for better mobile fit */
   margin: 0;
   border: 1px solid var(--nav-border-color);
   background: var(--nav-bg-color);
