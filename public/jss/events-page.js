@@ -129,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const eventDate = new Date(event.date);
             eventDate.setHours(0, 0, 0, 0);
             
+            // Event is upcoming if it's today or in the future
             const isUpcoming = eventDate >= today;
             const matchesShowType = (currentShowType === 'upcoming' && isUpcoming) || 
                                   (currentShowType === 'archived' && !isUpcoming);
@@ -186,6 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const eventDate = new Date(event.date);
         eventDate.setHours(0, 0, 0, 0);
         
+        // Event is past only if date is before today
         const isPastEvent = eventDate < today;
         
         // Create card container

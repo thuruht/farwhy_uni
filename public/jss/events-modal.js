@@ -354,6 +354,9 @@
       if (!showArchived) {
         const eventDate = new Date(event.date);
         eventDate.setHours(0, 0, 0, 0);
+        
+        // Include events occurring today or in the future
+        // Use full day comparison to ensure events happening later today are included
         matchesDate = eventDate >= today;
       }
       
@@ -414,10 +417,12 @@
         eventItem.classList.add('active');
       }
       
-      // Check if the event is in the past
+      // Check if the event is in the past - compare dates without considering time
       const eventDate = new Date(event.date);
       eventDate.setHours(0, 0, 0, 0);
-      const isPastEvent = eventDate < today;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const isPastEvent = eventDate < today; // Event is past only if date is before today
       
       if (isPastEvent) {
         eventItem.classList.add('past-event');
