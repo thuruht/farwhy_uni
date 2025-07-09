@@ -16,6 +16,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="./css/ccssss.css">
     <link rel="stylesheet" href="./css/events-modal.css">
+    <link rel="stylesheet" href="./css/events-calendar-button.css">
  <!--   <link rel="stylesheet" href="./css/fleeting-journey.css">-->
     <style>
       .card {
@@ -405,7 +406,7 @@
       <div id="credEt" class="dynamic-calendar-links"><hr>
       <p><small>
         calendar graphic (and the other swell graphics and general layout of this site) designed by the excellent <a href="https://austinchapmandesign.com/" target="_blank" rel="noopener">austin chapman</a> - however, any parts of the site that you dislike, that are animated annoyingly, bitcrushed, badly implemented, or the like, may instead be blamed on me (<a href="https://ntapkc.com" target="_blank" rel="noopener">jojo</a>), with the exception of show/event flyers, which are variously sourced</small></p>
-        <hr> || <a href="javascript:void(0);" class="events-modal-trigger"><b>VIEW ALL EVENTS</b></a> || <a href="#" class="cal-link-ics">get .ics file</a> ||<hr>
+        <hr> || <a href="javascript:void(0);" class="events-modal-trigger"><b>VIEW ALL EVENTS</b></a> || <a href="#" class="cal-link-ics tooltip"><b>📅 DOWNLOAD ALL EVENTS</b><span class="tooltip-text">Download all upcoming events as an .ics file that you can import into your calendar app (Google Calendar, Apple Calendar, Outlook, etc.)</span></a> ||<hr>
       </div>
   </div>
 
@@ -613,7 +614,7 @@ document.addEventListener('DOMContentLoaded', function() {
        <!-- <span class="material-icons">lightbulb</span> --> <div style="background:#f5f5f5;"><p><small>
  </small></p>
 <hr> || <a class="cal-link-listing events-modal-trigger" href="javascript:void(0);">view show listings</a> ||
-    <a class="cal-link-ics" href="#">get .ics file</a> || 
+    <a class="cal-link-ics" href="#"><b>📅 DOWNLOAD ALL EVENTS</b></a> || 
     <a id="toggle-past-events" href="javascript:void(0);">show past events</a> ||
 </div>
 
@@ -652,6 +653,8 @@ document.addEventListener('DOMContentLoaded', function() {
   <script src="./jss/script.js"></script>
   <script src="./jss/ics-generator.js"></script>
   <script src="./jss/events-modal.js"></script>
+  <script src="./jss/events-modal-calendar.js"></script>
+  <script src="./jss/ifrevl.js"></script>
   <script>
     function openEventsPopup() {
       // Get current venue state

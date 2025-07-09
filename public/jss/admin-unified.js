@@ -14,15 +14,21 @@ let dashboardState = {
 // DATE HANDLING UTILITY FUNCTIONS
 // ================================
 
-// SAFE DATE PARSING (handles both ISO strings and local dates)
-function parseEventDate(dateString) {
+// SAFE DATE PARSING (handles both ISO strings, local dates, and Date objects)
+function parseEventDate(dateInput) {
+  // Handle Date objects directly
+  if (dateInput instanceof Date) {
+    return new Date(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate());
+  }
+  
   // If date is in format "YYYY-MM-DD"
-  if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    const parts = dateString.split('-');
+  if (typeof dateInput === 'string' && dateInput.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const parts = dateInput.split('-');
     return new Date(parts[0], parts[1] - 1, parts[2]);
   }
+  
   // For full ISO strings or other formats
-  const d = new Date(dateString);
+  const d = new Date(dateInput);
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
@@ -1767,21 +1773,18 @@ function renderEvents(events, setupFilters = true) {
         <tbody>` +
         events.map(ev => {
             // Calculate if event is past or upcoming
-            const eventDate = new Date(ev.date);
-            const today = new Date();
+            const eventDateRaw = ev.date; // Use the raw date string
             
-            // Only consider an event as "past" after the day is completely over (midnight)
-            // Set both dates to midnight for accurate comparison
             // DEBUG: Log the raw event date for inspection
-            console.log('RAW EVENT DATE:', eventDate, 'TYPE:', typeof eventDate);
+            console.log('RAW EVENT DATE:', eventDateRaw, 'TYPE:', typeof eventDateRaw);
             
             // Use the utility functions for consistent date handling
-            const isPast = isPastEvent(eventDate);
-            const isToday = isTodayEvent(eventDate);
+            const isPast = isPastEvent(eventDateRaw);
+            const isToday = isTodayEvent(eventDateRaw);
             
             // Debug output for thorough diagnosis
             console.log(`Event: ${ev.title}`);
-            console.log('Parsed event date:', parseEventDate(eventDate));
+            console.log('Parsed event date:', parseEventDate(eventDateRaw));
             console.log('Today at midnight:', new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()));
             console.log('isPast:', isPast, 'isToday:', isToday);
             

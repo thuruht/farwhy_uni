@@ -14,6 +14,7 @@
   text-decoration: none;
   text-transform: uppercase;
   margin-left: 0.75rem;
+  position: relative; /* For tooltip positioning */
 }
 
 .event-calendar-download:hover {
@@ -26,6 +27,52 @@
   display: inline-block;
   margin-right: 0.5rem;
   font-size: 1.1rem;
+}
+
+/* Tooltip styles */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 280px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 10px;
+  position: absolute;
+  z-index: 1000;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -140px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.9rem;
+  font-weight: normal;
+  line-height: 1.4;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  border: 1px solid var(--nav-border-color);
+  pointer-events: none;
+  text-transform: none;
+}
+
+.tooltip .tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }
 
 /* Responsive styles */
@@ -42,6 +89,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+  
+  .tooltip .tooltip-text {
+    width: 220px;
+    margin-left: -110px;
+    font-size: 0.8rem;
   }
 }
 

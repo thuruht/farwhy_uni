@@ -48,8 +48,8 @@
 
     // Create the calendar download button
     const calendarButton = document.createElement('a');
-    calendarButton.className = 'event-calendar-download glitch-effect';
-    calendarButton.innerHTML = '<span class="calendar-icon">📅</span> ADD TO CALENDAR';
+    calendarButton.className = 'event-calendar-download glitch-effect tooltip';
+    calendarButton.innerHTML = '<span class="calendar-icon">📅</span> ADD TO CALENDAR<span class="tooltip-text">Download this event as an .ics file to add it to your calendar app (Google Calendar, Apple Calendar, Outlook, etc.)</span>';
     calendarButton.href = '#';
     calendarButton.addEventListener('click', generateSingleEventCalendar);
 
@@ -96,7 +96,9 @@
       // Create and trigger download
       const downloadLink = document.createElement('a');
       downloadLink.href = url;
-      downloadLink.download = `${event.venue}_${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
+      const venue = event.venue.charAt(0).toUpperCase() + event.venue.slice(1);
+      const formattedDate = event.date.replace(/-/g, '');
+      downloadLink.download = `${venue}_Event_${formattedDate}.ics`;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);

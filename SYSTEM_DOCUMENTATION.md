@@ -1,7 +1,7 @@
 # Farewell/Howdy System Documentation
 
-> **Last Updated**: July 10, 2025  
-> **Version**: 2.1.2  
+> **Last Updated**: July 15, 2025  
+> **Version**: 2.1.8  
 
 ## Table of Contents
 
@@ -32,11 +32,13 @@ The Farewell/Howdy Unified Project is a comprehensive content management system 
 ### Key Capabilities
 
 - **Event Management**: Create, edit, and display events for both venues
+- **Calendar Integration**: ICS calendar downloads for events with tooltips
 - **Blog System**: Rich text blog posts with image uploads and featured content
 - **Menu Management**: Dynamic menu system with categories and pricing
 - **Business Hours**: Venue-specific hours management
 - **Featured Videos**: YouTube video carousel system
 - **Image Handling**: Secure R2-based image storage with automatic optimization
+- **Responsive Design**: Mobile-optimized layouts for all user interfaces
 
 ---
 
@@ -62,16 +64,21 @@ src/
 
 ### Frontend Structure
 
-```
+```bash
 public/
 ├── admin.html           # Admin dashboard (SPA)
 ├── index.html           # Public homepage
+├── events.html          # Events listing page
 ├── jss/                 # JavaScript modules
 │   ├── admin-unified.js # Main admin functionality
 │   ├── menu-management.js # Menu CRUD operations
 │   ├── featured-videos-manager.js # Video management
+│   ├── events-modal-calendar.js # Calendar integration
+│   ├── ifrevl.js       # Calendar URL handlers
 │   └── script.js        # Public site functionality
-└── css/                 # Stylesheets (responsive design)
+├── css/                 # Stylesheets (responsive design)
+│   ├── events-modal.css # Modal styling for events
+│   └── events-calendar-button.css # Calendar button styling
 ```
 
 ---

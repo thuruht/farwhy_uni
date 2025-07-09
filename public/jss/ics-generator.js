@@ -263,9 +263,17 @@ async function downloadIcsFile(e, venue = null) {
     
     // Create and trigger download
     const downloadLink = document.createElement('a');
-    const venueText = venue ? `_${venue}` : '';
+    
+    // Create a clear filename that indicates what's being downloaded
+    let venueName = "All_Venues";
+    if (venue === 'farewell') venueName = "Farewell";
+    if (venue === 'howdy') venueName = "Howdy";
+    
+    const today = new Date();
+    const dateStamp = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
+    
     downloadLink.href = url;
-    downloadLink.download = `farewell_howdy${venueText}_events.ics`;
+    downloadLink.download = `${venueName}_Events_${dateStamp}.ics`;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
@@ -288,6 +296,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const icsLinks = document.querySelectorAll('.cal-link-ics');
   
   icsLinks.forEach(link => {
+    // Update text to be more descriptive of what this does
+    link.textContent = "Download All Events";
+    
     link.addEventListener('click', (e) => {
       // Get the current venue state from the body
       const currentState = document.body?.dataset.state || 'farewell';

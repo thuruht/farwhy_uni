@@ -2,6 +2,48 @@
 
 All notable changes to the Farewell/Howdy Unified Project.
 
+## [2.1.8] - July 15, 2025
+
+### 🐞 Bug Fixes
+
+- **Admin Interface Fix**: Fixed date comparison issue in admin-unified.js
+  - Updated `parseEventDate()` function to properly handle Date objects
+  - Modified event date handling to use raw date strings for consistent parsing
+  - Fixed inconsistency between admin and public-facing date handling
+  - Events now correctly show as past/upcoming in admin interface
+
+## [2.1.7] - July 14, 2025
+
+### 📅 Calendar Integration Completion
+
+- **Calendar System Finalization**: Completed integration of all calendar-related functionality
+  - Added tooltips to events.html calendar download button to explain .ics files
+  - Integrated ifrevl.js with proper calendar link handling
+  - Updated calendar download buttons with consistent styling and tooltips
+  - Added "Download All Events" text to all calendar download links
+  - Ensured proper tooltip display on all calendar download buttons
+  - Implemented clear, user-friendly calendar file naming across all downloads
+  - Maintained visual consistency between individual and bulk event downloads
+
+## [2.1.6] - July 13, 2025
+
+### 📅 Calendar Integration Enhancements
+
+- **Event Calendar Downloads**: Added comprehensive calendar functionality
+  - Added individual event calendar downloads within event modals
+  - Improved existing venue-wide calendar downloads with clearer labeling
+  - Added "Download All Events" text to bulk calendar download links
+  - Implemented consistent styling for calendar download buttons
+  - Standardized ICS file format and naming conventions
+  - Created clear visual distinction between single-event and all-events downloads
+  - No database or API changes required - purely frontend enhancement
+
+- **CSS and JS File Inventory**: Added comprehensive inventory
+  - Created CSS_AND_JS_INVENTORY.md with detailed usage information
+  - Documented all CSS and JS files with their status and usage
+  - Fixed admin-header.css integration in admin.html
+  - Added missing chunky font styling to admin header
+
 ## [2.1.5] - July 12, 2025
 
 ### 🚀 Bug Fixes and Enhancements
