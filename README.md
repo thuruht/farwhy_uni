@@ -14,6 +14,8 @@ This project contains the admin dashboard and APIs for managing events, blog pos
   - Upload event flyers
   - Filter events by venue
   - Auto-population of venue-specific defaults
+  - Modal-based events display with archive toggle
+  - Consistent date comparison for past/upcoming events
 - Blog post management with rich text editor
   - Create and edit blog posts with WYSIWYG editor
   - Upload and embed images directly in blog posts
@@ -115,6 +117,9 @@ npx wrangler deploy
 - Consolidated documentation (reduced from 27 to 5 files)
 - Enhanced menu management system with drag-and-drop
 - Multi-video featured content carousel
+- Improved events modal with archive toggle and pagination
+- Added GSAP library for smooth menu animations
+- Fixed date comparison logic for consistent event displays
 
 > **Historical Documentation**: Files in `ye_olde_docs/` are archived and may be outdated.
 

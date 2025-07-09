@@ -519,9 +519,18 @@
                     eventDate.setHours(0, 0, 0, 0);
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
-                    // Event is past only if the date is strictly before today
-                    // Events happening today are not considered past
-                    if (eventDate < today) {
+                    
+                    // Fix date comparison by explicitly comparing year, month, day
+                    const isPast = (
+                        eventDate.getFullYear() < today.getFullYear() || 
+                        (eventDate.getFullYear() === today.getFullYear() && 
+                         eventDate.getMonth() < today.getMonth()) ||
+                        (eventDate.getFullYear() === today.getFullYear() && 
+                         eventDate.getMonth() === today.getMonth() && 
+                         eventDate.getDate() < today.getDate())
+                    );
+                    
+                    if (isPast) {
                         eventCard.classList.add('past-event');
                     }
                     

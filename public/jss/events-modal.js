@@ -359,9 +359,18 @@
         const eventDate = new Date(event.date);
         eventDate.setHours(0, 0, 0, 0);
         
-        // Include events occurring today or in the future
-        // Use full day comparison to ensure events happening later today are included
-        matchesDate = eventDate >= today;
+        // Fix: Explicitly compare year, month and day instead of relying on Date object comparison
+        matchesDate = (
+          eventDate.getFullYear() > today.getFullYear() || 
+          (eventDate.getFullYear() === today.getFullYear() && 
+           eventDate.getMonth() > today.getMonth()) ||
+          (eventDate.getFullYear() === today.getFullYear() && 
+           eventDate.getMonth() === today.getMonth() && 
+           eventDate.getDate() >= today.getDate())
+        );
+        
+        // Debug output for this specific event
+        console.log(`Event ${event.title} on ${event.date}: ${matchesDate ? 'UPCOMING' : 'PAST'}`);
       }
       
       return matchesVenue && matchesDate;
@@ -426,7 +435,20 @@
       eventDate.setHours(0, 0, 0, 0);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const isPastEvent = eventDate < today; // Event is past only if date is before today
+      
+      // Debug the date comparison
+      console.log(`Comparing dates for ${event.title}: ${eventDate.toISOString()} vs today ${today.toISOString()}`);
+      console.log(`Date comparison result: ${eventDate < today ? 'PAST' : 'UPCOMING'}`);
+      
+      // Fix for today's date: Explicitly compare year, month, and day instead of Date objects
+      const isPastEvent = (
+        eventDate.getFullYear() < today.getFullYear() || 
+        (eventDate.getFullYear() === today.getFullYear() && 
+         eventDate.getMonth() < today.getMonth()) ||
+        (eventDate.getFullYear() === today.getFullYear() && 
+         eventDate.getMonth() === today.getMonth() && 
+         eventDate.getDate() < today.getDate())
+      );
       
       if (isPastEvent) {
         eventItem.classList.add('past-event');

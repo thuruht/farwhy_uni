@@ -1735,7 +1735,16 @@ function renderEvents(events, setupFilters = true) {
             // This ensures events happening today are still shown as "upcoming"
             const todayWithoutTime = new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const eventDateWithoutTime = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
-            const isPast = eventDateWithoutTime < todayWithoutTime;
+            
+            // Fix date comparison by explicitly comparing year, month, day
+            const isPast = (
+                eventDateWithoutTime.getFullYear() < todayWithoutTime.getFullYear() || 
+                (eventDateWithoutTime.getFullYear() === todayWithoutTime.getFullYear() && 
+                 eventDateWithoutTime.getMonth() < todayWithoutTime.getMonth()) ||
+                (eventDateWithoutTime.getFullYear() === todayWithoutTime.getFullYear() && 
+                 eventDateWithoutTime.getMonth() === todayWithoutTime.getMonth() && 
+                 eventDateWithoutTime.getDate() < todayWithoutTime.getDate())
+            );
             
             const statusClass = isPast ? 'event-past' : 'event-upcoming';
             const statusText = isPast ? 'Past' : 'Upcoming';

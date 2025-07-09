@@ -26,6 +26,10 @@ This document lists all API endpoints available in the Farewell/Howdy Cloudflare
 ### Events
 - `GET /api/events` - List all public events
 - `GET /api/events/slideshow` - Get events for slideshow display
+  - Parameters:
+    - `includePast` (boolean) - Include past events when set to 'true'
+    - `venue` (string) - Filter by venue name
+    - `limit` (number) - Maximum number of events to return (default: 20)
 - `GET /api/events/:id` - Get specific event by ID
 - `GET /api/slideshow` - Alternative slideshow endpoint
 

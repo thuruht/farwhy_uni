@@ -17,10 +17,13 @@ All notable changes to the Farewell/Howdy Unified Project.
   - Fixed inline events modal to show all events, not just current month
   - Added EVENTS link to navigation on more.htm, about.htm, and booking.htm pages
   - Fixed date comparison issue causing same-day events to incorrectly display as past
-  - Improved event filtering logic to properly handle current day events
+  - Improved event filtering logic to properly handle current day events (ensures today's events show as "upcoming")
   - Added consistent openEventsPopup function across all pages
   - Fixed issue where events happening later on the current day were incorrectly marked as "past"
-  - Added includePast=true parameter to API call to show events from all dates, not just current month
+  - Modified fetchEvents function in events-modal.js to conditionally use includePast parameter only when showing archived events
+  - Added limit=100 parameter to API call to retrieve more events
+  - Updated event filtering to ensure proper date comparison (using >= for today's dates)
+  - Ensured admin interface uses consistent date comparison logic
 
 ## [2.1.4] - July 11, 2025
 

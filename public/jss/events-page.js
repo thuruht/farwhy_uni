@@ -130,7 +130,15 @@ document.addEventListener('DOMContentLoaded', function() {
             eventDate.setHours(0, 0, 0, 0);
             
             // Event is upcoming if it's today or in the future
-            const isUpcoming = eventDate >= today;
+            // Fix date comparison by explicitly comparing year, month, day
+            const isUpcoming = (
+                eventDate.getFullYear() > today.getFullYear() || 
+                (eventDate.getFullYear() === today.getFullYear() && 
+                 eventDate.getMonth() > today.getMonth()) ||
+                (eventDate.getFullYear() === today.getFullYear() && 
+                 eventDate.getMonth() === today.getMonth() && 
+                 eventDate.getDate() >= today.getDate())
+            );
             const matchesShowType = (currentShowType === 'upcoming' && isUpcoming) || 
                                   (currentShowType === 'archived' && !isUpcoming);
             
@@ -187,8 +195,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const eventDate = new Date(event.date);
         eventDate.setHours(0, 0, 0, 0);
         
-        // Event is past only if date is before today
-        const isPastEvent = eventDate < today;
+        // Fix date comparison by explicitly comparing year, month, day
+        const isPastEvent = (
+            eventDate.getFullYear() < today.getFullYear() || 
+            (eventDate.getFullYear() === today.getFullYear() && 
+             eventDate.getMonth() < today.getMonth()) ||
+            (eventDate.getFullYear() === today.getFullYear() && 
+             eventDate.getMonth() === today.getMonth() && 
+             eventDate.getDate() < today.getDate())
+        );
         
         // Create card container
         const card = document.createElement('div');

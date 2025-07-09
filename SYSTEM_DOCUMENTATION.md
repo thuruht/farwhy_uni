@@ -90,8 +90,10 @@ public/
 - **Dual-venue support** (Farewell & Howdy)
 - **Event flyer uploads** to R2 storage
 - **Ticket URL integration** for external ticketing
-- **Public slideshow API** for homepage display
+- **Public slideshow API** for homepage display with configurable limits
 - **Admin filtering and search** capabilities
+- **Consistent date comparison** for past/upcoming events
+- **Events modal** with archive toggle and pagination support
 
 ### Blog System
 
@@ -240,6 +242,14 @@ The admin interface header uses a consistent visual style with the public site:
 - **Event handlers** for all admin operations
 - **API communication** with error handling
 - **Modal management** and form validation
+
+#### events-modal.js
+
+- **Inline events display** for multiple pages
+- **Toggle between current and archived events**
+- **Date comparison logic** for past/upcoming classification
+- **Pagination support** with configurable limits
+- **Responsive design** with mobile optimization
 
 #### menu-management.js
 
@@ -393,6 +403,8 @@ try {
 - ✅ **Menu Management**: Consolidated UI with drag-and-drop
 - ✅ **Image Uploads**: Separate file/URL inputs for all forms
 - ✅ **Featured Videos**: Multi-video carousel support
+- ✅ **Events Modal**: Improved with archive toggle and consistent date comparison
+- ✅ **Menu Animation**: Added GSAP library for smooth menu transitions
 - ✅ **Documentation**: Consolidated and current
 
 ### Known Limitations
