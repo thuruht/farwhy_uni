@@ -50,3 +50,10 @@ npm-debug.log*
 .vscode/
 *.swp
 *.swo
+
+# macOS specific files
+.DS_Store
+**/.DS_Store
+
+# Wrangler configuration
+.wrangler/
