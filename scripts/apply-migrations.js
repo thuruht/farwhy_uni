@@ -13,7 +13,7 @@ async function applyMigrations() {
     const fs = require('fs');
     const path = require('path');
     const migrationSQL = fs.readFileSync(
-      path.join(__dirname, 'database/migrations/add_missing_columns.sql'),
+      path.join(__dirname, '../database/migrations/add_missing_columns.sql'),
       'utf8'
     );
     

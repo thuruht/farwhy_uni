@@ -30,6 +30,12 @@ ye_olde_docs/
 ye_olde_src/
 archive/
 
+# Legacy files and directories
+**/ye_olde*
+**/yeo*
+src/wot/
+**/crap_unused_old/
+
 # Node modules
 node_modules/
 

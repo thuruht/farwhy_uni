@@ -1,7 +1,7 @@
 # Farewell/Howdy System Documentation
 
-> **Last Updated**: July 6, 2025  
-> **Version**: 2.1.0  
+> **Last Updated**: July 8, 2025  
+> **Version**: 2.1.2  
 
 ## Table of Contents
 
@@ -242,6 +242,45 @@ The admin interface is a **Single Page Application (SPA)** with:
 ---
 
 ## Development Guidelines
+
+### Project Scripts and Utilities
+
+The project includes several utility scripts in the `scripts/` directory:
+
+- **deploy.sh**: Deployment script for Cloudflare Workers
+  - Usage: `./scripts/deploy.sh`
+  - Handles Cloudflare Workers deployment with proper dependency installation
+
+- **commit-changes.sh**: Standardized commit workflow
+  - Usage: `./scripts/commit-changes.sh [commit_message] [description]`
+  - Archives documentation files and creates structured commits
+
+- **archive-legacy.sh**: Legacy code archival utility
+  - Usage: `./scripts/archive-legacy.sh [--dry-run]`
+  - Moves obsolete code to the project_archive directory
+
+- **apply-migrations.js**: Database migration script
+  - Applies SQL migrations to the D1 database
+
+- **generate-jwt-secret.js**: Security utility
+  - Generates secure JWT secrets for authentication
+
+- **hash-password.js**: Admin user management
+  - Creates password hashes compatible with the authentication system
+
+- **clean_blog_posts.js**: Content maintenance
+  - Cleans and formats blog post content
+
+### Code Organization and Archival
+
+The project follows a strict code organization approach to maintain a clean codebase:
+
+- **Active Code**: Only actively used code should remain in the main source directories
+- **Archival Process**: Obsolete code is moved to the `project_archive/` directory using the `move_to_archive.sh` script
+- **Legacy Directories**: All directories with prefixes `ye_olde_` and `yeo_` have been archived
+- **Unused Components**: The `src/wot/` directory and `public/jss/crap_unused_old/` have been archived
+- **Git Exclusion**: All archived content is excluded via .gitignore
+- **Documentation Consolidation**: Documentation has been reduced from 27 files to 5 core documents
 
 ### API Endpoint Patterns
 
