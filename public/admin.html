@@ -14,25 +14,51 @@
     <link rel="stylesheet" href="/css/menu-management.css">
     <style>
         /* Custom button styles */
-        .btn-link.text-muted.small {
-            min-width: auto;
-            min-height: auto;
-            padding: 4px 8px;
-            margin: 2px;
-            background: none;
-            border: none;
-            box-shadow: none;
-            color: #888;
-            font-size: 0.8rem;
-            text-decoration: underline;
-            opacity: 0.8;
+        .admin-header {
+            width: 100%;
+            background: var(--primary-bg-color) url('/img/bg4.png') center/cover no-repeat;
+            background-attachment: fixed;
+            border-bottom: 1px solid var(--nav-border-color);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px; /* Reduced from 150px */
         }
-        .btn-link.text-muted.small:hover {
-            color: #555;
-            background: none;
-            box-shadow: none;
-            text-decoration: underline;
-            opacity: 1;
+        
+        .admin-header-content {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-header h1 {
+            color: var(--header-text-color);
+            font-weight: 400;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin: 0;
+            font-size: 2rem;
+        }
+        
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            color: var(--header-text-color);
+        }
+        
+        #section-indicator {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .breadcrumb {
+            font-size: 0.85rem;
+            opacity: 0.85;
         }
         
         /* Hours Management Styles */
@@ -517,7 +543,13 @@
 </head>
 <body data-state="farewell">
     <div class="admin-header">
-        <h1>admin</h1>
+        <div class="admin-header-content">
+            <h1>admin</h1>
+            <div class="header-right">
+                <span id="section-indicator">Dashboard</span>
+                <span class="breadcrumb" id="breadcrumb">Home / Dashboard</span>
+            </div>
+        </div>
     </div>
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <div id="dashboard-container" class="admin-grid-container">
@@ -534,14 +566,6 @@
             </select>
         </nav>
         <main class="main-content">
-            <header class="main-header">
-                <div class="header-left">
-                    <span id="section-indicator">Dashboard</span>
-                </div>
-                <div class="header-right">
-                    <span class="breadcrumb" id="breadcrumb">Home / Dashboard</span>
-                </div>
-            </header>
             <section id="section-dashboard" class="admin-section active">
                 <div class="stats-grid">
                     <div class="stat-card"><div class="stat-icon">🎪</div><div class="stat-content"><h3>Total Events</h3><p id="stats-total-events">0</p></div></div>
@@ -555,7 +579,6 @@
                     <h2>Event Management</h2>
                     <div class="section-actions">
                         <button class="btn btn-secondary" id="repair-legacy-events-btn" title="Repair legacy events with missing flyer URLs">🔧 Repair Legacy</button>
-                        <button class="btn btn-link text-muted small" id="import-legacy-events-btn" title="Import events from legacy system (Admin use only)">📥 Import Legacy</button>
                         <button class="btn btn-primary" id="add-event-btn">+ New Event</button>
                     </div>
                 </div>
@@ -662,33 +685,27 @@
                         
                         <div id="help-events" class="help-section">
                             <h3>Events Management</h3>
-                            <p>The Events section lets you create, edit, and delete events for both Farewell and Howdy venues.</p>
+                            <p>The Events section lets you create, edit, and delete events for both venues.</p>
                             
                             <h4>Creating Events</h4>
                             <ol>
                                 <li>Click the "+ New Event" button</li>
-                                <li>Fill in the required fields: Title, Date, and Venue</li>
-                                <li>Add optional details: Description, Time, Price, Age Restriction, etc.</li>
-                                <li>Upload a flyer image if available (JPG, PNG, GIF, WebP up to 5MB) or provide a URL</li>
+                                <li>Fill in the event details including title, description, date, and time</li>
+                                <li>Select the venue (Farewell or Howdy)</li>
+                                <li>Upload a flyer image if available</li>
                                 <li>Click "Save" to create the event</li>
                             </ol>
                             
                             <h4>Editing Events</h4>
                             <ol>
                                 <li>Find the event in the list</li>
-                                <li>Click the "Edit" button (pencil icon)</li>
+                                <li>Click the "Edit" button</li>
                                 <li>Update the event details</li>
                                 <li>Click "Save" to update the event</li>
                             </ol>
                             
-                            <h4>Legacy Event Functions</h4>
-                            <ul>
-                                <li><strong>Repair Legacy</strong> - Fixes missing flyer URLs and other fields in legacy events</li>
-                                <li><strong>Import Legacy</strong> - Imports events from the legacy system (admin use only). This uses duplicate detection to avoid creating duplicate events.</li>
-                            </ul>
-                            
                             <div class="help-tip">
-                                <strong>Image Upload Workaround:</strong> If you encounter issues uploading an image when creating an event, create the event first without the image, then edit the event afterward to add the image. The system processes the event creation and image upload separately, and this two-step approach helps avoid timeout issues during uploads.
+                                <strong>Note:</strong> Events can be filtered by venue using the dropdown at the top of the events list.
                             </div>
                         </div>
                         
@@ -701,112 +718,88 @@
                                 <li>Click the "+ New Post" button</li>
                                 <li>Enter a title for your post</li>
                                 <li>Use the rich text editor to create your content</li>
-                                <li>Add an author name (optional)</li>
-                                <li>Upload a featured image (JPG, PNG, GIF, WebP up to 5MB) or provide a URL</li>
+                                <li>Upload an image if desired</li>
                                 <li>Click "Save" to publish the post</li>
                             </ol>
                             
-                            <h4>Rich Text Editor Features</h4>
+                            <h4>The Rich Text Editor</h4>
+                            <p>The editor toolbar provides formatting options:</p>
                             <ul>
-                                <li>Text formatting (bold, italic, underline)</li>
-                                <li>Headings and lists (ordered/unordered)</li>
-                                <li>Adding links to external websites</li>
-                                <li>Embedding images within the content</li>
+                                <li>Text formatting (bold, italic, etc.)</li>
+                                <li>Headings and lists</li>
+                                <li>Adding links</li>
+                                <li>Embedding images</li>
                             </ul>
                             
                             <div class="help-tip">
-                                <strong>Image Upload Workaround:</strong> Similar to events, if you have trouble uploading an image when creating a post, save the post first without the image, then edit the post to add the image. This two-step approach works around server processing limitations for file uploads.
+                                <strong>Tip:</strong> Images in the blog editor can be resized by clicking and dragging the corners.
                             </div>
                         </div>
                         
                         <div id="help-featured-videos" class="help-section">
                             <h3>Featured Videos</h3>
-                            <p>The Featured Videos section lets you manage YouTube videos that will be displayed in a carousel on the public site.</p>
+                            <p>The Featured Videos section lets you create a carousel of YouTube videos that will be displayed on the blog/news page.</p>
                             
-                            <h4>Managing Videos</h4>
+                            <h4>Adding Videos</h4>
                             <ol>
                                 <li>Paste a YouTube URL into the input field</li>
-                                <li>Click "Add Video" to add it to the list</li>
-                                <li>Add multiple videos to create a complete carousel</li>
-                                <li>Click "×" next to a video to remove it</li>
+                                <li>Click "Add Video"</li>
+                                <li>Repeat for multiple videos</li>
                                 <li>Click "Save Featured Videos" when finished</li>
                             </ol>
                             
                             <div class="help-tip">
-                                <strong>Supported formats:</strong> The system accepts all YouTube URL formats including standard (youtube.com/watch?v=ID), short URLs (youtu.be/ID), and embed URLs. Videos appear in the order they are added, with most recent additions at the bottom.
+                                <strong>Supported formats:</strong> The system accepts standard YouTube URLs (youtube.com/watch?v=ID), short URLs (youtu.be/ID), and embed URLs.
                             </div>
                         </div>
                          <div id="help-venue" class="help-section">
                             <h3>Venue Management</h3>
-                            <p>The Venue Management section allows you to manage the Farewell Cafe menu and business hours.</p>
+                            <p>The Venue Management section allows you to manage Farewell Cafe's business hours and menu items.</p>
                             
                             <h4>Business Hours</h4>
                             <ol>
                                 <li>Set open/close times for each day of the week</li>
                                 <li>Check the "Closed" box for days when the venue is not open</li>
-                                <li>Add notes for special situations (e.g., "Holiday hours", "Private event")</li>
-                                <li>Click "Save Hours" to update the public website</li>
+                                <li>Add notes if needed (e.g., "Private event")</li>
+                                <li>Click "Save Hours" to update</li>
                             </ol>
                             
                             <h4>Menu Management</h4>
                             <ol>
-                                <li>Click "Add Item" to create new menu items</li>
-                                <li>Fill out required fields: Name, Price, and Category</li>
-                                <li>Add optional descriptions for food/drink items</li>
-                                <li>Click "Save" to add the item to the menu</li>
-                                <li>Use the "Reorder Menu" button to arrange items within categories</li>
+                                <li>Browse existing menu sections (Domestics, Boulevard, Craft/Import, etc.)</li>
+                                <li>Click "Edit" on a section to modify its items</li>
+                                <li>Click "Add Item" to add new beverages or food items</li>
+                                <li>Fill out the name, price, category, and description</li>
+                                <li>Make sure "Active" is checked for items to appear on the public menu</li>
+                                <li>Click "Save" to update the menu</li>
                             </ol>
                             
                             <div class="help-tip">
-                                <strong>Note:</strong> Currently, the system manages a single menu for Farewell Cafe. Menu items must be marked as "Active" to appear on the public website.
+                                <strong>Note:</strong> Menu items must be marked as "Active" to appear on the public menu. The display order determines the sequence items appear in each category.
                             </div>
                         </div>
 
                         <div id="help-troubleshooting" class="help-section">
                             <h3>Troubleshooting</h3>
-                            <p>If you encounter any issues while using the admin dashboard, try these solutions:</p>
+                            <p>If you encounter any issues while using the admin dashboard, try these steps:</p>
                             
-                            <h4>Common Issues and Solutions</h4>
+                            <h4>Common Issues</h4>
                             <ul>
-                                <li>
-                                    <strong>Image Upload Failures:</strong> 
-                                    <ul>
-                                        <li><strong>Recommended workaround:</strong> Always create/save content first without images, then edit to add images.</li>
-                                        <li>Ensure your image is under 5MB and in a supported format (JPG, PNG, GIF, WebP).</li>
-                                        <li>Compress large images before uploading using a tool like TinyPNG or ImageOptim.</li>
-                                        <li>If an upload fails completely, you can always use the URL field to link to an externally hosted image.</li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <strong>Duplicate Events:</strong>
-                                    <ul>
-                                        <li>The "Repair Legacy" button fixes issues with legacy events, including duplicates with "No Image" errors.</li>
-                                        <li>The system prevents creating new events with identical title/date/venue combinations.</li>
-                                        <li>When importing from the legacy system, duplicate detection prevents overwriting existing events.</li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <strong>Changes not appearing on public site:</strong>
-                                    <ul>
-                                        <li>The public site updates every few minutes. Wait 5-10 minutes for changes to appear.</li>
-                                        <li>Try refreshing your browser with Ctrl+F5 (Windows) or Cmd+Shift+R (Mac) to clear cache.</li>
-                                        <li>If changes still don't appear after 10 minutes, contact the support team.</li>
-                                    </ul>
-                                </li>
-                                <li><strong>Session timeout:</strong> If you're logged out unexpectedly, log back in. Admin sessions expire after 8 hours of inactivity.</li>
+                                <li><strong>Changes not appearing:</strong> Try refreshing the page or clearing your browser cache.</li>
+                                <li><strong>Upload errors:</strong> Ensure your image is under 5MB and in a supported format (JPG, PNG).</li>
+                                <li><strong>Login issues:</strong> Try clearing cookies or using a private/incognito browsing window.</li>
+                                <li><strong>Duplicate events:</strong> If you notice duplicate events being created, simply delete the extra one for now. This is a known issue that will be fixed in a future update.</li>
                             </ul>
                             
                             <h4>Get Help</h4>
-                            <p>If you continue to experience issues, please contact the support team:</p>
+                            <p>If you continue to experience issues, please contact support:</p>
                             <p><strong>Email:</strong> <a href="mailto:help_i_broke_the_thing@distorted.work">help_i_broke_the_thing@distorted.work</a></p>
-                            
                             <p>When reporting an issue, please include:</p>
                             <ul>
-                                <li>What specific action you were trying to perform</li>
-                                <li>The exact steps you took before the issue occurred</li>
-                                <li>Any error messages you received (copy/paste exact text)</li>
-                                <li>Screenshots showing the problem (if possible)</li>
-                                <li>Which browser and device you're using</li>
+                                <li>What you were trying to do</li>
+                                <li>What steps you took</li>
+                                <li>What error message you received (if any)</li>
+                                <li>Screenshots if possible</li>
                             </ul>
                         </div>
                     </div>

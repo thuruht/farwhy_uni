@@ -2,31 +2,40 @@
 
 All notable changes to the Farewell/Howdy Unified Project.
 
-## [2.1.2] - July 7, 2025
+## [2.1.2] - July 8, 2025
 
-### 🛠️ Improved Legacy Events Management
+### 📊 Dashboard Enhancements
 
-- **Enhanced Import System**: Significantly improved legacy event import functionality
-  - Modified sync handler to never overwrite existing events 
-  - Added proper duplicate detection to prevent creating identical events
-  - Events with the same title, date and venue will be skipped during import
-  - Added detailed warnings before import to clarify the process
-  - Implemented better error handling with detailed success/failure reporting
-  - Fixed bug that could potentially cause data loss during imports
+- **Recent Activity Display**: Added recent activity section to admin dashboard
+  - Shows the 5 most recent events and blog posts
+  - Displays relative time (e.g., "2 hours ago")
+  - Includes venue and date information for events
+  - Automatically updates when dashboard loads
+  - Improves at-a-glance awareness of site changes
 
-- **Refined Legacy Repair Function**: Improved the repair function for legacy events
-  - Added more robust deduplication to prevent errors with duplicated events
-  - Improved error handling to reduce unnecessary error notifications
-  - Better handling of image URLs from the legacy system
-  - Fixed bug where duplicate "No Image" events would appear in the interface
-  - Better logging to track exactly which fields were repaired
+### 🖼️ Asset Updates
+
+- **Updated Calendar Images**: Refreshed calendar images for both venues
+  - Updated Farewell calendar icon with improved resolution
+  - Updated Howdy calendar icon with improved resolution
+  - Consistent styling between both venue calendar icons
+
+### 🎨 UI Improvements
+
+- **Compact Admin Header**: Streamlined admin interface layout
+  - Merged main-header and admin-header into a single compact design
+  - Improved space utilization in the admin interface
+  - Enhanced navigation with properly updating section indicators
+  - Better organization of title, navigation, and dashboard elements
 
 ## [2.1.1] - July 7, 2025
 
-### 🧹 Code Cleanup
+### 🧹 Project Organization
+
 - **Project Root Cleanup**: Archived numerous outdated documentation files, development artifacts, and old backups into a single `project_archive/` directory to significantly clean up the project root.
 
-### 🎨 UI/UX Fixes
+### 📱 Interface Refinements
+
 - **Inline Events Modal**: Removed redundant "VENUE:" and "SHOW:" text labels from the filter button rows on the index page modal for a cleaner, more readable interface.
 - **Full-Page Events Modal**:
   - Redesigned the `/events.html` page with a simplified, modern, and more intuitive layout.
@@ -50,7 +59,7 @@ All notable changes to the Farewell/Howdy Unified Project.
   - Added support for legacy `imageUrl` field in addition to current `flyer_image_url` field
   - Added missing `event_time` form field to admin interface to properly handle legacy `time` data  
   - Updated JavaScript to populate form fields from both legacy and current field names
-  - Legacy events from https://fygw0.kcmo.xyz/list/farewell and https://fygw0.kcmo.xyz/list/howdy now edit correctly
+  - Legacy events from [https://fygw0.kcmo.xyz/list/farewell](https://fygw0.kcmo.xyz/list/farewell) and [https://fygw0.kcmo.xyz/list/howdy](https://fygw0.kcmo.xyz/list/howdy) now edit correctly
   - All legacy event data (flyer images, event times, descriptions) is now preserved during editing
 - **Event Duplication Bug**: Fixed issue where editing events could create duplicate entries
   - Added form submission protection to prevent multiple submissions
@@ -237,9 +246,9 @@ All notable changes to the Farewell/Howdy Unified Project.
 ### General Maintenance
 
 - **Sessions**: Periodically clear expired session tokens from KV store
-- **Images**: Monitor R2 storage usage  **never delete old photos or flyers - they are destined for the archives - see below**
-- **Database**: never delete old events or flyers - they are archived and a special shows archive for both venues will be created eventually to painstakingly document all past events and allow the public to view and contribute to the archive
- 
+- **Images**: Monitor R2 storage usage and manually clean up unused files as needed; do not automate this process.
+- **Database**: Do not remove any events, flyers, or posts; they should be archived.
+
 ---
 
 ## Known Issues
@@ -250,6 +259,7 @@ All notable changes to the Farewell/Howdy Unified Project.
 - **User Management**: Single admin user model
 - **Caching**: Limited API response caching
 - **File Optimization**: No automatic image compression
+- **Event Duplication**: Occasionally creates duplicate events when adding new events
 
 ### Future Enhancements
 
