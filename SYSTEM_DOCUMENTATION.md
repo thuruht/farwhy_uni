@@ -1,6 +1,6 @@
 # Farewell/Howdy System Documentation
 
-> **Last Updated**: July 8, 2025  
+> **Last Updated**: July 10, 2025  
 > **Version**: 2.1.2  
 
 ## Table of Contents
@@ -220,21 +220,35 @@ The admin interface is a **Single Page Application (SPA)** with:
 - **Modal-based forms** for all CRUD operations
 - **Responsive design** with mobile optimizations
 - **Live data updates** via API calls
+- **Consistent styling** with public site branding via admin-header.css
+
+### Admin Header Styling
+
+The admin interface header uses a consistent visual style with the public site:
+
+- **Chunky font**: Custom "Chunk Five Regular" font face for headings
+- **Text shadow effects**: Consistent dark shadows for depth
+- **Hover animation**: Subtle color shift on hover for interactive elements
+- **Color scheme**: Matches public site branding
+- **Implementation**: Via dedicated admin-header.css stylesheet
 
 ### Key JavaScript Modules
 
 #### admin-unified.js
+
 - **Main admin controller** with section management
 - **Event handlers** for all admin operations
 - **API communication** with error handling
 - **Modal management** and form validation
 
 #### menu-management.js
+
 - **Menu CRUD operations** with drag-and-drop
 - **Category organization** and item reordering
 - **Real-time updates** via API integration
 
 #### featured-videos-manager.js
+
 - **YouTube URL processing** and validation
 - **Video carousel management**
 - **Multi-video support** with thumbnail generation
@@ -347,6 +361,7 @@ try {
 **Files**: `admin.html`, `admin-unified.js`
 
 **Critical Elements**:
+
 - Modal IDs: `#menu-item-modal`, `#form-modal`
 - Container: `#menu-list.menu-container`
 - Buttons: `#add-menu-btn`, `#reorder-menu-btn`

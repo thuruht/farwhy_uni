@@ -1,0 +1,42 @@
+/* admin-header.css */
+/* Styling for the admin header to match the chunky font and text-shadow from the public index */
+
+:root {
+  /* Importing color variables from main CSS */
+  --secondary-bg-color: #D990FF;
+  --nav-border-color: #000000;
+}
+
+/* Apply the chunky font and text-shadow to the admin h1 */
+#main-title {
+  font-family: 'db', sans-serif; /* Using the chunky font from public index */
+  font-size: 2.5rem;
+  color: var(--secondary-bg-color);
+  letter-spacing: 0.002em;
+  font-weight: 300;
+  /* Apply the text-shadow and stroke effect from the public index */
+  -webkit-text-stroke: 1px black;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000,
+    -5px 5px 0px var(--nav-border-color);
+  margin: 0;
+  padding: 10px 0;
+  transition: all 0.3s ease;
+}
+
+/* Add hover effect for a bit of interactivity */
+#main-title:hover {
+  transform: scale(1.02);
+}
+
+/* Ensure the db font is loaded */
+@font-face {
+  font-family: 'db';
+  src: url('../fnt/db.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
