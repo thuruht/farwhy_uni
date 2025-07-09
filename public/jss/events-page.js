@@ -4,6 +4,41 @@
  * Implements a modern, simplified event list and filtering interface
  */
 
+// SAFE DATE PARSING (handles both ISO strings and local dates)
+function parseEventDate(dateString) {
+  // If date is in format "YYYY-MM-DD"
+  if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const parts = dateString.split('-');
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+  // For full ISO strings or other formats
+  const d = new Date(dateString);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+// UNIVERSAL COMPARISON LOGIC
+function isPastEvent(eventDate, referenceDate = new Date()) {
+  const eventDay = parseEventDate(eventDate);
+  const referenceDay = new Date(
+    referenceDate.getFullYear(),
+    referenceDate.getMonth(),
+    referenceDate.getDate()
+  );
+  
+  return eventDay < referenceDay;
+}
+
+function isTodayEvent(eventDate, referenceDate = new Date()) {
+  const eventDay = parseEventDate(eventDate);
+  const referenceDay = new Date(
+    referenceDate.getFullYear(),
+    referenceDate.getMonth(),
+    referenceDate.getDate()
+  );
+  
+  return eventDay.getTime() === referenceDay.getTime();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // DOM elements
     const eventsGrid = document.getElementById('events-grid');
@@ -116,31 +151,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function filterAndRenderEvents() {
-        // Get current date for comparing events
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
         // Filter events based on current settings
         const filteredEvents = events.filter(event => {
             // Filter by venue
             const matchesVenue = event.venue === currentVenue;
             
-            // Filter by date (upcoming or archived)
-            const eventDate = new Date(event.date);
-            eventDate.setHours(0, 0, 0, 0);
+            // DEBUG: Log the raw event date for inspection
+            console.log('Filtering - RAW EVENT DATE:', event.date, 'TYPE:', typeof event.date);
             
-            // Event is upcoming if it's today or in the future
-            // Fix date comparison by explicitly comparing year, month, day
-            const isUpcoming = (
-                eventDate.getFullYear() > today.getFullYear() || 
-                (eventDate.getFullYear() === today.getFullYear() && 
-                 eventDate.getMonth() > today.getMonth()) ||
-                (eventDate.getFullYear() === today.getFullYear() && 
-                 eventDate.getMonth() === today.getMonth() && 
-                 eventDate.getDate() >= today.getDate())
-            );
+            // Use the utility functions for consistent date handling
+            const isPast = isPastEvent(event.date);
+            const isToday = isTodayEvent(event.date);
+            
+            // Event is upcoming if it's NOT past OR it's today
+            const isUpcoming = !isPast || isToday;
+            
             const matchesShowType = (currentShowType === 'upcoming' && isUpcoming) || 
                                   (currentShowType === 'archived' && !isUpcoming);
+            
+            // Debug output
+            console.log(`Filtering ${event.title}: venue=${matchesVenue}, isPast=${isPast}, isToday=${isToday}, isUpcoming=${isUpcoming}, matchesShowType=${matchesShowType}`);
             
             return matchesVenue && matchesShowType;
         });
@@ -189,20 +219,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function createEventCard(event) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // DEBUG: Log the raw event date for inspection
+        console.log('RAW EVENT DATE:', event.date, 'TYPE:', typeof event.date);
         
-        const eventDate = new Date(event.date);
-        eventDate.setHours(0, 0, 0, 0);
+        // Use the utility functions for consistent date handling
+        const isPast = isPastEvent(event.date);
+        const isToday = isTodayEvent(event.date);
         
-        // Simple comparison - if eventDate is earlier than today, it's past
-        const isPastEvent = eventDate < today;
+        // Debug output for thorough diagnosis
+        console.log(`Event: ${event.title}`);
+        console.log('Parsed event date:', parseEventDate(event.date));
+        console.log('Today at midnight:', new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()));
+        console.log('isPast:', isPast, 'isToday:', isToday);
         
-        // Check if it's today by comparing timestamps
-        const isToday = eventDate.getTime() === today.getTime();
-        
-        // Final determination - only past if it's not today
-        const isTrulyPast = isPastEvent && !isToday;
+        // Only mark as past if it's truly past (not today)
+        const isTrulyPast = isPast && !isToday;
         
         // Create card container
         const card = document.createElement('div');

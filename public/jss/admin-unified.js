@@ -11,6 +11,45 @@ let dashboardState = {
 };
 
 // ================================
+// DATE HANDLING UTILITY FUNCTIONS
+// ================================
+
+// SAFE DATE PARSING (handles both ISO strings and local dates)
+function parseEventDate(dateString) {
+  // If date is in format "YYYY-MM-DD"
+  if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    const parts = dateString.split('-');
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+  // For full ISO strings or other formats
+  const d = new Date(dateString);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+
+// UNIVERSAL COMPARISON LOGIC
+function isPastEvent(eventDate, referenceDate = new Date()) {
+  const eventDay = parseEventDate(eventDate);
+  const referenceDay = new Date(
+    referenceDate.getFullYear(),
+    referenceDate.getMonth(),
+    referenceDate.getDate()
+  );
+  
+  return eventDay < referenceDay;
+}
+
+function isTodayEvent(eventDate, referenceDate = new Date()) {
+  const eventDay = parseEventDate(eventDate);
+  const referenceDay = new Date(
+    referenceDate.getFullYear(),
+    referenceDate.getMonth(),
+    referenceDate.getDate()
+  );
+  
+  return eventDay.getTime() === referenceDay.getTime();
+}
+
+// ================================
 // MISSING CRITICAL FUNCTIONS - EMERGENCY FIX
 // ================================
 
@@ -1733,19 +1772,20 @@ function renderEvents(events, setupFilters = true) {
             
             // Only consider an event as "past" after the day is completely over (midnight)
             // Set both dates to midnight for accurate comparison
-            const todayWithoutTime = new Date();
-            todayWithoutTime.setHours(0, 0, 0, 0);
+            // DEBUG: Log the raw event date for inspection
+            console.log('RAW EVENT DATE:', eventDate, 'TYPE:', typeof eventDate);
             
-            const eventDateWithoutTime = new Date(eventDate);
-            eventDateWithoutTime.setHours(0, 0, 0, 0);
+            // Use the utility functions for consistent date handling
+            const isPast = isPastEvent(eventDate);
+            const isToday = isTodayEvent(eventDate);
             
-            // Simple comparison - if eventDate is earlier than today, it's past
-            const isPast = eventDateWithoutTime < todayWithoutTime;
+            // Debug output for thorough diagnosis
+            console.log(`Event: ${ev.title}`);
+            console.log('Parsed event date:', parseEventDate(eventDate));
+            console.log('Today at midnight:', new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()));
+            console.log('isPast:', isPast, 'isToday:', isToday);
             
-            // Check if it's today by comparing timestamps
-            const isToday = eventDateWithoutTime.getTime() === todayWithoutTime.getTime();
-            
-            // Mark as upcoming if it's happening today
+            // Only mark as past if it's truly past (not today)
             const isTrulyPast = isPast && !isToday;
             
             const statusClass = isTrulyPast ? 'event-past' : 'event-upcoming';

@@ -2,6 +2,43 @@
 // Implements the interactive modal that combines event listings and flyers
 
 (function() {
+  // Date utility functions for consistent handling across the application
+  
+  // SAFE DATE PARSING (handles both ISO strings and local dates)
+  function parseEventDate(dateString) {
+    // If date is in format "YYYY-MM-DD"
+    if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const parts = dateString.split('-');
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+    // For full ISO strings or other formats
+    const d = new Date(dateString);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  // UNIVERSAL COMPARISON LOGIC
+  function isPastEvent(eventDate, referenceDate = new Date()) {
+    const eventDay = parseEventDate(eventDate);
+    const referenceDay = new Date(
+      referenceDate.getFullYear(),
+      referenceDate.getMonth(),
+      referenceDate.getDate()
+    );
+    
+    return eventDay < referenceDay;
+  }
+
+  function isTodayEvent(eventDate, referenceDate = new Date()) {
+    const eventDay = parseEventDate(eventDate);
+    const referenceDay = new Date(
+      referenceDate.getFullYear(),
+      referenceDate.getMonth(),
+      referenceDate.getDate()
+    );
+    
+    return eventDay.getTime() === referenceDay.getTime();
+  }
+  
   // DOM references
   let modalOverlay;
   let eventsModal;
@@ -356,21 +393,15 @@
       // Apply date filter (only if not showing archived)
       let matchesDate = true;
       if (!showArchived) {
-        const eventDate = new Date(event.date);
-        eventDate.setHours(0, 0, 0, 0);
+        // Use the utility functions for consistent date handling
+        const isPast = isPastEvent(event.date);
+        const isToday = isTodayEvent(event.date);
         
-        // Fix: Explicitly compare year, month and day instead of relying on Date object comparison
-        matchesDate = (
-          eventDate.getFullYear() > today.getFullYear() || 
-          (eventDate.getFullYear() === today.getFullYear() && 
-           eventDate.getMonth() > today.getMonth()) ||
-          (eventDate.getFullYear() === today.getFullYear() && 
-           eventDate.getMonth() === today.getMonth() && 
-           eventDate.getDate() >= today.getDate())
-        );
+        // Events are upcoming if they're not past OR they're happening today
+        matchesDate = !isPast || isToday;
         
         // Debug output for this specific event
-        console.log(`Event ${event.title} on ${event.date}: ${matchesDate ? 'UPCOMING' : 'PAST'}`);
+        console.log(`Event ${event.title} on ${event.date}: isPast=${isPast}, isToday=${isToday}, matchesDate=${matchesDate}`);
       }
       
       return matchesVenue && matchesDate;
@@ -430,26 +461,21 @@
         eventItem.classList.add('active');
       }
       
-      // Check if the event is in the past - compare dates without considering time
-      const eventDate = new Date(event.date);
-      eventDate.setHours(0, 0, 0, 0);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // DEBUG: Log the raw event date for inspection
+      console.log('RAW EVENT DATE:', event.date, 'TYPE:', typeof event.date);
       
-      // Debug the date comparison
-      console.log(`Comparing dates for ${event.title}: ${eventDate.toISOString()} vs today ${today.toISOString()}`);
+      // Use the utility functions for consistent date handling
+      const isPast = isPastEvent(event.date);
+      const isToday = isTodayEvent(event.date);
       
-      // Simple comparison - if eventDate is earlier than today, it's past
-      const isPastEvent = eventDate < today;
+      // Debug output for thorough diagnosis
+      console.log(`Event: ${event.title}`);
+      console.log('Parsed event date:', parseEventDate(event.date));
+      console.log('Today at midnight:', new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()));
+      console.log('isPast:', isPast, 'isToday:', isToday);
       
-      // Check if it's today by comparing timestamps
-      const isToday = eventDate.getTime() === today.getTime();
-      
-      // Debug comparison results
-      console.log(`Date comparison result: isPastEvent=${isPastEvent}, isToday=${isToday}`);
-      
-      // Only mark as past if it's not today
-      if (isPastEvent && !isToday) {
+      // Only mark as past if it's truly past (not today)
+      if (isPast && !isToday) {
         eventItem.classList.add('past-event');
       }
       
