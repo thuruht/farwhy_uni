@@ -232,6 +232,7 @@ The admin interface is a **Single Page Application (SPA)** with:
 - **Responsive Design**: Navigation scales for mobile with consistent styling
 - **Venue-Context Awareness**: UI elements adapt to current venue state (Farewell/Howdy)
 - **Header Height Standardization**: Fixed height/line-height properties prevent layout shifts when toggling venues
+- **Mobile-Optimized Buttons**: Close and home buttons on events page have increased width and padding to prevent text overflow
 
 #### Calendar Download System
 
@@ -257,6 +258,14 @@ The admin interface is a **Single Page Application (SPA)** with:
 - **Clear Messaging**: "404" with helpful explanation text
 - **Navigation Options**: "TAKE ME HOME" button directs users back to the homepage
 - **Implementation**: Served via Cloudflare Workers for all non-existent routes
+
+#### Blog and Featured Videos Design
+
+- **Simplified Visual Design**: Removed concentric borders in blog posts and featured videos sections
+- **Reduced Shadow Effects**: Lighter shadows for improved visual clarity
+- **Consistent Border Styling**: Eliminated redundant borders from preview containers
+- **Container Hierarchy**: Simplified nesting structure to improve UI readability
+- **Mobile Optimization**: Cleaner display of content on smaller screens
 
 ### Admin Header Styling
 
@@ -468,10 +477,14 @@ This implementation includes:
 
 ## Current System Status
 
-### Recent Updates (July 2025)
+### Recent Updates (July 9, 2025)
 
+- ✅ **Mobile UI Optimization**: Improved button sizing and styling on events page
+- ✅ **UI Consistency**: Fixed header height between Farewell/Howdy states
+- ✅ **Date Comparison**: Fixed issue with events incorrectly marked as past
+- ✅ **Visual Design**: Removed concentric borders in blog and featured videos
 - ✅ **API Consistency**: All frontend/backend endpoints aligned
-- ✅ **Mobile Optimization**: Admin dashboard fully responsive
+- ✅ **Mobile Responsiveness**: Admin dashboard fully responsive
 - ✅ **Menu Management**: Consolidated UI with drag-and-drop
 - ✅ **Image Uploads**: Separate file/URL inputs for all forms
 - ✅ **Featured Videos**: Multi-video carousel support

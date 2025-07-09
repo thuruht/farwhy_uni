@@ -253,7 +253,7 @@ p {
 .header-title .span2 {
   color: var(--secondary-bg-color);
   font-family: 'db';
-  font-size: clamp(3.5rem, 11.3vw, 18.5em); /* Responsive font size relative to .header-title */
+  font-size: clamp(4rem, 12vw, 20em); /* Increased font size for Farewell state */
   letter-spacing: 0.002em;
   font-weight: 300;
   margin-left: 12px; /* Spacing between text and span2 */
@@ -622,7 +622,7 @@ nav ul li { font-size:0.8rem;}
   align-content:center; 
   align-items:center;
   height: auto; /* Override fixed height for mobile */
-  min-height: 0; /* Reset min-height for mobile */
+  min-height: 1.2em; /* Ensure minimum height is maintained - consistent with Howdy */
 }
 
 body.howdy-active .header-title .span2 {
@@ -750,7 +750,7 @@ body.howdy-active .header-title .span2 {
     letter-spacing: 0.00209em;
     color: #ff2b13;
  /*  scale: 1.16 0.8; */
-    font-size: clamp(4.5rem, 13.5vw, 21em); 
+    font-size: clamp(4.3rem, 13vw, 20em); /* Slightly reduced from previous value */
     margin:0 auto;
     margin-left:22px;
     height: 1.3em; /* Matching height with Farewell state to prevent layout shift */

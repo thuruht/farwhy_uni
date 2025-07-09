@@ -6,14 +6,31 @@
   
   // SAFE DATE PARSING (handles both ISO strings and local dates)
   function parseEventDate(dateString) {
-    // If date is in format "YYYY-MM-DD"
-    if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      const parts = dateString.split('-');
-      return new Date(parts[0], parts[1] - 1, parts[2]);
+    if (!dateString) return new Date(0); // Handle null/undefined dates
+    
+    try {
+      // If date is in format "YYYY-MM-DD"
+      if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const parts = dateString.split('-');
+        // Create date with year, month (0-indexed), day
+        // Force integers and properly adjust month (0-indexed in JS)
+        return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      }
+      
+      // For full ISO strings or other formats
+      const d = new Date(dateString);
+      // Check if date is valid
+      if (isNaN(d.getTime())) {
+        console.error("Invalid date format:", dateString);
+        return new Date(0);
+      }
+      
+      // Create new date with just the date part (no time)
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    } catch (error) {
+      console.error("Error parsing date:", dateString, error);
+      return new Date(0);
     }
-    // For full ISO strings or other formats
-    const d = new Date(dateString);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
   }
 
   // UNIVERSAL COMPARISON LOGIC
@@ -25,7 +42,10 @@
       referenceDate.getDate()
     );
     
-    return eventDay < referenceDay;
+    const result = eventDay < referenceDay;
+    console.log(`isPastEvent comparison: ${eventDate} => ${eventDay.toISOString().slice(0,10)} < ${referenceDay.toISOString().slice(0,10)} = ${result}`);
+    
+    return result;
   }
 
   function isTodayEvent(eventDate, referenceDate = new Date()) {
@@ -36,7 +56,10 @@
       referenceDate.getDate()
     );
     
-    return eventDay.getTime() === referenceDay.getTime();
+    const result = eventDay.getTime() === referenceDay.getTime();
+    console.log(`isTodayEvent comparison: ${eventDate} => ${eventDay.toISOString().slice(0,10)} === ${referenceDay.toISOString().slice(0,10)} = ${result}`);
+    
+    return result;
   }
   
   // DOM references
@@ -500,7 +523,7 @@
       dateContainer.appendChild(date);
       
       // Add past event indicator if needed
-      if (isPastEvent && !isToday) {
+      if (isPast && !isToday) {
         const pastIndicator = document.createElement('span');
         pastIndicator.className = 'past-indicator';
         pastIndicator.textContent = '(past)';
@@ -701,7 +724,7 @@
       // Check for date format like '2025-06-20' (YYYY-MM-DD)
       if (dateString.length === 10 && dateString.includes('-')) {
         // Handle as UTC date to prevent timezone offset issues
-        const [year, month, day] = dateString.split('-').map(Number);
+        const [year, month, day] = dateString.split('-').map(num => parseInt(num, 10));
         
         // Create a date with time 12:00 noon to avoid any date shifting due to timezone
         const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
@@ -709,7 +732,7 @@
         // Format: "Fri, Jun 20" format
         const options = { weekday: 'short', month: 'short', day: 'numeric' };
         const formattedDate = date.toLocaleDateString('en-US', options);
-        console.log(`Formatting date: ${dateString} => ${formattedDate} (UTC corrected)`);
+        console.log(`Formatting date: ${dateString} => ${formattedDate} (UTC corrected) [${year}-${month}-${day}]`);
         return formattedDate;
       }
       

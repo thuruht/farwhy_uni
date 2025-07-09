@@ -18,13 +18,13 @@
     border: 1px solid var(--nav-border-color);
     border-radius: 8px;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: none;
 }
 
 .preview-container {
     margin-top: 15px;
     min-height: 200px;
-    border: 1px dashed var(--nav-border-color);
+    border: none;
     padding: 10px;
     border-radius: 4px;
     background: rgba(0, 0, 0, 0.02);
@@ -44,7 +44,7 @@
     display: flex;
     align-items: center;
     padding: 10px;
-    border: 1px solid var(--nav-border-color);
+    border: none;
     border-radius: 4px;
     margin-bottom: 8px;
     background: rgba(255, 255, 255, 0.8);

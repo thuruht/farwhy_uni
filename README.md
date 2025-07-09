@@ -111,7 +111,13 @@ npx wrangler deploy
 🔒 **Secure** - JWT authentication with protected admin routes  
 📚 **Well Documented** - Comprehensive technical documentation  
 
-### Recent Updates (July 2025)
+### Recent Updates (July 9, 2025)
+
+- Mobile UI improvements for better usability:
+  - Fixed event page button sizing and text overflow
+  - Improved header height consistency between venue states
+  - Fixed date comparison logic for events display
+  - Removed concentric borders in blog and video sections
 - Complete API consistency verification and fixes
 - Mobile-responsive admin dashboard redesign  
 - Consolidated documentation (reduced from 27 to 5 files)
@@ -119,7 +125,6 @@ npx wrangler deploy
 - Multi-video featured content carousel
 - Improved events modal with archive toggle and pagination
 - Added GSAP library for smooth menu animations
-- Fixed date comparison logic for consistent event displays
 
 > **Historical Documentation**: Files in `ye_olde_docs/` are archived and may be outdated.
 

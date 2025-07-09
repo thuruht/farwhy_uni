@@ -6,14 +6,30 @@
 
 // SAFE DATE PARSING (handles both ISO strings and local dates)
 function parseEventDate(dateString) {
-  // If date is in format "YYYY-MM-DD"
-  if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    const parts = dateString.split('-');
-    return new Date(parts[0], parts[1] - 1, parts[2]);
+  if (!dateString) return new Date(0); // Handle null/undefined dates
+  
+  try {
+    // If date is in format "YYYY-MM-DD"
+    if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const parts = dateString.split('-');
+      // Create date with year, month (0-indexed), day
+      return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    }
+    
+    // For full ISO strings or other formats
+    const d = new Date(dateString);
+    // Check if date is valid
+    if (isNaN(d.getTime())) {
+      console.error("Invalid date format:", dateString);
+      return new Date(0);
+    }
+    
+    // Create new date with just the date part (no time)
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  } catch (error) {
+    console.error("Error parsing date:", dateString, error);
+    return new Date(0);
   }
-  // For full ISO strings or other formats
-  const d = new Date(dateString);
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
 // UNIVERSAL COMPARISON LOGIC

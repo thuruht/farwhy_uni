@@ -132,7 +132,7 @@
             line-height: 1.5;
             font-weight: normal;
             transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
-            width: 120px;
+            width: 150px; /* Increased width to fit text properly */
         }
         
         .close-nav ul li:hover {
@@ -362,15 +362,22 @@
             
             /* Better close/home buttons for small screens */
             .close-nav ul {
-                width: 80%; /* Wider to fit the text better */
+                width: 95%; /* Increased width to fit the text fully */
             }
             
             .close-nav ul li {
-                padding: 8px 10px; /* Smaller padding */
+                padding: 8px 12px; /* Slightly increased padding */
+                width: 100%; /* Full width */
+                min-width: 150px; /* Increased minimum width to fit text better */
             }
             
             .close-nav ul li a {
-                font-size: 0.9rem; /* Even smaller font */
+                font-size: 0.9rem; /* Slightly smaller font */
+                white-space: nowrap; /* Prevent text wrapping */
+                overflow: hidden; /* Hide any overflow */
+                text-overflow: ellipsis; /* Add ellipsis for overflow */
+                display: block; /* Ensure link takes full width */
+                width: 100%; /* Full width */
             }
         }
         
@@ -390,15 +397,22 @@
             }
             
             .close-nav ul {
-                width: 95%; /* Almost full width for better spacing */
+                width: 100%; /* Full width for very small screens */
+                box-sizing: border-box; /* Include padding in width calculation */
             }
             
             .close-nav ul li {
-                padding: 6px 8px; /* Minimal padding */
+                padding: 8px 12px; /* Slightly increased padding */
+                width: 100%; /* Full width */
+                min-width: 0; /* Remove min-width for very small screens */
+                box-sizing: border-box; /* Include padding in width calculation */
             }
             
             .close-nav ul li a {
-                font-size: 0.85rem; /* Smallest possible readable size */
+                font-size: 0.9rem; /* Keep slightly larger font for readability */
+                white-space: nowrap; /* Prevent text wrapping */
+                display: block; /* Ensure link takes full width */
+                width: 100%; /* Full width */
             }
             
             .events-title {
@@ -435,12 +449,13 @@
             
             .close-nav ul {
                 flex-direction: column;
-                width: 50%;
+                width: 60%; /* Increased width to better fit text */
                 margin: 0 auto;
             }
             
             .close-nav ul li {
                 width: 100%;
+                min-width: 150px; /* Ensure minimum width for text */
             }
             
             .close-nav ul li a {
@@ -523,14 +538,31 @@
         
         // SAFE DATE PARSING (handles both ISO strings and local dates)
         function parseEventDate(dateString) {
-          // If date is in format "YYYY-MM-DD"
-          if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-            const parts = dateString.split('-');
-            return new Date(parts[0], parts[1] - 1, parts[2]);
+          if (!dateString) return new Date(0); // Handle null/undefined dates
+          
+          try {
+            // If date is in format "YYYY-MM-DD"
+            if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+              const parts = dateString.split('-');
+              // Create date with year, month (0-indexed), day
+              // Force integers and properly adjust month (0-indexed in JS)
+              return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            }
+            
+            // For full ISO strings or other formats
+            const d = new Date(dateString);
+            // Check if date is valid
+            if (isNaN(d.getTime())) {
+              console.error("Invalid date format:", dateString);
+              return new Date(0);
+            }
+            
+            // Create new date with just the date part (no time)
+            return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+          } catch (error) {
+            console.error("Error parsing date:", dateString, error);
+            return new Date(0);
           }
-          // For full ISO strings or other formats
-          const d = new Date(dateString);
-          return new Date(d.getFullYear(), d.getMonth(), d.getDate());
         }
 
         // UNIVERSAL COMPARISON LOGIC
@@ -542,7 +574,10 @@
             referenceDate.getDate()
           );
           
-          return eventDay < referenceDay;
+          const result = eventDay < referenceDay;
+          console.log(`isPastEvent comparison: ${eventDate} => ${eventDay.toISOString().slice(0,10)} < ${referenceDay.toISOString().slice(0,10)} = ${result}`);
+          
+          return result;
         }
 
         function isTodayEvent(eventDate, referenceDate = new Date()) {
@@ -553,7 +588,10 @@
             referenceDate.getDate()
           );
           
-          return eventDay.getTime() === referenceDay.getTime();
+          const result = eventDay.getTime() === referenceDay.getTime();
+          console.log(`isTodayEvent comparison: ${eventDate} => ${eventDay.toISOString().slice(0,10)} === ${referenceDay.toISOString().slice(0,10)} = ${result}`);
+          
+          return result;
         }
         
         // Close function for popup window
