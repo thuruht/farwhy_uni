@@ -10,6 +10,7 @@ export interface Env {
   ADMIN_PASSWORD_HASH: string;
   JWT_SECRET: string;
   MIGRATION_SECRET?: string; // Secret for database migrations
+  PASSWORD_SALT?: string; // Salt for password hashing
 }
 
 export interface User {

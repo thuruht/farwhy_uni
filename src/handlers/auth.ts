@@ -76,7 +76,17 @@ function generateSessionToken(): string {
 }
 
 async function hashPassword(password: string, salt?: string): Promise<string> {
-  console.log(`[AUTH] Hashing password with salt: ${salt || 'default-salt'}`);
+  // Priority order for salt:
+  // 1. Explicitly provided salt parameter
+  // 2. Environment variable PASSWORD_SALT
+  // 3. Default salt (for backward compatibility)
+  const useSalt = salt || 
+                  (typeof self !== 'undefined' && 'PASSWORD_SALT' in self ? 
+                    (self as any).PASSWORD_SALT : 'default-salt');
+  
+  // Log without revealing the actual salt
+  console.log(`[AUTH] Hashing password with ${salt ? 'provided' : 
+    (useSalt !== 'default-salt' ? 'environment' : 'default')} salt`);
   
   // Hard-coded password for development/emergency access
   // This is a fallback mechanism in case the regular authentication fails
@@ -86,7 +96,7 @@ async function hashPassword(password: string, salt?: string): Promise<string> {
   }
   
   const encoder = new TextEncoder();
-  const data = encoder.encode(password + (salt || 'default-salt'));
+  const data = encoder.encode(password + useSalt);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');

@@ -4,6 +4,33 @@ All notable changes to the Farewell/Howdy Unified Project.
 
 ## [2.1.2] - July 8, 2025
 
+### 🛡️ Security Improvements
+
+- **Password Salt Management**: Enhanced authentication security
+  - Added secure salt management with environment variable support
+  - Created `generate-password-salt.js` script for generating and configuring secure salts
+  - Improved password hashing with fallback compatibility
+  - Maintained backward compatibility with existing password hashes
+  - Preserved emergency access functionality
+
+### 🔧 Project Infrastructure
+
+- **Script Organization**: Standardized and improved project scripts
+  - Moved all utility scripts to `scripts/` directory
+  - Improved `commit-changes.sh` with better documentation and flexibility
+  - Created standardized `archive-legacy.sh` script with dry-run option
+  - Added simplified `deploy.sh` script for streamlined deployment
+  - Made all scripts more modular and reusable
+
+### 🗄️ Legacy Code Archival
+
+- **Obsolete Code Cleanup**: Moved all legacy code to project_archive directory
+  - Archived ye_olde_docs/ and ye_olde_src/ directories
+  - Moved unused src/wot/ directory with obsolete handlers
+  - Relocated crap_unused_old/ directory containing deprecated JS
+  - Updated .gitignore to exclude all archived content
+  - Created move_to_archive.sh script for consistent archiving process
+
 ### 📊 Dashboard Enhancements
 
 - **Recent Activity Display**: Added recent activity section to admin dashboard
@@ -255,7 +282,7 @@ All notable changes to the Farewell/Howdy Unified Project.
 
 ### Current Limitations
 
-- **Single Menu**: Only supports Farewell menu (Howdy placeholder message)
+- **Single Menu**: Only supports Farewell menu (Howdy does not need a menu)
 - **User Management**: Single admin user model
 - **Caching**: Limited API response caching
 - **File Optimization**: No automatic image compression
