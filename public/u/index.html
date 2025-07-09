@@ -34,6 +34,10 @@
   <script src="./news.js"></script>
   <script>
     // Auto-resize iframe communication script
+    // Track content and image loading
+    let contentLoaded = false;
+    let imagesLoaded = false;
+    
     function reportHeight() {
       try {
         // Calculate the total content height
@@ -61,38 +65,111 @@
       }
     }
     
+    // Check if all images have loaded
+    function checkImagesLoaded() {
+      const images = document.querySelectorAll('img');
+      let loadedCount = 0;
+      
+      if (images.length === 0) {
+        imagesLoaded = true;
+        finalResize();
+        return;
+      }
+      
+      images.forEach(img => {
+        if (img.complete) {
+          loadedCount++;
+        } else {
+          img.addEventListener('load', () => {
+            loadedCount++;
+            if (loadedCount === images.length) {
+              console.log('All images loaded');
+              imagesLoaded = true;
+              finalResize();
+            }
+          });
+          
+          // Handle broken images
+          img.addEventListener('error', () => {
+            loadedCount++;
+            if (loadedCount === images.length) {
+              console.log('All images loaded (some with errors)');
+              imagesLoaded = true;
+              finalResize();
+            }
+          });
+        }
+      });
+      
+      // If all images are already loaded
+      if (loadedCount === images.length) {
+        console.log('All images were already loaded');
+        imagesLoaded = true;
+        finalResize();
+      }
+    }
+    
+    // Final resize once everything is loaded
+    function finalResize() {
+      if (contentLoaded && imagesLoaded) {
+        console.log('Content and images all loaded, sending final height');
+        reportHeight();
+        
+        // Also listen for window resize events
+        window.addEventListener('resize', debounce(reportHeight, 250));
+      }
+    }
+    
+    // Debounce helper function
+    function debounce(func, wait) {
+      let timeout;
+      return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+      };
+    }
+    
     // Listen for height requests from parent
     window.addEventListener('message', function(event) {
       if (event.data && event.data.type === 'getHeight') {
-        reportHeight();
+        if (contentLoaded && imagesLoaded) {
+          reportHeight();
+        } else {
+          console.log('Height requested but content not fully loaded yet');
+        }
       }
     });
     
-    // Report height when content loads
+    // Report height when DOM content loads
     document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(reportHeight, 100);
+      console.log('DOM content loaded');
+      contentLoaded = true;
+      checkImagesLoaded();
     });
     
-    // Report height when window loads
+    // Report height when window loads (all resources)
     window.addEventListener('load', function() {
-      setTimeout(reportHeight, 100);
+      console.log('Window fully loaded');
+      contentLoaded = true;
+      imagesLoaded = true;
+      finalResize();
     });
     
-    // Report height when content changes
-    const observer = new MutationObserver(function() {
-      // Debounce the height reporting
-      clearTimeout(window._heightReportTimeout);
-      window._heightReportTimeout = setTimeout(reportHeight, 250);
-    });
+    // Track dynamic content changes
+    const observer = new MutationObserver(debounce(function() {
+      if (contentLoaded && imagesLoaded) {
+        console.log('Content changed, updating height');
+        reportHeight();
+      }
+    }, 250));
     
     observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true
     });
-    
-    // Also report height periodically for dynamic content
-    setInterval(reportHeight, 2000);
   </script>
 </body>
 </html>

@@ -450,7 +450,15 @@
          eventDate.getDate() < today.getDate())
       );
       
-      if (isPastEvent) {
+      // Check if this event is happening today
+      const isToday = (
+        eventDate.getFullYear() === today.getFullYear() &&
+        eventDate.getMonth() === today.getMonth() &&
+        eventDate.getDate() === today.getDate()
+      );
+      
+      // Only mark as past if it's not today
+      if (isPastEvent && !isToday) {
         eventItem.classList.add('past-event');
       }
       
@@ -475,7 +483,7 @@
       dateContainer.appendChild(date);
       
       // Add past event indicator if needed
-      if (isPastEvent) {
+      if (isPastEvent && !isToday) {
         const pastIndicator = document.createElement('span');
         pastIndicator.className = 'past-indicator';
         pastIndicator.textContent = '(past)';

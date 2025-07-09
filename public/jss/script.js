@@ -782,15 +782,23 @@ function onIframeLoad(iframe) {
   // Initial resize
   resizeIframe();
   
-  // Retry resize after a short delay to account for dynamic content loading
-  setTimeout(resizeIframe, 500);
+  // Retry resize once after a short delay to account for dynamic content loading
+  // Reduced number of resize attempts to avoid infinite loop
   setTimeout(resizeIframe, 1000);
-  setTimeout(resizeIframe, 2000);
 }
 
 // Listen for messages from iframes (for cross-origin height communication)
+// Add rate limiting to prevent endless resizing loops
+let lastResizeTime = 0;
 window.addEventListener('message', function(event) {
   if (event.data && event.data.type === 'setHeight' && typeof event.data.height === 'number') {
+    // Rate limit to at most once per second
+    const now = Date.now();
+    if (now - lastResizeTime < 1000) {
+      return; // Ignore rapid successive resize requests
+    }
+    lastResizeTime = now;
+    
     // Find the iframe that sent this message
     const iframes = document.querySelectorAll('iframe');
     for (let iframe of iframes) {

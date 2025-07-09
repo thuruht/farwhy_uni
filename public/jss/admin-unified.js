@@ -1746,8 +1746,18 @@ function renderEvents(events, setupFilters = true) {
                  eventDateWithoutTime.getDate() < todayWithoutTime.getDate())
             );
             
-            const statusClass = isPast ? 'event-past' : 'event-upcoming';
-            const statusText = isPast ? 'Past' : 'Upcoming';
+            // Check if event is happening today
+            const isToday = (
+                eventDateWithoutTime.getFullYear() === todayWithoutTime.getFullYear() &&
+                eventDateWithoutTime.getMonth() === todayWithoutTime.getMonth() &&
+                eventDateWithoutTime.getDate() === todayWithoutTime.getDate()
+            );
+            
+            // Mark as upcoming if it's happening today
+            const isTrulyPast = isPast && !isToday;
+            
+            const statusClass = isTrulyPast ? 'event-past' : 'event-upcoming';
+            const statusText = isTrulyPast ? 'Past' : 'Upcoming';
             
             return `<tr class="event-row venue-${ev.venue || 'unknown'}">
                 <td class="thumbnail-cell" style="width: 80px; vertical-align: middle; text-align: center;">

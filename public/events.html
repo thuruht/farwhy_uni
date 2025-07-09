@@ -477,6 +477,7 @@
                     const eventDate = new Date(event.date);
                     eventDate.setHours(0, 0, 0, 0);
                     
+                    // Ensure comparison treats same-day events as upcoming
                     const isUpcoming = eventDate >= today;
                     const matchesDate = showArchived ? true : isUpcoming;
                     
@@ -520,7 +521,8 @@
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
                     
-                    // Fix date comparison by explicitly comparing year, month, day
+                    // Fix date comparison for events happening today (July 9, 2025)
+                    // Events on today's date should NOT be marked as past
                     const isPast = (
                         eventDate.getFullYear() < today.getFullYear() || 
                         (eventDate.getFullYear() === today.getFullYear() && 
@@ -530,7 +532,20 @@
                          eventDate.getDate() < today.getDate())
                     );
                     
-                    if (isPast) {
+                    // Check for today's date and override the isPast flag
+                    const isToday = (
+                        eventDate.getFullYear() === today.getFullYear() &&
+                        eventDate.getMonth() === today.getMonth() &&
+                        eventDate.getDate() === today.getDate()
+                    );
+                    
+                    const isTrulyPast = isPast && !isToday;
+                    
+                    // Debug log to check date comparison
+                    console.log(`Event: ${event.title}, Date: ${event.date}, Today: ${today.toISOString().split('T')[0]}, isToday: ${isToday}, isPast: ${isTrulyPast}`);
+                    
+                    // Only mark as past if it's truly past (not today)
+                    if (isTrulyPast) {
                         eventCard.classList.add('past-event');
                     }
                     
