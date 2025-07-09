@@ -1,7 +1,7 @@
 # Farewell/Howdy System Documentation
 
-> **Last Updated**: July 16, 2025  
-> **Version**: 2.1.10  
+> **Last Updated**: July 9, 2025  
+> **Version**: 2.1.9  
 
 ## Table of Contents
 
@@ -32,13 +32,11 @@ The Farewell/Howdy Unified Project is a comprehensive content management system 
 ### Key Capabilities
 
 - **Event Management**: Create, edit, and display events for both venues
-- **Calendar Integration**: ICS calendar downloads for events with tooltips
 - **Blog System**: Rich text blog posts with image uploads and featured content
 - **Menu Management**: Dynamic menu system with categories and pricing
 - **Business Hours**: Venue-specific hours management
 - **Featured Videos**: YouTube video carousel system
 - **Image Handling**: Secure R2-based image storage with automatic optimization
-- **Responsive Design**: Mobile-optimized layouts for all user interfaces
 
 ---
 
@@ -64,21 +62,16 @@ src/
 
 ### Frontend Structure
 
-```bash
+```
 public/
 ├── admin.html           # Admin dashboard (SPA)
 ├── index.html           # Public homepage
-├── events.html          # Events listing page
 ├── jss/                 # JavaScript modules
 │   ├── admin-unified.js # Main admin functionality
 │   ├── menu-management.js # Menu CRUD operations
 │   ├── featured-videos-manager.js # Video management
-│   ├── events-modal-calendar.js # Calendar integration
-│   ├── ifrevl.js       # Calendar URL handlers
 │   └── script.js        # Public site functionality
-├── css/                 # Stylesheets (responsive design)
-│   ├── events-modal.css # Modal styling for events
-│   └── events-calendar-button.css # Calendar button styling
+└── css/                 # Stylesheets (responsive design)
 ```
 
 ---
@@ -101,9 +94,6 @@ public/
 - **Admin filtering and search** capabilities
 - **Consistent date comparison** for past/upcoming events
 - **Events modal** with archive toggle and pagination support
-- **Calendar downloads** with .ics file generation for venue-specific events
-- **Streamlined UI controls** with consolidated past/upcoming events filtering
-- **Mobile responsive layout** with optimized close buttons and font sizes
 
 ### Blog System
 
@@ -234,6 +224,40 @@ The admin interface is a **Single Page Application (SPA)** with:
 - **Live data updates** via API calls
 - **Consistent styling** with public site branding via admin-header.css
 
+### Public Site UI Components
+
+#### Navigation System
+
+- **Standardized Labels**: All pages use consistent "BOOK" navigation label
+- **Responsive Design**: Navigation scales for mobile with consistent styling
+- **Venue-Context Awareness**: UI elements adapt to current venue state (Farewell/Howdy)
+- **Header Height Standardization**: Fixed height/line-height properties prevent layout shifts when toggling venues
+
+#### Calendar Download System
+
+- **Context-Aware Downloads**: Calendar downloads adapt based on the current page context
+  - On events.html: "DOWNLOAD ALL EVENTS" for all venues regardless of current state
+  - On venue-specific pages: "DOWNLOAD VENUE CALENDAR" for current venue only
+- **Intelligent File Naming**: Generated .ics files include venue name and date (e.g., "Farewell_Events_20250713.ics")
+- **Implementation**: Uses ics-generator.js to detect current page and venue state
+
+#### Calendar Downloads
+
+- **Context-aware Downloads**: 
+  - "DOWNLOAD VENUE CALENDAR" on venue-specific pages
+  - "DOWNLOAD ALL EVENTS" on the events.html page
+- **Dual Script System**:
+  - `ics-generator.js`: Handles bulk venue/all-events calendar downloads
+  - `events-modal-calendar.js`: Handles single event calendar downloads from event modals
+- **User Experience**: Clear tooltips explain calendar functionality
+
+#### Custom 404 Page
+
+- **Branded Error Page**: Maintains site design language with the Farewell/Howdy header
+- **Clear Messaging**: "404" with helpful explanation text
+- **Navigation Options**: "TAKE ME HOME" button directs users back to the homepage
+- **Implementation**: Served via Cloudflare Workers for all non-existent routes
+
 ### Admin Header Styling
 
 The admin interface header uses a consistent visual style with the public site:
@@ -252,7 +276,6 @@ The admin interface header uses a consistent visual style with the public site:
 - **Event handlers** for all admin operations
 - **API communication** with error handling
 - **Modal management** and form validation
-- **Date comparison** for accurate past/upcoming event handling
 
 #### events-modal.js
 
@@ -261,18 +284,6 @@ The admin interface header uses a consistent visual style with the public site:
 - **Date comparison logic** for past/upcoming classification
 - **Pagination support** with configurable limits
 - **Responsive design** with mobile optimization
-
-#### events-modal-calendar.js
-
-- **ICS file generation** for single events
-- **Calendar download buttons** with tooltips
-- **Integrated with event modals** for seamless user experience
-
-#### ifrevl.js
-
-- **Calendar URL generation** for venue-specific events
-- **Link updating** for bulk calendar downloads
-- **Cross-page compatibility** with unified calendar handling
 
 #### menu-management.js
 
@@ -365,6 +376,44 @@ try {
 }
 ```
 
+### 404 Error Handling
+
+The application implements a custom 404 error page for non-existent routes:
+
+```typescript
+// For unknown routes, serve custom 404 page
+app.get('*', async (c) => {
+  const url = new URL(c.req.url);
+  
+  // Try to serve static assets first
+  try {
+    const assetResponse = await c.env.ASSETS.fetch(c.req.raw);
+    if (assetResponse.status === 200) {
+      return assetResponse;
+    }
+  } catch (e) {
+    // Not a static file, continue to 404 handling
+  }
+  
+  // API routes return JSON 404
+  if (url.pathname.startsWith('/api/')) {
+    return c.json({ success: false, error: 'API endpoint not found' }, 404);
+  }
+  
+  // All other routes serve the custom 404.html page
+  return c.env.ASSETS.fetch(new Request(new URL('/404.html', c.req.url)));
+});
+```
+
+This implementation includes:
+
+- **Content-Type Specific Responses**: Returns appropriate format based on request type:
+  - JSON responses for API routes (`/api/*`)
+  - HTML 404 page for web requests
+- **Custom 404.html Page**: Branded error page that maintains site navigation
+- **Improved User Experience**: Users can easily navigate back to main site from error page
+- **SEO Benefits**: Proper 404 status code helps search engines understand page status
+
 ---
 
 ## Critical System Components
@@ -421,10 +470,8 @@ try {
 
 ### Recent Updates (July 2025)
 
-- ✅ **Calendar Integration**: Complete calendar downloads for events with ICS file generation
-- ✅ **Date Comparison Fix**: Consistent past/upcoming event classification across all interfaces
-- ✅ **Mobile Optimization**: Improved modal display with responsive buttons and text sizing
 - ✅ **API Consistency**: All frontend/backend endpoints aligned
+- ✅ **Mobile Optimization**: Admin dashboard fully responsive
 - ✅ **Menu Management**: Consolidated UI with drag-and-drop
 - ✅ **Image Uploads**: Separate file/URL inputs for all forms
 - ✅ **Featured Videos**: Multi-video carousel support
@@ -470,4 +517,4 @@ npx wrangler deploy       # Deploy to Cloudflare Workers
 
 ---
 
-*This documentation reflects the current system state as of July 16, 2025. For the most up-to-date API reference, see `API_REFERENCE.md`.*
+*This documentation reflects the current system state as of July 9, 2025. For the most up-to-date API reference, see `API_REFERENCE.md`.*

@@ -47,7 +47,47 @@ The "ADD TO CALENDAR" button allows users to download a single event they're cur
 
 For detailed information about these updates, please refer to the [CHANGELOG.md](CHANGELOG.md) file.
 
-Last updated: July 15, 2025
+Last updated: July 9, 2025
+
+## UI Consistency Improvements
+
+Several UI consistency improvements have been implemented to create a more unified experience across the site:
+
+### Header Layout Standardization
+
+- Fixed inconsistent header height between Farewell/Howdy states
+- Added fixed height and line-height to header title elements
+- Ensured consistent dimensions when toggling between venues
+- Maintained mobile responsiveness with appropriate sizing
+
+### Navigation Consistency
+
+- Standardized all navigation labels to use "BOOK" instead of "BOOKING"
+- Ensures navigation labels match across all pages (index.html, about.htm, more.htm, etc.)
+- Better fits mobile layouts while maintaining consistent branding
+
+### Context-Aware Calendar Downloads
+
+- Enhanced calendar download functionality to be context-aware:
+  - On venue-specific pages: Downloads only events for the current venue
+  - On events.html: Downloads all events regardless of venue
+- Clear labeling indicates what's being downloaded (venue-specific vs. all events)
+- Implemented through the ics-generator.js script
+
+## Error Handling
+
+### Custom 404 Page Implementation
+
+The website now features enhanced error handling with a custom 404 page:
+
+- **Consistent Branding**: Error page maintains site navigation and styling
+- **Improved User Experience**: Users can easily navigate back to main content
+- **Content-Type Awareness**: Serves appropriate response format based on request type
+  - JSON responses for API requests
+  - HTML 404 page for web page requests
+- **Implementation**: Cloudflare Workers catch-all route serves 404.html for unknown paths
+
+For technical implementation details, refer to the [SYSTEM_DOCUMENTATION.md](SYSTEM_DOCUMENTATION.md) file.
 
 ## System Features
 
@@ -75,4 +115,4 @@ All documentation files have been updated to reflect the recent changes to the s
 
 ---
 
-Last updated: July 15, 2025
+Last updated: July 9, 2025

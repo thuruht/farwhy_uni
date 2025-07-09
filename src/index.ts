@@ -590,19 +590,43 @@ app.get('/archives', (c) => handleEvents(c, 'archives', { venue: c.req.query('ty
 // --- Final catch-all route for serving the SPA and static assets ---
 app.get('*', async (c) => {
     const host = c.req.header('host') || '';
+    const url = new URL(c.req.url);
+    
     try {
         // First, try to serve a static asset (CSS, JS, fonts, images)
-        return await c.env.ASSETS.fetch(c.req.raw);
+        const assetResponse = await c.env.ASSETS.fetch(c.req.raw);
+        
+        // If the asset exists, return it
+        if (assetResponse.status === 200) {
+            return assetResponse;
+        }
+        
+        // If the asset is not found, continue to custom handling
     } catch (e) {
         // Not a static file, fall through to serve the HTML shell.
     }
 
+    // Admin subdomain handling
     if (host.startsWith('admin.')) {
         return c.env.ASSETS.fetch(new Request(new URL('/admin.html', c.req.url)));
     }
-
-    // Fallback for public site
-    return c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
+    
+    // For API routes that don't exist, return a JSON 404
+    if (url.pathname.startsWith('/api/')) {
+        return c.json({ 
+            success: false, 
+            error: 'API endpoint not found'
+        }, 404);
+    }
+    
+    // For known routes, return the appropriate page
+    if (['/index.html', '/', '/about.htm', '/more.htm', '/booking.htm', 
+         '/thrift.html', '/events.html', '/login.html'].includes(url.pathname)) {
+        return c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
+    }
+    
+    // For unknown routes, serve custom 404 page
+    return c.env.ASSETS.fetch(new Request(new URL('/404.html', c.req.url)));
 });
 
 export default app;

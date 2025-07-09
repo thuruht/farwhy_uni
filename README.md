@@ -16,8 +16,6 @@ This project contains the admin dashboard and APIs for managing events, blog pos
   - Auto-population of venue-specific defaults
   - Modal-based events display with archive toggle
   - Consistent date comparison for past/upcoming events
-  - Calendar downloads with ICS file generation
-  - Mobile-optimized event modals
 - Blog post management with rich text editor
   - Create and edit blog posts with WYSIWYG editor
   - Upload and embed images directly in blog posts
@@ -114,11 +112,8 @@ npx wrangler deploy
 📚 **Well Documented** - Comprehensive technical documentation  
 
 ### Recent Updates (July 2025)
-
-- Streamlined UI controls for past/upcoming events filtering
-- Enhanced calendar download with clearer venue-specific labeling
 - Complete API consistency verification and fixes
-- Mobile-responsive admin dashboard and events page redesign
+- Mobile-responsive admin dashboard redesign  
 - Consolidated documentation (reduced from 27 to 5 files)
 - Enhanced menu management system with drag-and-drop
 - Multi-video featured content carousel

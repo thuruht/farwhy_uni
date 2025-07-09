@@ -2,40 +2,47 @@
 
 All notable changes to the Farewell/Howdy Unified Project.
 
-## [2.1.10] - July 16, 2025
+## [2.1.9] - July 9, 2025
 
-### 🧹 UI Improvements
+### 🖌️ UI Consistency Improvements
 
-- **Streamlined Event Controls**: Enhanced usability in homepage slideshow area
-  - Removed redundant "show past events"/"hide past events" toggle link
-  - Made dropdown selector the primary control for filtering past/upcoming events
-  - Clarified calendar download link to specify it's venue-specific
-  - Improved UI consistency by removing duplicate controls
-  - Better tooltip text explains the calendar download functionality
-  - Changed "BOOKING" to "BOOK" in navigation for better fit on mobile
-  - Reduced navigation padding to prevent overflow on narrow screens
+- **Header Layout Enhancement**: Fixed inconsistent header height between Farewell/Howdy states
+  - Added fixed height and line-height to header title elements in global CSS
+  - Ensured consistent header dimensions when toggling between venues
+  - Maintained mobile responsiveness with appropriate sizing
+  - Used existing CSS structure without adding additional files
 
-## [2.1.9] - July 15, 2025
+- **Navigation Consistency**: Standardized navigation labels across the site
+  - Changed "BOOKING" to "BOOK" for better mobile fit and consistency
+  - Ensured navigation labels match across all pages (index.html, about.htm, more.htm, etc.)
 
-### 📱 Mobile Optimization
+- **Calendar Download Enhancement**: Improved calendar download context awareness
+  - Added ics-generator.js to events.html for proper calendar downloads
+  - Made calendar downloads context-aware (venue-specific vs. all events)
+  - Ensured "DOWNLOAD VENUE CALENDAR" appears on venue-specific pages
+  - Maintained "DOWNLOAD ALL EVENTS" text on events.html page
+  - Enhanced user experience with clear indication of what's being downloaded
 
-- **Enhanced Mobile Responsiveness**: Fixed layout issues on narrow screens
-  - Improved events.html layout for narrowest phone screens
-  - Fixed close and home button sizing to prevent text overflow
-  - Optimized modals width to prevent horizontal scrolling
-  - Enhanced button visibility with better backgrounds and spacing
-  - Added extra small screen support for devices under 360px width
-  - Implemented better vertical spacing for button stacking
+- **UI Cleanup**: Removed redundant UI elements
+  - Removed duplicate "show past events" toggle links when not needed
+  - Standardized navigation menu options across all pages
+  - Improved overall interface consistency between venues and pages
 
-## [2.1.8] - July 15, 2025
+- **Custom 404 Page Implementation**: Enhanced error handling
+  - Implemented proper 404 page routing in Cloudflare Workers
+  - Updated catch-all route to serve custom 404.html for unknown paths
+  - Added content-type specific error responses (JSON for API, HTML for web pages)
+  - Maintained consistent branding and navigation in error page
 
-### 🐞 Bug Fixes
+## [2.1.8] - July 9, 2025
 
-- **Admin Interface Fix**: Fixed date comparison issue in admin-unified.js
-  - Updated `parseEventDate()` function to properly handle Date objects
-  - Modified event date handling to use raw date strings for consistent parsing
-  - Fixed inconsistency between admin and public-facing date handling
-  - Events now correctly show as past/upcoming in admin interface
+### 🛠️ Minor Fixes and UI Refinements
+
+- **Booking Page Updates**: Made small improvements to the booking.htm page
+  - Restored emphasis on "local" artists text for better visual emphasis
+  - Improved window title format for booking form popup to "farewell/howdy: book" for better clarity
+  - Maintained "BOOK" heading to match repository version
+  - Ensured proper formatting of buttons and links
 
 ## [2.1.7] - July 14, 2025
 

@@ -296,15 +296,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const icsLinks = document.querySelectorAll('.cal-link-ics');
   
   icsLinks.forEach(link => {
-    // We don't need to update the text here as we've updated it directly in the HTML
+    // Don't force update text - preserve what's in the HTML
+    // link.textContent = "Download All Events";  // Removed to respect HTML text
     
     link.addEventListener('click', (e) => {
-      // Get the current venue state from the body
-      const currentState = document.body?.dataset.state || 'farewell';
-      console.log(`[ICS] Generating calendar for venue: ${currentState}`);
+      // Check if this is in events.html (which needs all events from both venues)
+      const isEventsPage = window.location.pathname.includes('events.html');
       
-      // Download the ICS file for the current venue
-      downloadIcsFile(e, currentState);
+      if (isEventsPage) {
+        // On events.html, download all events regardless of current venue state
+        console.log(`[ICS] Generating calendar for all venues (from events.html)`);
+        downloadIcsFile(e, null); // null = all venues
+      } else {
+        // On other pages, get the current venue state from the body
+        const currentState = document.body?.dataset.state || 'farewell';
+        console.log(`[ICS] Generating calendar for venue: ${currentState}`);
+        
+        // Download the ICS file for the current venue only
+        downloadIcsFile(e, currentState);
+      }
     });
   });
   
