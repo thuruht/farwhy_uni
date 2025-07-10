@@ -160,7 +160,7 @@ p {
   align-items: center;
   justify-content: flex-start; /* Aligns the contain div to the start (left) */
   width: 100%; 
-  min-height: 212px; /* Consistent minimum height */
+  min-height: 232px; /* Consistent minimum height */
   height: auto; /* Changed from fixed height to auto to work better on mobile */
   box-sizing: border-box; /* Ensures padding doesn't affect the fixed height */
   background: var(--header-bg); /* Use the combined background variable */
