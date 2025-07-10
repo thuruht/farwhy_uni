@@ -20,7 +20,9 @@ async function fetchUpcomingEvents(venue = null) {
     // Define possible API endpoints to try
     const endpoints = venue 
       ? [`${BASE_URL}/list/${venue}`, `${BASE_URL}/api/list/${venue}`]
-      : [`${BASE_URL}/list/all`, `${BASE_URL}/api/list/all`];
+      : [`${BASE_URL}/list/all`, `${BASE_URL}/api/list/all`, `${BASE_URL}/api/events`];
+    
+    console.log(`[ICS] Fetching events for venue: ${venue || 'ALL VENUES'}`);
     
     // Try each endpoint until one works
     let events = [];
@@ -44,10 +46,21 @@ async function fetchUpcomingEvents(venue = null) {
         
         if (response.ok) {
           const data = await response.json();
-          events = data;
+          events = Array.isArray(data) ? data : (data.data || []);
           successUrl = url;
           console.log(`[ICS] Successfully fetched ${events.length} events from ${url}`);
-          break; // Exit the loop if successful
+          
+          // If we need to filter by venue
+          if (venue && events.length > 0) {
+            const venueSpecificEvents = events.filter(event => event.venue === venue);
+            console.log(`[ICS] Filtered to ${venueSpecificEvents.length} events for venue ${venue}`);
+            events = venueSpecificEvents;
+          }
+          
+          // Only break if we got events
+          if (events.length > 0) {
+            break;
+          }
         }
       } catch (err) {
         console.warn(`[ICS] Failed to fetch from ${url}:`, err);
@@ -56,14 +69,15 @@ async function fetchUpcomingEvents(venue = null) {
     }
     
     if (events.length === 0) {
-      // If the /list/ endpoints failed, try a fallback to get all events and filter locally
+      // If all endpoints failed, try a more aggressive fallback
       try {
-        const fallbackUrl = `${BASE_URL}/api/events`;
-        console.log(`[ICS] Trying fallback endpoint: ${fallbackUrl}`);
+        const fallbackUrl = `${BASE_URL}/api/events?includePast=false&limit=100`;
+        console.log(`[ICS] Trying emergency fallback endpoint: ${fallbackUrl}`);
         const response = await fetch(fallbackUrl);
         
         if (response.ok) {
-          const allEvents = await response.json();
+          const responseData = await response.json();
+          const allEvents = Array.isArray(responseData) ? responseData : (responseData.data || []);
           
           // Filter for upcoming events and specific venue if needed
           events = allEvents.filter(event => {
@@ -73,10 +87,16 @@ async function fetchUpcomingEvents(venue = null) {
             return isUpcoming && venueMatches;
           });
           
-          console.log(`[ICS] Filtered ${events.length} upcoming events from fallback endpoint`);
+          console.log(`[ICS] Emergency fallback retrieved ${events.length} upcoming events`);
+          
+          // Log the venues found to help debug
+          if (events.length > 0) {
+            const venues = [...new Set(events.map(e => e.venue))];
+            console.log(`[ICS] Events found for venues: ${venues.join(', ')}`);
+          }
         }
       } catch (fallbackError) {
-        console.error('[ICS] Fallback fetch failed:', fallbackError);
+        console.error('[ICS] Emergency fallback fetch failed:', fallbackError);
       }
     }
     
@@ -300,13 +320,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // link.textContent = "Download All Events";  // Removed to respect HTML text
     
     link.addEventListener('click', (e) => {
-      // Check if this is in events.html (which needs all events from both venues)
-      const isEventsPage = window.location.pathname.includes('events.html');
+      // More reliable check for events.html page
+      const isEventsPage = window.location.pathname.endsWith('events.html') || 
+                          window.location.pathname.includes('/events.html');
       
       if (isEventsPage) {
-        // On events.html, download all events regardless of current venue state
+        // Fix for events.html calendar download
         console.log(`[ICS] Generating calendar for all venues (from events.html)`);
-        downloadIcsFile(e, null); // null = all venues
+        
+        // Force null venue parameter to ensure all events are downloaded, regardless of body data-state
+        downloadIcsFile(e, null);
       } else {
         // On other pages, get the current venue state from the body
         const currentState = document.body?.dataset.state || 'farewell';
