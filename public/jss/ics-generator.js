@@ -255,27 +255,38 @@ function generateIcsContent(events) {
  * Generates and downloads an .ics file with all upcoming events
  * @param {Event} e - The click event
  * @param {string} venue - Optional: 'farewell', 'howdy', or null for both
+ * @param {boolean} futureOnly - Optional: whether to include only future events
  */
-async function downloadIcsFile(e, venue = null) {
+async function downloadIcsFile(e, venue = null, futureOnly = false) {
   e.preventDefault();
   
   // Show loading indicator
-  const originalText = e.target.textContent;
-  e.target.textContent = 'Generating calendar...';
+  const originalText = e.target.closest('.cal-link-ics').innerHTML;
+  e.target.closest('.cal-link-ics').innerHTML = '<span class="calendar-icon">⏳</span> Generating calendar...';
   
   try {
     // Fetch events
     const events = await fetchUpcomingEvents(venue);
     
-    if (events.length === 0) {
+    // Filter for future events if requested
+    let filteredEvents = events;
+    if (futureOnly) {
+      const now = new Date();
+      filteredEvents = events.filter(event => {
+        return new Date(event.date) >= now;
+      });
+      console.log(`[ICS] Filtered to ${filteredEvents.length} future events from ${events.length} total events`);
+    }
+    
+    if (filteredEvents.length === 0) {
       console.warn('[ICS] No upcoming events found');
       alert('No upcoming events found');
-      e.target.textContent = originalText;
+      e.target.closest('.cal-link-ics').innerHTML = originalText;
       return;
     }
     
     // Generate ICS content
-    const icsContent = generateIcsContent(events);
+    const icsContent = generateIcsContent(filteredEvents);
     
     // Create a downloadable blob
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
@@ -306,7 +317,7 @@ async function downloadIcsFile(e, venue = null) {
     alert('Error generating calendar file. Please try again later.');
   } finally {
     // Restore original button text
-    e.target.textContent = originalText;
+    e.target.closest('.cal-link-ics').innerHTML = originalText;
   }
 }
 
@@ -315,28 +326,92 @@ document.addEventListener('DOMContentLoaded', () => {
   // Find all .cal-link-ics elements and attach the event handler
   const icsLinks = document.querySelectorAll('.cal-link-ics');
   
-  icsLinks.forEach(link => {
-    // Don't force update text - preserve what's in the HTML
-    // link.textContent = "Download All Events";  // Removed to respect HTML text
+  // Function to update calendar button text based on venue
+  function updateCalendarButtonText() {
+    const isEventsPage = window.location.pathname.endsWith('events.html') || 
+                        window.location.pathname.includes('/events.html');
     
+    if (isEventsPage) {
+      const calendarButtons = document.querySelectorAll('.cal-link-ics.event-calendar-download');
+      
+      // Use the currentVenue from the events page if available
+      if (typeof currentVenue !== 'undefined') {
+        calendarButtons.forEach(button => {
+          const calendarIcon = '<span class="calendar-icon">📅</span> ';
+          
+          if (currentVenue === 'farewell') {
+            button.innerHTML = `${calendarIcon}DOWNLOAD FAREWELL EVENTS`;
+          } else if (currentVenue === 'howdy') {
+            button.innerHTML = `${calendarIcon}DOWNLOAD HOWDY EVENTS`;
+          } else {
+            button.innerHTML = `${calendarIcon}DOWNLOAD ALL EVENTS`;
+          }
+        });
+      }
+    }
+  }
+  
+  // Update button text on page load
+  updateCalendarButtonText();
+  
+  // Watch for venue tab changes in events.html
+  if (window.location.pathname.endsWith('events.html') || 
+      window.location.pathname.includes('/events.html')) {
+    
+    // Create a MutationObserver to watch for class changes on venue tabs
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (mutation.type === 'attributes' && 
+            mutation.attributeName === 'class' && 
+            mutation.target.classList.contains('venue-tab') &&
+            typeof currentVenue !== 'undefined') {
+          
+          // Update button text when venue changes
+          updateCalendarButtonText();
+        }
+      });
+    });
+    
+    // Start observing venue tabs
+    const venueTabs = document.querySelectorAll('.venue-tab');
+    venueTabs.forEach(tab => {
+      observer.observe(tab, { attributes: true });
+    });
+    
+    // Also listen for the custom event that might be triggered when venue changes
+    document.addEventListener('venueChanged', () => {
+      updateCalendarButtonText();
+    });
+  }
+  
+  // Attach click event to calendar download links
+  icsLinks.forEach(link => {
     link.addEventListener('click', (e) => {
-      // More reliable check for events.html page
+      // Check if we're on the events.html page
       const isEventsPage = window.location.pathname.endsWith('events.html') || 
                           window.location.pathname.includes('/events.html');
       
       if (isEventsPage) {
-        // Fix for events.html calendar download
-        console.log(`[ICS] Generating calendar for all venues (from events.html)`);
-        
-        // Force null venue parameter to ensure all events are downloaded, regardless of body data-state
-        downloadIcsFile(e, null);
+        // Use the currentVenue from the events page if available
+        if (typeof currentVenue !== 'undefined') {
+          console.log(`[ICS] Generating calendar for venue: ${currentVenue} (from events.html)`);
+          
+          // For "both" venue option, pass null to include all venues
+          const venueParam = currentVenue === 'both' ? null : currentVenue;
+          
+          // Only include future events
+          downloadIcsFile(e, venueParam, true);
+        } else {
+          console.log(`[ICS] Generating calendar for all venues (from events.html, currentVenue not found)`);
+          downloadIcsFile(e, null, true);
+        }
       } else {
         // On other pages, get the current venue state from the body
         const currentState = document.body?.dataset.state || 'farewell';
         console.log(`[ICS] Generating calendar for venue: ${currentState}`);
         
         // Download the ICS file for the current venue only
-        downloadIcsFile(e, currentState);
+        downloadIcsFile(e, currentState, true);
       }
     });
   });
