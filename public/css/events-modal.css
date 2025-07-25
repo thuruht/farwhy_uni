@@ -98,8 +98,8 @@
 
 .calendar-download-link {
   display: inline-block;
-  font-size: 1rem;
-  padding: 0.15rem 0.25rem;
+  font-size: 0.9rem;
+  padding: 0.1rem 0.15rem;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--nav-border-color);
   border-radius: 3px;
@@ -108,7 +108,7 @@
   transition: all 0.2s;
   white-space: nowrap;
   text-align: center;
-  height: 24px;
+  height: 22px;
   display: flex;
   align-items: center;
 }
@@ -121,60 +121,68 @@
 
 .filter-container {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  flex-wrap: nowrap;
+  gap: 0.45rem;
+  padding: 0.4rem 0.2rem;
+  margin-top: 0.3rem;
+  /* Add this line to ensure even spacing of items */
   align-items: center;
-  width: 100%;
-  margin-top: 0.5rem;
-  gap: 0.25rem;
+}
+
+/* Make sure each filter item has equal dimensions for better alignment */
+.filter-container > * {
+  flex: 0 0 auto;
+}
+
+/* Add tooltip style for abbreviated filter labels */
+.venue-tab[data-tooltip], 
+.archive-toggle[data-tooltip],
+.calendar-download-link[data-tooltip] {
+  position: relative;
+}
+
+.venue-tab[data-tooltip]:hover::after, 
+.archive-toggle[data-tooltip]:hover::after,
+.calendar-download-link[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
 }
 
 .venue-tab, .archive-toggle {
-  padding: 0.15rem 0.3rem;
-  background: var(--header-bg);
-  border: 1px solid var(--nav-border-color);
-  font-family: var(--font-main);
-  font-weight: bold;
-  color: var(--text-color);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.7rem;
-  min-width: 40px;
-  text-align: center;
-  display: flex;
-  justify-content: center;
+  display: inline-flex;
   align-items: center;
-  height: 24px; /* Smaller height for buttons */
-  flex: 1;
-}
-
-.venue-tab:first-of-type {
-  border-radius: 4px 0 0 4px;
-}
-
-.venue-tab:last-of-type {
-  border-radius: 0 4px 4px 0;
-}
-
-.venue-tab:not(:first-of-type):not(:last-of-type) {
-  border-left: none;
-  border-right: none;
-}
-
-.venue-tab.active {
-  background: var(--button-bg-color);
-  color: var(--button-text-color);
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
-}
-
-.archive-toggle {
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0.25rem 0.15rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 4px;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.archive-toggle[aria-pressed="true"] {
-  background: var(--button-bg-color);
-  color: var(--button-text-color);
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+.venue-tab:hover, .archive-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .events-list {
@@ -561,21 +569,22 @@
   .events-modal-close {
     top: 0.35rem;
     right: 0.35rem;
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     font-size: 1.3rem;
     background-color: rgba(0, 0, 0, 0.25); /* Darker background to stand out */
   }
   
   .venue-tab, .archive-toggle {
-    min-width: 40px;
-    padding: 0.3rem 0.15rem;
-    font-size: 0.7rem;
+    min-width: 25px;
+    padding: 0.2rem 0.1rem;
+    font-size: 0.65rem;
   }
   
   .calendar-download-link {
-    min-width: 24px;
-    width: 24px;
+    min-width: 20px;
+    width: 20px;
+    font-size: 0.8rem;
   }
   
   .events-list {

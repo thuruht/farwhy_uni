@@ -165,31 +165,37 @@
     const farewellTab = document.createElement('button');
     farewellTab.className = 'venue-tab' + (currentVenue === 'farewell' ? ' active' : '');
     farewellTab.dataset.venue = 'farewell';
-    farewellTab.textContent = currentVenue === 'farewell' ? 'FW ✓' : 'FW';
+    farewellTab.textContent = currentVenue === 'farewell' ? 'F✓' : 'F';
+    farewellTab.setAttribute('data-tooltip', 'Farewell');
     
     const howdyTab = document.createElement('button');
     howdyTab.className = 'venue-tab' + (currentVenue === 'howdy' ? ' active' : '');
     howdyTab.dataset.venue = 'howdy';
-    howdyTab.textContent = currentVenue === 'howdy' ? 'HY ✓' : 'HY';
+    howdyTab.textContent = currentVenue === 'howdy' ? 'H✓' : 'H';
+    howdyTab.setAttribute('data-tooltip', 'Howdy');
     
     const bothTab = document.createElement('button');
     bothTab.className = 'venue-tab' + (currentVenue === 'both' ? ' active' : '');
     bothTab.dataset.venue = 'both';
-    bothTab.textContent = currentVenue === 'both' ? 'ALL ✓' : 'ALL';
+    bothTab.textContent = currentVenue === 'both' ? 'A✓' : 'A';
+    bothTab.setAttribute('data-tooltip', 'All Venues');
     
     venueFilterTabs = [farewellTab, howdyTab, bothTab];
     
     // Create archive toggle
     const archiveToggle = document.createElement('button');
     archiveToggle.className = 'archive-toggle';
-    archiveToggle.textContent = 'UPCOMING';
+    archiveToggle.textContent = 'NEW';
     archiveToggle.setAttribute('aria-pressed', 'false');
+    archiveToggle.setAttribute('data-tooltip', 'Show All Events');
+    archiveToggle.setAttribute('title', 'Toggle between upcoming and all events');
     
     // Create calendar download link
     const calendarLink = document.createElement('a');
     calendarLink.className = 'calendar-download-link';
     calendarLink.href = '#';
     calendarLink.textContent = '📅';
+    calendarLink.setAttribute('data-tooltip', 'Download Calendar');
     calendarLink.setAttribute('title', 'Download all events as calendar file');
     calendarLink.addEventListener('click', (e) => {
       e.preventDefault();
@@ -203,7 +209,7 @@
     
     archiveToggle.addEventListener('click', async () => {
       showArchived = !showArchived;
-      archiveToggle.textContent = showArchived ? 'ALL' : 'UPCOMING';
+      archiveToggle.textContent = showArchived ? 'ALL' : 'NEW';
       archiveToggle.setAttribute('aria-pressed', showArchived.toString());
       
       // Fetch fresh events with the new includePast parameter
@@ -274,22 +280,22 @@
             t.classList.remove('active');
             // Remove check marks from all tabs
             if (t.dataset.venue === 'farewell') {
-              t.textContent = 'FW';
+              t.textContent = 'F';
             } else if (t.dataset.venue === 'howdy') {
-              t.textContent = 'HY';
+              t.textContent = 'H';
             } else if (t.dataset.venue === 'both') {
-              t.textContent = 'ALL';
+              t.textContent = 'A';
             }
           });
           
           tab.classList.add('active');
           // Add check mark to the active tab
           if (venue === 'farewell') {
-            tab.textContent = 'FW ✓';
+            tab.textContent = 'F✓';
           } else if (venue === 'howdy') {
-            tab.textContent = 'HY ✓';
+            tab.textContent = 'H✓';
           } else if (venue === 'both') {
-            tab.textContent = 'ALL ✓';
+            tab.textContent = 'A✓';
           }
           
           // Update displayed events
@@ -329,11 +335,11 @@
       
       // Reset tab text
       if (venue === 'farewell') {
-        tab.textContent = 'FW';
+        tab.textContent = 'F';
       } else if (venue === 'howdy') {
-        tab.textContent = 'HY';
+        tab.textContent = 'H';
       } else if (venue === 'both') {
-        tab.textContent = 'ALL';
+        tab.textContent = 'A';
       }
       
       // Set active tab based on current venue
@@ -341,11 +347,11 @@
         tab.classList.add('active');
         // Add check mark to the active tab
         if (venue === 'farewell') {
-          tab.textContent = 'FW ✓';
+          tab.textContent = 'F✓';
         } else if (venue === 'howdy') {
-          tab.textContent = 'HY ✓';
+          tab.textContent = 'H✓';
         } else if (venue === 'both') {
-          tab.textContent = 'ALL ✓';
+          tab.textContent = 'A✓';
         }
       }
     });
