@@ -69,6 +69,7 @@
   let eventDetails;
   let venueFilterTabs;
   let closeButton;
+  let homeButton;
   
   // State management
   let allEvents = [];
@@ -148,44 +149,48 @@
     const modalHeader = document.createElement('div');
     modalHeader.className = 'events-modal-header';
     
+    // Create navigation bar with buttons
+    const modalNav = document.createElement('div');
+    modalNav.className = 'events-modal-nav';
+    
+    homeButton = document.createElement('button');
+    homeButton.className = 'events-modal-home';
+    homeButton.textContent = 'HOME';
+    homeButton.setAttribute('aria-label', 'Go to homepage');
+    
+    closeButton = document.createElement('button');
+    closeButton.className = 'events-modal-close';
+    closeButton.textContent = 'CLOSE';
+    closeButton.setAttribute('aria-label', 'Close');
+    
+    modalNav.appendChild(homeButton);
+    modalNav.appendChild(closeButton);
+    
     const modalTitle = document.createElement('h2');
     modalTitle.className = 'events-modal-title';
     modalTitle.textContent = 'UPCOMING SHOWS';
     
-    closeButton = document.createElement('button');
-    closeButton.className = 'events-modal-close';
-    closeButton.innerHTML = '&times;';
-    closeButton.setAttribute('aria-label', 'Close');
-    
+    modalHeader.appendChild(modalNav);
     modalHeader.appendChild(modalTitle);
     
     // Create venue filter tabs
     const venueFilter = document.createElement('div');
     venueFilter.className = 'venue-filter';
     
-    // Set up labels and buttons
-    const venueLabel = document.createElement('span');
-    venueLabel.className = 'events-modal-label';
-    venueLabel.textContent = '';
-
-    const showLabel = document.createElement('span');
-    showLabel.className = 'events-modal-label';
-    showLabel.textContent = '';
-    
     const farewellTab = document.createElement('button');
     farewellTab.className = 'venue-tab' + (currentVenue === 'farewell' ? ' active' : '');
     farewellTab.dataset.venue = 'farewell';
-    farewellTab.textContent = currentVenue === 'farewell' ? 'FAREWELL ONLY ✓' : 'FAREWELL ONLY';
+    farewellTab.textContent = currentVenue === 'farewell' ? 'FW ONLY ✓' : 'FW ONLY';
     
     const howdyTab = document.createElement('button');
     howdyTab.className = 'venue-tab' + (currentVenue === 'howdy' ? ' active' : '');
     howdyTab.dataset.venue = 'howdy';
-    howdyTab.textContent = currentVenue === 'howdy' ? 'HOWDY ONLY ✓' : 'HOWDY ONLY';
+    howdyTab.textContent = currentVenue === 'howdy' ? 'HY ONLY ✓' : 'HY ONLY';
     
     const bothTab = document.createElement('button');
     bothTab.className = 'venue-tab' + (currentVenue === 'both' ? ' active' : '');
     bothTab.dataset.venue = 'both';
-    bothTab.textContent = currentVenue === 'both' ? 'BOTH VENUES ✓' : 'BOTH VENUES';
+    bothTab.textContent = currentVenue === 'both' ? 'BOTH ✓' : 'BOTH';
     
     venueFilterTabs = [farewellTab, howdyTab, bothTab];
     venueFilter.append(farewellTab, howdyTab, bothTab);
@@ -194,19 +199,30 @@
     const archiveFilter = document.createElement('div');
     archiveFilter.className = 'archive-filter';
     
-    const archiveLabel = document.createElement('span');
-    archiveLabel.className = 'filter-label';
-    archiveLabel.textContent = '';
-    archiveFilter.appendChild(archiveLabel);
-    
     const archiveToggle = document.createElement('button');
     archiveToggle.className = 'archive-toggle';
-    archiveToggle.textContent = 'UPCOMING ONLY ✓';
+    archiveToggle.textContent = 'UPCOMING ✓';
     archiveToggle.setAttribute('aria-pressed', 'false');
+    
+    // Create calendar download link
+    const calendarLink = document.createElement('a');
+    calendarLink.className = 'calendar-download-link';
+    calendarLink.href = '#';
+    calendarLink.textContent = '📅 DOWNLOAD';
+    calendarLink.setAttribute('title', 'Download all events as calendar file');
+    calendarLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      const calendarSelector = document.querySelector('.cal-link-ics');
+      if (calendarSelector) {
+        calendarSelector.click();
+      } else {
+        alert('Calendar download not available');
+      }
+    });
     
     archiveToggle.addEventListener('click', async () => {
       showArchived = !showArchived;
-      archiveToggle.textContent = showArchived ? 'ALL EVENTS ✓' : 'UPCOMING ONLY ✓';
+      archiveToggle.textContent = showArchived ? 'ALL EVENTS ✓' : 'UPCOMING ✓';
       archiveToggle.setAttribute('aria-pressed', showArchived.toString());
       
       // Fetch fresh events with the new includePast parameter
@@ -219,10 +235,9 @@
     // Create filter container
     const filterContainer = document.createElement('div');
     filterContainer.className = 'filter-container';
-    filterContainer.append(venueFilter, archiveFilter);
+    filterContainer.append(venueFilter, archiveFilter, calendarLink);
     
     modalHeader.appendChild(filterContainer);
-    modalHeader.appendChild(closeButton);
     
     // Create events list
     eventsList = document.createElement('div');
@@ -504,7 +519,7 @@
       
       const title = document.createElement('div');
       title.className = 'event-list-title';
-      title.textContent = event.title;
+      title.textContent = event.title.length > 40 ? event.title.substring(0, 38) + '...' : event.title;
       
       const dateContainer = document.createElement('div');
       dateContainer.className = 'event-list-date-container';
