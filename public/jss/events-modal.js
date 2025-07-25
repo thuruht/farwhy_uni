@@ -69,7 +69,6 @@
   let eventDetails;
   let venueFilterTabs;
   let closeButton;
-  let homeButton;
   
   // State management
   let allEvents = [];
@@ -149,66 +148,48 @@
     const modalHeader = document.createElement('div');
     modalHeader.className = 'events-modal-header';
     
-    // Create navigation bar with buttons
-    const modalNav = document.createElement('div');
-    modalNav.className = 'events-modal-nav';
-    
-    homeButton = document.createElement('button');
-    homeButton.className = 'events-modal-home';
-    homeButton.textContent = 'HOME';
-    homeButton.setAttribute('aria-label', 'Go to homepage');
-    
+    // Create close button (× symbol)
     closeButton = document.createElement('button');
     closeButton.className = 'events-modal-close';
-    closeButton.textContent = 'CLOSE';
+    closeButton.innerHTML = '&times;';
     closeButton.setAttribute('aria-label', 'Close');
-    
-    modalNav.appendChild(homeButton);
-    modalNav.appendChild(closeButton);
     
     const modalTitle = document.createElement('h2');
     modalTitle.className = 'events-modal-title';
     modalTitle.textContent = 'UPCOMING SHOWS';
     
-    modalHeader.appendChild(modalNav);
+    modalHeader.appendChild(closeButton);
     modalHeader.appendChild(modalTitle);
     
     // Create venue filter tabs
-    const venueFilter = document.createElement('div');
-    venueFilter.className = 'venue-filter';
-    
     const farewellTab = document.createElement('button');
     farewellTab.className = 'venue-tab' + (currentVenue === 'farewell' ? ' active' : '');
     farewellTab.dataset.venue = 'farewell';
-    farewellTab.textContent = currentVenue === 'farewell' ? 'FW ONLY ✓' : 'FW ONLY';
+    farewellTab.textContent = currentVenue === 'farewell' ? 'FW ✓' : 'FW';
     
     const howdyTab = document.createElement('button');
     howdyTab.className = 'venue-tab' + (currentVenue === 'howdy' ? ' active' : '');
     howdyTab.dataset.venue = 'howdy';
-    howdyTab.textContent = currentVenue === 'howdy' ? 'HY ONLY ✓' : 'HY ONLY';
+    howdyTab.textContent = currentVenue === 'howdy' ? 'HY ✓' : 'HY';
     
     const bothTab = document.createElement('button');
     bothTab.className = 'venue-tab' + (currentVenue === 'both' ? ' active' : '');
     bothTab.dataset.venue = 'both';
-    bothTab.textContent = currentVenue === 'both' ? 'BOTH ✓' : 'BOTH';
+    bothTab.textContent = currentVenue === 'both' ? 'ALL ✓' : 'ALL';
     
     venueFilterTabs = [farewellTab, howdyTab, bothTab];
-    venueFilter.append(farewellTab, howdyTab, bothTab);
     
-    // Create archive filter
-    const archiveFilter = document.createElement('div');
-    archiveFilter.className = 'archive-filter';
-    
+    // Create archive toggle
     const archiveToggle = document.createElement('button');
     archiveToggle.className = 'archive-toggle';
-    archiveToggle.textContent = 'UPCOMING ✓';
+    archiveToggle.textContent = 'UPCOMING';
     archiveToggle.setAttribute('aria-pressed', 'false');
     
     // Create calendar download link
     const calendarLink = document.createElement('a');
     calendarLink.className = 'calendar-download-link';
     calendarLink.href = '#';
-    calendarLink.textContent = '📅 DOWNLOAD';
+    calendarLink.textContent = '📅';
     calendarLink.setAttribute('title', 'Download all events as calendar file');
     calendarLink.addEventListener('click', (e) => {
       e.preventDefault();
@@ -222,7 +203,7 @@
     
     archiveToggle.addEventListener('click', async () => {
       showArchived = !showArchived;
-      archiveToggle.textContent = showArchived ? 'ALL EVENTS ✓' : 'UPCOMING ✓';
+      archiveToggle.textContent = showArchived ? 'ALL' : 'UPCOMING';
       archiveToggle.setAttribute('aria-pressed', showArchived.toString());
       
       // Fetch fresh events with the new includePast parameter
@@ -230,12 +211,11 @@
       filterEvents();
     });
     
-    archiveFilter.appendChild(archiveToggle);
-    
-    // Create filter container
+    // Create filter container - all in a single row
     const filterContainer = document.createElement('div');
     filterContainer.className = 'filter-container';
-    filterContainer.append(venueFilter, archiveFilter, calendarLink);
+    // Add elements directly without nested containers
+    filterContainer.append(farewellTab, howdyTab, bothTab, archiveToggle, calendarLink);
     
     modalHeader.appendChild(filterContainer);
     
@@ -294,22 +274,22 @@
             t.classList.remove('active');
             // Remove check marks from all tabs
             if (t.dataset.venue === 'farewell') {
-              t.textContent = 'FAREWELL ONLY';
+              t.textContent = 'FW';
             } else if (t.dataset.venue === 'howdy') {
-              t.textContent = 'HOWDY ONLY';
+              t.textContent = 'HY';
             } else if (t.dataset.venue === 'both') {
-              t.textContent = 'BOTH VENUES';
+              t.textContent = 'ALL';
             }
           });
           
           tab.classList.add('active');
           // Add check mark to the active tab
           if (venue === 'farewell') {
-            tab.textContent = 'FAREWELL ONLY ✓';
+            tab.textContent = 'FW ✓';
           } else if (venue === 'howdy') {
-            tab.textContent = 'HOWDY ONLY ✓';
+            tab.textContent = 'HY ✓';
           } else if (venue === 'both') {
-            tab.textContent = 'BOTH VENUES ✓';
+            tab.textContent = 'ALL ✓';
           }
           
           // Update displayed events
@@ -349,11 +329,11 @@
       
       // Reset tab text
       if (venue === 'farewell') {
-        tab.textContent = 'FAREWELL ONLY';
+        tab.textContent = 'FW';
       } else if (venue === 'howdy') {
-        tab.textContent = 'HOWDY ONLY';
+        tab.textContent = 'HY';
       } else if (venue === 'both') {
-        tab.textContent = 'BOTH VENUES';
+        tab.textContent = 'ALL';
       }
       
       // Set active tab based on current venue
@@ -361,11 +341,11 @@
         tab.classList.add('active');
         // Add check mark to the active tab
         if (venue === 'farewell') {
-          tab.textContent = 'FAREWELL ONLY ✓';
+          tab.textContent = 'FW ✓';
         } else if (venue === 'howdy') {
-          tab.textContent = 'HOWDY ONLY ✓';
+          tab.textContent = 'HY ✓';
         } else if (venue === 'both') {
-          tab.textContent = 'BOTH VENUES ✓';
+          tab.textContent = 'ALL ✓';
         }
       }
     });
