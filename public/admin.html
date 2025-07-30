@@ -544,6 +544,95 @@
         .section-actions .btn {
             white-space: nowrap;
         }
+        
+        /* Import Legacy Events Modal Styles */
+        .import-info {
+            margin-bottom: 20px;
+        }
+        
+        .import-info code {
+            background-color: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .import-controls {
+            margin: 20px 0;
+        }
+        
+        .import-controls .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .import-controls label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .import-controls input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .import-progress {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .import-status {
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .import-results {
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 10px;
+        }
+        
+        .import-result-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .import-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-action {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .result-action.imported {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .result-action.skipped {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .result-action.preview {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
     </style>
 </head>
 <body data-state="farewell">
@@ -583,6 +672,7 @@
                 <div class="section-header">
                     <h2>Event Management</h2>
                     <div class="section-actions">
+                        <button class="btn btn-warning" id="import-legacy-events-btn" title="Import and deduplicate events from legacy system">📥 Import Legacy</button>
                         <button class="btn btn-secondary" id="repair-legacy-events-btn" title="Repair legacy events with missing flyer URLs">🔧 Repair Legacy</button>
                         <button class="btn btn-primary" id="add-event-btn">+ New Event</button>
                     </div>
@@ -958,6 +1048,58 @@
         </div>
     </div>
 
+    <!-- Import Legacy Events Modal -->
+    <div id="import-legacy-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Import Legacy Events</h3>
+                <button class="modal-close-btn" onclick="closeImportLegacyModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="import-info">
+                    <p>This tool will import events from the legacy system and automatically deduplicate any existing events.</p>
+                    <p><strong>Sources:</strong></p>
+                    <ul>
+                        <li>Farewell events: <code>https://fygw0.kcmo.xyz/list/farewell</code></li>
+                        <li>Howdy events: <code>https://fygw0.kcmo.xyz/list/howdy</code></li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> The system will compare events by title, date, and venue to avoid duplicates. Legacy flyer images will be imported with their original URLs.
+                    </div>
+                </div>
+                
+                <div class="import-controls">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="import-farewell" checked> Import Farewell events
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="import-howdy" checked> Import Howdy events
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="dry-run-mode" checked> Dry run mode (preview only, don't save)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" onclick="closeImportLegacyModal()" class="btn btn-secondary">Cancel</button>
+                    <button type="button" onclick="startLegacyImport()" class="btn btn-primary" id="start-import-btn">Start Import</button>
+                </div>
+                
+                <div id="import-progress" class="import-progress" style="display: none;">
+                    <h4>Import Progress</h4>
+                    <div id="import-status" class="import-status"></div>
+                    <div id="import-results" class="import-results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
 
@@ -970,5 +1112,6 @@
     <script src="/jss/menu-management.js"></script>
     <script src="/jss/admin-patch.js"></script>
     <script src="/jss/event-form-patch.js"></script>
+    <script src="/jss/legacy-import.js"></script>
     </body>
     </html>
