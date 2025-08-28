@@ -145,8 +145,17 @@ function showEventForm(eventData = null) {
 async function handleEventFormSubmit(e) {
     e.preventDefault();
     
+    const form = e.target;
+    // Guard: if the form is already being processed, ignore duplicate submissions
+    if (form && form.dataset.processing === '1') {
+        console.warn('Duplicate form submit detected; ignoring because processing flag is set');
+        return;
+    }
+    // Mark as processing to prevent duplicate submissions
+    if (form) form.dataset.processing = '1';
+
     // Prevent multiple submissions
-    const submitButton = e.target.querySelector('button[type="submit"]');
+    const submitButton = form.querySelector('button[type="submit"]');
     if (submitButton) {
         submitButton.disabled = true;
         submitButton.textContent = 'Saving...';
@@ -217,6 +226,12 @@ async function handleEventFormSubmit(e) {
         if (submitButton) {
             submitButton.disabled = false;
             submitButton.textContent = isEdit ? 'Update Event' : 'Create Event';
+        }
+        // Clear processing flag so the form can be submitted again later
+        try {
+            if (form && form.dataset.processing) delete form.dataset.processing;
+        } catch (err) {
+            console.warn('Unable to clear form processing flag:', err);
         }
     }
 }
