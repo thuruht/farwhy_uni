@@ -144,93 +144,31 @@ function setupBlogFilters() {
  * This code should be injected into the admin-unified.js file to handle the
  * missing database columns without causing errors
  */
-// Override the existing event form submit handler to strip event_type
-const originalEventFormSubmit = document.querySelector('#event-form')?.onsubmit;
-if (document.querySelector('#event-form')) {
-    document.querySelector('#event-form').onsubmit = function(e) {
-        e.preventDefault();
-        
-        // Log the form submission
-        console.log('Event form submission patched to handle missing columns');
-        
-        // Get form data
-        const formData = new FormData(this);
-        const eventData = {};
-        
-        // Process form data
-        for (const [key, value] of formData.entries()) {
-            eventData[key] = value;
-        }
-        
-        // Remove fields that don't exist in the database schema
-        delete eventData.event_type;
-        delete eventData.performers;
-        delete eventData.tags;
-        delete eventData.external_links;
-        
-        // Handle image URL conversions (preserve this functionality)
-        if (eventData.flyer_image_url && eventData.flyer_image_url.startsWith('http')) {
-            // Extract relative path from absolute URL
-            const url = new URL(eventData.flyer_image_url);
-            eventData.flyer_image_url = url.pathname;
-        }
-        
-        // Make API request
-        fetch('/api/admin/events', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(eventData),
-            credentials: 'include'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`API Error: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Event created successfully:', data);
-            
-            // Close modal
-            document.getElementById('form-modal').classList.remove('active');
-            
-            // Show success message
-            const toastContainer = document.getElementById('toast-container');
-            if (toastContainer) {
-                const toast = document.createElement('div');
-                toast.className = 'toast toast-success';
-                toast.textContent = 'Event created successfully';
-                toastContainer.appendChild(toast);
-                setTimeout(() => toast.classList.add('show'), 10);
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toastContainer.removeChild(toast), 300);
-                }, 3000);
-            }
-            
-            // Reload events
-            if (typeof loadEvents === 'function') {
-                loadEvents();
-            }
-        })
-        .catch(error => {
-            console.error('Error creating event:', error);
-            
-            // Show error message
-            const toastContainer = document.getElementById('toast-container');
-            if (toastContainer) {
-                const toast = document.createElement('div');
-                toast.className = 'toast toast-error';
-                toast.textContent = `Error: ${error.message}`;
-                toastContainer.appendChild(toast);
-                setTimeout(() => toast.classList.add('show'), 10);
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => toastContainer.removeChild(toast), 300);
-                }, 3000);
-            }
-        });
-        
-        return false; // Prevent default form submission
-    };
+// Legacy onsubmit override removed.
+//
+// Previously this file overwrote the form's `onsubmit` handler and performed a
+// direct fetch to `/api/admin/events`. That caused duplicate POSTs when the
+// modern `addEventListener('submit', ...)` handler in `admin-unified.js` also
+// ran (one before flyer upload, producing an event without the image, and one
+// after). To prevent double-creation of events we intentionally leave this
+// file present as a compatibility stub but DO NOT attach a legacy onsubmit
+// handler. If a compatibility shim is required in the future, implement a
+// guarded wrapper that checks `form.dataset.processing === '1'` or similar so
+// it never triggers when the modern handler is active.
+
+console.log('event-form-patch: legacy onsubmit override has been disabled to avoid duplicate submissions');
+
+// Example guarded shim (commented out) for future reference:
+/*
+const form = document.querySelector('#event-form');
+if (form && !form.dataset.legacyPatched) {
+  form.dataset.legacyPatched = '1';
+  form.onsubmit = function(e) {
+    // If the modern handler is processing, skip legacy submission
+    if (form.dataset.processing === '1') return;
+    // Otherwise, you could implement a safe, synchronous shim here.
+  };
 }
+*/
+
+// End of compatibility patch (no legacy onsubmit handler attached)
