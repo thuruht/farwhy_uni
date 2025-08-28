@@ -146,70 +146,21 @@ if (typeof setupBlogFilters !== 'function') {
 }
 
 // Patch for the event form submission to handle database schema issues
-const originalEventFormSubmit = window.submitEventForm || null;
-window.submitEventForm = async function(formData) {
-    console.log('Using patched event form submission to handle schema compatibility');
-    
-    try {
-        // Create a safe copy of form data that won't break if schema fields are missing
-        const safeFormData = { ...formData };
-        
-        // If we're getting database errors about missing columns, 
-        // modify the request to exclude problematic fields
-        // The migration script will add these columns, but until then,
-        // we need to avoid sending fields that might cause errors
-        
-        // Check if we've successfully run the migration by setting a flag in localStorage
-        const migrationRun = localStorage.getItem('event_schema_migrated') === 'true';
-        
-        if (!migrationRun) {
-            // Remove fields that might not exist in the database yet
-            // These will be properly handled once the migration runs
-            console.log('Temporarily removing potentially problematic fields until migration completes');
-            
-            // Don't delete the data completely, just make a safe version for the API
-            // Original data in the form will be preserved
-            const apiSafeData = { ...safeFormData };
-            delete apiSafeData.event_type;
-            delete apiSafeData.performers;
-            delete apiSafeData.tags;
-            delete apiSafeData.external_links;
-            
-            console.log('Original form data:', safeFormData);
-            console.log('API-safe form data:', apiSafeData);
-            
-            try {
-                // Try to run migration automatically
-                const migrationResponse = await fetch('/api/admin/migrate/events', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include'
-                });
-                
-                if (migrationResponse.ok) {
-                    console.log('Event schema migration successful!');
-                    localStorage.setItem('event_schema_migrated', 'true');
-                    // Now we can use the full data as the database is updated
-                    return originalEventFormSubmit ? originalEventFormSubmit(safeFormData) : null;
-                } else {
-                    console.warn('Event schema migration failed or not available, using compatible form data');
-                    // Use the reduced data set
-                    return originalEventFormSubmit ? originalEventFormSubmit(apiSafeData) : null;
-                }
-            } catch (migrationError) {
-                console.error('Error running migration:', migrationError);
-                // Use the reduced data set
-                return originalEventFormSubmit ? originalEventFormSubmit(apiSafeData) : null;
-            }
-        } else {
-            // Migration already run successfully, use full data
-            return originalEventFormSubmit ? originalEventFormSubmit(safeFormData) : null;
-        }
-    } catch (error) {
-        console.error('Error in patched event form submission:', error);
-        throw error;
-    }
-};
+// NOTE: The legacy onsubmit override that performed a direct POST to
+// `/api/admin/events` was removed because it ran in parallel with the
+// modern `addEventListener('submit', ...)` handler in `admin-unified.js`.
+//
+// That duplicate handling caused two POSTs: one before the flyer upload
+// completed (resulting in an event without an image) and another after the
+// upload. Event creation is now handled centrally by the submit handler
+// attached in `admin-unified.js` (which uploads the flyer, updates the
+// form data, and then calls the API). Keeping the legacy override here
+// risks double-creating events, so it has been intentionally removed.
+
+// If we need to reintroduce a compatibility shim, do so by adding a guarded
+// wrapper that detects if the modern handler already processed the submission
+// (for example by checking `form.dataset.submitted === '1'`) to avoid duplicate
+// requests.
 
 // Patch the event creation function to use our safe submission handler
 const originalShowEventForm = window.showEventForm;
