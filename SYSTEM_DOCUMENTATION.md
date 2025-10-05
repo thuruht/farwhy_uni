@@ -347,7 +347,7 @@ The project follows a strict code organization approach to maintain a clean code
 - **Legacy Directories**: All directories with prefixes `ye_olde_` and `yeo_` have been archived
 - **Unused Components**: The `src/wot/` directory and `public/jss/crap_unused_old/` have been archived
 - **Git Exclusion**: All archived content is excluded via .gitignore
-- **Documentation Consolidation**: Documentation has been reduced from 27 files to 5 core documents
+- **Documentation Structure**: Documentation maintained as 5 core files covering all system aspects
 
 ### API Endpoint Patterns
 

@@ -93,10 +93,12 @@ npx wrangler deploy
 
 ## Documentation
 
-### Primary Documentation
+### Documentation
 - **[SYSTEM_DOCUMENTATION.md](SYSTEM_DOCUMENTATION.md)** - Complete technical reference and architecture guide
 - **[API_REFERENCE.md](API_REFERENCE.md)** - Comprehensive API endpoint documentation  
 - **[CHANGELOG.md](CHANGELOG.md)** - Recent updates, fixes, and version history
+- **[scripts/README.md](scripts/README.md)** - Utility scripts documentation
+- **[style-guide/STYLE_GUIDE.md](style-guide/STYLE_GUIDE.md)** - Design system and UI patterns
 
 ### Quick Reference
 - **Admin Dashboard**: Access at `/admin.html` (requires login)
@@ -120,13 +122,11 @@ npx wrangler deploy
   - Removed concentric borders in blog and video sections
 - Complete API consistency verification and fixes
 - Mobile-responsive admin dashboard redesign  
-- Consolidated documentation (reduced from 27 to 5 files)
+- Consolidated documentation (reduced from 27 to 5 core files)
 - Enhanced menu management system with drag-and-drop
 - Multi-video featured content carousel
 - Improved events modal with archive toggle and pagination
 - Added GSAP library for smooth menu animations
-
-> **Historical Documentation**: Files in `ye_olde_docs/` are archived and may be outdated.
 
 ## License
 
