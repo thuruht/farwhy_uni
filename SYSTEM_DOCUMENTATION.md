@@ -27,7 +27,7 @@ The Farewell/Howdy Unified Project is a comprehensive content management system 
 - **Database**: Cloudflare D1 (SQLite)
 - **Storage**: Cloudflare R2 (Image storage)
 - **Authentication**: JWT tokens with session management
-- **Frontend**: Responsive HTML/CSS/JS with modal-based UI
+- **Frontend**: Responsive HTML/CSS/JS
 
 ### Key Capabilities
 
