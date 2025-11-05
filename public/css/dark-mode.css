@@ -6,6 +6,18 @@
     --dark-secondary-color: #03DAC6;
     --dark-text-color: #FFFFFF;
     --dark-text-secondary-color: #B3B3B3;
+
+    /* Farewell Dark Mode */
+    --farewell-dark-bg-color: #1a201a;
+    --farewell-dark-surface-color: #2a302a;
+    --farewell-dark-primary-color: #a0d0a0;
+    --farewell-dark-secondary-color: #b0ee00;
+
+    /* Howdy Dark Mode */
+    --howdy-dark-bg-color: #1c1a20;
+    --howdy-dark-surface-color: #2c2a30;
+    --howdy-dark-primary-color: #c0a0d0;
+    --howdy-dark-secondary-color: #d990ff;
 }
 
 body.dark-mode {
@@ -13,11 +25,31 @@ body.dark-mode {
     color: var(--dark-text-color);
 }
 
+body[data-state='farewell'].dark-mode {
+    background-color: var(--farewell-dark-bg-color);
+}
+
+body[data-state='howdy'].dark-mode {
+    background-color: var(--howdy-dark-bg-color);
+}
+
 .dark-mode .event-card,
 .dark-mode .menu-card,
 .dark-mode .modal-content {
     background-color: var(--dark-surface-color);
     border-color: var(--dark-text-secondary-color);
+}
+
+body[data-state='farewell'].dark-mode .event-card,
+body[data-state='farewell'].dark-mode .menu-card,
+body[data-state='farewell'].dark-mode .modal-content {
+    background-color: var(--farewell-dark-surface-color);
+}
+
+body[data-state='howdy'].dark-mode .event-card,
+body[data-state='howdy'].dark-mode .menu-card,
+body[data-state='howdy'].dark-mode .modal-content {
+    background-color: var(--howdy-dark-surface-color);
 }
 
 .dark-mode h1,
@@ -29,9 +61,37 @@ body.dark-mode {
     color: var(--dark-primary-color);
 }
 
+body[data-state='farewell'].dark-mode h1,
+body[data-state='farewell'].dark-mode h2,
+body[data-state='farewell'].dark-mode h3,
+body[data-state='farewell'].dark-mode h4,
+body[data-state='farewell'].dark-mode h5,
+body[data-state='farewell'].dark-mode h6 {
+    color: var(--farewell-dark-primary-color);
+}
+
+body[data-state='howdy'].dark-mode h1,
+body[data-state='howdy'].dark-mode h2,
+body[data-state='howdy'].dark-mode h3,
+body[data-state='howdy'].dark-mode h4,
+body[data-state='howdy'].dark-mode h5,
+body[data-state='howdy'].dark-mode h6 {
+    color: var(--howdy-dark-primary-color);
+}
+
 .dark-mode .btn-primary {
     background-color: var(--dark-primary-color);
     color: var(--dark-bg-color);
+}
+
+body[data-state='farewell'].dark-mode .btn-primary {
+    background-color: var(--farewell-dark-primary-color);
+    color: var(--farewell-dark-bg-color);
+}
+
+body[data-state='howdy'].dark-mode .btn-primary {
+    background-color: var(--howdy-dark-primary-color);
+    color: var(--howdy-dark-bg-color);
 }
 
 .dark-mode .btn-secondary {
@@ -40,9 +100,27 @@ body.dark-mode {
     border-color: var(--dark-primary-color);
 }
 
+body[data-state='farewell'].dark-mode .btn-secondary {
+    color: var(--farewell-dark-primary-color);
+    border-color: var(--farewell-dark-primary-color);
+}
+
+body[data-state='howdy'].dark-mode .btn-secondary {
+    color: var(--howdy-dark-primary-color);
+    border-color: var(--howdy-dark-primary-color);
+}
+
 .dark-mode .nav {
     background-color: var(--dark-surface-color);
     border-bottom-color: var(--dark-text-secondary-color);
+}
+
+body[data-state='farewell'].dark-mode .nav {
+    background-color: var(--farewell-dark-surface-color);
+}
+
+body[data-state='howdy'].dark-mode .nav {
+    background-color: var(--howdy-dark-surface-color);
 }
 
 .dark-mode .nav-link {
@@ -54,15 +132,43 @@ body.dark-mode {
     color: var(--dark-bg-color);
 }
 
+body[data-state='farewell'].dark-mode .nav-link:hover {
+    background-color: var(--farewell-dark-primary-color);
+    color: var(--farewell-dark-bg-color);
+}
+
+body[data-state='howdy'].dark-mode .nav-link:hover {
+    background-color: var(--howdy-dark-primary-color);
+    color: var(--howdy-dark-bg-color);
+}
+
 .dark-mode .form-control {
     background-color: var(--dark-surface-color);
     color: var(--dark-text-color);
     border-color: var(--dark-text-secondary-color);
 }
 
+body[data-state='farewell'].dark-mode .form-control {
+    background-color: var(--farewell-dark-surface-color);
+}
+
+body[data-state='howdy'].dark-mode .form-control {
+    background-color: var(--howdy-dark-surface-color);
+}
+
 .dark-mode .form-control:focus {
     border-color: var(--dark-primary-color);
     box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.2);
+}
+
+body[data-state='farewell'].dark-mode .form-control:focus {
+    border-color: var(--farewell-dark-primary-color);
+    box-shadow: 0 0 0 2px rgba(160, 208, 160, 0.2);
+}
+
+body[data-state='howdy'].dark-mode .form-control:focus {
+    border-color: var(--howdy-dark-primary-color);
+    box-shadow: 0 0 0 2px rgba(192, 160, 208, 0.2);
 }
 
 .dark-mode label {
