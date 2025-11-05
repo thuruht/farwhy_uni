@@ -862,3 +862,14 @@ font-family:'hnbi4',sans-serif;
   opacity: 0.8;
   transform: translateY(-2px);
 }
+
+#calendar-toggle {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    transform: rotate(-90deg);
+    transform-origin: top left;
+    display: flex;
+    flex-direction: row-reverse; /* To make the buttons read top-to-bottom after rotation */
+    z-index: 10; /* To make sure it's on top of the images */
+}

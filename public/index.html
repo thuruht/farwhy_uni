@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="./css/ccssss.css">
     <link rel="stylesheet" href="./css/events-modal.css">
     <link rel="stylesheet" href="./css/events-calendar-button.css">
+    <link rel="stylesheet" href="./css/dark-mode.css">
+    <link rel="stylesheet" href="./css/image-zoom.css">
  <!--   <link rel="stylesheet" href="./css/fleeting-journey.css">-->
     <style>
       .card {
@@ -389,6 +391,7 @@
               </nav>
           </div>
           <div class="right">
+              <button id="theme-switcher">Dark Mode</button>
               <h1 class="header-title">
                   <span class="span2">FAREWELL</span>
                   <span class="sulk drop-wiggle"> & HOWDY &nbsp;<span id="swico"><img src="./img/swap.png" class="insect flipp cocoon" alt="click-drag"></span></span>
@@ -402,7 +405,19 @@
   <main class="grid-container">
      <!-- Calendar -->
   <div class="card" id="calendar"> 
-      <img src="./img/fwcal.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer;">
+      <div id="calendar-images">
+        <img src="./img/fwcal.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer;" data-venue="farewell" data-type="cal">
+        <img src="./img/fw.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer; display: none;" data-venue="farewell" data-type="default">
+        <img src="./img/fwbw.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer; display: none;" data-venue="farewell" data-type="bw">
+        <img src="./img/hycal.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer; display: none;" data-venue="howdy" data-type="cal">
+        <img src="./img/hy.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer; display: none;" data-venue="howdy" data-type="default">
+        <img src="./img/hybw.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer; display: none;" data-venue="howdy" data-type="bw">
+      </div>
+      <div id="calendar-toggle">
+        <button data-type="cal">Calendar</button>
+        <button data-type="default">Default</button>
+        <button data-type="bw">B&W</button>
+      </div>
       <div id="credEt" class="dynamic-calendar-links"><hr>
       <p><small>
         calendar graphic (and the other swell graphics and general layout of this site) designed by the excellent <a href="https://austinchapmandesign.com/" target="_blank" rel="noopener">austin chapman</a> - however, any parts of the site that you dislike, that are animated annoyingly, bitcrushed, badly implemented, or the like, may instead be blamed on me (<a href="https://ntapkc.com" target="_blank" rel="noopener">jojo</a>), with the exception of show/event flyers, which are variously sourced</small></p>
@@ -653,6 +668,8 @@ document.addEventListener('DOMContentLoaded', function() {
   <script src="./jss/events-modal.js"></script>
   <script src="./jss/events-modal-calendar.js"></script>
   <script src="./jss/ifrevl.js"></script>
+  <script src="./jss/theme-switcher.js"></script>
+  <script src="./jss/calendar-toggle.js"></script>
   <script>
     function openEventsPopup() {
       // Get current venue state

@@ -1,0 +1,70 @@
+
+:root {
+    --dark-bg-color: #121212;
+    --dark-surface-color: #1E1E1E;
+    --dark-primary-color: #BB86FC;
+    --dark-secondary-color: #03DAC6;
+    --dark-text-color: #FFFFFF;
+    --dark-text-secondary-color: #B3B3B3;
+}
+
+body.dark-mode {
+    background-color: var(--dark-bg-color);
+    color: var(--dark-text-color);
+}
+
+.dark-mode .event-card,
+.dark-mode .menu-card,
+.dark-mode .modal-content {
+    background-color: var(--dark-surface-color);
+    border-color: var(--dark-text-secondary-color);
+}
+
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5,
+.dark-mode h6 {
+    color: var(--dark-primary-color);
+}
+
+.dark-mode .btn-primary {
+    background-color: var(--dark-primary-color);
+    color: var(--dark-bg-color);
+}
+
+.dark-mode .btn-secondary {
+    background-color: transparent;
+    color: var(--dark-primary-color);
+    border-color: var(--dark-primary-color);
+}
+
+.dark-mode .nav {
+    background-color: var(--dark-surface-color);
+    border-bottom-color: var(--dark-text-secondary-color);
+}
+
+.dark-mode .nav-link {
+    color: var(--dark-text-color);
+}
+
+.dark-mode .nav-link:hover {
+    background-color: var(--dark-primary-color);
+    color: var(--dark-bg-color);
+}
+
+.dark-mode .form-control {
+    background-color: var(--dark-surface-color);
+    color: var(--dark-text-color);
+    border-color: var(--dark-text-secondary-color);
+}
+
+.dark-mode .form-control:focus {
+    border-color: var(--dark-primary-color);
+    box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.2);
+}
+
+.dark-mode label {
+    color: var(--dark-text-color);
+}

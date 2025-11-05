@@ -29,6 +29,243 @@ The Farewell/Howdy Unified Project is a comprehensive content management system 
 - **Authentication**: JWT tokens with session management
 - **Frontend**: Responsive HTML/CSS/JS
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
++-
+
+
+
+
+
+
+
+
+z
+
 ### Key Capabilities
 
 - **Event Management**: Create, edit, and display events for both venues
@@ -47,13 +284,16 @@ The Farewell/Howdy Unified Project is a comprehensive content management system 
 ```
 src/
 ├── index.ts              # Main router and endpoint definitions
+├── admin.html            # Admin dashboard served from src
+├── wrangler.jsonc        # Wrangler configuration for src
 ├── handlers/             # Feature-specific handlers
 │   ├── auth.ts          # Authentication logic
 │   ├── events.ts        # Event management
 │   ├── blog.ts          # Blog post management
 │   ├── menu.ts          # Menu item management
 │   ├── hours.ts         # Business hours
-│   └── featured.ts      # Featured content
+│   ├── featured.ts      # Featured content
+│   └── sync.ts          # Sync logic
 ├── middleware/
 │   └── auth.ts          # JWT authentication middleware
 └── types/
@@ -66,12 +306,26 @@ src/
 public/
 ├── admin.html           # Admin dashboard (SPA)
 ├── index.html           # Public homepage
+├── events.html          # Events page
+├── login.html           # Login page
+├── ...                  # Other HTML files
 ├── jss/                 # JavaScript modules
 │   ├── admin-unified.js # Main admin functionality
 │   ├── menu-management.js # Menu CRUD operations
 │   ├── featured-videos-manager.js # Video management
-│   └── script.js        # Public site functionality
-└── css/                 # Stylesheets (responsive design)
+│   ├── events-modal.js  # Events modal functionality
+│   ├── ics-generator.js # Calendar download functionality
+│   ├── script.js        # Public site functionality
+│   └── ...              # Other JS files and libraries (e.g., gsap)
+├── css/                 # Stylesheets
+│   ├── admin-header.css # Admin header styling
+│   ├── dark-mode.css    # Dark mode theme
+│   ├── events-page.css  # Events page styling
+│   └── ...              # Other CSS files
+├── img/                 # Images
+├── fnt/                 # Fonts
+├── menu/                # Menu-related assets
+└── u/                   # Blog/news-related assets
 ```
 
 ---
