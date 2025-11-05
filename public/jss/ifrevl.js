@@ -145,8 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // For event-related .open-popup links only (backward compatibility)
-    if (link && link instanceof HTMLAnchorElement && 
-        link.href.includes('shows') || link.href.includes('events')) {
+    if (link && link instanceof HTMLAnchorElement && (link.href.includes('shows') || link.href.includes('events'))) {
         event.preventDefault(); // Prevent default link navigation
 
         // Instead of opening a popup, trigger the events modal
