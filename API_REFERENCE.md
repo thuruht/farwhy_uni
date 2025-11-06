@@ -30,7 +30,7 @@ This document lists all API endpoints available in the Farewell/Howdy Cloudflare
     - `includePast` (boolean) - Include past events when set to 'true'
     - `venue` (string) - Filter by venue name
     - `limit` (number) - Maximum number of events to return (default: 20)
-- `GET /api/events/:id` - Get specific event by ID
+- `GET /api/events/:id` - Get specific event by ID (mock endpoint)
 - `GET /api/slideshow` - Alternative slideshow endpoint
 
 ### Blog/News
@@ -41,12 +41,12 @@ This document lists all API endpoints available in the Farewell/Howdy Cloudflare
 
 ### Menu
 - `GET /api/menu` - Get unified menu items (all active items)
-- `GET /api/venues/:venue/menu` - Get menu for specific venue
-- `GET /api/venues/:venue/menu-items` - Get menu items for specific venue
+- `GET /api/venues/:venue/menu` - Get menu for a specific venue.
+- `GET /api/venues/:venue/menu-items` - Get all active menu items, ignoring the venue parameter.
 
 ### Featured Content
 - `GET /api/featured` - Get main featured content
-- `GET /api/venues/:venue/featured` - Get venue-specific featured content
+- `GET /api/venues/:venue/featured` - Get venue-specific featured content (mock endpoint, returns an empty array)
 
 ### Business Hours
 - `GET /api/hours` - Get business hours for all venues
@@ -64,27 +64,31 @@ This document lists all API endpoints available in the Farewell/Howdy Cloudflare
 - `PUT /api/admin/events/:id` - Update existing event
 - `DELETE /api/admin/events/:id` - Delete event
 - `POST /api/admin/events/flyer` - Upload event flyer image
+- `POST /api/admin/events/sync` - Synchronize events (specific functionality may vary)
 
 ### Blog Management
 - `GET /api/admin/blog/posts` - List all blog posts (admin view)
 - `POST /api/admin/blog/posts` - Create new blog post
+- `POST /api/admin/blog` - Alias for creating a new blog post
 - `PUT /api/admin/blog/posts/:id` - Update existing blog post
+- `PUT /api/admin/blog/:id` - Alias for updating an existing blog post
 - `DELETE /api/admin/blog/posts/:id` - Delete blog post
+- `DELETE /api/admin/blog/:id` - Alias for deleting a blog post
 - `GET /api/admin/blog/featured` - Get featured blog content (admin)
 - `POST /api/admin/blog/featured` - Set featured blog content
 - `POST /api/admin/blog/upload-image` - Upload blog post image
 
 ### Menu Management
-- `GET /api/admin/venues/:venue/menu` - Get menu info for venue
-- `POST /api/admin/venues/:venue/menu` - Create new menu for venue
-- `PUT /api/admin/venues/:venue/menu/:id` - Update menu info
-- `DELETE /api/admin/venues/:venue/menu/:id` - Delete menu (restricted)
-- `GET /api/admin/menu-items` - Get all menu items
+- `GET /api/admin/venues/:venue/menu` - Get menu info for venue (mock endpoint)
+- `POST /api/admin/venues/:venue/menu` - Create new menu for venue (mock endpoint)
+- `PUT /api/admin/venues/:venue/menu/:id` - Update menu info (mock endpoint)
+- `DELETE /api/admin/venues/:venue/menu/:id` - Delete menu (restricted, mock endpoint)
+- `GET /api/admin/menu-items` - Get all menu items for the single-menu system
 - `POST /api/admin/menu-items` - Create new menu item
 - `PUT /api/admin/menu-items/:id` - Update menu item
 - `DELETE /api/admin/menu-items/:id` - Delete menu item
-- `GET /api/admin/venues/:venue/menu-items` - Get menu items for specific venue
-- `POST /api/admin/venues/:venue/menu-items` - Create menu item for specific venue
+- `GET /api/admin/venues/:venue/menu-items` - Get all menu items for the single-menu system, ignoring the venue parameter
+- `POST /api/admin/venues/:venue/menu-items` - Create a new menu item, ignoring the venue parameter
 - `POST /api/admin/menu-items/reorder` - Reorder menu items
 - `POST /api/admin/menu-items/upload-image` - Upload menu item image
 
