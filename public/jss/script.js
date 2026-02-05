@@ -395,15 +395,34 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      flyers.forEach((flyer) => {
+      flyers.forEach(flyer => {
         const flyerItem = document.createElement('div');
         flyerItem.className = 'flyer-item';
-        flyerItem.innerHTML = `
-          <h3>${flyer.title}</h3>
-          <p>${flyer.description}</p>
-          <p><strong>Date:</strong> ${flyer.date}</p>
-          <p><strong>Time:</strong> ${flyer.time}</p>
-        `;
+
+        const h3 = document.createElement('h3');
+        h3.textContent = flyer.title;
+        flyerItem.appendChild(h3);
+
+        const descP = document.createElement('p');
+        descP.textContent = flyer.description;
+        flyerItem.appendChild(descP);
+
+        const dateP = document.createElement('p');
+        const dateStrong = document.createElement('strong');
+        dateStrong.textContent = 'Date: ';
+        dateP.appendChild(dateStrong);
+        // Use createTextNode to safely append the date string
+        dateP.appendChild(document.createTextNode(flyer.date));
+        flyerItem.appendChild(dateP);
+
+        const timeP = document.createElement('p');
+        const timeStrong = document.createElement('strong');
+        timeStrong.textContent = 'Time: ';
+        timeP.appendChild(timeStrong);
+        // Use createTextNode to safely append the time string
+        timeP.appendChild(document.createTextNode(flyer.time));
+        flyerItem.appendChild(timeP);
+
         archiveContent.appendChild(flyerItem);
       });
     } catch (error) {
@@ -639,40 +658,82 @@ function setupEventsPage() {
   // Function to render events based on current filters
   function renderEvents() {
     if (!eventsList) return;
+
+    // Clear previous events
+    eventsList.innerHTML = '';
     
     // Apply venue filter
     let filteredEvents = allEvents;
     if (venueFilter && venueFilter.value !== 'all') {
       filteredEvents = allEvents.filter(event => event.venue === venueFilter.value);
     }
-    
+
     if (filteredEvents.length === 0) {
-      eventsList.innerHTML = '<div class="empty-state">No events found matching your criteria.</div>';
+      const emptyState = document.createElement('div');
+      emptyState.className = 'empty-state';
+      emptyState.textContent = 'No events found matching your criteria.';
+      eventsList.appendChild(emptyState);
       return;
     }
-    
-    // Generate HTML for each event
-    eventsList.innerHTML = filteredEvents.map(event => {
-      const formattedDate = event.date ? new Date(event.date).toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+
+    // Create and append each event item safely
+    filteredEvents.forEach(event => {
+      const eventItem = document.createElement('div');
+      eventItem.className = 'event-item';
+
+      if (event.imageUrl) {
+        const img = document.createElement('img');
+        img.src = event.imageUrl;
+        img.alt = event.title || 'Event Flyer';
+        eventItem.appendChild(img);
+      } else {
+        const noImage = document.createElement('div');
+        noImage.className = 'no-image';
+        noImage.style.cssText = 'width: 100px; height: 100px; background: #333; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px;';
+        noImage.textContent = 'No Image';
+        eventItem.appendChild(noImage);
+      }
+
+      const details = document.createElement('div');
+      details.className = 'event-details';
+
+      const h3 = document.createElement('h3');
+      h3.textContent = event.title;
+      details.appendChild(h3);
+
+      const dateP = document.createElement('p');
+      dateP.textContent = event.date ? new Date(event.date).toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
       }) : 'Date TBD';
+      details.appendChild(dateP);
+
+      const venueP = document.createElement('p');
+      const strong = document.createElement('strong');
+      strong.textContent = 'Venue: ';
+      const venueSpan = document.createElement('span');
+      venueSpan.className = `venue-${event.venue}`;
+      venueSpan.textContent = event.venue;
+      venueP.appendChild(strong);
+      venueP.appendChild(venueSpan);
+      details.appendChild(venueP);
+
+      const descP = document.createElement('p');
+      descP.textContent = event.description || '';
+      details.appendChild(descP);
+
+      if (event.ticketLink) {
+        const ticketLink = document.createElement('a');
+        ticketLink.href = event.ticketLink;
+        ticketLink.target = '_blank';
+        ticketLink.rel = 'noopener noreferrer';
+        ticketLink.className = 'event-ticket-link';
+        ticketLink.textContent = event.price ? `Tickets ${event.price}` : 'Get Tickets';
+        details.appendChild(ticketLink);
+      }
       
-      return `
-        <div class="event-item">
-          ${event.imageUrl ? `<img src="${event.imageUrl}" alt="${event.title || 'Event Flyer'}">` : '<div class="no-image" style="width: 100px; height: 100px; background: #333; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px;">No Image</div>'}
-          <div class="event-details">
-            <h3>${event.title}</h3>
-            <p>${formattedDate}</p>
-            <p><strong>Venue:</strong> <span class="venue-${event.venue}">${event.venue}</span></p>
-            <p>${event.description || ''}</p>
-            ${event.ticketLink ? `<a href="${event.ticketLink}" target="_blank" rel="noopener noreferrer" class="event-ticket-link">${event.price ? `Tickets ${event.price}` : 'Get Tickets'}</a>` : ''}
-          </div>
-        </div>
-      `;
-    }).join('');
+      eventItem.appendChild(details);
+      eventsList.appendChild(eventItem);
+    });
   }
   
   // Event handlers
@@ -827,4 +888,3 @@ window.addEventListener('message', function(event) {
 
 // Make function globally available
 window.onIframeLoad = onIframeLoad;
-
