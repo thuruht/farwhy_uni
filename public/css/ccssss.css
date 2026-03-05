@@ -2,20 +2,20 @@
 
 :root {
     /* Colors */
-    --pupil: #d990ff;
-    --redd: #ff2b13;
-    --lima: #b0ee00;
-    --blew: #00e2ff;
-    --primary-bg-color: #b0ee00;
-    --secondary-bg-color: #D990FF;
-    --accent-color: #ff2b13;
-    --text-color: #010101;
+    --pupil: #dc80fc;
+    --redd: #c92010;
+    --lima: #c9cf22;
+    --blew: #11c0c9;
+    --primary-bg-color: #d9ff42;
+    --secondary-bg-color: #dc80fc;
+    --accent-color: #c92010;
+    --text-color: #392929;
     --header-text-shadow: rgba(0, 0, 0, 0.5);
-    --nav-bg-color: #ffffff;
-    --nav-border-color: #000000;
-    --card-bg-color: #f9f9f9;
-    --button-bg-color: #b0ee00;
-    --button-text-color: #000000;
+    --nav-bg-color: #f0f0f0;
+    --nav-border-color: #3f3030;
+    --card-bg-color: #fcfffc;
+    --button-bg-color: #c9cf22;
+    --button-text-color: #3f0000;
     --header-bg: var(--primary-bg-color) url('../img/bg4.png') center/cover no-repeat; /* Combined background */
 	--howder-bg: var(--secondary-bg-color) url('../img/bg7.png') center/cover no-repeat;
     /* Fonts */
@@ -118,7 +118,7 @@ body {
   margin: 0 auto;
   margin-bottom:24px;
   font-family: var(--font-hnm11);
-  background-color: #f0ffff;
+  background-color: #c9c9c9
   color: var(--text-color);
   padding: var(--padding-medium);
   text-align: center;
