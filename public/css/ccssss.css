@@ -118,7 +118,7 @@ body {
   margin: 0 auto;
   margin-bottom:24px;
   font-family: var(--font-hnm11);
-  background-color: #c9c9c9
+  background-color: #c9c9c9;
   color: var(--text-color);
   padding: var(--padding-medium);
   text-align: center;
