@@ -421,129 +421,141 @@
   </div>
 
 <!-- Newsletter Card -->
-<div class="card" id="newsletter" style="display:none;">
+<div class="card" id="featured-videos-card">
   <section style="width:100%;">
-      <h2>NEWSLETTER</h2>
-      <h3>Sign up or miss out!</h3>
-      <img src="./img/fwm.png" alt="mascot" class="nicic flipp squi-rmbreth">
-
-      <hr style="color: transparent; padding:24px; border: 0px transparent;">
-
-
-      <!-- Kit Form Container -->
-      <div id="kit_embed_shell" style="width:100%; max-width:468px; margin:0 auto; padding:0; background:transparent;">
-          <!-- Custom Kit Form that matches your original design -->
-          <form id="kit-newsletter-form" style="margin:0; padding:0; width:100%;">
-              <div style="width:100%; padding:0;">
-                  <!-- Email Field -->
-                  <div style="margin-bottom:12px; width:100%;">
-                      <input type="email" name="email_address" id="kit-email" 
-                             style="width:100%; height:35px; padding:10px;
-                                    border:1px solid var(--nav-border-color);
-                                    background:rgba(255,255,255,0.9);
-                                    font-family:var(--font-hnm11); font-size:1rem;
-                                    box-sizing:border-box;"
-                             placeholder="youremail@fart.com" required>
-                  </div>
-
-                  <!-- Response Messages -->
-                  <div id="kit-responses" style="width:100%; margin:0; padding:0;">
-                      <div id="kit-error-response" style="display:none; color:#ea4110; margin:8px 0; padding:8px; background:#fde8e2; border:1px solid #f2643b; border-radius:4px; font-size:14px;"></div>
-                      <div id="kit-success-response" style="display:none; color:#0c905c; margin:8px 0; padding:8px; background:#d3fbeb; border:1px solid #10bf7a; border-radius:4px; font-size:14px;"></div>
-                  </div>
-
-                  <div style="width:100%; margin:0; padding:0;">
-                      <button type="submit" id="kit-submit-btn"
-                              style="width:100%; height:35px; margin:12px 0 0 0;
-                                     padding:0; background:var(--button-bg-color);
-                                     border:1px solid var(--nav-border-color);
-                                     color:var(--button-text-color); font-family:var(--font-main);
-                                     cursor:pointer; transition:all var(--transition-speed) ease;
-                                     box-sizing:border-box; position:relative; font-weight:bold;">
-                          <span id="kit-submit-text">SUBSCRIBE</span>
-                          <div id="kit-spinner" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);">
-                              <div style="width:12px; height:12px; background-color:currentColor; opacity:0.3; border-radius:100%; display:inline-block; animation:kit-bounce 1.4s infinite ease-in-out both;"></div>
-                          </div>
-                      </button>
-                  </div>
-              </div>
-          </form>
-      </div>
-
-      <hr style="color:transparent; padding:24px; border:0;">
+    <h2>FEATURED</h2>
+    <img src="./img/fwm.png" alt="mascot" class="nicic flipp squi-rmbreth">
+    <div id="index-featured-content" style="width:100%;">
+      <div style="text-align:center; padding:1rem; opacity:0.5;">Loading...</div>
+    </div>
   </section>
+</div>
 
 <style>
-@keyframes kit-bounce {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1); }
+#featured-videos-card {
+  background: var(--secondary-bg-color);
+  text-align: center;
+  padding: var(--padding-medium);
+  width: 96%;
+  margin: 0 auto;
+  border: 1px solid var(--nav-border-color);
+  grid-column: 2;
+  grid-row: 1;
+}
+#featured-videos-card h2 { color: #fff; -webkit-text-stroke: 1px #000; }
+body.howdy-active #featured-videos-card { background: var(--primary-bg-color); }
+
+#featured-videos-card .embed-container {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  width: 100%;
+}
+#featured-videos-card .embed-container iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: 0;
+}
+#featured-videos-card .yt-carousel { width: 100%; }
+#featured-videos-card .yt-slide .embed-container { margin-bottom: 0; }
+#featured-videos-card .yt-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+}
+#featured-videos-card .yt-prev,
+#featured-videos-card .yt-next {
+  padding: 0.3rem 0.9rem;
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
+  border: 1px solid var(--nav-border-color);
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+#featured-videos-card .yt-prev:hover,
+#featured-videos-card .yt-next:hover { opacity: 0.8; }
+#featured-videos-card .yt-indicator {
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  opacity: 0.7;
 }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('kit-newsletter-form');
-    if (form) {
-        form.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            
-            const email = document.getElementById('kit-email').value;
-            const submitBtn = document.getElementById('kit-submit-btn');
-            const submitText = document.getElementById('kit-submit-text');
-            const spinner = document.getElementById('kit-spinner');
-            const errorDiv = document.getElementById('kit-error-response');
-            const successDiv = document.getElementById('kit-success-response');
-            
-            // Hide previous messages
-            errorDiv.style.display = 'none';
-            successDiv.style.display = 'none';
-            
-            // Show loading state
-            submitText.style.opacity = '0';
-            spinner.style.display = 'block';
-            submitBtn.disabled = true;
-            submitBtn.style.cursor = 'not-allowed';
-            
-            try {
-                // Use Kit's public API endpoint with proper headers
-                const response = await fetch('https://app.kit.com/forms/8151329/subscriptions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email_address: email,
-                        // Include the UID from your Kit form
-                        uid: 'ee38b9f6eb'
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    successDiv.textContent = 'Success! Now check your email to confirm your subscription.';
-                    successDiv.style.display = 'block';
-                    form.reset();
-                } else {
-                    throw new Error(result.message || 'Subscription failed');
-                }
-            } catch (error) {
-                console.error('Kit subscription error:', error);
-                errorDiv.textContent = 'Something went wrong. Please try again.';
-                errorDiv.style.display = 'block';
-            } finally {
-                // Reset button state
-                submitText.style.opacity = '1';
-                spinner.style.display = 'none';
-                submitBtn.disabled = false;
-                submitBtn.style.cursor = 'pointer';
-            }
-        });
+(function() {
+  function extractVideoId(url) {
+    try {
+      if (url.includes('youtube.com/watch')) return new URL(url).searchParams.get('v');
+      if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split('?')[0];
+      if (url.includes('youtube.com/embed/')) return url.split('youtube.com/embed/')[1].split('?')[0];
+    } catch(e) {}
+    return null;
+  }
+
+  function embedHtml(videoId) {
+    return `<div class="embed-container"><iframe src="https://www.youtube.com/embed/${videoId}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+  }
+
+  window.indexCarouselNav = function(id, dir) {
+    const carousel = document.getElementById(id);
+    if (!carousel) return;
+    const slides = carousel.querySelectorAll('.yt-slide');
+    let active = [...slides].findIndex(s => s.style.display !== 'none');
+    if (active === -1) active = 0;
+    slides[active].style.display = 'none';
+    const next = (active + dir + slides.length) % slides.length;
+    slides[next].style.display = 'block';
+    const ind = carousel.querySelector('.yt-indicator');
+    if (ind) ind.textContent = `${next + 1} / ${slides.length}`;
+  };
+
+  async function loadIndexFeatured() {
+    const el = document.getElementById('index-featured-content');
+    if (!el) return;
+    try {
+      const res = await fetch('/api/featured');
+      if (!res.ok) throw new Error();
+      const { data } = await res.json();
+      const raw = data && (data.youtube || data.youtubeUrl);
+      if (!raw) { el.innerHTML = ''; return; }
+      const urls = (Array.isArray(raw) ? raw : raw.split(',').map(u => u.trim())).filter(Boolean);
+      const ids = urls.map(extractVideoId).filter(Boolean);
+      if (!ids.length) { el.innerHTML = ''; return; }
+
+      if (ids.length === 1) {
+        el.innerHTML = embedHtml(ids[0]);
+      } else {
+        const cid = 'idx-carousel-' + Math.random().toString(36).slice(2, 7);
+        const slides = ids.map((id, i) =>
+          `<div class="yt-slide" style="display:${i===0?'block':'none'}">${embedHtml(id)}</div>`
+        ).join('');
+        el.innerHTML = `<div id="${cid}" class="yt-carousel">
+          ${slides}
+          <div class="yt-controls">
+            <button class="yt-prev" onclick="indexCarouselNav('${cid}',-1)">&laquo; PREV</button>
+            <span class="yt-indicator">1 / ${ids.length}</span>
+            <button class="yt-next" onclick="indexCarouselNav('${cid}',1)">NEXT &raquo;</button>
+          </div>
+        </div>`;
+      }
+    } catch(e) {
+      el.innerHTML = '';
     }
-});
+  }
+
+  document.addEventListener('DOMContentLoaded', loadIndexFeatured);
+})();
 </script>
-</div>
+
+      <!-- Contact -->
+
 
       <!-- Contact -->
      <div class="card" id="contact">

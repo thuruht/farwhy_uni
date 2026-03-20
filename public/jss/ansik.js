@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /*
    * SUPER-SUBTLE SCROLLTRIGGER COLOR TWEEN
    * Gradually shifts the body's background
-   * from #f0ffff to #ffffff over 2000px of scroll.
+   * from current to #f9c0c0 over 2000px of scroll.
    */
   gsap.to("body", {
     scrollTrigger: {
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
       end: 1200,    // Extend the distance to make the color shift extra subtle
       scrub: 1
     },
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f9c0c0",
     ease: "none"
   });
 ;

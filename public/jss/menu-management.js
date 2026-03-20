@@ -123,7 +123,7 @@ async function loadMenus(venue) {
         // SIMPLIFIED LOGIC: Only Farewell has a menu, Howdy doesn't
         if (venue !== 'farewell') {
             menuList.innerHTML = `<div class="info-message">
-                <p>Howdy Thrift doesn't have a digital menu. Only Farewell Cafe has menu management.</p>
+                <p>Howdy doesn't have a digital menu. Only Farewell Cafe has menu management.</p>
             </div>`;
             return;
         }
