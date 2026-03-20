@@ -15,7 +15,7 @@
 async function fetchUpcomingEvents(venue = null) {
   const BASE_URL = window.location.origin;
   try {
-    const url = venue
+    const url = (venue && venue !== 'both')
       ? `${BASE_URL}/list/${venue}`
       : `${BASE_URL}/api/events`;
 
@@ -26,7 +26,7 @@ async function fetchUpcomingEvents(venue = null) {
     const data = await response.json();
     let events = Array.isArray(data) ? data : (data.data || []);
 
-    if (venue) {
+    if (venue && venue !== 'both') {
       events = events.filter(e => e.venue === venue);
     }
 
@@ -253,98 +253,24 @@ async function downloadIcsFile(e, venue = null, futureOnly = false) {
 
 // Initialize when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  // Find all .cal-link-ics elements and attach the event handler
   const icsLinks = document.querySelectorAll('.cal-link-ics');
-  
-  // Function to update calendar button text based on venue
-  function updateCalendarButtonText() {
-    const isEventsPage = window.location.pathname.endsWith('events.html') || 
-                        window.location.pathname.includes('/events.html');
-    
-    if (isEventsPage) {
-      const calendarButtons = document.querySelectorAll('.cal-link-ics.event-calendar-download');
-      
-      // Use the currentVenue from the events page if available
-      if (typeof currentVenue !== 'undefined') {
-        calendarButtons.forEach(button => {
-          const calendarIcon = '<span class="calendar-icon">📅</span> ';
-          
-          if (currentVenue === 'farewell') {
-            button.innerHTML = `${calendarIcon}DOWNLOAD FAREWELL EVENTS`;
-          } else if (currentVenue === 'howdy') {
-            button.innerHTML = `${calendarIcon}DOWNLOAD HOWDY EVENTS`;
-          } else {
-            button.innerHTML = `${calendarIcon}DOWNLOAD ALL EVENTS`;
-          }
-        });
-      }
-    }
-  }
-  
-  // Update button text on page load
-  updateCalendarButtonText();
-  
-  // Watch for venue tab changes in events.html
-  if (window.location.pathname.endsWith('events.html') || 
-      window.location.pathname.includes('/events.html')) {
-    
-    // Create a MutationObserver to watch for class changes on venue tabs
-    const observer = new MutationObserver(mutations => {
-      mutations.forEach(mutation => {
-        if (mutation.type === 'attributes' && 
-            mutation.attributeName === 'class' && 
-            mutation.target.classList.contains('venue-tab') &&
-            typeof currentVenue !== 'undefined') {
-          
-          // Update button text when venue changes
-          updateCalendarButtonText();
-        }
-      });
-    });
-    
-    // Start observing venue tabs
-    const venueTabs = document.querySelectorAll('.venue-tab');
-    venueTabs.forEach(tab => {
-      observer.observe(tab, { attributes: true });
-    });
-    
-    // Also listen for the custom event that might be triggered when venue changes
-    document.addEventListener('venueChanged', () => {
-      updateCalendarButtonText();
-    });
-  }
-  
+
   // Attach click event to calendar download links
   icsLinks.forEach(link => {
     link.addEventListener('click', (e) => {
-      // Check if we're on the events.html page
-      const isEventsPage = window.location.pathname.endsWith('events.html') || 
-                          window.location.pathname.includes('/events.html');
-      
+      const isEventsPage = window.location.pathname.includes('events.html');
+      let venue;
       if (isEventsPage) {
-        // Use the currentVenue from the events page if available
-        if (typeof currentVenue !== 'undefined') {
-          console.log(`[ICS] Generating calendar for venue: ${currentVenue} (from events.html)`);
-          
-          // For "both" venue option, pass null to include all venues
-          const venueParam = currentVenue === 'both' ? null : currentVenue;
-          
-          // Only include future events
-          downloadIcsFile(e, venueParam, true);
-        } else {
-          console.log(`[ICS] Generating calendar for all venues (from events.html, currentVenue not found)`);
-          downloadIcsFile(e, null, true);
-        }
+        venue = window.currentVenue || 'both';
       } else {
-        // On other pages, get the current venue state from the body
-        const currentState = document.body?.dataset.state || 'farewell';
-        console.log(`[ICS] Generating calendar for venue: ${currentState}`);
-        
-        // Download the ICS file for the current venue only
-        downloadIcsFile(e, currentState, true);
+        venue = document.body?.dataset.state || 'farewell';
       }
+      // 'both' means all venues — pass null
+      const venueParam = (venue === 'both') ? null : venue;
+      console.log(`[ICS] Generating calendar for venue: ${venue}`);
+      downloadIcsFile(e, venueParam, true);
     });
   });
-  
+
   console.log(`[ICS] Initialized calendar downloads for ${icsLinks.length} links`);
 });
