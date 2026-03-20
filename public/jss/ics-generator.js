@@ -14,95 +14,23 @@
  */
 async function fetchUpcomingEvents(venue = null) {
   const BASE_URL = window.location.origin;
-  const now = new Date();
-  
   try {
-    // Define possible API endpoints to try
-    const endpoints = venue 
-      ? [`${BASE_URL}/list/${venue}`, `${BASE_URL}/api/list/${venue}`]
-      : [`${BASE_URL}/list/all`, `${BASE_URL}/api/list/all`, `${BASE_URL}/api/events`];
-    
-    console.log(`[ICS] Fetching events for venue: ${venue || 'ALL VENUES'}`);
-    
-    // Try each endpoint until one works
-    let events = [];
-    let successUrl = null;
-    
-    for (const url of endpoints) {
-      try {
-        console.log(`[ICS] Trying to fetch events from: ${url}`);
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        
-        const response = await fetch(url, {
-          signal: controller.signal,
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache'
-          }
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (response.ok) {
-          const data = await response.json();
-          events = Array.isArray(data) ? data : (data.data || []);
-          successUrl = url;
-          console.log(`[ICS] Successfully fetched ${events.length} events from ${url}`);
-          
-          // If we need to filter by venue
-          if (venue && events.length > 0) {
-            const venueSpecificEvents = events.filter(event => event.venue === venue);
-            console.log(`[ICS] Filtered to ${venueSpecificEvents.length} events for venue ${venue}`);
-            events = venueSpecificEvents;
-          }
-          
-          // Only break if we got events
-          if (events.length > 0) {
-            break;
-          }
-        }
-      } catch (err) {
-        console.warn(`[ICS] Failed to fetch from ${url}:`, err);
-        // Continue to the next URL
-      }
+    const url = venue
+      ? `${BASE_URL}/list/${venue}`
+      : `${BASE_URL}/api/events`;
+
+    console.log(`[ICS] Fetching events from: ${url}`);
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const data = await response.json();
+    let events = Array.isArray(data) ? data : (data.data || []);
+
+    if (venue) {
+      events = events.filter(e => e.venue === venue);
     }
-    
-    if (events.length === 0) {
-      // If all endpoints failed, try a more aggressive fallback
-      try {
-        const fallbackUrl = `${BASE_URL}/api/events?includePast=false&limit=100`;
-        console.log(`[ICS] Trying emergency fallback endpoint: ${fallbackUrl}`);
-        const response = await fetch(fallbackUrl);
-        
-        if (response.ok) {
-          const responseData = await response.json();
-          const allEvents = Array.isArray(responseData) ? responseData : (responseData.data || []);
-          
-          // Filter for upcoming events and specific venue if needed
-          events = allEvents.filter(event => {
-            const eventDate = new Date(event.date);
-            const isUpcoming = eventDate >= now;
-            const venueMatches = venue ? event.venue === venue : true;
-            return isUpcoming && venueMatches;
-          });
-          
-          console.log(`[ICS] Emergency fallback retrieved ${events.length} upcoming events`);
-          
-          // Log the venues found to help debug
-          if (events.length > 0) {
-            const venues = [...new Set(events.map(e => e.venue))];
-            console.log(`[ICS] Events found for venues: ${venues.join(', ')}`);
-          }
-        }
-      } catch (fallbackError) {
-        console.error('[ICS] Emergency fallback fetch failed:', fallbackError);
-      }
-    }
-    
-    // Sort events by date (soonest first)
+
     return events.sort((a, b) => new Date(a.date) - new Date(b.date));
-    
   } catch (error) {
     console.error('[ICS] Error fetching events:', error);
     return [];
@@ -274,10 +202,9 @@ async function downloadIcsFile(e, venue = null, futureOnly = false) {
     // Filter for future events if requested
     let filteredEvents = events;
     if (futureOnly) {
-      const now = new Date();
-      filteredEvents = events.filter(event => {
-        return new Date(event.date) >= now;
-      });
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      filteredEvents = events.filter(event => event.date.split('T')[0] >= todayStr);
       console.log(`[ICS] Filtered to ${filteredEvents.length} future events from ${events.length} total events`);
     }
     
