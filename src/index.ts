@@ -460,6 +460,7 @@ adminApi.get('/booking/submissions', (c) => handleBooking(c, 'list'));
 adminApi.get('/booking/unseen-count', (c) => handleBooking(c, 'unseen-count'));
 adminApi.post('/booking/mark-all-seen', (c) => handleBooking(c, 'mark-all-seen'));
 adminApi.post('/booking/submissions/:id/seen', (c) => handleBooking(c, 'mark-seen'));
+adminApi.delete('/booking/submissions/:id', (c) => handleBooking(c, 'delete'));
 adminApi.post('/hours', (c) => handleHours(c, 'create'));
 adminApi.put('/hours/:id', (c) => handleHours(c, 'update'));
 adminApi.delete('/hours/:id', (c) => handleHours(c, 'delete'));

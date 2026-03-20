@@ -1580,11 +1580,12 @@ async function loadDashboardStats() {
     try {
         const bc = await api.get('/api/admin/booking/unseen-count');
         const badge = document.getElementById('booking-badge');
-        if (badge && bc.count > 0) {
-            badge.textContent = bc.count;
-            badge.style.display = 'inline';
-            showAlert(`You have ${bc.count} new booking submission${bc.count > 1 ? 's' : ''}!`, 'info');
-        }
+        const statEl = document.getElementById('stats-unseen-bookings');
+        const card = document.getElementById('booking-stat-card');
+        if (statEl) statEl.textContent = bc.count;
+        if (badge) { badge.textContent = bc.count; badge.style.display = bc.count > 0 ? 'inline' : 'none'; }
+        if (card) card.style.outline = bc.count > 0 ? '2px solid #b0ee00' : '';
+        if (bc.count > 0) showAlert(`${bc.count} new booking submission${bc.count > 1 ? 's' : ''} — click New Bookings to review.`, 'info');
     } catch(e) {}
     console.log('Loading dashboard stats...');
     
@@ -3044,6 +3045,7 @@ async function loadBookingSubmissions() {
                         ${s.notes ? `<div style="margin-top:0.4rem; font-style:italic;">${s.notes}</div>` : ''}
                     </div>
                     ${!s.seen ? `<button onclick="markBookingSeen(${s.id})" style="margin-top:0.5rem; padding:0.3rem 0.8rem; font-size:0.85rem; cursor:pointer;">Mark seen</button>` : '<span style="font-size:0.8rem; opacity:0.5;">✓ seen</span>'}
+                    <button onclick="deleteBooking(${s.id})" style="margin-top:0.5rem; margin-left:0.5rem; padding:0.3rem 0.8rem; font-size:0.85rem; cursor:pointer; background:#ff2b13; color:#fff; border:none;">Delete</button>
                 </div>`;
             });
         }
@@ -3061,4 +3063,11 @@ async function markBookingSeen(id) {
 async function markAllBookingsSeen() {
     await api.post('/api/admin/booking/mark-all-seen', {});
     loadBookingSubmissions();
+}
+
+async function deleteBooking(id) {
+    if (!confirm('Delete this submission?')) return;
+    await api.delete(`/api/admin/booking/submissions/${id}`);
+    loadBookingSubmissions();
+    loadDashboardStats();
 }

@@ -41,5 +41,11 @@ export async function handleBooking(c: Context<{ Bindings: Env }>, action: strin
     return c.json({ success: true });
   }
 
+  if (action === 'delete') {
+    const id = c.req.param('id');
+    await FWHY_D1.prepare(`DELETE FROM booking_submissions WHERE id = ?`).bind(id).run();
+    return c.json({ success: true });
+  }
+
   return c.json({ success: false, error: 'Invalid action' }, 400);
 }
