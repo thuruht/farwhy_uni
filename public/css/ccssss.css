@@ -573,7 +573,7 @@ p {
 }
 
 /* Media query: single column below 640px (or whatever size you want) */
-@media (max-width: 1001px) {
+@media (max-width: 1024px) {
   .grid-container {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(4, auto);
