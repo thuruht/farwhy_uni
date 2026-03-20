@@ -128,48 +128,45 @@ function escapeIcsText(text) {
  * @returns {Object} - { startDate, endDate } in iCalendar format
  */
 function formatIcsDate(dateStr, timeStr) {
-  // Parse the date
-  const date = new Date(dateStr);
-  
-  // Default time to 7pm for doors if nothing else can be determined
-  let startHour = 19; // 7pm
-  let endHour = 23;   // 11pm by default (4 hour event)
-  
-  // Try to extract time from the time string
+  // Parse YYYY-MM-DD safely without UTC offset shift
+  const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
+
+  let startHour = 19, startMin = 0; // default 7pm
+  let endHour = 23, endMin = 0;
+
   if (timeStr) {
-    // Look for common patterns like "8pm", "7:30pm", etc.
-    const doorTimeMatch = timeStr.match(/Doors at (\d+)(?::(\d+))?\s*(am|pm)/i);
-    const musicTimeMatch = timeStr.match(/Music at (\d+)(?::(\d+))?\s*(am|pm)/i);
-    
-    // Prefer music time if available, otherwise use door time
-    const timeMatch = musicTimeMatch || doorTimeMatch;
-    
-    if (timeMatch) {
-      let hour = parseInt(timeMatch[1], 10);
-      const minute = parseInt(timeMatch[2] || '0', 10);
-      const period = timeMatch[3].toLowerCase();
-      
-      // Convert to 24-hour format
-      if (period === 'pm' && hour < 12) hour += 12;
-      if (period === 'am' && hour === 12) hour = 0;
-      
-      startHour = hour;
-      endHour = Math.min(hour + 4, 23); // End 4 hours later or at 11pm, whichever is earlier
+    // Match patterns like "7pm", "7:30pm", "Doors 7pm", "Music at 8pm", "6pm to 11pm"
+    const musicMatch = timeStr.match(/[Mm]usic(?:\s+at)?\s+(\d+)(?::(\d+))?\s*(am|pm)/i);
+    const doorsMatch = timeStr.match(/[Dd]oors?(?:\s+at)?\s+(\d+)(?::(\d+))?\s*(am|pm)/i);
+    const simpleMatch = timeStr.match(/(\d+)(?::(\d+))?\s*(am|pm)/i);
+    const endMatch   = timeStr.match(/to\s+(\d+)(?::(\d+))?\s*(am|pm)/i);
+
+    const startRef = musicMatch || doorsMatch || simpleMatch;
+    if (startRef) {
+      let h = parseInt(startRef[1], 10);
+      const m = parseInt(startRef[2] || '0', 10);
+      const p = startRef[3].toLowerCase();
+      if (p === 'pm' && h < 12) h += 12;
+      if (p === 'am' && h === 12) h = 0;
+      startHour = h; startMin = m;
+      endHour = Math.min(h + 4, 23); endMin = 0;
+    }
+    if (endMatch) {
+      let h = parseInt(endMatch[1], 10);
+      const m = parseInt(endMatch[2] || '0', 10);
+      const p = endMatch[3].toLowerCase();
+      if (p === 'pm' && h < 12) h += 12;
+      if (p === 'am' && h === 12) h = 0;
+      endHour = h; endMin = m;
     }
   }
-  
-  // Create the start date/time
-  const startDate = new Date(date);
-  startDate.setHours(startHour, 0, 0, 0);
-  
-  // Create the end date/time (4 hours later)
-  const endDate = new Date(date);
-  endDate.setHours(endHour, 0, 0, 0);
-  
-  // Format dates for iCalendar
+
+  const startDate = new Date(year, month - 1, day, startHour, startMin, 0);
+  const endDate   = new Date(year, month - 1, day, endHour,   endMin,   0);
+
   return {
     startDate: formatDateForIcs(startDate),
-    endDate: formatDateForIcs(endDate)
+    endDate:   formatDateForIcs(endDate)
   };
 }
 
@@ -214,16 +211,22 @@ function generateIcsContent(events) {
     const location = event.venue === 'farewell' 
       ? 'Farewell, 6515 Stadium Drive, Kansas City, MO'
       : 'Howdy, 6523 Stadium Drive, Kansas City, MO';
-    
-    const { startDate, endDate } = formatIcsDate(event.date, event.time);
+
+    // Support both API field names (event_time) and legacy (time)
+    const eventTime = event.event_time || event.time || '';
+    const ticketUrl = event.ticket_url || event.ticketLink || '';
+    const ageRestr  = event.age_restriction || event.ageRestriction || '';
+    const price     = event.price || event.suggestedPrice || '';
+
+    const { startDate, endDate } = formatIcsDate(event.date, eventTime);
     
     const description = [
       event.description,
       '',
-      `Time: ${event.time || 'TBD'}`,
-      `Age: ${event.ageRestriction || 'See venue'}`,
-      event.price ? `Price: ${event.price}` : '',
-      event.ticketLink ? `Tickets: ${event.ticketLink}` : ''
+      eventTime ? `Time: ${eventTime}` : '',
+      ageRestr  ? `Age: ${ageRestr}`   : '',
+      price     ? `Price: ${price}`    : '',
+      ticketUrl ? `Tickets: ${ticketUrl}` : ''
     ].filter(Boolean).join('\\n');
     
     icsContent = icsContent.concat([
@@ -235,7 +238,7 @@ function generateIcsContent(events) {
       `SUMMARY:${escapeIcsText(event.title)} @ ${event.venue.charAt(0).toUpperCase() + event.venue.slice(1)}`,
       `DESCRIPTION:${escapeIcsText(description)}`,
       `LOCATION:${escapeIcsText(location)}`,
-      `URL:${event.ticketLink || window.location.origin}`,
+      `URL:${ticketUrl || window.location.origin}`,
       'BEGIN:VALARM',
       'ACTION:DISPLAY',
       'DESCRIPTION:Reminder',
