@@ -1367,6 +1367,9 @@ function showSection(sectionName) {
                     loadMenus('farewell');
                 }
                 break;
+            case 'booking':
+                loadBookingSubmissions();
+                break;
             case 'import': 
                 setupImportHandlers(); 
                 break;
@@ -1412,7 +1415,7 @@ function setupNavigation() {
             }
             
             showSection(target);
-            const sectionNames = { 'dashboard': 'Dashboard', 'events': 'Event Management', 'blog': 'Blog Management', 'venue': 'Venue Settings', 'import': 'Import Legacy Data' };
+            const sectionNames = { 'dashboard': 'Dashboard', 'events': 'Event Management', 'blog': 'Blog Management', 'venue': 'Venue Settings', 'booking': 'Booking Submissions', 'import': 'Import Legacy Data' };
             if (sectionIndicator) sectionIndicator.textContent = sectionNames[target] || target;
             if (breadcrumb) breadcrumb.textContent = `Home / ${sectionNames[target] || target}`;
         });
@@ -1573,6 +1576,16 @@ async function loadInitialData() {
 }
 
 async function loadDashboardStats() {
+    // Check for unseen booking submissions and show badge
+    try {
+        const bc = await api.get('/api/admin/booking/unseen-count');
+        const badge = document.getElementById('booking-badge');
+        if (badge && bc.count > 0) {
+            badge.textContent = bc.count;
+            badge.style.display = 'inline';
+            showAlert(`You have ${bc.count} new booking submission${bc.count > 1 ? 's' : ''}!`, 'info');
+        }
+    } catch(e) {}
     console.log('Loading dashboard stats...');
     
     try {
@@ -2994,4 +3007,58 @@ function setupFileUploadHandlers() {
             }
         });
     }
+}
+
+async function loadBookingSubmissions() {
+    const section = document.getElementById('section-booking');
+    if (!section) return;
+    section.innerHTML = '<h2>Booking Submissions</h2><p>Loading...</p>';
+    try {
+        const data = await api.get('/api/admin/booking/submissions');
+        const submissions = data.data || [];
+        const unseen = submissions.filter(s => !s.seen).length;
+        const badge = document.getElementById('booking-badge');
+        if (badge) { badge.textContent = unseen; badge.style.display = unseen > 0 ? 'inline' : 'none'; }
+
+        let html = `<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+            <h2 style="margin:0;">Booking Submissions (${submissions.length})</h2>
+            ${unseen > 0 ? `<button onclick="markAllBookingsSeen()" style="padding:0.4rem 1rem; cursor:pointer;">Mark all as seen</button>` : ''}
+        </div>`;
+
+        if (submissions.length === 0) {
+            html += '<p>No submissions yet.</p>';
+        } else {
+            submissions.forEach(s => {
+                const bg = s.seen ? 'transparent' : 'rgba(176,238,0,0.08)';
+                const border = s.seen ? '1px solid var(--nav-border-color)' : '2px solid #b0ee00';
+                html += `<div style="border:${border}; background:${bg}; padding:1rem; margin-bottom:0.75rem; border-radius:4px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem;">
+                        <strong style="font-size:1.1rem;">${s.artist_name}</strong>
+                        <span style="font-size:0.85rem; opacity:0.6;">${new Date(s.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div style="margin-top:0.4rem; font-size:0.95rem;">
+                        <div>📧 <a href="mailto:${s.email}">${s.email}</a></div>
+                        <div>🎵 <a href="${s.music_link}" target="_blank" rel="noopener">${s.music_link}</a></div>
+                        ${s.social_link ? `<div>🔗 <a href="${s.social_link}" target="_blank" rel="noopener">${s.social_link}</a></div>` : ''}
+                        ${s.genre ? `<div>🎸 ${s.genre}</div>` : ''}
+                        ${s.notes ? `<div style="margin-top:0.4rem; font-style:italic;">${s.notes}</div>` : ''}
+                    </div>
+                    ${!s.seen ? `<button onclick="markBookingSeen(${s.id})" style="margin-top:0.5rem; padding:0.3rem 0.8rem; font-size:0.85rem; cursor:pointer;">Mark seen</button>` : '<span style="font-size:0.8rem; opacity:0.5;">✓ seen</span>'}
+                </div>`;
+            });
+        }
+        section.innerHTML = html;
+    } catch(e) {
+        section.innerHTML = '<h2>Booking Submissions</h2><p style="color:#ff2b13;">Failed to load submissions.</p>';
+    }
+}
+
+async function markBookingSeen(id) {
+    await api.post(`/api/admin/booking/submissions/${id}/seen`, {});
+    loadBookingSubmissions();
+}
+
+async function markAllBookingsSeen() {
+    await api.post('/api/admin/booking/mark-all-seen', {});
+    loadBookingSubmissions();
 }

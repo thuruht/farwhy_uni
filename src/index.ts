@@ -2,6 +2,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { timing } from 'hono/timing';
+import { handleBooking } from './handlers/booking';
 import { handleAuth } from './handlers/auth';
 import { handleEvents } from './handlers/events';
 import { handleSync } from './handlers/sync';
@@ -233,6 +234,7 @@ publicApi.get('/menu', async (c) => {
   }
 });
 publicApi.get('/hours', (c) => handleHours(c, 'list-all'));
+publicApi.post('/booking', (c) => handleBooking(c, 'submit'));
 publicApi.get('/slideshow', (c) => handleEvents(c, 'slideshow'));
 
 // Public authentication endpoints (login/logout/check)
@@ -454,6 +456,10 @@ adminApi.post('/venues/:venue/menu-items', async (c) => {
     return c.json({ success: false, error: 'Failed to create menu item' }, 500);
   }
 });
+adminApi.get('/booking/submissions', (c) => handleBooking(c, 'list'));
+adminApi.get('/booking/unseen-count', (c) => handleBooking(c, 'unseen-count'));
+adminApi.post('/booking/mark-all-seen', (c) => handleBooking(c, 'mark-all-seen'));
+adminApi.post('/booking/submissions/:id/seen', (c) => handleBooking(c, 'mark-seen'));
 adminApi.post('/hours', (c) => handleHours(c, 'create'));
 adminApi.put('/hours/:id', (c) => handleHours(c, 'update'));
 adminApi.delete('/hours/:id', (c) => handleHours(c, 'delete'));

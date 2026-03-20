@@ -48,8 +48,18 @@
     
        <div class="card" id="nkey"><section><h2 style="text-align: left; margin:var(--padding-large);">BOOK</h2>
         <p class="pp nrml">Schedule a show or event with our booking team </p><a href="mailto:booking@farewellcafe.com?subject=Booking"><span class="pp nrml" style="font-size:1.8rem;"><button style="width:256px;">booking@farewellcafe.com</span></button></a></section> 
-       <br> <section><p class="pp nrml">For <em>local</em> artists interested in opening a show etc. please fill out this <span class="pp nrml" style="font-size:1.8rem;"><button style="width:256px;" onclick="openBlegh()">Interest Form</button></span></p>
+       <br> <section><p class="pp nrml">For <em>local</em> artists interested in opening a show etc. please fill out the form below:</p>
        
+       <form id="booking-form" style="max-width:520px; margin:1rem auto; display:flex; flex-direction:column; gap:0.75rem;">
+         <input type="text" id="bf-artist" placeholder="Band / artist name *" required style="padding:0.6rem; font-family:inherit; font-size:1rem; border:1px solid var(--nav-border-color); background:rgba(255,255,255,0.9);">
+         <input type="email" id="bf-email" placeholder="Email *" required style="padding:0.6rem; font-family:inherit; font-size:1rem; border:1px solid var(--nav-border-color); background:rgba(255,255,255,0.9);">
+         <input type="url" id="bf-music" placeholder="Music link — YouTube / Bandcamp preferred *" required style="padding:0.6rem; font-family:inherit; font-size:1rem; border:1px solid var(--nav-border-color); background:rgba(255,255,255,0.9);">
+         <input type="text" id="bf-social" placeholder="Social media / Linktree link" style="padding:0.6rem; font-family:inherit; font-size:1rem; border:1px solid var(--nav-border-color); background:rgba(255,255,255,0.9);">
+         <input type="text" id="bf-genre" placeholder="Genre / one-sentence description" style="padding:0.6rem; font-family:inherit; font-size:1rem; border:1px solid var(--nav-border-color); background:rgba(255,255,255,0.9);">
+         <textarea id="bf-notes" placeholder="Anything else we should know? (availability, stage requirements, etc.)" rows="3" style="padding:0.6rem; font-family:inherit; font-size:1rem; border:1px solid var(--nav-border-color); background:rgba(255,255,255,0.9); resize:vertical;"></textarea>
+         <button type="submit" style="padding:0.7rem 1.5rem; font-family:inherit; font-size:1rem; cursor:pointer;">SUBMIT</button>
+         <p id="bf-msg" style="display:none; font-weight:bold;"></p>
+       </form>
        </section></div>
 
  
@@ -62,10 +72,43 @@
         <p id="address">6515 STADIUM DRIVE, KANSAS CITY, MISSOURI</p></div>
     </footer>
     <script>
-        function openBlegh() {
-            window.open('https://docs.google.com/forms/d/e/1FAIpQLSeYeAew5Ln18Lp31WajdVTmaCL3pWtF2jdrKYLWedTN_rwDCw/viewform', 'farewell/howdy: book', 'width=800,height=900,fullscreen=yes');
-        }
-        
+        document.getElementById('booking-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const msg = document.getElementById('bf-msg');
+            const btn = this.querySelector('button[type=submit]');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            try {
+                const res = await fetch('/api/booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        artist_name: document.getElementById('bf-artist').value,
+                        email: document.getElementById('bf-email').value,
+                        music_link: document.getElementById('bf-music').value,
+                        social_link: document.getElementById('bf-social').value,
+                        genre: document.getElementById('bf-genre').value,
+                        notes: document.getElementById('bf-notes').value
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.style.display = 'none';
+                    msg.style.display = 'block';
+                    msg.style.color = '#b0ee00';
+                    msg.textContent = 'Got it! We\'ll keep you in mind. Note that filling out the form multiple times won\'t help your chances.';
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch(err) {
+                btn.disabled = false;
+                btn.textContent = 'SUBMIT';
+                msg.style.display = 'block';
+                msg.style.color = '#ff2b13';
+                msg.textContent = 'Something went wrong, please try again.';
+            }
+        });
+
         // Function to open events popup
         function openEventsPopup() {
             // Get current venue state
