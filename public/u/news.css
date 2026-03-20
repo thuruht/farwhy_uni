@@ -27,7 +27,7 @@
 
 /* Global Base styles (from ccssss.css) */
 body {
-  background: #f0ffff;
+  background: transparent;
   font-family: var(--font-main);
   color: var(--text-color);
   margin: 0;
@@ -92,10 +92,9 @@ footer {
    you wouldn't need to duplicate these rules. */
 #public-posts, 
 #public-featured {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background: transparent;
+  border: none;
+  box-shadow: none;
   padding: 1rem;
 }
 

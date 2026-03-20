@@ -112,8 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Update each social link
-    const socialAnchors = document.querySelectorAll('.social-icons a');
-    const platforms = ['facebook', 'instagram', 'twitter', 'spotify', 'secret'];
+    const socialAnchors = Array.from(document.querySelectorAll('.social-icons a')).filter(a => a.closest('li').style.display !== 'none');
+    const platforms = ['facebook', 'instagram', 'twitter', 'secret'];
 
     socialAnchors.forEach((anchor, index) => {
       if (index < platforms.length) {  // Skip any additional anchors like Discord

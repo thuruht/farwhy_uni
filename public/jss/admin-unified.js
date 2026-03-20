@@ -1,3 +1,11 @@
+function showAlert(message, type = 'info') {
+    const el = document.createElement('div');
+    el.textContent = message;
+    el.style.cssText = `position:fixed;top:20px;right:20px;z-index:9999;padding:12px 20px;border-radius:6px;font-weight:bold;color:#fff;background:${type === 'success' ? '#b0ee00' : type === 'error' ? '#ff2b13' : '#d990ff'};color:${type === 'success' ? '#000' : '#fff'};box-shadow:0 3px 10px rgba(0,0,0,0.3);`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+}
+
 let currentUser = null;
 let dashboardState = {
     currentSection: 'dashboard',

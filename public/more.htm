@@ -303,31 +303,11 @@
         
         // Display Farewell hours from API data
         function displayFarewellHours(hours) {
-            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const dayWidths = ['Sunday----', 'Monday---', 'Tuesday---', 'Wednesday-', 'Thursday--', 'Friday----', 'Saturday--'];
-            
-            // Sort hours by day of week
-            hours.sort((a, b) => a.day_of_week - b.day_of_week);
-            
             const hoursList = document.getElementById('farewell-hours-list');
-            hoursList.innerHTML = '';
-            
-            hours.forEach(hour => {
-                const dayName = dayWidths[hour.day_of_week];
-                const li = document.createElement('li');
-                
-                if (hour.is_closed) {
-                    li.innerHTML = `<strong>${dayName}</strong>: ${hour.notes || 'Closed'}`;
-                } else {
-                    // Format time strings (assumes HH:MM format)
-                    const openTime = formatTime(hour.open_time);
-                    const closeTime = formatTime(hour.close_time);
-                    
-                    li.innerHTML = `<strong>${dayName}</strong>: ${openTime} - ${closeTime}${hour.notes ? ' (' + hour.notes + ')' : ''}`;
-                }
-                
-                hoursList.appendChild(li);
-            });
+            const openNight = hours.find(h => !h.is_closed);
+            const note = openNight?.notes || '';
+            const openTime = openNight ? formatTime(openNight.open_time) : '6pm';
+            hoursList.innerHTML = `<li>${openTime}${note ? ' — ' + note : ''}</li>`;
         }
         
         // Display default Farewell hours as fallback

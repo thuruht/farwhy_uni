@@ -575,10 +575,10 @@ p {
 /* Media query: single column below 640px (or whatever size you want) */
 @media (max-width: 1001px) {
   .grid-container {
-    /* Only 1 column, as many auto-rows as needed */
     grid-template-columns: 1fr;
     grid-template-rows: repeat(4, auto);
-    grid-gap: 32px; /* You can adjust the gap for smaller screens */
+    grid-gap: 32px;
+    padding-top: 0;
   }
   
   /* Force each section to occupy full width in a new row */
@@ -639,7 +639,7 @@ body.howdy-active .header-title .span2 {
 
 .header-title {text-align:center; align-content:center; align-items:center; padding:20px; padding-top:40px;}
 
-header {text-align:center; align-content:center; align-items:center; margin-bottom:36px;}
+header {text-align:center; align-content:center; align-items:center; margin-bottom:8px;}
 
 /* Ensure header has proper spacing on mobile */
 .feader {
