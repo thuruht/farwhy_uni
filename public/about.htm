@@ -197,18 +197,18 @@
     <script>
         // Function to open events popup
         function openEventsPopup() {
-            // Get current venue state
-            const venueState = document.body.dataset.state || 'farewell';
-            const eventsUrl = `./events.html?venue=${venueState}`;
-            
-            // First try to open in a popup
-            const popup = window.open(eventsUrl, 'farewell-events', 'width=1024,height=800,scrollbars=yes');
-            
-            // If popup is blocked or null, try opening in a new tab
-            if (!popup) {
-                window.open(eventsUrl, '_blank');
-            }
+            const venue = document.body.dataset.state || 'farewell';
+            const modal = document.getElementById('events-page-modal');
+            const iframe = document.getElementById('events-iframe');
+            iframe.src = `./events.html?venue=${venue}`;
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
         }
     </script>
+
+  <div id="events-page-modal" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(29,2,2,0.88); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);">
+    <iframe id="events-iframe" src="" style="position:absolute; inset:0; width:100%; height:100%; border:none;"></iframe>
+  </div>
+
 </body>
 </html>
