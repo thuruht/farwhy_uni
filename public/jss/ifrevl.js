@@ -46,15 +46,7 @@ function updateCalendarLinks() {
     newModalTriggers.forEach(link => {
       link.addEventListener('click', async (e) => {
         e.preventDefault();
-        // Get the current venue state for the modal
-        const currentState = document.body.dataset.state || 'farewell';
-        console.log(`[UpdateLinks] Modal trigger clicked with state: ${currentState}`);
-        
-        // Dispatch a custom event to notify events-modal.js
-        const event = new CustomEvent('openEventsModal', { 
-          detail: { venue: currentState }
-        });
-        document.dispatchEvent(event);
+        if (typeof openEventsPopup === 'function') openEventsPopup();
       });
     });
     

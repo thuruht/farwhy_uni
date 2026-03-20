@@ -101,33 +101,16 @@
     });
     
     // Listen for custom event from ifrevl.js
-    document.addEventListener('openEventsModal', async (e) => {
-      // Set venue from custom event detail
-      if (e.detail && e.detail.venue) {
-        currentVenue = e.detail.venue;
-        console.log(`[Events Modal] Opening with venue from custom event: ${currentVenue}`);
-      } else {
-        // Fallback to body data-state
-        currentVenue = document.body.dataset.state || 'farewell';
-        console.log(`[Events Modal] Opening with venue from body: ${currentVenue}`);
-      }
-      
-      // Fetch and open the modal
-      await fetchEvents();
-      openModal();
+    document.addEventListener('openEventsModal', (e) => {
+      if (typeof openEventsPopup === 'function') openEventsPopup();
     });
     
     // Trigger modal when clicking show listings or calendar image
     const listingLinks = document.querySelectorAll('.events-modal-trigger, #calendar img');
     listingLinks.forEach(link => {
-      link.addEventListener('click', async (e) => {
+      link.addEventListener('click', (e) => {
         e.preventDefault();
-        // Update currentVenue from current state before opening the modal
-        currentVenue = document.body.dataset.state || 'farewell';
-        console.log(`[Events Modal] Opening with venue: ${currentVenue}`);
-        // Always reload data when opening modal
-        await fetchEvents();
-        openModal();
+        if (typeof openEventsPopup === 'function') openEventsPopup();
       });
     });
   });
@@ -305,15 +288,10 @@
     
     // Set up global click delegation for events-modal-trigger links
     document.addEventListener('click', (e) => {
-      // Find closest trigger link
       const link = e.target.closest('.events-modal-trigger');
       if (link) {
         e.preventDefault();
-        // Update currentVenue from current page state
-        currentVenue = document.body.dataset.state || 'farewell';
-        console.log(`[Events Modal] Delegation handler opening with venue: ${currentVenue}`);
-        // Open the modal
-        fetchEvents().then(() => openModal());
+        if (typeof openEventsPopup === 'function') openEventsPopup();
       }
     });
   }
