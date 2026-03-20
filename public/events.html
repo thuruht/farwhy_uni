@@ -611,6 +611,7 @@
             const archiveToggle = document.querySelector('.archive-toggle');
             
             let currentVenue = 'both';
+            window.currentVenue = currentVenue;
             let showArchived = false;
             let allEvents = [];
             
@@ -676,6 +677,8 @@
                     
                     // Update venue filter
                     currentVenue = this.dataset.venue;
+                    window.currentVenue = currentVenue;
+                    document.body.dataset.state = currentVenue;
                     
                     // Add check mark to the active tab
                     if (currentVenue === 'farewell') {
