@@ -13,15 +13,19 @@
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const venue = urlParams.get('venue');
-            
+
             if (venue === 'howdy') {
                 document.body.dataset.state = 'howdy';
-            } else {
+                window.currentVenue = 'howdy';
+            } else if (venue === 'farewell') {
                 document.body.dataset.state = 'farewell';
+                window.currentVenue = 'farewell';
+            } else {
+                document.body.dataset.state = 'both';
+                window.currentVenue = 'both';
             }
-            
-            // Add debug log
-            console.log(`Events page initialized with venue: ${document.body.dataset.state}`);
+
+            console.log(`Events page initialized with venue: ${window.currentVenue}`);
         });
     </script>
     <style>
@@ -610,8 +614,19 @@
             const venueTabs = document.querySelectorAll('.venue-tab');
             const archiveToggle = document.querySelector('.archive-toggle');
             
-            let currentVenue = 'both';
+            let currentVenue = window.currentVenue || 'both';
             window.currentVenue = currentVenue;
+
+            // Sync active tab to match URL param / window.currentVenue
+            venueTabs.forEach(t => {
+                t.classList.remove('active');
+                const v = t.dataset.venue;
+                t.textContent = v === 'farewell' ? 'FAREWELL ONLY' : v === 'howdy' ? 'HOWDY ONLY' : 'BOTH VENUES';
+                if (v === currentVenue) {
+                    t.classList.add('active');
+                    t.textContent += ' ✓';
+                }
+            });
             let showArchived = false;
             let allEvents = [];
             

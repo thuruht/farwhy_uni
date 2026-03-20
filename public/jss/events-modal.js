@@ -274,8 +274,7 @@
         const venue = tab.dataset.venue;
         if (venue !== currentVenue) {
           currentVenue = venue;
-          
-          // Update active tab
+          window.currentVenue = venue;
           venueFilterTabs.forEach(t => {
             t.classList.remove('active');
             // Remove check marks from all tabs
