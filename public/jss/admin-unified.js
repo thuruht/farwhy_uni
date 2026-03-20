@@ -1581,11 +1581,13 @@ async function loadDashboardStats() {
         const bc = await api.get('/api/admin/booking/unseen-count');
         const badge = document.getElementById('booking-badge');
         const statEl = document.getElementById('stats-unseen-bookings');
+        const seenEl = document.getElementById('stats-seen-bookings');
         const card = document.getElementById('booking-stat-card');
-        if (statEl) statEl.textContent = bc.count;
-        if (badge) { badge.textContent = bc.count; badge.style.display = bc.count > 0 ? 'inline' : 'none'; }
-        if (card) card.style.outline = bc.count > 0 ? '2px solid #b0ee00' : '';
-        if (bc.count > 0) showAlert(`${bc.count} new booking submission${bc.count > 1 ? 's' : ''} — click New Bookings to review.`, 'info');
+        if (statEl) statEl.textContent = bc.unseen ?? bc.count;
+        if (seenEl) seenEl.textContent = (bc.total ?? 0) - (bc.unseen ?? bc.count ?? 0);
+        if (badge) { badge.textContent = bc.unseen ?? bc.count; badge.style.display = (bc.unseen ?? bc.count) > 0 ? 'inline' : 'none'; }
+        if (card) card.style.outline = (bc.unseen ?? bc.count) > 0 ? '2px solid #b0ee00' : '';
+        if ((bc.unseen ?? bc.count) > 0) showAlert(`${bc.unseen ?? bc.count} new booking submission${(bc.unseen ?? bc.count) > 1 ? 's' : ''} — click Booking Requests to review.`, 'info');
     } catch(e) {}
     console.log('Loading dashboard stats...');
     

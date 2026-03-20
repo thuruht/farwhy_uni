@@ -25,9 +25,10 @@ export async function handleBooking(c: Context<{ Bindings: Env }>, action: strin
 
   if (action === 'unseen-count') {
     const { results } = await FWHY_D1.prepare(
-      `SELECT COUNT(*) as count FROM booking_submissions WHERE seen = 0`
+      `SELECT SUM(CASE WHEN seen = 0 THEN 1 ELSE 0 END) as unseen, COUNT(*) as total FROM booking_submissions`
     ).all();
-    return c.json({ success: true, count: (results[0] as any).count });
+    const row = results[0] as any;
+    return c.json({ success: true, count: row.unseen, unseen: row.unseen, total: row.total });
   }
 
   if (action === 'mark-seen') {
