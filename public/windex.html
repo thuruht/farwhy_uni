@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>FAREWELL | HOWDY | KCMO - Howdy and Farewell - Kansas City</title>
+    <link rel="icon" type="image/x-icon" href="./img/flavicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    
+    <!-- GSAP and Plugins -->
+    <script src="./jss/gsap-public/minified/gsap.min.js"></script>
+    <script src="./jss/gsap-public/minified/ScrollTrigger.min.js"></script>
+    <script src="./jss/gsap-public/minified/MotionPathPlugin.min.js"></script>
+    <script src="./jss/gsap-public/minified/CustomEase.min.js"></script>
+    <script defer src="./jss/ansik.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/ccssss.css">
+    <link rel="stylesheet" href="./css/events-modal.css">
+    <link rel="stylesheet" href="./css/events-calendar-button.css">
+    <link rel="stylesheet" href="./css/dark-mode.css">
+    <link rel="stylesheet" href="./css/image-zoom.css">
+ <!--   <link rel="stylesheet" href="./css/fleeting-journey.css">-->
+    <style>
+      .card {
+        position: relative;
+        display: inline-block; 
+        text-align:center; 
+        align-items:center;
+        align-content:center;
+        justify-content:center;
+        margin: 0 auto;
+    }
+
+    #credEt {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #1d0202bf;
+        color: #b9b9b9cc;
+        padding: auto;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.5s ease;
+        pointer-events: none;
+        box-shadow: 0 -2px 10px rgba(255, 144, 144, 0.1);
+        -webkit-backdrop-filter: blur(2px);
+        backdrop-filter: blur(2px);
+        max-height: 70vh; 
+        overflow: auto;
+    }
+
+    .card:hover #credEt {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    #credEt a {
+        color: #00ccaacc;
+        text-decoration: none;
+    }
+     #credEt a:hover {
+        text-decoration: underline;
+    }
+
+    #events-modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            z-index: 10001;
+        }
+
+        #events-modal-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        #events-modal-close:hover,
+        #events-modal-close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .modal-header-fixed {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #events-modal-content .modal-body {
+            padding-top: 15px;
+        }
+
+        /* Events Page Modal Styles */
+        #events-page-modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(29, 2, 2, 0.85);
+            backdrop-filter: blur(3px);
+        }
+
+        .events-page-content {
+            background-color: #3a3a3a;
+            color: #f1f1f1;
+            margin: 5% auto;
+            padding: 20px;
+            border: 2px solid var(--nav-border-color);
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            box-shadow: -8px 8px 0 rgba(0, 0, 0, 0.2);
+            font-family: var(--font-main);
+        }
+
+        .events-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .events-page-header h2 {
+            margin: 0;
+            font-family: var(--font-db, 'Lora', serif);
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            text-shadow: -2px 2px 0 rgba(0,0,0,0.2);
+        }
+
+        .events-page-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .events-page-close:hover,
+        .events-page-close:focus {
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .events-filters {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .events-filters select,
+        .events-filters button {
+            padding: 8px 12px;
+            font-family: var(--font-main);
+            background-color: #333;
+            color: #f1f1f1;
+            border: 1px solid #555;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        
+        .events-filters button.active {
+            background-color: var(--accent-color);
+            color: black;
+        }
+
+        .events-list {
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 10px; /* for scrollbar */
+        }
+
+        .event-item {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border: 1px solid #444;
+        }
+
+        .event-details h3 {
+            margin: 0 0 5px;
+            color: var(--accent-color);
+            font-family: var(--font-hnm11);
+        }
+
+        .event-details p {
+            margin: 0 0 5px;
+            font-size: 0.9rem;
+        }
+
+        .event-ticket-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: var(--accent-color);
+            color: #000;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .event-ticket-link:hover {
+            background-color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Mobile styles for events page modal */
+        @media (max-width: 768px) {
+            .events-page-content {
+                margin: 2% auto;
+                padding: 15px;
+                width: 95%;
+                max-height: 96vh;
+                overflow-y: auto;
+            }
+
+            .events-page-header h2 {
+                font-size: 1.4rem;
+            }
+
+            .events-page-close {
+                font-size: 24px;
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .events-filters {
+                flex-direction: column;
+                gap: 8px;
+                align-items: stretch;
+            }
+
+            .events-filters select,
+            .events-filters button {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+                min-height: 44px; /* Touch-friendly */
+                width: 100%;
+            }
+
+            .events-list {
+                max-height: 70vh;
+                padding-right: 5px;
+            }
+
+            .event-item {
+                grid-template-columns: 80px 1fr;
+                gap: 12px;
+                margin-bottom: 12px;
+                padding-bottom: 12px;
+            }
+
+            .event-item img {
+                width: 80px;
+                height: 80px;
+            }
+
+            .event-details h3 {
+                font-size: 1rem;
+                line-height: 1.3;
+            }
+
+            .event-details p {
+                font-size: 0.85rem;
+                line-height: 1.4;
+            }
+
+            .event-ticket-link {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+                margin-top: 8px;
+                display: block;
+                text-align: center;
+                width: fit-content;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .events-page-content {
+                margin: 0;
+                padding: 10px;
+                width: 100%;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
+
+            .events-page-header {
+                padding-bottom: 8px;
+                margin-bottom: 10px;
+            }
+
+            .events-page-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .events-page-close {
+                font-size: 20px;
+                width: 35px;
+                height: 35px;
+            }
+
+            .events-list {
+                max-height: 75vh;
+            }
+
+            .event-item {
+                grid-template-columns: 60px 1fr;
+                gap: 10px;
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+            }
+
+            .event-item img {
+                width: 60px;
+                height: 60px;
+            }
+
+            .event-details h3 {
+                font-size: 0.9rem;
+            }
+
+            .event-details p {
+                font-size: 0.8rem;
+            }
+
+            .event-ticket-link {
+                font-size: 0.85rem;
+                padding: 8px 16px;
+            }
+        }
+
+    </style>
+</head>
+
+<body data-state="farewell">
+  <header class="feader">
+      <div class="contain">
+          <div class="left">
+              <nav>
+                  <ul>
+                      <li><a href="javascript:void(0);" onclick="openEventsPopup()">EVENTS</a></li>
+                      <li><a href="./booking.htm">BOOK</a></li>
+                      <li><a href="./more.htm">MORE</a></li>
+                      <li><a href="./about.htm">ABOUT</a></li>
+                  </ul>
+              </nav>
+          </div>
+          <div class="right">
+            <!--  <button id="theme-switcher">Dark Mode</button>-->
+              <h1 class="header-title">
+                  <span class="span2">FAREWELL</span>
+                  <span class="sulk drop-wiggle"> & HOWDY &nbsp;<span id="swico"><img src="./img/swap.png" class="insect flipp cocoon" alt="click-drag"></span></span>
+              </h1>
+          </div>
+      </div>
+
+
+  </header>
+
+  <main class="grid-container">
+     <!-- Calendar -->
+  <div class="card" id="calendar"> 
+      <div id="calendar-images">
+        <img src="./img/fwcal.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer;" data-venue="farewell" data-type="cal">
+        <img src="./img/fw.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer; display: none;" data-venue="farewell" data-type="default">
+        <img src="./img/fwbw.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer; display: none;" data-venue="farewell" data-type="bw">
+        <img src="./img/hycal.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer; display: none;" data-venue="howdy" data-type="cal">
+        <img src="./img/hy.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer; display: none;" data-venue="howdy" data-type="default">
+        <img src="./img/hybw.png" class="cally events-modal-trigger" alt="events calendar" style="cursor: pointer; display: none;" data-venue="howdy" data-type="bw">
+      </div>
+      <div id="credEt" class="dynamic-calendar-links"><hr>
+      <p><small>
+        calendar graphic (and the other swell graphics and general layout of this site) designed by the excellent <a href="https://austinchapmandesign.com/" target="_blank" rel="noopener">austin chapman</a> - however, any parts of the site that you dislike, that are animated annoyingly, bitcrushed, badly implemented, or the like, may instead be blamed on me (<a href="https://ntapkc.com" target="_blank" rel="noopener">jojo</a>), with the exception of show/event flyers, which are variously sourced</small></p>
+        <hr> || <a href="javascript:void(0);" class="events-modal-trigger"><b>VIEW ALL EVENTS</b></a> || <a href="#" class="cal-link-ics tooltip"><b>📅 DOWNLOAD VENUE CALENDAR</b><span class="tooltip-text">Download upcoming events for the current venue as an .ics file that you can import into your calendar app (Google Calendar, Apple Calendar, Outlook, etc.)</span></a> ||<hr>
+      </div>
+  </div>
+
+<!-- Newsletter Card -->
+<div class="card" id="featured-videos-card">
+  <section style="width:100%;">
+    <h2>FEATURED</h2>
+    <img src="./img/fwm.png" alt="mascot" class="nicic flipp squi-rmbreth">
+    <div id="index-featured-content" style="width:100%;">
+      <div style="text-align:center; padding:1rem; opacity:0.5;">Loading...</div>
+    </div>
+  </section>
+</div>
+
+<style>
+#featured-videos-card {
+  background: var(--secondary-bg-color);
+  text-align: center;
+  padding: var(--padding-medium);
+  width: 96%;
+  margin: 0 auto;
+  border: 1px solid var(--nav-border-color);
+  grid-column: 2;
+  grid-row: 1;
+}
+@media (max-width: 1024px) {
+  #featured-videos-card { grid-column: 1; grid-row: auto; }
+}
+#featured-videos-card h2 { color: #fff; -webkit-text-stroke: 1px #000; }
+body.howdy-active #featured-videos-card { background: var(--primary-bg-color); }
+
+#featured-videos-card .embed-container {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  width: 100%;
+}
+#featured-videos-card .embed-container iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: 0;
+}
+#featured-videos-card .yt-carousel { width: 100%; }
+#featured-videos-card .yt-slide .embed-container { margin-bottom: 0; }
+#featured-videos-card .yt-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+}
+#featured-videos-card .yt-prev,
+#featured-videos-card .yt-next {
+  padding: 0.3rem 0.9rem;
+  background: var(--button-bg-color);
+  color: var(--button-text-color);
+  border: 1px solid var(--nav-border-color);
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+#featured-videos-card .yt-prev:hover,
+#featured-videos-card .yt-next:hover { opacity: 0.8; }
+#featured-videos-card .yt-indicator {
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+</style>
+
+<script>
+(function() {
+  function extractVideoId(url) {
+    try {
+      if (url.includes('youtube.com/watch')) return new URL(url).searchParams.get('v');
+      if (url.includes('youtu.be/')) return url.split('youtu.be/')[1].split('?')[0];
+      if (url.includes('youtube.com/embed/')) return url.split('youtube.com/embed/')[1].split('?')[0];
+    } catch(e) {}
+    return null;
+  }
+
+  function embedHtml(videoId) {
+    return `<div class="embed-container"><iframe src="https://www.youtube.com/embed/${videoId}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+  }
+
+  window.indexCarouselNav = function(id, dir) {
+    const carousel = document.getElementById(id);
+    if (!carousel) return;
+    const slides = carousel.querySelectorAll('.yt-slide');
+    let active = [...slides].findIndex(s => s.style.display !== 'none');
+    if (active === -1) active = 0;
+    slides[active].style.display = 'none';
+    const next = (active + dir + slides.length) % slides.length;
+    slides[next].style.display = 'block';
+    const ind = carousel.querySelector('.yt-indicator');
+    if (ind) ind.textContent = `${next + 1} / ${slides.length}`;
+  };
+
+  async function loadIndexFeatured() {
+    const el = document.getElementById('index-featured-content');
+    if (!el) return;
+    try {
+      const res = await fetch('/api/featured');
+      if (!res.ok) throw new Error();
+      const { data } = await res.json();
+      const raw = data && (data.youtube || data.youtubeUrl);
+      if (!raw) { el.innerHTML = ''; return; }
+      const urls = (Array.isArray(raw) ? raw : raw.split(',').map(u => u.trim())).filter(Boolean);
+      const ids = urls.map(extractVideoId).filter(Boolean);
+      if (!ids.length) { el.innerHTML = ''; return; }
+
+      if (ids.length === 1) {
+        el.innerHTML = embedHtml(ids[0]);
+      } else {
+        const cid = 'idx-carousel-' + Math.random().toString(36).slice(2, 7);
+        const slides = ids.map((id, i) =>
+          `<div class="yt-slide" style="display:${i===0?'block':'none'}">${embedHtml(id)}</div>`
+        ).join('');
+        el.innerHTML = `<div id="${cid}" class="yt-carousel">
+          ${slides}
+          <div class="yt-controls">
+            <button class="yt-prev" onclick="indexCarouselNav('${cid}',-1)">&laquo; PREV</button>
+            <span class="yt-indicator">1 / ${ids.length}</span>
+            <button class="yt-next" onclick="indexCarouselNav('${cid}',1)">NEXT &raquo;</button>
+          </div>
+        </div>`;
+      }
+    } catch(e) {
+      el.innerHTML = '';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadIndexFeatured);
+})();
+</script>
+
+      <!-- Contact -->
+
+
+      <!-- Contact -->
+     <div class="card" id="contact">
+      <section>
+          <h2>CONTACT</h2>
+          <h3>816•500•4552</h3>
+          <img src="./img/fm.png" alt="Contact Icon" class="flip squi-rmbreth conic">
+      <hr style="color: transparent; padding:24px; border: 0px transparent;">
+          <div class="social-icons">
+            <ul style="text-decoration: none;">
+          <li class="sopc flip squi-rmbreth">
+              <a href="#facebook" target="_blank" rel="noopener">
+                  <img src="./img/fc.png" alt="Facebook" style="width:24px; height: auto;"> Facebook
+              </a>
+          </li>
+          <li class="sopc flipp squi-rmbreth">
+              <a href="#instagram" target="_blank" rel="noopener">
+                  <img src="./img/gi.png" alt="Instagram" style="width:24px; height: auto;"> Instagram
+              </a>
+          </li>
+          <li class="sopc flip squi-rmbreth">
+              <a href="#twitter" target="_blank" rel="noopener">
+                  <img src="./img/xt.png" alt="Twitter" style="width:24px; height: auto;"> Twitter
+              </a>
+          </li>
+  
+          <li class="sopc flipp squi-rmbreth" style="display:none;">
+              <a href="https://linktr.ee/farewellhowdy" target="_blank" rel="noopener">
+                  <img src="./img/ps.png" alt="Spotify" style="width:24px; height: auto;"> Spotify
+              </a>
+          </li>
+          <li class="sopc flip squi-rmbreth">
+              <a href="https://linktr.ee/farewellhowdy" target="_blank" rel="noopener">
+                  <img src="./img/secret.png" alt="Linktr.ee" style="width:24px; height: auto;"> Linktr.ee
+              </a>
+          </li>
+          <li class="sopc flipp squi-rmbreth">
+              <a href="https://bored.farewellcafe.com/" target="_blank" rel="noopener">
+                  <img src="./img/dis.png" alt="what's this?" style="width:24px; height: auto;"> ?
+              </a>
+          </li>
+          </div>
+      <hr style="color: transparent; padding:24px; border: 0px transparent;">
+          <img src="./img/fm2.png" alt="Contact Icon" class="conica">
+      <hr style="color: transparent; padding:24px; border: 0px transparent;">
+        </section>
+      </div>        
+
+
+<div class="card" id="event">
+
+<div class="sorting-controls" style="align-items: center; text-align: center; justify-content: space-between;">
+          <label for="sort-select">Sort By:</label>
+          <select id="sort-select">
+              <option value="soonest"><span style="font-family: inherit; font-weight: inherit; font-size: inherit; color: inherit;">Soonest Event</span></option>
+              <option value="past"><span style="font-family: inherit; font-weight: inherit; font-size: inherit; color: inherit;">Past Events</span></option>
+          </select><!--
+                 <span style="opacity: 0.4;">  <a href="#" class="admin-upload-link" ><button type="button" id="openAdminModalBtn">open uploader</button></a></span>
+                 -->
+      </div>
+      <!-- Loading Indicator -->
+
+
+      <!-- Slideshow Container -->
+      <div class="slideshow-container">
+      
+          <div class="slide">
+            <img id="slide-image" src="" alt="Slideshow Image Loading...">
+        
+          </div>
+         
+          <!-- Navigation Buttons -->
+          <button class="nav-button prev" id="prev-button" aria-label="Previous Slide">&#10094;</button>
+          <button class="nav-button next" id="next-button" aria-label="Next Slide">&#10095;</button>
+        
+      </div>
+       <!--<div class="caption"< !-- id="slide-caption"></div>   -->
+       <!-- <span class="material-icons">lightbulb</span> --> <div style="background:#f5f5f5;"><p><small>
+ </small></p> <hr> || <a class="cal-link-listing events-modal-trigger" href="javascript:void(0);">view show listings</a> ||
+    <a class="cal-link-ics" href="#"><b>📅 DOWNLOAD VENUE CALENDAR</b></a> ||
+</div>
+
+
+
+  </main>
+<div id="news" style="width:100%;">
+<iframe src="./u/index.html" style="border: 0; width:100%; min-height:40vh;" frameborder="0" onload="onIframeLoad(this)" title="News and Updates" /></iframe>
+</div>
+  <footer><div>
+      <p id="address">6515 STADIUM DRIVE, KANSAS CITY, MISSOURI</p></div>
+  </footer><div class="main-calendar-links"></div>
+
+  <!-- Events iframe overlay -->
+  <div id="events-page-modal" style="display:none; position:fixed; inset:0; z-index:10000; background:rgba(29,2,2,0.88); backdrop-filter:blur(3px);">
+    <iframe id="events-iframe" src="" style="position:absolute; inset:0; width:100%; height:100%; border:none;" allowtransparency="true"></iframe>
+  </div>
+
+  <script src="./jss/script.js"></script>
+  <script src="./jss/ics-generator.js"></script>
+  <script src="./jss/events-modal.js"></script>
+  <script src="./jss/events-modal-calendar.js"></script>
+  <script src="./jss/ifrevl.js"></script>
+  <script src="./jss/theme-switcher.js"></script>
+
+  <script>
+    function openEventsPopup() {
+      const venue = document.body.dataset.state || 'farewell';
+      const modal = document.getElementById('events-page-modal');
+      const iframe = document.getElementById('events-iframe');
+      iframe.src = `./events.html?venue=${venue}`;
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+  </script>
+
+</body></html>

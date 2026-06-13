@@ -261,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentState = body.dataset.state;
     const newState = currentState === 'farewell' ? 'howdy' : 'farewell';
     body.dataset.state = newState;
+    localStorage.setItem('fwhy-venue', newState);
     body.classList.toggle('howdy-active'); // for theming
 
     // Update dynamic text
@@ -521,11 +522,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial Setup
   // --------------------------
 
-  // Set an initial state 
+  // Set an initial state — URL param wins, then localStorage, then default
   if (body) {
-    body.dataset.state = body.dataset.state || 'farewell'; 
-    toggleImages('farewell'); 
-    updateSocialLinks('farewell'); 
+    const venueParam = new URLSearchParams(location.search).get('venue');
+    const s = venueParam || localStorage.getItem('fwhy-venue') || 'farewell';
+    body.dataset.state = (s === 'howdy') ? 'howdy' : 'farewell';
+    body.classList.toggle('howdy-active', body.dataset.state === 'howdy');
+    if (farewellSpan) farewellSpan.textContent = (body.dataset.state === 'howdy') ? 'HOWDY' : 'FAREWELL';
+    if (howdySpan) howdySpan.textContent = (body.dataset.state === 'howdy') ? '& FAREWELL' : '& HOWDY';
+    if (address) address.textContent = (body.dataset.state === 'howdy')
+      ? '6523 STADIUM DRIVE, KANSAS CITY, MISSOURI'
+      : '6515 STADIUM DRIVE, KANSAS CITY, MISSOURI';
+    if (title) title.textContent = (body.dataset.state === 'farewell')
+      ? 'FAREWELL | HOWDY | KCMO - Howdy and Farewell - Kansas City'
+      : 'HOWDY | FAREWELL | KCMO - Farewell and Howdy - Kansas City';
+    toggleImages(body.dataset.state);
+    updateSocialLinks(body.dataset.state);
   }
 
   // Initialize the slideshow (default to soonest events)
