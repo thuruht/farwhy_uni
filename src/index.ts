@@ -240,7 +240,7 @@ publicApi.get('/slideshow', (c) => handleEvents(c, 'slideshow'));
 // ── Guestbook ────────────────────────────────────────────────────────────────
 const GB_MAX_CHARS    = 200;
 const GB_MAX_COMMENTS = 500;
-const GB_RATE_LIMIT_S = 30;
+const GB_RATE_LIMIT_S = 60;
 const GB_VALID_COLORS = new Set(['lima', 'pupil', 'blew', 'redd', 'white']);
 
 function gbScrub(val: unknown, max: number): string {

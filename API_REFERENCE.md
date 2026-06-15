@@ -57,7 +57,7 @@ This document lists all API endpoints available in the Farewell/Howdy Cloudflare
   - Body: `{ text, color, name?, email?, country? }`
   - `color` must be one of: `lima`, `pupil`, `blew`, `redd`, `white`
   - `text` max 200 characters; `name` max 48; `email` max 120 (stored privately, never returned); `country` max 8 bytes (flag emoji)
-  - Rate limited to one post per IP per 30 seconds (HTTP 429 on violation)
+  - Rate limited to one post per IP per 60 seconds (HTTP 429 on violation)
   - Returns `{ ok: true, comments: [...] }` with full updated comment list
 
 ### Health Check
