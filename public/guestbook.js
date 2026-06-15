@@ -19,22 +19,93 @@
   ];
 
   const COUNTRIES = [
+    // North America
     ['🇺🇸','United States'],['🇨🇦','Canada'],['🇲🇽','Mexico'],
+    // Central America
+    ['🇬🇹','Guatemala'],['🇧🇿','Belize'],['🇭🇳','Honduras'],
+    ['🇸🇻','El Salvador'],['🇳🇮','Nicaragua'],['🇨🇷','Costa Rica'],['🇵🇦','Panama'],
+    // Caribbean
+    ['🇨🇺','Cuba'],['🇯🇲','Jamaica'],['🇭🇹','Haiti'],['🇩🇴','Dominican Republic'],
+    ['🇵🇷','Puerto Rico'],['🇹🇹','Trinidad & Tobago'],['🇧🇧','Barbados'],
+    ['🇧🇸','Bahamas'],['🇬🇾','Guyana'],['🇸🇷','Suriname'],
+    ['🇱🇨','St. Lucia'],['🇻🇨','St. Vincent'],['🇬🇩','Grenada'],
+    ['🇦🇬','Antigua & Barbuda'],['🇩🇲','Dominica'],['🇰🇳','St. Kitts & Nevis'],
+    // South America
+    ['🇧🇷','Brazil'],['🇦🇷','Argentina'],['🇨🇴','Colombia'],['🇨🇱','Chile'],
+    ['🇵🇪','Peru'],['🇻🇪','Venezuela'],['🇪🇨','Ecuador'],['🇧🇴','Bolivia'],
+    ['🇵🇾','Paraguay'],['🇺🇾','Uruguay'],
+    // Western Europe
     ['🇬🇧','United Kingdom'],['🇫🇷','France'],['🇩🇪','Germany'],
-    ['🇪🇸','Spain'],['🇮🇹','Italy'],['🇯🇵','Japan'],['🇰🇷','South Korea'],
-    ['🇨🇳','China'],['🇦🇺','Australia'],['🇳🇿','New Zealand'],
-    ['🇧🇷','Brazil'],['🇦🇷','Argentina'],['🇨🇴','Colombia'],
-    ['🇨🇱','Chile'],['🇯🇲','Jamaica'],['🇳🇱','Netherlands'],
-    ['🇧🇪','Belgium'],['🇸🇪','Sweden'],['🇳🇴','Norway'],
-    ['🇩🇰','Denmark'],['🇫🇮','Finland'],['🇵🇱','Poland'],
-    ['🇨🇿','Czechia'],['🇬🇷','Greece'],['🇵🇹','Portugal'],
-    ['🇮🇪','Ireland'],['🇨🇭','Switzerland'],['🇦🇹','Austria'],
-    ['🇺🇦','Ukraine'],['🇷🇺','Russia'],['🇮🇳','India'],
-    ['🇳🇬','Nigeria'],['🇬🇭','Ghana'],['🇿🇦','South Africa'],
-    ['🇰🇪','Kenya'],['🇪🇬','Egypt'],['🇹🇷','Turkey'],
-    ['🇮🇩','Indonesia'],['🇵🇭','Philippines'],['🇹🇭','Thailand'],
-    ['🇻🇳','Vietnam'],['🇸🇬','Singapore'],['🇲🇾','Malaysia'],
-    ['🇸🇦','Saudi Arabia'],['🇮🇱','Israel'],
+    ['🇪🇸','Spain'],['🇮🇹','Italy'],['🇳🇱','Netherlands'],
+    ['🇧🇪','Belgium'],['🇨🇭','Switzerland'],['🇦🇹','Austria'],
+    ['🇵🇹','Portugal'],['🇮🇪','Ireland'],['🇱🇺','Luxembourg'],
+    ['🇲🇨','Monaco'],['🇦🇩','Andorra'],['🇱🇮','Liechtenstein'],
+    ['🇸🇲','San Marino'],['🇻🇦','Vatican City'],
+    // Nordic & Baltic
+    ['🇸🇪','Sweden'],['🇳🇴','Norway'],['🇩🇰','Denmark'],['🇫🇮','Finland'],['🇮🇸','Iceland'],
+    ['🇪🇪','Estonia'],['🇱🇻','Latvia'],['🇱🇹','Lithuania'],
+    // Eastern Europe
+    ['🇵🇱','Poland'],['🇨🇿','Czechia'],['🇸🇰','Slovakia'],
+    ['🇭🇺','Hungary'],['🇷🇴','Romania'],['🇧🇬','Bulgaria'],
+    ['🇺🇦','Ukraine'],['🇷🇺','Russia'],['🇧🇾','Belarus'],['🇲🇩','Moldova'],
+    // Balkans & Southern Europe
+    ['🇬🇷','Greece'],['🇭🇷','Croatia'],['🇸🇮','Slovenia'],['🇷🇸','Serbia'],
+    ['🇧🇦','Bosnia & Herzegovina'],['🇲🇪','Montenegro'],
+    ['🇲🇰','North Macedonia'],['🇦🇱','Albania'],['🇽🇰','Kosovo'],
+    ['🇨🇾','Cyprus'],['🇲🇹','Malta'],
+    // Caucasus
+    ['🇹🇷','Turkey'],['🇬🇪','Georgia'],['🇦🇲','Armenia'],['🇦🇿','Azerbaijan'],
+    // North Africa
+    ['🇲🇦','Morocco'],['🇩🇿','Algeria'],['🇹🇳','Tunisia'],['🇱🇾','Libya'],
+    ['🇪🇬','Egypt'],['🇸🇩','Sudan'],['🇸🇸','South Sudan'],
+    // West Africa
+    ['🇳🇬','Nigeria'],['🇬🇭','Ghana'],['🇸🇳','Senegal'],['🇨🇮','Côte d\'Ivoire'],
+    ['🇲🇱','Mali'],['🇧🇫','Burkina Faso'],['🇬🇳','Guinea'],
+    ['🇸🇱','Sierra Leone'],['🇱🇷','Liberia'],['🇹🇬','Togo'],
+    ['🇧🇯','Benin'],['🇳🇪','Niger'],['🇲🇷','Mauritania'],
+    ['🇨🇻','Cape Verde'],['🇬🇲','Gambia'],['🇬🇼','Guinea-Bissau'],
+    // Central Africa
+    ['🇨🇲','Cameroon'],['🇨🇩','DR Congo'],['🇨🇬','Congo'],
+    ['🇨🇫','Central African Republic'],['🇬🇦','Gabon'],['🇹🇩','Chad'],
+    ['🇬🇶','Equatorial Guinea'],['🇸🇹','São Tomé & Príncipe'],
+    // East Africa
+    ['🇪🇹','Ethiopia'],['🇰🇪','Kenya'],['🇹🇿','Tanzania'],
+    ['🇺🇬','Uganda'],['🇷🇼','Rwanda'],['🇧🇮','Burundi'],
+    ['🇸🇴','Somalia'],['🇩🇯','Djibouti'],['🇪🇷','Eritrea'],
+    ['🇲🇿','Mozambique'],['🇲🇬','Madagascar'],['🇲🇺','Mauritius'],
+    ['🇸🇨','Seychelles'],['🇰🇲','Comoros'],
+    // Southern Africa
+    ['🇿🇦','South Africa'],['🇿🇲','Zambia'],['🇿🇼','Zimbabwe'],
+    ['🇧🇼','Botswana'],['🇳🇦','Namibia'],['🇦🇴','Angola'],
+    ['🇲🇼','Malawi'],['🇱🇸','Lesotho'],['🇸🇿','Eswatini'],
+    // Middle East
+    ['🇸🇾','Syria'],['🇱🇧','Lebanon'],['🇯🇴','Jordan'],
+    ['🇮🇶','Iraq'],['🇮🇷','Iran'],['🇰🇼','Kuwait'],['🇸🇦','Saudi Arabia'],
+    ['🇦🇪','United Arab Emirates'],['🇶🇦','Qatar'],['🇧🇭','Bahrain'],
+    ['🇴🇲','Oman'],['🇾🇪','Yemen'],['🇵🇸','Palestine'],
+    // South Asia
+    ['🇮🇳','India'],['🇵🇰','Pakistan'],['🇧🇩','Bangladesh'],
+    ['🇱🇰','Sri Lanka'],['🇳🇵','Nepal'],['🇧🇹','Bhutan'],
+    ['🇲🇻','Maldives'],['🇦🇫','Afghanistan'],
+    // Central Asia
+    ['🇰🇿','Kazakhstan'],['🇺🇿','Uzbekistan'],['🇹🇲','Turkmenistan'],
+    ['🇰🇬','Kyrgyzstan'],['🇹🇯','Tajikistan'],
+    // East Asia
+    ['🇨🇳','China'],['🇯🇵','Japan'],['🇰🇷','South Korea'],['🇰🇵','North Korea'],
+    ['🇹🇼','Taiwan'],['🇲🇳','Mongolia'],['🇭🇰','Hong Kong'],
+    // Southeast Asia
+    ['🇻🇳','Vietnam'],['🇹🇭','Thailand'],['🇲🇾','Malaysia'],
+    ['🇸🇬','Singapore'],['🇮🇩','Indonesia'],['🇵🇭','Philippines'],
+    ['🇲🇲','Myanmar'],['🇰🇭','Cambodia'],['🇱🇦','Laos'],
+    ['🇧🇳','Brunei'],['🇹🇱','Timor-Leste'],
+    // Oceania
+    ['🇦🇺','Australia'],['🇳🇿','New Zealand'],['🇵🇬','Papua New Guinea'],
+    ['🇫🇯','Fiji'],['🇸🇧','Solomon Islands'],['🇻🇺','Vanuatu'],
+    ['🇼🇸','Samoa'],['🇹🇴','Tonga'],['🇰🇮','Kiribati'],
+    ['🇫🇲','Micronesia'],['🇲🇭','Marshall Islands'],['🇵🇼','Palau'],
+    ['🇹🇻','Tuvalu'],['🇳🇷','Nauru'],['🇨🇰','Cook Islands'],
+    // Not from here
+    ['👽','Outer Space'],['🏴','Anarchist'],
   ];
 
   const SEED = [
