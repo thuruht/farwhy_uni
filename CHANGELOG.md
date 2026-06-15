@@ -2,6 +2,18 @@
 
 All notable changes to the Farewell/Howdy Unified Project.
 
+## [2.2.0] - June 15, 2026
+
+### 🎟️ Splash Page v2 — Ticker + Guestbook
+
+- **Scrolling comment ticker**: Marquee strip above the venue doors scrolls visitor comments live from the KV backend; falls back to seed comments when empty
+- **Guestbook panel**: Slide-up panel lets visitors leave a note about the marquee sign — includes color swatch picker, emoji grid, optional name/country/email fields
+- **Cloudflare KV backend**: New `GUESTBOOK` KV namespace (`3c4e3a20a3394b36b456388f62badcf9`) stores up to 500 comments; emails stored separately under private keys, never returned by GET
+- **New API endpoints**: `GET /api/comments` and `POST /api/comments` with per-IP rate limiting (30 s), HTML-tag scrubbing, and whitelisted color values
+- **Updated `enter.js`**: H/F keyboard shortcuts blocked while guestbook panel is open; active input element guard prevents accidental navigation
+- **New `guestbook.js`**: All user content rendered via `textContent` (never `innerHTML`) — XSS-safe by design
+- **Static assets**: `index.html`, `enter.js`, `guestbook.js` deployed; `splash.css`, fonts, and `img/wc_classy.png` unchanged
+
 ## [2.1.9] - July 9, 2025
 
 ### 🖌️ UI Consistency Improvements

@@ -51,6 +51,15 @@ This document lists all API endpoints available in the Farewell/Howdy Cloudflare
 ### Business Hours
 - `GET /api/hours` - Get business hours for all venues
 
+### Guestbook
+- `GET /api/comments` - Get all guestbook comments (returns `{ comments: [...] }`)
+- `POST /api/comments` - Post a new comment
+  - Body: `{ text, color, name?, email?, country? }`
+  - `color` must be one of: `lima`, `pupil`, `blew`, `redd`, `white`
+  - `text` max 200 characters; `name` max 48; `email` max 120 (stored privately, never returned); `country` max 8 bytes (flag emoji)
+  - Rate limited to one post per IP per 30 seconds (HTTP 429 on violation)
+  - Returns `{ ok: true, comments: [...] }` with full updated comment list
+
 ### Health Check
 - `GET /api/health` - API health check
 
@@ -210,8 +219,8 @@ With HTTP status code 404.
 
 ### KV Stores Used
 - `SESSIONS_KV` - User session management
-- `FWHY_D1` - Main database (D1)
-- `FWHY_IMAGES` - Image storage (R2)
+- `BLOG_KV` - Blog featured content
+- `GUESTBOOK` - Splash page visitor comments (public text) and private email records
 
 ---
 
@@ -276,4 +285,4 @@ With HTTP status code 404.
 
 ---
 
-Last Updated: July 9, 2025
+Last Updated: June 15, 2026

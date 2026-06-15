@@ -28,6 +28,7 @@ This project contains the admin dashboard and APIs for managing events, blog pos
   - Update hours, contact information, and other venue details
 - Legacy data import system
 - Authentication system with role-based access
+- Splash page guestbook with live scrolling comment ticker (Cloudflare KV backed)
 
 ## Tech Stack
 
@@ -113,7 +114,14 @@ npx wrangler deploy
 🔒 **Secure** - JWT authentication with protected admin routes  
 📚 **Well Documented** - Comprehensive technical documentation  
 
-### Recent Updates (July 9, 2025)
+### Recent Updates (June 15, 2026)
+
+- **Splash v2**: Scrolling visitor comment ticker + guestbook slide-up panel on the splash page
+- New `GUESTBOOK` Cloudflare KV namespace; `GET /api/comments` + `POST /api/comments` worker routes
+- Keyboard H/F navigation blocked while guestbook panel is open
+- All documentation updated; corrupted blank section in SYSTEM_DOCUMENTATION.md repaired
+
+### Previous Updates (July 9, 2025)
 
 - Mobile UI improvements for better usability:
   - Fixed event page button sizing and text overflow
@@ -121,7 +129,7 @@ npx wrangler deploy
   - Fixed date comparison logic for events display
   - Removed concentric borders in blog and video sections
 - Complete API consistency verification and fixes
-- Mobile-responsive admin dashboard redesign  
+- Mobile-responsive admin dashboard redesign
 - Consolidated documentation (reduced from 27 to 5 core files)
 - Enhanced menu management system with drag-and-drop
 - Multi-video featured content carousel

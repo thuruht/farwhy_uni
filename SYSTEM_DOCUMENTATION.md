@@ -1,7 +1,7 @@
 # Farewell/Howdy System Documentation
 
-> **Last Updated**: July 9, 2025  
-> **Version**: 2.1.9  
+> **Last Updated**: June 15, 2026  
+> **Version**: 2.2.0  
 
 ## Table of Contents
 
@@ -30,242 +30,6 @@ The Farewell/Howdy Unified Project is a comprehensive content management system 
 - **Frontend**: Responsive HTML/CSS/JS
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-+-
-
-
-
-
-
-
-
-
-z
-
 ### Key Capabilities
 
 - **Event Management**: Create, edit, and display events for both venues
@@ -274,6 +38,7 @@ z
 - **Business Hours**: Venue-specific hours management
 - **Featured Videos**: YouTube video carousel system
 - **Image Handling**: Secure R2-based image storage with automatic optimization
+- **Splash Guestbook**: Live scrolling comment ticker with KV-backed visitor guestbook on the splash page
 
 ---
 
@@ -370,6 +135,15 @@ public/
 - **Closed day handling** with special notes
 - **Venue-specific configuration**
 - **API endpoint** for public site integration
+
+### Splash Page & Guestbook
+
+- **Venue selector splash** (`public/index.html`) with ambient background, rising orbs, and glitch-out nav transition
+- **Scrolling ticker** (`public/guestbook.js`) displays live visitor comments via `GET /api/comments`; falls back to seed comments when empty
+- **Guestbook panel**: slide-up sheet with color swatches, emoji grid, optional name/country fields, and email (stored privately)
+- **KV backend** (`GUESTBOOK` namespace): stores up to 500 public comments and private email records keyed by comment ID
+- **IP rate limiting**: 30-second cooldown per posting IP enforced in the worker
+- **XSS safety**: all user content written via DOM `textContent`, never `innerHTML`; server-side HTML tag stripping on every field
 
 ---
 
@@ -731,7 +505,15 @@ This implementation includes:
 
 ## Current System Status
 
-### Recent Updates (July 9, 2025)
+### Recent Updates (June 15, 2026)
+
+- ✅ **Splash Guestbook**: Live ticker + KV-backed comment panel on splash page
+- ✅ **GUESTBOOK KV**: New namespace provisioned and wired into worker bindings
+- ✅ **API**: `GET /api/comments` and `POST /api/comments` with rate limiting and scrubbing
+- ✅ **enter.js**: Keyboard navigation blocked while guestbook panel is open
+- ✅ **Documentation**: Corrupted blank section removed; all docs updated to v2.2.0
+
+### Previous Updates (July 9, 2025)
 
 - ✅ **Mobile UI Optimization**: Improved button sizing and styling on events page
 - ✅ **UI Consistency**: Fixed header height between Farewell/Howdy states
@@ -744,7 +526,6 @@ This implementation includes:
 - ✅ **Featured Videos**: Multi-video carousel support
 - ✅ **Events Modal**: Improved with archive toggle and consistent date comparison
 - ✅ **Menu Animation**: Added GSAP library for smooth menu transitions
-- ✅ **Documentation**: Consolidated and current
 
 ### Known Limitations
 
