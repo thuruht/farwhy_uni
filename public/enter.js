@@ -34,8 +34,13 @@
     setTimeout(go, 620);
   };
 
+  // Keyboard: H -> howdy, F -> farewell
+  // Blocked when the guestbook panel is open or an input has focus.
   document.addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (window.__gbOpen) return;
+    const tag = (document.activeElement || {}).tagName || '';
+    if (['INPUT','TEXTAREA','SELECT'].includes(tag)) return;
     const k = e.key.toLowerCase();
     if (k === 'h') window.enterVenue('howdy');
     if (k === 'f') window.enterVenue('farewell');

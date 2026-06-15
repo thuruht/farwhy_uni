@@ -143,6 +143,63 @@
   .orb.pop{ animation:pop .42s ease forwards; }
   @keyframes pop{ to{ transform:scale(2.6); opacity:0; } }
 
+  /* ── ticker strip ──────────────────────────────────────────────────── */
+  .ticker-row{ display:flex; align-items:center; gap:0; margin-bottom:clamp(9px,2.2vh,15px); width:100%; }
+  .ticker-wrap{ flex:1 1 0; overflow:hidden; background:rgba(0,0,0,.38); border:1px solid rgba(255,255,255,.12); border-radius:6px 0 0 6px; height:28px; display:flex; align-items:center; }
+  .ticker-inner{ display:flex; align-items:center; white-space:nowrap; will-change:transform; animation:tscroll 40s linear infinite; }
+  @keyframes tscroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  .tk-item{ display:inline-flex; align-items:center; gap:.42em; padding:0 1.1em; font-family:var(--font-ui); font-size:10.5px; letter-spacing:.05em; }
+  .tk-flag{ font-size:12px; line-height:1; }
+  .tk-name{ color:rgba(255,255,255,.44); font-size:10px; }
+  .tk-sep{ color:rgba(255,255,255,.18); font-size:8px; padding-left:.4em; }
+  .ticker-btn{ flex-shrink:0; height:28px; padding:0 11px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-left:none; border-radius:0 6px 6px 0; color:rgba(255,255,255,.68); font-family:var(--font-ui); font-size:11px; cursor:pointer; transition:background .15s,color .15s; white-space:nowrap; }
+  .ticker-btn:hover{ background:rgba(176,238,0,.16); color:var(--lima); }
+
+  /* ── guestbook panel ─────────────────────────────────────────────────── */
+  .gb-overlay{ display:none; position:fixed; inset:0; z-index:8; background:rgba(0,0,0,.48); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); }
+  .gb-overlay.open{ display:block; }
+  .gb-panel{ position:fixed; bottom:0; left:50%; transform:translateX(-50%) translateY(102%); z-index:9; width:min(96vw,460px); max-height:88vh; overflow-y:auto; background:linear-gradient(150deg,rgba(18,10,28,.97),rgba(6,3,12,.98)); border:1px solid rgba(255,255,255,.16); border-bottom:none; border-radius:16px 16px 0 0; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); padding:18px 18px 32px; transition:transform .34s cubic-bezier(.32,.72,0,1); box-shadow:0 -6px 40px rgba(0,0,0,.65); }
+  .gb-panel.open{ transform:translateX(-50%) translateY(0); }
+  .gb-handle{ width:36px; height:4px; background:rgba(255,255,255,.17); border-radius:2px; margin:0 auto 14px; }
+  .gb-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .gb-title{ font-family:var(--font-ui); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.58); }
+  .gb-close{ background:none; border:none; color:rgba(255,255,255,.42); font-size:22px; cursor:pointer; line-height:1; padding:0 3px; transition:color .15s; }
+  .gb-close:hover{ color:#fff; }
+  .gb-ta-wrap{ position:relative; margin-bottom:10px; }
+  .gb-ta{ width:100%; background:rgba(0,0,0,.4); border:1px solid rgba(255,255,255,.13); border-radius:8px; color:#fff; font-family:var(--font-body); font-size:14px; line-height:1.52; padding:9px 11px 22px; resize:none; outline:none; transition:border-color .15s; box-sizing:border-box; }
+  .gb-ta:focus{ border-color:rgba(255,255,255,.3); }
+  .gb-ta::placeholder{ color:rgba(255,255,255,.26); }
+  .gb-count{ position:absolute; bottom:7px; right:9px; font-family:var(--font-ui); font-size:9.5px; color:rgba(255,255,255,.28); pointer-events:none; transition:color .15s; }
+  .gb-row{ display:flex; align-items:center; gap:8px; margin-bottom:9px; flex-wrap:wrap; }
+  .gb-swatches{ display:flex; gap:7px; align-items:center; }
+  .gb-swatch{ width:17px; height:17px; border-radius:50%; background:var(--c); border:2px solid transparent; cursor:pointer; transition:transform .14s,border-color .14s; box-shadow:0 0 5px var(--c); padding:0; }
+  .gb-swatch:hover{ transform:scale(1.3); }
+  .gb-swatch.active{ border-color:#fff; transform:scale(1.18); box-shadow:0 0 10px var(--c),0 0 20px var(--c); }
+  .gb-emoji-btn{ margin-left:auto; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.11); border-radius:6px; color:rgba(255,255,255,.62); font-family:var(--font-ui); font-size:11px; padding:4px 10px; cursor:pointer; transition:background .15s; }
+  .gb-emoji-btn:hover{ background:rgba(255,255,255,.14); color:#fff; }
+  .gb-emoji-grid{ display:flex; flex-wrap:wrap; gap:3px; background:rgba(0,0,0,.42); border:1px solid rgba(255,255,255,.09); border-radius:8px; padding:7px; margin-bottom:9px; }
+  .gb-emoji-grid[hidden]{ display:none; }
+  .gb-emoji{ background:none; border:none; font-size:17px; cursor:pointer; padding:2px; border-radius:4px; transition:background .1s,transform .1s; line-height:1; }
+  .gb-emoji:hover{ background:rgba(255,255,255,.1); transform:scale(1.22); }
+  .gb-optional{ margin-bottom:11px; border:1px solid rgba(255,255,255,.09); border-radius:8px; overflow:hidden; }
+  .gb-optional summary{ font-family:var(--font-ui); font-size:10.5px; letter-spacing:.14em; color:rgba(255,255,255,.44); padding:7px 11px; cursor:pointer; list-style:none; user-select:none; }
+  .gb-optional summary::-webkit-details-marker{ display:none; }
+  .gb-optional summary:hover{ color:rgba(255,255,255,.75); }
+  .gb-optional[open] summary{ border-bottom:1px solid rgba(255,255,255,.09); }
+  .gb-opts{ display:flex; flex-direction:column; gap:7px; padding:9px 11px 11px; }
+  .gb-label{ display:flex; flex-direction:column; gap:3px; font-family:var(--font-ui); font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:rgba(255,255,255,.38); }
+  .gb-hint{ text-transform:none; letter-spacing:0; font-size:9px; color:rgba(255,255,255,.28); }
+  .gb-input{ background:rgba(0,0,0,.38); border:1px solid rgba(255,255,255,.11); border-radius:6px; color:#fff; font-family:var(--font-body); font-size:13px; padding:6px 9px; outline:none; transition:border-color .15s; width:100%; box-sizing:border-box; }
+  .gb-input:focus{ border-color:rgba(255,255,255,.28); }
+  .gb-select{ appearance:none; -webkit-appearance:none; cursor:pointer; }
+  .gb-select option{ background:#0d0618; }
+  .gb-submit{ display:block; width:100%; background:var(--lima); color:#060210; border:none; border-radius:8px; font-family:var(--font-ui); font-weight:700; font-size:12px; letter-spacing:.24em; text-transform:uppercase; padding:11px; cursor:pointer; transition:opacity .15s,transform .15s; margin-bottom:7px; }
+  .gb-submit:hover:not(:disabled){ opacity:.88; transform:translateY(-1px); }
+  .gb-submit:active:not(:disabled){ transform:translateY(0); }
+  .gb-submit:disabled{ opacity:.4; cursor:not-allowed; }
+  .gb-status{ font-family:var(--font-ui); font-size:10.5px; letter-spacing:.1em; min-height:15px; text-align:center; color:rgba(255,255,255,.52); transition:opacity .3s; }
+  .gb-status.ok{ color:var(--lima); } .gb-status.err{ color:var(--redd); }
+
   /* leaving glitch-out */
   html[data-leaving] .stage{ animation:leave .6s steps(4) forwards; }
   @keyframes leave{
@@ -166,6 +223,10 @@
     <p class="kicker">FAREWELL <b>&amp;</b> HOWDY <i>·</i> KCMO</p>
 
     <div class="lower">
+    <div class="ticker-row">
+      <div class="ticker-wrap" id="ticker-wrap"><div class="ticker-inner" id="ticker-inner"></div></div>
+      <button class="ticker-btn" id="gb-open" type="button" aria-label="Leave a note about the marquee">✍ note</button>
+    </div>
     <div class="doors">
       <a class="door howdy" href="#" onclick="enterVenue('howdy',event)">
         <span class="nm" data-t="Howdy">Howdy</span>
@@ -184,6 +245,7 @@
   </main>
 
   <script src="enter.js"></script>
+  <script src="guestbook.js"></script>
   <script>
   (function(){
     const cls=['','p','w'];

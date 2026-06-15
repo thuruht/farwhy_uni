@@ -4,6 +4,7 @@ export interface Env {
   FWHY_IMAGES: R2Bucket;
   SESSIONS_KV: KVNamespace;
   BLOG_KV: KVNamespace;
+  GUESTBOOK: KVNamespace;
   FWHY_KV?: KVNamespace; // Made optional since we're now using BLOG_KV instead
   ASSETS: Fetcher;
   ADMIN_USERNAME: string;

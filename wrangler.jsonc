@@ -28,6 +28,10 @@
     {
       "binding": "BLOG_KV",
       "id": "6ee9ab6b71634a4eb3e66de82d8dfcdc"
+    },
+    {
+      "binding": "GUESTBOOK",
+      "id": "3c4e3a20a3394b36b456388f62badcf9"
     }
   ],
   "vars": {

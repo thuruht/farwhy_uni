@@ -237,6 +237,77 @@ publicApi.get('/hours', (c) => handleHours(c, 'list-all'));
 publicApi.post('/booking', (c) => handleBooking(c, 'submit'));
 publicApi.get('/slideshow', (c) => handleEvents(c, 'slideshow'));
 
+// ── Guestbook ────────────────────────────────────────────────────────────────
+const GB_MAX_CHARS    = 200;
+const GB_MAX_COMMENTS = 500;
+const GB_RATE_LIMIT_S = 30;
+const GB_VALID_COLORS = new Set(['lima', 'pupil', 'blew', 'redd', 'white']);
+
+function gbScrub(val: unknown, max: number): string {
+  if (typeof val !== 'string') return '';
+  return val
+    .replace(/<[^>]*>/g, '')
+    .replace(/[ --]/g, '')
+    .trim()
+    .slice(0, max);
+}
+
+function gbValidEmail(e: string): boolean {
+  return !e || /^[^\s@]{1,64}@[^\s@]{1,253}\.[^\s@]{2,}$/.test(e);
+}
+
+function gbUid(): string {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+publicApi.get('/comments', async (c) => {
+  const raw = await c.env.GUESTBOOK.get('comments').catch(() => null);
+  let comments: unknown[] = [];
+  try { comments = raw ? JSON.parse(raw) : []; } catch { comments = []; }
+  return c.json({ comments: Array.isArray(comments) ? comments : [] });
+});
+
+publicApi.post('/comments', async (c) => {
+  const ip    = c.req.header('CF-Connecting-IP') || 'unknown';
+  const rlKey = `rl:${ip}`;
+  if (await c.env.GUESTBOOK.get(rlKey)) {
+    return c.text('slow down a little', 429);
+  }
+
+  let body: Record<string, unknown>;
+  try { body = await c.req.json(); }
+  catch { return c.text('bad JSON', 400); }
+
+  const text = gbScrub(body.text, GB_MAX_CHARS);
+  if (!text)                    return c.text('text is required', 400);
+  if (text.length > GB_MAX_CHARS) return c.text(`max ${GB_MAX_CHARS} characters`, 400);
+
+  const color = String(body.color || 'white');
+  if (!GB_VALID_COLORS.has(color)) return c.text('invalid color', 400);
+
+  const name    = gbScrub(body.name,    48);
+  const email   = gbScrub(body.email,  120);
+  const country = gbScrub(body.country,  8);
+  if (!gbValidEmail(email)) return c.text('invalid email', 400);
+
+  const comment = { id: gbUid(), text, color, name, country, ts: Date.now() };
+
+  if (email) {
+    await c.env.GUESTBOOK.put(`email:${comment.id}`, email, { expirationTtl: 60 * 60 * 24 * 365 });
+  }
+
+  const raw      = await c.env.GUESTBOOK.get('comments').catch(() => null);
+  let comments: unknown[];
+  try { comments = raw ? JSON.parse(raw) : []; } catch { comments = []; }
+  if (!Array.isArray(comments)) comments = [];
+  comments.unshift(comment);
+  if (comments.length > GB_MAX_COMMENTS) comments.length = GB_MAX_COMMENTS;
+  await c.env.GUESTBOOK.put('comments', JSON.stringify(comments));
+  await c.env.GUESTBOOK.put(rlKey, '1', { expirationTtl: GB_RATE_LIMIT_S });
+
+  return c.json({ ok: true, comments });
+});
+
 // Public authentication endpoints (login/logout/check)
 publicApi.post('/login', (c) => handleAuth(c, 'login'));
 publicApi.post('/logout', (c) => handleAuth(c, 'logout'));
