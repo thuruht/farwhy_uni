@@ -247,7 +247,7 @@ function gbScrub(val: unknown, max: number): string {
   if (typeof val !== 'string') return '';
   return val
     .replace(/<[^>]*>/g, '')
-    .replace(/[ --]/g, '')
+    .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, '')
     .trim()
     .slice(0, max);
 }
