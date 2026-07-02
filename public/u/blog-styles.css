@@ -2,7 +2,7 @@
 .post-item-public {
   margin-bottom: 30px;
   padding: 20px;
-  background: white;
+  background: transparent;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease;
@@ -40,7 +40,7 @@
 /* Enhanced Featured Content */
 .featured-content-wrapper {
   padding: 15px;
-  background: white;
+  background: transparent;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   border: none;
