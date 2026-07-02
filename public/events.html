@@ -164,7 +164,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
+            transition: transform 0.15s, box-shadow 0.15s;
             box-shadow: -3px 3px 0 rgba(0,0,0,0.15);
             position: relative;
         }
@@ -172,7 +172,8 @@
         .event-list-item.active {
             transform: translateY(-3px);
             box-shadow: -5px 5px 0 rgba(0,0,0,0.25);
-            background: rgba(0,0,0,0.04);
+            background: var(--card-bg-color);
+            border-left: none;
         }
         .event-flyer-container {
             height: 220px;
