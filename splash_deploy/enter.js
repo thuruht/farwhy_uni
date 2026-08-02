@@ -1,39 +1,24 @@
-/* Venue-enter wiring for the splash page.
- *
- * Clicking HOWDY / FAREWELL (or pressing H / F) calls enterVenue(venue).
- * The choice is stored in localStorage as 'fwhy-venue' AND passed as a
- * ?venue= query param so windex.html can read it immediately on load.
- *
- * In windex.html, add near the top of your boot script:
- *
- *   const v = new URLSearchParams(location.search).get('venue')
- *             || localStorage.getItem('fwhy-venue');
- *   document.body.dataset.state = (v === 'howdy') ? 'howdy' : 'farewell';
- *
- * Override the destination by setting window.SPLASH_INDEX before this script loads.
- */
 (function () {
-  const INDEX = (typeof window.SPLASH_INDEX === 'string')
-    ? window.SPLASH_INDEX
-    : 'windex.html';
-
+  const INDEX = typeof window.SPLASH_INDEX === 'string' ? window.SPLASH_INDEX : 'windex.html';
   window.enterVenue = function enterVenue(venue, ev) {
     if (ev) ev.preventDefault();
-    venue = (venue === 'howdy') ? 'howdy' : 'farewell';
-    try { localStorage.setItem('fwhy-venue', venue); } catch (e) {}
-
+    venue = venue === 'howdy' ? 'howdy' : 'farewell';
+    try {
+      localStorage.setItem('fwhy-venue', venue);
+    } catch (e) {}
     const root = document.documentElement;
     root.setAttribute('data-leaving', venue);
-
-    const go = () => { window.location.href = `${INDEX}?venue=${venue}`; };
-
-    const reduce = window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { go(); return; }
-
+    const go = () => {
+      window.location.href = `${INDEX}?venue=${venue}`;
+    };
+    const reduce =
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      go();
+      return;
+    }
     setTimeout(go, 620);
   };
-
   document.addEventListener('keydown', (e) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     const k = e.key.toLowerCase();

@@ -1,20 +1,21 @@
 @font-face {
   font-family: 'hnb2';
-  src: url('/fnt/hnb2.woff2') format('woff2'),
-       url('/fnt/hnb2.woff') format('woff');
+  src:
+    url('/fnt/hnb2.woff2') format('woff2'),
+    url('/fnt/hnb2.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'kb';
-  src: url('/fnt/kb.woff2') format('woff2'),
-       url('/fnt/kb.woff') format('woff');
+  src:
+    url('/fnt/kb.woff2') format('woff2'),
+    url('/fnt/kb.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
 
-/* Global Variables and Base Styles */
 :root {
   --primary-color: #d990ff;
   --error-color: #ff2b13;
@@ -25,7 +26,6 @@
   --transition-speed: 0.3s;
 }
 
-/* Global Base styles (from ccssss.css) */
 body {
   background: transparent;
   font-family: var(--font-main);
@@ -40,17 +40,15 @@ header {
   color: #fff;
 }
 
-/* Example Card Styling (from ccssss.css) */
 .card {
   background: transparent;
   border: 1px solid #ddd;
   border-radius: 4px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px #0000001a;
   padding: 1rem;
   margin: 0.5rem 0;
 }
 
-/* Admin link styling */
 .admin-link {
   display: inline-block;
   background-color: transparent;
@@ -74,23 +72,19 @@ footer {
   text-align: center;
 }
 
-/* Public view */
 #public-view {
   display: block;
   padding: 1rem;
 }
 #public-view main {
   display: flex;
-  gap: 1rem; /* Adjust the space between columns as needed */
+  gap: 1rem;
 }
 #public-view section {
   flex: 1;
 }
 
-/* Apply card styling to the posts and featured sections.
-   If the global .card is defined and your HTML adds that class,
-   you wouldn't need to duplicate these rules. */
-#public-posts, 
+#public-posts,
 #public-featured {
   background: transparent;
   border: none;
@@ -98,7 +92,6 @@ footer {
   padding: 1rem;
 }
 
-/* YouTube Carousel Styles */
 .yt-carousel {
   position: relative;
   max-width: 100%;
@@ -125,7 +118,7 @@ footer {
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
-  background-color: rgba(0,0,0,0.6);
+  background-color: #00000099;
   padding: 8px 12px;
   border-radius: 30px;
   display: flex;
@@ -154,22 +147,21 @@ footer {
   font-size: 0.9rem;
 }
 
-/* Embedded YouTube video container styles */
 .embed-container {
-    position: relative;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
-    height: 0;
-    overflow: hidden;
-    max-width: 100%;
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .embed-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .featured-video-container {
@@ -183,23 +175,21 @@ footer {
   white-space: pre-wrap;
 }
 
-/* Featured content styling */
 .featured-content-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .featured-text {
-    line-height: 1.5;
-    font-size: 16px;
+  line-height: 1.5;
+  font-size: 16px;
 }
 
 .featured-video-container {
-    width: 100%;
+  width: 100%;
 }
 
-/* Public posts styling */
 .post-item-public {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
@@ -220,7 +210,7 @@ footer {
   height: auto;
   margin: 1rem 0;
   border-radius: 8px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 8px #0000001a;
 }
 
 .post-content-public {
@@ -243,23 +233,21 @@ footer {
   text-decoration: none;
 }
 
-/* Admin Featured Area – remove any inline styles from index.html and use these rules */
 #admin-featured-content,
 #current-featured-preview {
   background: transparent;
   border: 1px solid #ddd;
   border-radius: 4px;
- box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px #0000001a;
   padding: 1rem;
-  margin-bottom: 10px; /* replaces the inline style in index.html */
+  margin-bottom: 10px;
 }
 
-/* (Optional) If you want the inner content to have some margin */
-#public-posts > *, #public-featured > * {
+#public-posts > *,
+#public-featured > * {
   margin-bottom: 0.5rem;
 }
 
-/* Admin view and other styles remain unchanged */
 #admin-view {
   display: none;
 }
@@ -269,15 +257,17 @@ footer {
   gap: 1rem;
   padding: 1rem;
 }
-.blog-content, .admin-panel {
+.blog-content,
+.admin-panel {
   background: #fff;
   padding: 1rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px #0000001a;
 }
 .content-container {
   margin-top: 1rem;
 }
-.admin-form, .featured-form {
+.admin-form,
+.featured-form {
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
@@ -294,7 +284,6 @@ footer {
   padding: 0.5rem;
 }
 
-/* Post list styling */
 .post-item {
   border-bottom: 1px solid #ddd;
   padding: 0.5rem 0;
@@ -303,49 +292,47 @@ footer {
   margin-right: 0.5rem;
 }
 
-/* Admin Post Items Styling */
 .post-item-admin {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px #0000000d;
+  transition: all 0.2s;
 }
 
 .post-item-admin:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+  box-shadow: 0 4px 8px #0000001a;
+  transform: translateY(-2px);
 }
 
 .post-item-admin strong {
-    display: block;
-    font-size: 1.2rem;
-    margin-bottom: 8px;
-    color: var(--text-color);
+  display: block;
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: var(--text-color);
 }
 
 .post-item-admin p {
-    margin: 8px 0;
-    color: #555;
+  margin: 8px 0;
+  color: #555;
 }
 
 .post-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 
-/* Modal Styling */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: #00000080;
   display: none;
   align-items: center;
   justify-content: center;
@@ -354,7 +341,6 @@ footer {
   display: flex;
 }
 
-/* Editor Styling */
 .ql-toolbar {
   background: #fff;
   border-color: #000 !important;
@@ -365,7 +351,6 @@ footer {
   background: #fff;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   #public-view main {
     flex-direction: column;
@@ -376,18 +361,17 @@ footer {
   .ql-editor {
     font-size: 16px !important;
   }
-  
+
   .yt-controls {
     bottom: 10px;
   }
-  
+
   .yt-controls button {
     padding: 4px 10px;
     font-size: 0.8rem;
   }
 }
 
-/* Other global adjustments */
 [data-admin-only] {
   display: none !important;
   opacity: 0.95;
@@ -397,20 +381,18 @@ button[disabled] {
   opacity: 0.7;
   cursor: not-allowed;
 }
-footer
-{
-  background:transparent;
-  border: 0; 
-  box-shadow:#b0ee0022 0 0 3px;
-width:33%;
-height:auto;
-padding-top:0.5rem;
-padding-bottom:1.5rem;
-margin: 1rem auto;
-vertical-align:middle;
-border-radius: 50% 50% 50% 50% ;
-opacity:0.3666;
-
+footer {
+  background: transparent;
+  border: 0;
+  box-shadow: #b0ee0022 0 0 3px;
+  width: 33%;
+  height: auto;
+  padding-top: 0.5rem;
+  padding-bottom: 1.5rem;
+  margin: 1rem auto;
+  vertical-align: middle;
+  border-radius: 50% 50% 50% 50%;
+  opacity: 0.3666;
 }
 
 h2:nth-of-type(1) {
@@ -435,220 +417,227 @@ h2:nth-of-type(7) {
   color: #00ff00;
 }
 .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    overflow: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #00000080;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  overflow: auto;
 }
 
 .modal.active {
-    display: flex;
+  display: flex;
 }
 
 .modal-content {
-    position: relative;
-    background: white;
-    padding: 2rem;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 500px;
-    margin: 20px;
-    animation: modalSlideIn 0.3s ease-out;
+  position: relative;
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  margin: 20px;
+  animation: modalSlideIn 0.3s ease-out;
 }
 
 @keyframes modalSlideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .close-button {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 1.8rem;
-    cursor: pointer;
-    color: #ff4444;
-    transition: color 0.2s;
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: #ff4444;
+  transition: color 0.2s;
 }
 
 .close-button:hover {
-    color: #cc0000;
+  color: #cc0000;
 }
 .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    overflow: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #00000080;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  overflow: auto;
 }
 
 .modal.active {
-    display: flex;
+  display: flex;
 }
 
 .modal-content {
-    position: relative;
-    background: white;
-    padding: 2rem;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 500px;
-    margin: 20px;
-    animation: modalSlideIn 0.3s ease-out;
+  position: relative;
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 500px;
+  margin: 20px;
+  animation: modalSlideIn 0.3s ease-out;
 }
 
 @keyframes modalSlideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .close-button {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 1.8rem;
-    cursor: pointer;
-    color: #ff4444;
-    transition: color 0.2s;
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: #ff4444;
+  transition: color 0.2s;
 }
 
 .close-button:hover {
-    color: #cc0000;
+  color: #cc0000;
 }
 
-/* YouTube Carousel Styling */
 .yt-carousel {
-    position: relative;
-    width: 100%;
-    height: 0;
-    padding-bottom: 56.25%; /* 16:9 aspect ratio */
-    overflow: hidden;
-    margin-bottom: 20px;
-    background-color: #000; /* Black background for video */
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%;
+  overflow: hidden;
+  margin-bottom: 20px;
+  background-color: #000;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px #00000033;
 }
 
 .yt-slide {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none; /* Hide all slides by default */
-    z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  z-index: 1;
 }
 
 .yt-slide:first-child {
-    display: block; /* Show first slide by default */
+  display: block;
 }
 
 .yt-slide iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .yt-controls {
-    position: absolute;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10; /* Increased z-index to ensure visibility */
-    display: flex;
-    gap: 10px;
-    background-color: rgba(0, 0, 0, 0.7); /* Darker background for better visibility */
-    padding: 8px 12px;
-    border-radius: 20px;
-    align-items: center;
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  gap: 10px;
+  background-color: #000000b2;
+  padding: 8px 12px;
+  border-radius: 20px;
+  align-items: center;
 }
 
 .yt-indicator {
-    color: white;
-    font-size: 14px;
-    margin-right: 10px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  color: white;
+  font-size: 14px;
+  margin-right: 10px;
+  text-shadow: 1px 1px 2px #000000cc;
 }
 
-.yt-prev, 
+.yt-prev,
 .yt-next {
-    background-color: var(--primary-color, #d990ff);
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 12px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  background-color: var(--primary-color, #d990ff);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: bold;
+  box-shadow: 0 2px 5px #0000004c;
 }
 
-.yt-prev:hover, 
+.yt-prev:hover,
 .yt-next:hover {
-    background-color: var(--success-color, #b0ee00);
-    color: #000;
-    transform: translateY(-2px);
+  background-color: var(--success-color, #b0ee00);
+  color: #000;
+  transform: translateY(-2px);
 }
 
-.yt-prev:active, 
+.yt-prev:active,
 .yt-next:active {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 
-/* Fix for filter controls in admin view */
 #admin-view select,
 #admin-view .filter-dropdown {
-    width: auto;
-    max-width: 180px;
-    min-width: 100px;
+  width: auto;
+  max-width: 180px;
+  min-width: 100px;
 }
 
-#admin-view input[type="text"],
+#admin-view input[type='text'],
 #admin-view .search-input {
-    flex: 1;
-    min-width: 250px;
-    max-width: 400px;
+  flex: 1;
+  min-width: 250px;
+  max-width: 400px;
 }
 
-/* Blog filters specific styling */
 #blog-status-filter {
-    width: auto;
-    max-width: 180px;
+  width: auto;
+  max-width: 180px;
 }
 
 #blog-search {
-    min-width: 250px;
-    max-width: none;
-    flex: 1;
+  min-width: 250px;
+  max-width: none;
+  flex: 1;
 }
 
-/* Filter bar styling */
 .filter-bar {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    align-items: center;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-/* Admin link styling */
 .admin-link {
   display: inline-block;
   padding: 0.5rem 1rem;
@@ -657,7 +646,9 @@ h2:nth-of-type(7) {
   text-decoration: none;
   border-radius: 4px;
   font-family: var(--font-secondary);
-  transition: background-color 0.3s, transform 0.2s;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
   margin-top: 2rem;
   margin-bottom: 1rem;
   text-align: center;
@@ -666,7 +657,7 @@ h2:nth-of-type(7) {
 .admin-link:hover {
   background-color: #c065f0;
   transform: translateY(-2px);
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 5px #00000033;
 }
 
 footer {
@@ -676,7 +667,6 @@ footer {
   border-top: 1px solid #eee;
 }
 
-/* Error Fallback Styles */
 .error-fallback {
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
@@ -692,14 +682,14 @@ footer {
 }
 
 @media (max-width: 768px) {
-    .filter-bar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    #blog-search,
-    #admin-view input[type="text"] {
-        width: 100%;
-        max-width: none;
-    }
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #blog-search,
+  #admin-view input[type='text'] {
+    width: 100%;
+    max-width: none;
+  }
 }

@@ -1,12 +1,3 @@
-/* Admin UI Button Standardization CSS - DEPRECATED */
-
-/* 
- * THIS FILE IS DEPRECATED IN FAVOR OF unified-buttons.css
- * PLEASE USE THE STYLES DEFINED IN unified-buttons.css FOR ALL ADMIN BUTTONS
- * KEEPING THIS FILE FOR BACKWARD COMPATIBILITY
- */
-
-/* Provide only minimal backwards compatibility styles */
 .admin-view button,
 #admin-view button,
 .post-actions button,
@@ -16,7 +7,6 @@
 .blog-content button,
 #post-form button,
 #featured-form button {
-    /* Ensure basic margins and prevent older styles from conflicting with new ones */
-    margin: 0;
-    display: inline-block;
+  margin: 0;
+  display: inline-block;
 }

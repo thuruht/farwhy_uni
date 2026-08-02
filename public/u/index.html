@@ -1,169 +1,172 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>fw/hy newz</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <link rel="stylesheet" href="../css/ccssss.css">
-  <link rel="stylesheet" href="./news.css">
-  <link rel="stylesheet" href="./blog-styles.css">
-  <link rel="stylesheet" href="../css/unified-buttons.css">
-</head>
-<body>
-  <div id="public-view">
-    <main>
-      <section id="public-posts">
-          <h2>Posts</h2>
-          <div id="public-posts-list" class="card">
-            Loading posts...
-          </div>
-      </section>
-    </main>
-    <footer>
-      <a href="/admin" target="_blank" class="admin-link">Go to Admin Dashboard</a>
-    </footer>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>fw/hy newz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <script src="./news.js"></script>
-  <script>
-    // Auto-resize iframe communication script
-    // Track content and image loading
-    let contentLoaded = false;
-    let imagesLoaded = false;
-    
-    function reportHeight() {
-      try {
-        // Calculate the total content height
-        const body = document.body;
-        const html = document.documentElement;
-        
-        const contentHeight = Math.max(
-          body.scrollHeight,
-          body.offsetHeight,
-          html.clientHeight,
-          html.scrollHeight,
-          html.offsetHeight
-        );
-        
-        // Send height to parent window
-        if (window.parent && window.parent !== window) {
-          window.parent.postMessage({
-            type: 'setHeight',
-            height: contentHeight
-          }, '*');
-          console.log('Iframe reported height:', contentHeight);
+    <link rel="stylesheet" href="../css/ccssss.css" />
+    <link rel="stylesheet" href="./news.css" />
+    <link rel="stylesheet" href="./blog-styles.css" />
+    <link rel="stylesheet" href="../css/unified-buttons.css" />
+  </head>
+  <body>
+    <div id="public-view">
+      <main>
+        <section id="public-posts">
+          <h2>Posts</h2>
+          <div id="public-posts-list" class="card">Loading posts...</div>
+        </section>
+      </main>
+      <footer>
+        <a href="/admin" target="_blank" class="admin-link">Go to Admin Dashboard</a>
+      </footer>
+    </div>
+
+    <script src="./news.js"></script>
+    <script>
+      // Auto-resize iframe communication script
+      // Track content and image loading
+      let contentLoaded = false;
+      let imagesLoaded = false;
+
+      function reportHeight() {
+        try {
+          // Calculate the total content height
+          const body = document.body;
+          const html = document.documentElement;
+
+          const contentHeight = Math.max(
+            body.scrollHeight,
+            body.offsetHeight,
+            html.clientHeight,
+            html.scrollHeight,
+            html.offsetHeight
+          );
+
+          // Send height to parent window
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage(
+              {
+                type: 'setHeight',
+                height: contentHeight,
+              },
+              '*'
+            );
+            console.log('Iframe reported height:', contentHeight);
+          }
+        } catch (error) {
+          console.log('Failed to report height:', error);
         }
-      } catch (error) {
-        console.log('Failed to report height:', error);
       }
-    }
-    
-    // Check if all images have loaded
-    function checkImagesLoaded() {
-      const images = document.querySelectorAll('img');
-      let loadedCount = 0;
-      
-      if (images.length === 0) {
-        imagesLoaded = true;
-        finalResize();
-        return;
+
+      // Check if all images have loaded
+      function checkImagesLoaded() {
+        const images = document.querySelectorAll('img');
+        let loadedCount = 0;
+
+        if (images.length === 0) {
+          imagesLoaded = true;
+          finalResize();
+          return;
+        }
+
+        images.forEach((img) => {
+          if (img.complete) {
+            loadedCount++;
+          } else {
+            img.addEventListener('load', () => {
+              loadedCount++;
+              if (loadedCount === images.length) {
+                console.log('All images loaded');
+                imagesLoaded = true;
+                finalResize();
+              }
+            });
+
+            // Handle broken images
+            img.addEventListener('error', () => {
+              loadedCount++;
+              if (loadedCount === images.length) {
+                console.log('All images loaded (some with errors)');
+                imagesLoaded = true;
+                finalResize();
+              }
+            });
+          }
+        });
+
+        // If all images are already loaded
+        if (loadedCount === images.length) {
+          console.log('All images were already loaded');
+          imagesLoaded = true;
+          finalResize();
+        }
       }
-      
-      images.forEach(img => {
-        if (img.complete) {
-          loadedCount++;
-        } else {
-          img.addEventListener('load', () => {
-            loadedCount++;
-            if (loadedCount === images.length) {
-              console.log('All images loaded');
-              imagesLoaded = true;
-              finalResize();
-            }
-          });
-          
-          // Handle broken images
-          img.addEventListener('error', () => {
-            loadedCount++;
-            if (loadedCount === images.length) {
-              console.log('All images loaded (some with errors)');
-              imagesLoaded = true;
-              finalResize();
-            }
-          });
+
+      // Final resize once everything is loaded
+      function finalResize() {
+        if (contentLoaded && imagesLoaded) {
+          console.log('Content and images all loaded, sending final height');
+          reportHeight();
+
+          // Also listen for window resize events
+          window.addEventListener('resize', debounce(reportHeight, 250));
+        }
+      }
+
+      // Debounce helper function
+      function debounce(func, wait) {
+        let timeout;
+        return function () {
+          const context = this;
+          const args = arguments;
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(context, args), wait);
+        };
+      }
+
+      // Listen for height requests from parent
+      window.addEventListener('message', function (event) {
+        if (event.data && event.data.type === 'getHeight') {
+          if (contentLoaded && imagesLoaded) {
+            reportHeight();
+          } else {
+            console.log('Height requested but content not fully loaded yet');
+          }
         }
       });
-      
-      // If all images are already loaded
-      if (loadedCount === images.length) {
-        console.log('All images were already loaded');
+
+      // Report height when DOM content loads
+      document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM content loaded');
+        contentLoaded = true;
+        checkImagesLoaded();
+      });
+
+      // Report height when window loads (all resources)
+      window.addEventListener('load', function () {
+        console.log('Window fully loaded');
+        contentLoaded = true;
         imagesLoaded = true;
         finalResize();
-      }
-    }
-    
-    // Final resize once everything is loaded
-    function finalResize() {
-      if (contentLoaded && imagesLoaded) {
-        console.log('Content and images all loaded, sending final height');
-        reportHeight();
-        
-        // Also listen for window resize events
-        window.addEventListener('resize', debounce(reportHeight, 250));
-      }
-    }
-    
-    // Debounce helper function
-    function debounce(func, wait) {
-      let timeout;
-      return function() {
-        const context = this;
-        const args = arguments;
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(context, args), wait);
-      };
-    }
-    
-    // Listen for height requests from parent
-    window.addEventListener('message', function(event) {
-      if (event.data && event.data.type === 'getHeight') {
-        if (contentLoaded && imagesLoaded) {
-          reportHeight();
-        } else {
-          console.log('Height requested but content not fully loaded yet');
-        }
-      }
-    });
-    
-    // Report height when DOM content loads
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM content loaded');
-      contentLoaded = true;
-      checkImagesLoaded();
-    });
-    
-    // Report height when window loads (all resources)
-    window.addEventListener('load', function() {
-      console.log('Window fully loaded');
-      contentLoaded = true;
-      imagesLoaded = true;
-      finalResize();
-    });
-    
-    // Track dynamic content changes
-    const observer = new MutationObserver(debounce(function() {
-      if (contentLoaded && imagesLoaded) {
-        console.log('Content changed, updating height');
-        reportHeight();
-      }
-    }, 250));
-    
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true
-    });
-  </script>
-</body>
+      });
+
+      // Track dynamic content changes
+      const observer = new MutationObserver(
+        debounce(function () {
+          if (contentLoaded && imagesLoaded) {
+            console.log('Content changed, updating height');
+            reportHeight();
+          }
+        }, 250)
+      );
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+      });
+    </script>
+  </body>
 </html>

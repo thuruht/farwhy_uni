@@ -1,136 +1,288 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Font Specimen</title>
     <style>
-        @font-face { font-family: 'db'; src: url('./db.woff2') format('woff2'); }
-        @font-face { font-family: 'ds'; src: url('./ds.woff2') format('woff2'); }
-        @font-face { font-family: 'hnb2'; src: url('./hnb2.woff2') format('woff2'); }
-        @font-face { font-family: 'hnbi4'; src: url('./hnbi4.woff2') format('woff2'); }
-        @font-face { font-family: 'hnm11'; src: url('./hnm11.woff2') format('woff2'); }
-        @font-face { font-family: 'hnmi12'; src: url('./hnmi12.woff2') format('woff2'); }
-        @font-face { font-family: 'kb'; src: url('./kb.woff2') format('woff2'); }
-        @font-face { font-family: 'mrt'; src: url('./mrt.woff2') format('woff2'); }
+      @font-face {
+        font-family: 'db';
+        src: url('./db.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'ds';
+        src: url('./ds.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'hnb2';
+        src: url('./hnb2.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'hnbi4';
+        src: url('./hnbi4.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'hnm11';
+        src: url('./hnm11.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'hnmi12';
+        src: url('./hnmi12.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'kb';
+        src: url('./kb.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'mrt';
+        src: url('./mrt.woff2') format('woff2');
+      }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #1a1a1a;
-            color: #e0e0e0;
-            padding: 2rem;
-            font-family: system-ui, sans-serif;
-        }
-        h1 {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 2.5rem;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            opacity: 0.7;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #1a1a1a;
+        color: #e0e0e0;
+        padding: 2rem;
+        font-family: system-ui, sans-serif;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2.5rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+        gap: 1.5rem;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .card {
+        background: #2a2a2a;
+        border: 1px solid #444;
+        padding: 1.5rem;
+        border-radius: 4px;
+      }
+      .card h2 {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.5;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #444;
+      }
+      .sample {
+        margin-bottom: 1rem;
+      }
+      .sample:last-child {
+        margin-bottom: 0;
+      }
+      .sample .label {
+        font-size: 0.7rem;
+        opacity: 0.4;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.25rem;
+      }
+      .pangram {
+        font-size: 1.3rem;
+        line-height: 1.4;
+        word-break: break-word;
+      }
+      .pangram-sm {
+        font-size: 0.95rem;
+        line-height: 1.3;
+      }
+      .pangram-xs {
+        font-size: 0.75rem;
+        line-height: 1.3;
+      }
+
+      .font-db {
+        font-family: 'db', serif;
+      }
+      .font-ds {
+        font-family: 'ds', serif;
+      }
+      .font-hnb2 {
+        font-family: 'hnb2', sans-serif;
+      }
+      .font-hnbi4 {
+        font-family: 'hnbi4', sans-serif;
+      }
+      .font-hnm11 {
+        font-family: 'hnm11', sans-serif;
+      }
+      .font-hnmi12 {
+        font-family: 'hnmi12', sans-serif;
+      }
+      .font-kb {
+        font-family: 'kb', sans-serif;
+      }
+      .font-mrt {
+        font-family: 'mrt', sans-serif;
+      }
+
+      @media (max-width: 540px) {
         .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
-            gap: 1.5rem;
-            max-width: 1400px;
-            margin: 0 auto;
+          grid-template-columns: 1fr;
         }
-        .card {
-            background: #2a2a2a;
-            border: 1px solid #444;
-            padding: 1.5rem;
-            border-radius: 4px;
+        body {
+          padding: 1rem;
         }
-        .card h2 {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            opacity: 0.5;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #444;
+        .pangram {
+          font-size: 1.1rem;
         }
-        .sample { margin-bottom: 1rem; }
-        .sample:last-child { margin-bottom: 0; }
-        .sample .label {
-            font-size: 0.7rem;
-            opacity: 0.4;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.25rem;
-        }
-        .pangram { font-size: 1.3rem; line-height: 1.4; word-break: break-word; }
-        .pangram-sm { font-size: 0.95rem; line-height: 1.3; }
-        .pangram-xs { font-size: 0.75rem; line-height: 1.3; }
-
-        .font-db { font-family: 'db', serif; }
-        .font-ds { font-family: 'ds', serif; }
-        .font-hnb2 { font-family: 'hnb2', sans-serif; }
-        .font-hnbi4 { font-family: 'hnbi4', sans-serif; }
-        .font-hnm11 { font-family: 'hnm11', sans-serif; }
-        .font-hnmi12 { font-family: 'hnmi12', sans-serif; }
-        .font-kb { font-family: 'kb', sans-serif; }
-        .font-mrt { font-family: 'mrt', sans-serif; }
-
-        @media (max-width: 540px) {
-            .grid { grid-template-columns: 1fr; }
-            body { padding: 1rem; }
-            .pangram { font-size: 1.1rem; }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Font Specimen</h1>
     <div class="grid">
-        <div class="card">
-            <h2>db</h2>
-            <div class="sample"><div class="label">Regular</div><div class="pangram font-db">The quick brown fox jumps over the lazy dog.</div></div>
-            <div class="sample"><div class="label">Numerals</div><div class="pangram font-db">0123456789</div></div>
-            <div class="sample"><div class="label">Small</div><div class="pangram-sm font-db">How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.</div></div>
+      <div class="card">
+        <h2>db</h2>
+        <div class="sample">
+          <div class="label">Regular</div>
+          <div class="pangram font-db">The quick brown fox jumps over the lazy dog.</div>
         </div>
-        <div class="card">
-            <h2>ds</h2>
-            <div class="sample"><div class="label">Regular</div><div class="pangram font-ds">The quick brown fox jumps over the lazy dog.</div></div>
-            <div class="sample"><div class="label">Numerals</div><div class="pangram font-ds">0123456789</div></div>
-            <div class="sample"><div class="label">Small</div><div class="pangram-sm font-ds">How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.</div></div>
+        <div class="sample">
+          <div class="label">Numerals</div>
+          <div class="pangram font-db">0123456789</div>
         </div>
-        <div class="card">
-            <h2>hnb2</h2>
-            <div class="sample"><div class="label">Regular</div><div class="pangram font-hnb2">The quick brown fox jumps over the lazy dog.</div></div>
-            <div class="sample"><div class="label">Numerals</div><div class="pangram font-hnb2">0123456789</div></div>
-            <div class="sample"><div class="label">Small</div><div class="pangram-sm font-hnb2">How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.</div></div>
+        <div class="sample">
+          <div class="label">Small</div>
+          <div class="pangram-sm font-db">
+            How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.
+          </div>
         </div>
-        <div class="card">
-            <h2>hnbi4</h2>
-            <div class="sample"><div class="label">Regular</div><div class="pangram font-hnbi4">The quick brown fox jumps over the lazy dog.</div></div>
-            <div class="sample"><div class="label">Numerals</div><div class="pangram font-hnbi4">0123456789</div></div>
-            <div class="sample"><div class="label">Small</div><div class="pangram-sm font-hnbi4">How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.</div></div>
+      </div>
+      <div class="card">
+        <h2>ds</h2>
+        <div class="sample">
+          <div class="label">Regular</div>
+          <div class="pangram font-ds">The quick brown fox jumps over the lazy dog.</div>
         </div>
-        <div class="card">
-            <h2>hnm11</h2>
-            <div class="sample"><div class="label">Regular</div><div class="pangram font-hnm11">The quick brown fox jumps over the lazy dog.</div></div>
-            <div class="sample"><div class="label">Numerals</div><div class="pangram font-hnm11">0123456789</div></div>
-            <div class="sample"><div class="label">Small</div><div class="pangram-sm font-hnm11">How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.</div></div>
+        <div class="sample">
+          <div class="label">Numerals</div>
+          <div class="pangram font-ds">0123456789</div>
         </div>
-        <div class="card">
-            <h2>hnmi12</h2>
-            <div class="sample"><div class="label">Regular</div><div class="pangram font-hnmi12">The quick brown fox jumps over the lazy dog.</div></div>
-            <div class="sample"><div class="label">Numerals</div><div class="pangram font-hnmi12">0123456789</div></div>
-            <div class="sample"><div class="label">Small</div><div class="pangram-sm font-hnmi12">How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.</div></div>
+        <div class="sample">
+          <div class="label">Small</div>
+          <div class="pangram-sm font-ds">
+            How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.
+          </div>
         </div>
-        <div class="card">
-            <h2>kb</h2>
-            <div class="sample"><div class="label">Regular</div><div class="pangram font-kb">The quick brown fox jumps over the lazy dog.</div></div>
-            <div class="sample"><div class="label">Numerals</div><div class="pangram font-kb">0123456789</div></div>
-            <div class="sample"><div class="label">Small</div><div class="pangram-sm font-kb">How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.</div></div>
+      </div>
+      <div class="card">
+        <h2>hnb2</h2>
+        <div class="sample">
+          <div class="label">Regular</div>
+          <div class="pangram font-hnb2">The quick brown fox jumps over the lazy dog.</div>
         </div>
-        <div class="card">
-            <h2>mrt</h2>
-            <div class="sample"><div class="label">Regular</div><div class="pangram font-mrt">The quick brown fox jumps over the lazy dog.</div></div>
-            <div class="sample"><div class="label">Numerals</div><div class="pangram font-mrt">0123456789</div></div>
-            <div class="sample"><div class="label">Small</div><div class="pangram-sm font-mrt">How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.</div></div>
+        <div class="sample">
+          <div class="label">Numerals</div>
+          <div class="pangram font-hnb2">0123456789</div>
         </div>
+        <div class="sample">
+          <div class="label">Small</div>
+          <div class="pangram-sm font-hnb2">
+            How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>hnbi4</h2>
+        <div class="sample">
+          <div class="label">Regular</div>
+          <div class="pangram font-hnbi4">The quick brown fox jumps over the lazy dog.</div>
+        </div>
+        <div class="sample">
+          <div class="label">Numerals</div>
+          <div class="pangram font-hnbi4">0123456789</div>
+        </div>
+        <div class="sample">
+          <div class="label">Small</div>
+          <div class="pangram-sm font-hnbi4">
+            How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>hnm11</h2>
+        <div class="sample">
+          <div class="label">Regular</div>
+          <div class="pangram font-hnm11">The quick brown fox jumps over the lazy dog.</div>
+        </div>
+        <div class="sample">
+          <div class="label">Numerals</div>
+          <div class="pangram font-hnm11">0123456789</div>
+        </div>
+        <div class="sample">
+          <div class="label">Small</div>
+          <div class="pangram-sm font-hnm11">
+            How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>hnmi12</h2>
+        <div class="sample">
+          <div class="label">Regular</div>
+          <div class="pangram font-hnmi12">The quick brown fox jumps over the lazy dog.</div>
+        </div>
+        <div class="sample">
+          <div class="label">Numerals</div>
+          <div class="pangram font-hnmi12">0123456789</div>
+        </div>
+        <div class="sample">
+          <div class="label">Small</div>
+          <div class="pangram-sm font-hnmi12">
+            How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>kb</h2>
+        <div class="sample">
+          <div class="label">Regular</div>
+          <div class="pangram font-kb">The quick brown fox jumps over the lazy dog.</div>
+        </div>
+        <div class="sample">
+          <div class="label">Numerals</div>
+          <div class="pangram font-kb">0123456789</div>
+        </div>
+        <div class="sample">
+          <div class="label">Small</div>
+          <div class="pangram-sm font-kb">
+            How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>mrt</h2>
+        <div class="sample">
+          <div class="label">Regular</div>
+          <div class="pangram font-mrt">The quick brown fox jumps over the lazy dog.</div>
+        </div>
+        <div class="sample">
+          <div class="label">Numerals</div>
+          <div class="pangram font-mrt">0123456789</div>
+        </div>
+        <div class="sample">
+          <div class="label">Small</div>
+          <div class="pangram-sm font-mrt">
+            How vexingly quick daft zebras jump! Pack my box with five dozen liquor jugs.
+          </div>
+        </div>
+      </div>
     </div>
-</body>
+  </body>
 </html>

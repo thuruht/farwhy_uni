@@ -1,10 +1,9 @@
-/* Enhanced Blog Posts Display */
 .post-item-public {
   margin-bottom: 30px;
   padding: 20px;
   background: transparent;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px #00000014;
   transition: transform 0.2s ease;
   border: none;
 }
@@ -37,12 +36,11 @@
   height: auto;
 }
 
-/* Enhanced Featured Content */
 .featured-content-wrapper {
   padding: 15px;
   background: transparent;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px #00000014;
   border: none;
 }
 
@@ -56,7 +54,6 @@
   margin-top: 15px;
 }
 
-/* YouTube Carousel Styling */
 .yt-carousel {
   position: relative;
   max-width: 100%;
@@ -83,12 +80,13 @@
   z-index: 10;
   display: flex;
   gap: 10px;
-  background-color: rgba(0,0,0,0.5);
+  background-color: #00000080;
   padding: 8px 15px;
   border-radius: 30px;
 }
 
-.yt-prev, .yt-next {
+.yt-prev,
+.yt-next {
   background-color: var(--primary-color);
   color: white;
   border: none;
@@ -99,6 +97,7 @@
   transition: background-color 0.2s;
 }
 
-.yt-prev:hover, .yt-next:hover {
+.yt-prev:hover,
+.yt-next:hover {
   background-color: #b06fdb;
 }

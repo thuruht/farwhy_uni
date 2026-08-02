@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SHOWS | FAREWELL / HOWDY | KCMO</title>
+    <link rel="icon" type="image/x-icon" href="./img/flavicon.png" />
+    <link rel="stylesheet" href="./css/ccssss.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        display: block;
+        background: var(--nav-bg-color);
+        color: var(--text-color);
+        font-family: var(--font-main);
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        width: 100%;
+      }
+
+      .shows-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.9rem 1.2rem;
+        background: var(--header-bg);
+        border-bottom: 2px solid var(--nav-border-color);
+      }
+      .shows-header h1 {
+        font-family: var(--font-db);
+        text-transform: uppercase;
+        font-size: clamp(1.3rem, 4vw, 2rem);
+        color: var(--accent-color);
+        margin: 0;
+        text-shadow: -2px 2px 0 #00000033;
+      }
+      .shows-header a.home-link {
+        font-family: var(--font-main);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: var(--text-color);
+        background: #ffffff8c;
+        border: 1px solid var(--nav-border-color);
+        border-radius: 3px;
+        padding: 0.4rem 0.8rem;
+        white-space: nowrap;
+        transition: background 0.15s;
+      }
+      .shows-header a.home-link:hover {
+        background: #ffffffd9;
+      }
+
+      .shows-controls {
+        display: flex;
+        align-items: stretch;
+        flex-wrap: wrap;
+        gap: 0;
+        margin: 0.9rem 1.2rem;
+        border: 1px solid var(--nav-border-color);
+        border-radius: 4px;
+        background: var(--nav-bg-color);
+        overflow: hidden;
+      }
+      .segmented {
+        display: flex;
+        border-right: 1px solid var(--nav-border-color);
+      }
+      .segmented button {
+        appearance: none;
+        border: none;
+        background: transparent;
+        color: var(--text-color);
+        font-family: var(--font-main);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+        padding: 0 0.85rem;
+        height: 38px;
+        cursor: pointer;
+        border-right: 1px solid #3f303040;
+        transition:
+          background 0.15s,
+          color 0.15s;
+        white-space: nowrap;
+      }
+      .segmented button:last-child {
+        border-right: none;
+      }
+      .segmented button:hover {
+        background: #3f303014;
+      }
+      .segmented button.active {
+        background: var(--accent-color);
+        color: #fff;
+      }
+      .search-wrap {
+        flex: 1 1 200px;
+        display: flex;
+        align-items: center;
+        min-width: 160px;
+      }
+      .search-wrap input {
+        width: 100%;
+        height: 38px;
+        border: none;
+        background: transparent;
+        color: var(--text-color);
+        font-family: var(--font-main);
+        font-size: 0.85rem;
+        padding: 0 0.9rem;
+        outline: none;
+      }
+      .search-wrap input::placeholder {
+        color: #3929298c;
+      }
+
+      .shows-main {
+        padding: 0 1.2rem 2rem;
+      }
+      .shows-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1.1rem;
+      }
+      .show-card {
+        border: 1px solid var(--nav-border-color);
+        background: var(--card-bg-color);
+        color: var(--text-color);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        box-shadow: -3px 3px 0 #00000026;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s;
+        position: relative;
+      }
+      .show-card:hover {
+        transform: translateY(-3px);
+        box-shadow: -5px 5px 0 #00000040;
+      }
+      .show-flyer-container {
+        height: 260px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0000000a;
+      }
+      .show-flyer-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .show-card-info {
+        padding: 0.55rem 0.65rem;
+      }
+      .show-card-title {
+        font-family: var(--font-db);
+        font-size: 0.92rem;
+        margin: 0 0 0.25rem;
+        line-height: 1.25;
+        color: var(--accent-color);
+      }
+      .show-card-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.4rem;
+        font-size: 0.72rem;
+        opacity: 0.85;
+      }
+      .venue-badge {
+        display: inline-block;
+        padding: 0.08rem 0.4rem;
+        font-size: 0.65rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-radius: 2px;
+        color: #fff;
+        white-space: nowrap;
+      }
+      .venue-badge.farewell {
+        background: #8f1616cc;
+      }
+      .venue-badge.howdy {
+        background: #164e8fcc;
+      }
+
+      .show-card.past-event {
+        opacity: 0.5;
+      }
+      .show-card.past-event::after {
+        content: 'PAST';
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: #000000bf;
+        color: #fff;
+        padding: 2px 5px;
+        font-size: 0.6rem;
+        letter-spacing: 0.05em;
+      }
+
+      .no-shows {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 3rem 1rem;
+        opacity: 0.65;
+      }
+
+      .flyer-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+      }
+      .flyer-modal.active {
+        display: flex;
+      }
+      .flyer-modal-backdrop {
+        position: absolute;
+        inset: 0;
+        background: #080404f0;
+        backdrop-filter: blur(4px);
+      }
+      .flyer-modal-content {
+        position: relative;
+        z-index: 1;
+        background: var(--card-bg-color);
+        color: var(--text-color);
+        max-width: min(560px, 100%);
+        max-height: 100%;
+        width: 100%;
+        overflow-y: auto;
+        border: 1px solid var(--nav-border-color);
+        box-shadow: -14px 18px 0px #00000066;
+      }
+      .flyer-modal-close {
+        position: absolute;
+        top: 0.4rem;
+        right: 0.6rem;
+        background: #0000008c;
+        color: #fff;
+        border: none;
+        font-size: 1.6rem;
+        line-height: 1;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 2;
+      }
+      .flyer-modal-image-wrap {
+        background: #0000000f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        max-height: 60vh;
+        overflow: hidden;
+      }
+      .flyer-modal-image-wrap img {
+        width: 100%;
+        max-height: 60vh;
+        object-fit: contain;
+      }
+      .flyer-modal-details {
+        padding: 1rem 1.2rem 1.3rem;
+      }
+      .flyer-modal-title {
+        font-family: var(--font-db);
+        font-size: 1.3rem;
+        margin: 0 0 0.4rem;
+        color: var(--accent-color);
+      }
+      .flyer-modal-datetime {
+        font-size: 0.85rem;
+        opacity: 0.85;
+        margin: 0.3rem 0;
+      }
+      .flyer-modal-info-item {
+        font-size: 0.82rem;
+        margin-bottom: 0.3rem;
+        line-height: 1.4;
+      }
+      .flyer-modal-info-item .info-label {
+        font-weight: bold;
+        color: var(--accent-color);
+      }
+      .flyer-modal-cta {
+        display: inline-block;
+        margin-top: 0.6rem;
+        padding: 0.5rem 1.1rem;
+        background: var(--button-bg-color);
+        color: var(--button-text-color);
+        text-decoration: none;
+        font-family: var(--font-main);
+        font-weight: bold;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        border: 1px solid var(--nav-border-color);
+        transition: transform 0.15s;
+      }
+      .flyer-modal-cta:hover {
+        transform: translateY(-2px);
+      }
+
+      @media (max-width: 600px) {
+        .shows-header {
+          padding: 0.6rem 0.8rem;
+        }
+        .shows-controls {
+          margin: 0.7rem 0.8rem;
+        }
+        .shows-main {
+          padding: 0 0.8rem 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shows-header">
+      <h1>Shows</h1>
+      <a class="home-link" href="./windex.html">HOME</a>
+    </div>
+
+    <div class="shows-controls">
+      <div class="segmented" id="venue-segment">
+        <button data-venue="both" class="active">BOTH</button>
+        <button data-venue="farewell">FAREWELL</button>
+        <button data-venue="howdy">HOWDY</button>
+      </div>
+      <div class="segmented" id="archive-segment">
+        <button data-archive="upcoming" class="active">UPCOMING</button>
+        <button data-archive="all">ALL</button>
+      </div>
+      <div class="search-wrap">
+        <input type="text" id="search-input" placeholder="Search shows…" />
+      </div>
+    </div>
+
+    <div class="shows-main">
+      <div class="shows-grid" id="shows-grid"></div>
+    </div>
+
+    <div class="flyer-modal" id="flyer-modal">
+      <div class="flyer-modal-backdrop" id="flyer-modal-backdrop"></div>
+      <div class="flyer-modal-content">
+        <button class="flyer-modal-close" id="flyer-modal-close" aria-label="Close">&times;</button>
+        <div class="flyer-modal-image-wrap">
+          <img id="flyer-modal-image" alt="" />
+        </div>
+        <div class="flyer-modal-details" id="flyer-modal-details"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        // ---------- date utilities (matches existing logic across the site) ----------
+        function parseEventDate(dateString) {
+          if (!dateString) return new Date(0);
+          try {
+            if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+              const [y, m, d] = dateString.split('-').map((n) => parseInt(n, 10));
+              return new Date(y, m - 1, d);
+            }
+            const d = new Date(dateString);
+            if (isNaN(d.getTime())) return new Date(0);
+            return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+          } catch (e) {
+            return new Date(0);
+          }
+        }
+
+        function isPastEvent(dateString) {
+          const day = parseEventDate(dateString);
+          const today = new Date();
+          const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          return day < todayDay;
+        }
+
+        function isTodayEvent(dateString) {
+          const day = parseEventDate(dateString);
+          const today = new Date();
+          const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          return day.getTime() === todayDay.getTime();
+        }
+
+        function formatDate(dateString) {
+          if (!dateString) return 'TBD';
+          try {
+            if (
+              typeof dateString === 'string' &&
+              dateString.length === 10 &&
+              dateString.includes('-')
+            ) {
+              const [year, month, day] = dateString.split('-').map(Number);
+              const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+              return date.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+              });
+            }
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+            return date.toLocaleDateString('en-US', {
+              weekday: 'short',
+              month: 'short',
+              day: 'numeric',
+            });
+          } catch (e) {
+            return dateString;
+          }
+        }
+
+        // ---------- state ----------
+        let allShows = [];
+        let currentVenue = 'both';
+        let currentArchive = 'upcoming';
+        let searchTerm = '';
+
+        const grid = document.getElementById('shows-grid');
+        const venueSegment = document.getElementById('venue-segment');
+        const archiveSegment = document.getElementById('archive-segment');
+        const searchInput = document.getElementById('search-input');
+
+        const modal = document.getElementById('flyer-modal');
+        const modalBackdrop = document.getElementById('flyer-modal-backdrop');
+        const modalClose = document.getElementById('flyer-modal-close');
+        const modalImage = document.getElementById('flyer-modal-image');
+        const modalDetails = document.getElementById('flyer-modal-details');
+
+        // Respect a ?venue= query param (e.g. linked from windex.html's per-venue state)
+        const requestedVenue = new URLSearchParams(window.location.search).get('venue');
+        if (requestedVenue === 'farewell' || requestedVenue === 'howdy') {
+          currentVenue = requestedVenue;
+          venueSegment.querySelectorAll('button').forEach((b) => {
+            b.classList.toggle('active', b.dataset.venue === requestedVenue);
+          });
+        }
+
+        // ---------- data ----------
+        async function fetchShows() {
+          grid.innerHTML = '<div class="no-shows">Loading shows…</div>';
+          try {
+            const timestamp = Date.now();
+            const response = await fetch(`/api/events?t=${timestamp}`);
+            if (!response.ok) throw new Error('Failed to load events');
+            const events = await response.json();
+
+            // Dedupe by title+date+venue, preferring the entry that has an image
+            const eventMap = new Map();
+            events.forEach((event) => {
+              const key = `${event.title}-${event.date}-${event.venue}`;
+              if (!eventMap.has(key) || (event.imageUrl && !eventMap.get(key).imageUrl)) {
+                eventMap.set(key, event);
+              }
+            });
+            allShows = Array.from(eventMap.values());
+            render();
+          } catch (error) {
+            console.error('Error fetching shows:', error);
+            grid.innerHTML =
+              '<div class="no-shows">Failed to load shows. Please try again later.</div>';
+          }
+        }
+
+        // ---------- filtering / sorting ----------
+        function getFiltered() {
+          let filtered = allShows.filter((show) => {
+            const matchesVenue = currentVenue === 'both' ? true : show.venue === currentVenue;
+
+            const term = searchTerm.trim().toLowerCase();
+            const matchesSearch =
+              !term ||
+              (show.title && show.title.toLowerCase().includes(term)) ||
+              (show.description && show.description.toLowerCase().includes(term));
+
+            return matchesVenue && matchesSearch;
+          });
+
+          const upcoming = filtered.filter((s) => !isPastEvent(s.date) || isTodayEvent(s.date));
+          upcoming.sort((a, b) => parseEventDate(a.date) - parseEventDate(b.date));
+
+          if (currentArchive === 'upcoming') {
+            return upcoming;
+          }
+
+          const past = filtered.filter((s) => isPastEvent(s.date) && !isTodayEvent(s.date));
+          past.sort((a, b) => parseEventDate(b.date) - parseEventDate(a.date));
+
+          return upcoming.concat(past);
+        }
+
+        function render() {
+          const shows = getFiltered();
+          grid.innerHTML = '';
+
+          if (shows.length === 0) {
+            grid.innerHTML = '<div class="no-shows">No shows found for these filters.</div>';
+            return;
+          }
+
+          shows.forEach((show) => {
+            const card = document.createElement('div');
+            card.className = 'show-card';
+            if (isPastEvent(show.date) && !isTodayEvent(show.date)) {
+              card.classList.add('past-event');
+            }
+
+            const flyerContainer = document.createElement('div');
+            flyerContainer.className = 'show-flyer-container';
+            const img = document.createElement('img');
+            img.src = show.imageUrl || './img/placeholder.png';
+            img.alt = `Flyer for ${show.title}`;
+            img.onerror = function () {
+              this.onerror = null;
+              this.src = './img/placeholder.png';
+            };
+            flyerContainer.appendChild(img);
+
+            const info = document.createElement('div');
+            info.className = 'show-card-info';
+            const title = document.createElement('h3');
+            title.className = 'show-card-title';
+            title.textContent = show.title;
+
+            const meta = document.createElement('div');
+            meta.className = 'show-card-meta';
+            const date = document.createElement('span');
+            date.textContent = formatDate(show.date);
+            const badge = document.createElement('span');
+            badge.className = `venue-badge ${show.venue}`;
+            badge.textContent = show.venue === 'howdy' ? 'HOWDY' : 'FAREWELL';
+            meta.append(date, badge);
+
+            info.append(title, meta);
+            card.append(flyerContainer, info);
+
+            card.addEventListener('click', () => openFlyerModal(show));
+            grid.appendChild(card);
+          });
+        }
+
+        // ---------- flyer modal ----------
+        function openFlyerModal(show) {
+          modalImage.src = show.imageUrl || './img/placeholder.png';
+          modalImage.alt = `Flyer for ${show.title}`;
+          modalImage.onerror = function () {
+            this.onerror = null;
+            this.src = './img/placeholder.png';
+          };
+
+          modalDetails.innerHTML = '';
+
+          const title = document.createElement('h2');
+          title.className = 'flyer-modal-title';
+          title.textContent = show.title;
+
+          const badge = document.createElement('span');
+          badge.className = `venue-badge ${show.venue}`;
+          badge.textContent = show.venue === 'howdy' ? 'HOWDY' : 'FAREWELL';
+
+          const dateTime = document.createElement('div');
+          dateTime.className = 'flyer-modal-datetime';
+          dateTime.textContent = `${formatDate(show.date)}${show.time ? ' | ' + show.time : ''}`;
+
+          modalDetails.append(title, badge, dateTime);
+
+          function appendInfoItem(label, value) {
+            const item = document.createElement('div');
+            item.className = 'flyer-modal-info-item';
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'info-label';
+            labelSpan.textContent = label;
+            item.append(labelSpan, document.createTextNode(' ' + value));
+            modalDetails.appendChild(item);
+          }
+
+          const price = show.price || show.suggestedPrice;
+          if (price) appendInfoItem('Price:', price);
+          if (show.ageRestriction) appendInfoItem('Age:', show.ageRestriction);
+          if (show.description) appendInfoItem('Info:', show.description);
+
+          const link = show.ticketLink || show.url;
+          let safeLink = null;
+          if (link) {
+            try {
+              const parsed = new URL(link, window.location.href);
+              if (parsed.protocol === 'http:' || parsed.protocol === 'https:')
+                safeLink = parsed.href;
+            } catch (e) {}
+          }
+          if (safeLink) {
+            const cta = document.createElement('a');
+            cta.className = 'flyer-modal-cta';
+            cta.href = safeLink;
+            cta.target = '_blank';
+            cta.rel = 'noopener noreferrer';
+            cta.textContent = show.ticketLink
+              ? price
+                ? `TICKETS ${price}`
+                : 'BUY TICKETS'
+              : 'EVENT WEBSITE';
+            modalDetails.appendChild(cta);
+          }
+
+          modal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeFlyerModal() {
+          modal.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+
+        modalBackdrop.addEventListener('click', closeFlyerModal);
+        modalClose.addEventListener('click', closeFlyerModal);
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && modal.classList.contains('active')) closeFlyerModal();
+        });
+
+        // ---------- controls ----------
+        venueSegment.addEventListener('click', (e) => {
+          const btn = e.target.closest('button');
+          if (!btn) return;
+          venueSegment.querySelectorAll('button').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentVenue = btn.dataset.venue;
+          render();
+        });
+
+        archiveSegment.addEventListener('click', (e) => {
+          const btn = e.target.closest('button');
+          if (!btn) return;
+          archiveSegment.querySelectorAll('button').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentArchive = btn.dataset.archive;
+          render();
+        });
+
+        let searchDebounce;
+        searchInput.addEventListener('input', () => {
+          clearTimeout(searchDebounce);
+          searchDebounce = setTimeout(() => {
+            searchTerm = searchInput.value;
+            render();
+          }, 150);
+        });
+
+        fetchShows();
+      })();
+    </script>
+  </body>
+</html>

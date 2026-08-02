@@ -1,47 +1,42 @@
-/**
- * Component CSS Template
- * Use this template as a starting point for new components
- */
 
-/* ================================
-   {{COMPONENT_NAME}} Component
-   ================================ */
+
+
 
 .{{COMPONENT_CLASS}} {
-    /* Container styles */
+    
     display: block;
     position: relative;
     
-    /* Spacing */
+    
     margin: var(--padding-small) 0;
     padding: var(--padding-medium);
     
-    /* Background and borders */
+    
     background: var(--card-bg-color);
     border: 2px solid var(--text-color);
     
-    /* Typography */
+    
     font-family: var(--font-main);
     color: var(--text-color);
     
-    /* Transitions */
+    
     transition: all var(--transition-speed) ease;
 }
 
-/* Hover state */
+
 .{{COMPONENT_CLASS}}:hover {
     transform: translateY(-2px);
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+    box-shadow: 4px 4px 0 #0000001a;
 }
 
-/* Header section */
+
 .{{COMPONENT_CLASS}}__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: var(--padding-small);
     padding-bottom: var(--padding-small);
-    border-bottom: 1px solid rgba(1,1,1,0.1);
+    border-bottom: 1px solid #0101011a;
 }
 
 .{{COMPONENT_CLASS}}__title {
@@ -60,9 +55,9 @@
     margin: 0;
 }
 
-/* Content section */
+
 .{{COMPONENT_CLASS}}__content {
-    /* Content styles */
+    
 }
 
 .{{COMPONENT_CLASS}}__content p {
@@ -70,7 +65,7 @@
     line-height: 1.6;
 }
 
-/* Meta information */
+
 .{{COMPONENT_CLASS}}__meta {
     display: flex;
     flex-wrap: wrap;
@@ -87,23 +82,23 @@
     opacity: 0.8;
 }
 
-/* Actions section */
+
 .{{COMPONENT_CLASS}}__actions {
     display: flex;
     gap: var(--padding-small);
     margin-top: var(--padding-medium);
     padding-top: var(--padding-small);
-    border-top: 1px solid rgba(1,1,1,0.1);
+    border-top: 1px solid #0101011a;
 }
 
 .{{COMPONENT_CLASS}}__action {
-    /* Button styles inherit from global button classes */
+    
 }
 
-/* States */
+
 .{{COMPONENT_CLASS}}--featured {
     border-color: var(--lima);
-    background: rgba(176, 238, 0, 0.05);
+    background: #b0ee000d;
 }
 
 .{{COMPONENT_CLASS}}--disabled {
@@ -122,13 +117,13 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255,255,255,0.8);
+    background: #ffffffcc;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* Size variants */
+
 .{{COMPONENT_CLASS}}--small {
     padding: var(--padding-small);
 }
@@ -137,7 +132,7 @@
     padding: var(--padding-large);
 }
 
-/* Responsive design */
+
 @media (max-width: 768px) {
     .{{COMPONENT_CLASS}} {
         margin: calc(var(--padding-small) / 2) 0;
@@ -160,7 +155,7 @@
     }
 }
 
-/* Print styles */
+
 @media print {
     .{{COMPONENT_CLASS}}__actions {
         display: none;
@@ -173,7 +168,7 @@
     }
 }
 
-/* Dark mode support (if needed) */
+
 @media (prefers-color-scheme: dark) {
     .{{COMPONENT_CLASS}} {
         background: #2a2a2a;
@@ -182,7 +177,7 @@
     }
 }
 
-/* High contrast mode support */
+
 @media (prefers-contrast: high) {
     .{{COMPONENT_CLASS}} {
         border-width: 3px;
@@ -193,7 +188,7 @@
     }
 }
 
-/* Reduced motion support */
+
 @media (prefers-reduced-motion: reduce) {
     .{{COMPONENT_CLASS}} {
         transition: none;

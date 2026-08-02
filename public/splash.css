@@ -1,31 +1,67 @@
-/* Farewell | Howdy — splash tokens + faces */
-
-@font-face { font-family:'ds';   src:url('fnt/ds.woff2')   format('woff2'); font-display:swap; }
-@font-face { font-family:'db';   src:url('fnt/db.woff2')   format('woff2'); font-display:swap; }
-@font-face { font-family:'hnb2'; src:url('fnt/hnb2.woff2') format('woff2'); font-display:swap; }
-@font-face { font-family:'kb';   src:url('fnt/kb.woff2')   format('woff2'); font-display:swap; }
-@font-face { font-family:'mrt';  src:url('fnt/mrt.woff2')  format('woff2'); font-display:swap; }
-
-:root{
-  --lima:#b0ee00;
-  --pupil:#d990ff;
-  --redd:#ff2b13;
-  --blew:#00e2ff;
-  --ink:#010101;
-  --paper:#f4f4ef;
-
-  --font-howdy:'mrt', sans-serif;
-  --font-farewell:'db', Georgia, serif;
-  --font-num:'ds', sans-serif;
-  --font-body:'kb', sans-serif;
-  --font-ui:'hnb2', sans-serif;
+@font-face {
+  font-family: 'ds';
+  src: url('fnt/ds.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'db';
+  src: url('fnt/db.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'hnb2';
+  src: url('fnt/hnb2.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'kb';
+  src: url('fnt/kb.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'mrt';
+  src: url('fnt/mrt.woff2') format('woff2');
+  font-display: swap;
 }
 
-*,*::before,*::after{ box-sizing:border-box; }
-html,body{ margin:0; padding:0; height:100%; }
-img{ display:block; max-width:100%; }
-a{ text-decoration:none; color:inherit; }
+:root {
+  --lima: #b0ee00;
+  --pupil: #d990ff;
+  --redd: #ff2b13;
+  --blew: #00e2ff;
+  --ink: #010101;
+  --paper: #f4f4ef;
 
-@media (prefers-reduced-motion: reduce){
-  *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; }
+  --font-howdy: 'mrt', sans-serif;
+  --font-farewell: 'db', Georgia, serif;
+  --font-num: 'ds', sans-serif;
+  --font-body: 'kb', sans-serif;
+  --font-ui: 'hnb2', sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+img {
+  display: block;
+  max-width: 100%;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

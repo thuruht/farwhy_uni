@@ -1,567 +1,633 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EVENTS | FAREWELL / HOWDY | KCMO</title>
-    <link rel="icon" type="image/x-icon" href="./img/flavicon.png">
-    <link rel="stylesheet" href="./css/ccssss.css">
-    <link rel="stylesheet" href="./css/events-modal.css">
-    <link rel="stylesheet" href="./css/events-calendar-button.css">
+    <link rel="icon" type="image/x-icon" href="./img/flavicon.png" />
+    <link rel="stylesheet" href="./css/ccssss.css" />
+    <link rel="stylesheet" href="./css/events-modal.css" />
+    <link rel="stylesheet" href="./css/events-calendar-button.css" />
     <script>
-        // Set the correct venue state based on URL parameter or default to farewell
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const venue = urlParams.get('venue');
+      // Set the correct venue state based on URL parameter or default to farewell
+      document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const venue = urlParams.get('venue');
 
-            if (venue === 'howdy') {
-                document.body.dataset.state = 'howdy';
-                window.currentVenue = 'howdy';
-            } else if (venue === 'farewell') {
-                document.body.dataset.state = 'farewell';
-                window.currentVenue = 'farewell';
-            } else {
-                document.body.dataset.state = 'both';
-                window.currentVenue = 'both';
-            }
+        if (venue === 'howdy') {
+          document.body.dataset.state = 'howdy';
+          window.currentVenue = 'howdy';
+        } else if (venue === 'farewell') {
+          document.body.dataset.state = 'farewell';
+          window.currentVenue = 'farewell';
+        } else {
+          document.body.dataset.state = 'both';
+          window.currentVenue = 'both';
+        }
 
-            console.log(`Events page initialized with venue: ${window.currentVenue}`);
-        });
+        console.log(`Events page initialized with venue: ${window.currentVenue}`);
+      });
     </script>
     <style>
-        * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
 
-        body {
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-family: var(--font-main);
-            margin: 0; padding: 0;
-        }
+      body {
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-family: var(--font-main);
+        margin: 0;
+        padding: 0;
+      }
 
-        /* header bar */
-        .header-nav {
-            display: flex;
-            border-radius: 4px 4px 0 0;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.4rem 1rem;
-            background: var(--header-bg); background-blend-mode: difference;
-            border-bottom: 2px solid var(--nav-border-color);
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-        .events-title {
-            font-family: var(--font-db);
-            text-transform: uppercase;
-            font-size: clamp(1.1rem, 4vw, 1.6rem);
-            color: var(--accent-color);
-            margin: 0;
-            text-shadow: -2px 2px 0 rgba(0,0,0,0.2);
-            white-space: nowrap;
-        }
-        .close-nav ul {
-            display: flex;
-            list-style: none;
-            padding: 0; margin: 0;
-            gap: 1px;
-            border: 1px solid var(--nav-border-color);
-        }
-        .close-nav ul li {
-            background: var(--nav-bg-color);
-            border: 1px solid var(--nav-border-color);
-            transition: background var(--transition-speed);
-        }
-        .close-nav ul li:hover { background: var(--nav-border-color); }
-        .close-nav ul li a {
-            display: block;
-            padding: 0.35rem 0.9rem;
-            text-decoration: none;
-            color: inherit;
-            font-family: var(--font-main);
-            font-size: 0.8rem;
-            white-space: nowrap;
-        }
+      .header-nav {
+        display: flex;
+        border-radius: 4px 4px 0 0;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.4rem 1rem;
+        background: var(--header-bg);
+        background-blend-mode: difference;
+        border-bottom: 2px solid var(--nav-border-color);
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .events-title {
+        font-family: var(--font-db);
+        text-transform: uppercase;
+        font-size: clamp(1.1rem, 4vw, 1.6rem);
+        color: var(--accent-color);
+        margin: 0;
+        text-shadow: -2px 2px 0 #00000033;
+        white-space: nowrap;
+      }
+      .close-nav ul {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        gap: 1px;
+        border: 1px solid var(--nav-border-color);
+      }
+      .close-nav ul li {
+        background: var(--nav-bg-color);
+        border: 1px solid var(--nav-border-color);
+        transition: background var(--transition-speed);
+      }
+      .close-nav ul li:hover {
+        background: var(--nav-border-color);
+      }
+      .close-nav ul li a {
+        display: block;
+        padding: 0.35rem 0.9rem;
+        text-decoration: none;
+        color: inherit;
+        font-family: var(--font-main);
+        font-size: 0.8rem;
+        white-space: nowrap;
+      }
 
-        /* controls bar */
-        .events-controls {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            padding: 0.4rem 1rem;
-            background: var(--header-bg);
-            border-bottom: 2px solid var(--nav-border-color);
-            flex-wrap: wrap;
-        }
-        .venue-filter, .archive-filter, .calendar-button-container { display: contents; }
+      .events-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 0.4rem 1rem;
+        background: var(--header-bg);
+        border-bottom: 2px solid var(--nav-border-color);
+        flex-wrap: wrap;
+      }
+      .venue-filter,
+      .archive-filter,
+      .calendar-button-container {
+        display: contents;
+      }
 
-        .venue-tab, .archive-toggle {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            height: 28px;
-            padding: 0 0.6rem;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 3px;
-            color: var(--text-color);
-            font-family: var(--font-main);
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-        .venue-tab:hover, .archive-toggle:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.4);
-        }
-        .venue-tab.active, .archive-toggle[aria-pressed="true"] {
-            background: var(--button-bg-color);
-            color: var(--button-text-color);
-            border-color: var(--nav-border-color);
-        }
-        .cal-link-ics {
-            display: inline-flex;
-            align-items: center;
-            height: 28px;
-            padding: 0 0.6rem;
-            background: rgba(0,0,0,0.2);
-            border: 1px solid var(--nav-border-color);
-            border-radius: 3px;
-            color: var(--text-color);
-            text-decoration: none;
-            font-size: 0.75rem;
-            font-weight: 600;
-            white-space: nowrap;
-            transition: all 0.2s;
-        }
-        .cal-link-ics:hover {
-            background: var(--button-bg-color);
-            color: var(--button-text-color);
-        }
+      .venue-tab,
+      .archive-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 28px;
+        padding: 0 0.6rem;
+        background: #0000004c;
+        border: 1px solid #ffffff33;
+        border-radius: 3px;
+        color: var(--text-color);
+        font-family: var(--font-main);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .venue-tab:hover,
+      .archive-toggle:hover {
+        background: #ffffff1a;
+        border-color: #ffffff66;
+      }
+      .venue-tab.active,
+      .archive-toggle[aria-pressed='true'] {
+        background: var(--button-bg-color);
+        color: var(--button-text-color);
+        border-color: var(--nav-border-color);
+      }
+      .cal-link-ics {
+        display: inline-flex;
+        align-items: center;
+        height: 28px;
+        padding: 0 0.6rem;
+        background: #00000033;
+        border: 1px solid var(--nav-border-color);
+        border-radius: 3px;
+        color: var(--text-color);
+        text-decoration: none;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: all 0.2s;
+      }
+      .cal-link-ics:hover {
+        background: var(--button-bg-color);
+        color: var(--button-text-color);
+      }
 
-        /* grid */
-        .main-container { padding: 1rem; }
+      .main-container {
+        padding: 1rem;
+      }
+      .events-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.85rem;
+      }
+      @media (max-width: 900px) {
         .events-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.85rem;
+          grid-template-columns: repeat(2, 1fr);
         }
-        @media (max-width: 900px) {
-            .events-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 600px) {
+        .events-grid {
+          grid-template-columns: 1fr;
         }
-        @media (max-width: 600px) {
-            .events-grid { grid-template-columns: 1fr; }
-        }
+      }
 
-        /* cards */
-        .event-list-item {
-            border: 1px solid var(--nav-border-color);
-            background: var(--card-bg-color);
-            color: var(--text-color);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.15s, box-shadow 0.15s;
-            box-shadow: -3px 3px 0 rgba(0,0,0,0.15);
-            position: relative;
-        }
-        .event-list-item:hover,
-        .event-list-item.active {
-            transform: translateY(-3px);
-            box-shadow: -5px 5px 0 rgba(0,0,0,0.25);
-            background: var(--card-bg-color);
-            border-left: none;
-        }
-        .event-flyer-container {
-            height: 220px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.04);
-        }
-        .event-flyer {
-            width: 100%; height: 100%;
-            object-fit: contain;
-            transition: transform 0.3s;
-        }
-        .event-list-item:hover .event-flyer { transform: scale(1.02); }
+      .event-list-item {
+        border: 1px solid var(--nav-border-color);
+        background: var(--card-bg-color);
+        color: var(--text-color);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s;
+        box-shadow: -3px 3px 0 #00000026;
+        position: relative;
+      }
+      .event-list-item:hover,
+      .event-list-item.active {
+        transform: translateY(-3px);
+        box-shadow: -5px 5px 0 #00000040;
+        background: var(--card-bg-color);
+        border-left: none;
+      }
+      .event-flyer-container {
+        height: 220px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0000000a;
+      }
+      .event-flyer {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: transform 0.3s;
+      }
+      .event-list-item:hover .event-flyer {
+        transform: scale(1.02);
+      }
 
-        .event-info {
-            padding: 0.6rem 0.7rem;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            gap: 0.2rem;
-        }
-        .event-title {
-            font-family: var(--font-db);
-            font-size: 1rem;
-            margin: 0;
-            line-height: 1.25;
-            color: var(--accent-color);
-        }
-        .venue-badge {
-            display: inline-block;
-            padding: 0.1rem 0.35rem;
-            font-size: 0.68rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            border-radius: 2px;
-            align-self: flex-start;
-        }
-        .venue-farewell { background: rgba(143,22,22,0.7); color:#fff; }
-        .venue-howdy    { background: rgba(22,78,143,0.7);  color:#fff; }
+      .event-info {
+        padding: 0.6rem 0.7rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        gap: 0.2rem;
+      }
+      .event-title {
+        font-family: var(--font-db);
+        font-size: 1rem;
+        margin: 0;
+        line-height: 1.25;
+        color: var(--accent-color);
+      }
+      .venue-badge {
+        display: inline-block;
+        padding: 0.1rem 0.35rem;
+        font-size: 0.68rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-radius: 2px;
+        align-self: flex-start;
+      }
+      .venue-farewell {
+        background: #8f1616b2;
+        color: #fff;
+      }
+      .venue-howdy {
+        background: #164e8fb2;
+        color: #fff;
+      }
 
-        .event-date-time { font-size: 0.8rem; opacity: 0.85; }
-        .event-details-info { font-size: 0.78rem; opacity: 0.8; }
-        .event-info-item { margin-bottom: 0.15rem; line-height: 1.3; }
-        .info-label { font-weight: bold; color: var(--accent-color); }
-        .event-description {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .event-buttons { margin-top: auto; padding-top: 0.4rem; }
-        .event-cta {
-            display: inline-block;
-            padding: 0.35rem 0.8rem;
-            background: var(--button-bg-color);
-            color: var(--button-text-color);
-            text-decoration: none;
-            font-family: var(--font-main);
-            font-weight: bold;
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            border: 1px solid var(--nav-border-color);
-            transition: all 0.2s;
-        }
-        .event-cta:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+      .event-date-time {
+        font-size: 0.8rem;
+        opacity: 0.85;
+      }
+      .event-details-info {
+        font-size: 0.78rem;
+        opacity: 0.8;
+      }
+      .event-info-item {
+        margin-bottom: 0.15rem;
+        line-height: 1.3;
+      }
+      .info-label {
+        font-weight: bold;
+        color: var(--accent-color);
+      }
+      .event-description {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .event-buttons {
+        margin-top: auto;
+        padding-top: 0.4rem;
+      }
+      .event-cta {
+        display: inline-block;
+        padding: 0.35rem 0.8rem;
+        background: var(--button-bg-color);
+        color: var(--button-text-color);
+        text-decoration: none;
+        font-family: var(--font-main);
+        font-weight: bold;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        border: 1px solid var(--nav-border-color);
+        transition: all 0.2s;
+      }
+      .event-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 8px #00000033;
+      }
 
-        .past-event { opacity: 0.5; }
-        .past-event::after {
-            content: "PAST";
-            position: absolute;
-            top: 7px; right: 7px;
-            background: rgba(0,0,0,0.75);
-            color: #fff;
-            padding: 2px 5px;
-            font-size: 0.62rem;
-            letter-spacing: 0.05em;
-        }
-        .no-events {
-            grid-column: 1/-1;
-            text-align: center;
-            padding: 3rem;
-            opacity: 0.6;
-        }
+      .past-event {
+        opacity: 0.5;
+      }
+      .past-event::after {
+        content: 'PAST';
+        position: absolute;
+        top: 7px;
+        right: 7px;
+        background: #000000bf;
+        color: #fff;
+        padding: 2px 5px;
+        font-size: 0.62rem;
+        letter-spacing: 0.05em;
+      }
+      .no-events {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 3rem;
+        opacity: 0.6;
+      }
 
-        @media (max-width: 600px) {
-            .header-nav { padding: 0.35rem 0.6rem; }
+      @media (max-width: 600px) {
+        .header-nav {
+          padding: 0.35rem 0.6rem;
         }
+      }
     </style>
-</head>
-<body data-state="farewell">
+  </head>
+  <body data-state="farewell">
     <div class="overlay1"></div>
     <div class="overlay2"></div>
 
     <div class="header-nav">
-        <h1 class="events-title">Upcoming Shows</h1>
-        <nav class="close-nav">
-            <ul>
-                <li><a href="javascript:void(0);" onclick="closeEventsPopup()">CLOSE</a></li>
-                <li><a href="./windex.html" target="_blank">HOME</a></li>
-            </ul>
-        </nav>
+      <h1 class="events-title">Upcoming Shows</h1>
+      <nav class="close-nav">
+        <ul>
+          <li><a href="javascript:void(0);" onclick="closeEventsPopup()">CLOSE</a></li>
+          <li><a href="./windex.html" target="_blank">HOME</a></li>
+        </ul>
+      </nav>
     </div>
 
     <div class="events-controls">
-        <button class="venue-tab" data-venue="farewell">FAREWELL</button>
-        <button class="venue-tab" data-venue="howdy">HOWDY</button>
-        <button class="venue-tab active" data-venue="both">BOTH ✓</button>
-        <button class="archive-toggle" aria-pressed="false">UPCOMING ✓</button>
-        <a href="#" class="cal-link-ics event-calendar-download">📅 SAVE TO CALENDAR</a>
+      <button class="venue-tab" data-venue="farewell">FAREWELL</button>
+      <button class="venue-tab" data-venue="howdy">HOWDY</button>
+      <button class="venue-tab active" data-venue="both">BOTH ✓</button>
+      <button class="archive-toggle" aria-pressed="false">UPCOMING ✓</button>
+      <a href="#" class="cal-link-ics event-calendar-download">📅 SAVE TO CALENDAR</a>
     </div>
 
     <div class="main-container">
-        <div id="events-grid" class="events-grid">
-            <!-- Events will be loaded here -->
-        </div>
+      <div id="events-grid" class="events-grid"></div>
     </div>
 
-    <!-- Include necessary scripts -->
     <script src="./jss/gsap-public/minified/gsap.min.js"></script>
     <script src="./jss/gsap-public/minified/ScrollTrigger.min.js"></script>
     <script src="./jss/ics-generator.js"></script>
     <script>
-        // Date utility functions for consistent handling across the application
-        
-        // SAFE DATE PARSING (handles both ISO strings and local dates)
-        function parseEventDate(dateString) {
-          if (!dateString) return new Date(0); // Handle null/undefined dates
-          
-          try {
-            // If date is in format "YYYY-MM-DD"
-            if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-              const parts = dateString.split('-');
-              // Create date with year, month (0-indexed), day
-              // Force integers and properly adjust month (0-indexed in JS)
-              return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-            }
-            
-            // For full ISO strings or other formats
-            const d = new Date(dateString);
-            // Check if date is valid
-            if (isNaN(d.getTime())) {
-              console.error("Invalid date format:", dateString);
-              return new Date(0);
-            }
-            
-            // Create new date with just the date part (no time)
-            return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-          } catch (error) {
-            console.error("Error parsing date:", dateString, error);
+      // Date utility functions for consistent handling across the application
+
+      // SAFE DATE PARSING (handles both ISO strings and local dates)
+      function parseEventDate(dateString) {
+        if (!dateString) return new Date(0); // Handle null/undefined dates
+
+        try {
+          // If date is in format "YYYY-MM-DD"
+          if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            const parts = dateString.split('-');
+            // Create date with year, month (0-indexed), day
+            // Force integers and properly adjust month (0-indexed in JS)
+            return new Date(
+              parseInt(parts[0], 10),
+              parseInt(parts[1], 10) - 1,
+              parseInt(parts[2], 10)
+            );
+          }
+
+          // For full ISO strings or other formats
+          const d = new Date(dateString);
+          // Check if date is valid
+          if (isNaN(d.getTime())) {
+            console.error('Invalid date format:', dateString);
             return new Date(0);
           }
-        }
 
-        // UNIVERSAL COMPARISON LOGIC
-        function isPastEvent(eventDate, referenceDate = new Date()) {
-          const eventDay = parseEventDate(eventDate);
-          const referenceDay = new Date(
-            referenceDate.getFullYear(),
-            referenceDate.getMonth(),
-            referenceDate.getDate()
-          );
-          
-          const result = eventDay < referenceDay;
-          console.log(`isPastEvent comparison: ${eventDate} => ${eventDay.toISOString().slice(0,10)} < ${referenceDay.toISOString().slice(0,10)} = ${result}`);
-          
-          return result;
+          // Create new date with just the date part (no time)
+          return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        } catch (error) {
+          console.error('Error parsing date:', dateString, error);
+          return new Date(0);
         }
+      }
 
-        function isTodayEvent(eventDate, referenceDate = new Date()) {
-          const eventDay = parseEventDate(eventDate);
-          const referenceDay = new Date(
-            referenceDate.getFullYear(),
-            referenceDate.getMonth(),
-            referenceDate.getDate()
-          );
-          
-          const result = eventDay.getTime() === referenceDay.getTime();
-          console.log(`isTodayEvent comparison: ${eventDate} => ${eventDay.toISOString().slice(0,10)} === ${referenceDay.toISOString().slice(0,10)} = ${result}`);
-          
-          return result;
-        }
-        
-        // Close function for popup window
-        function closeEventsPopup() {
-            // If inside an iframe, close the parent overlay
-            if (window.parent && window.parent !== window) {
-                const modal = window.parent.document.getElementById('events-page-modal');
-                if (modal) {
-                    modal.style.display = 'none';
-                    window.parent.document.body.style.overflow = '';
-                    document.getElementById('events-iframe') && (document.getElementById('events-iframe').src = '');
-                    return;
-                }
-            }
-            // Fallback: popup or direct navigation
-            if (window.opener && !window.opener.closed) {
-                window.close();
-            } else {
-                window.location.href = './windex.html';
-            }
-        }
-        
-        document.addEventListener('DOMContentLoaded', async function() {
-            const eventsGrid = document.getElementById('events-grid');
-            const venueTabs = document.querySelectorAll('.venue-tab');
-            const archiveToggle = document.querySelector('.archive-toggle');
-            
-            let currentVenue = window.currentVenue || 'both';
-            window.currentVenue = currentVenue;
+      // UNIVERSAL COMPARISON LOGIC
+      function isPastEvent(eventDate, referenceDate = new Date()) {
+        const eventDay = parseEventDate(eventDate);
+        const referenceDay = new Date(
+          referenceDate.getFullYear(),
+          referenceDate.getMonth(),
+          referenceDate.getDate()
+        );
 
-            // Sync active tab to match URL param / window.currentVenue
-            venueTabs.forEach(t => {
-                t.classList.remove('active');
-                const v = t.dataset.venue;
-                t.textContent = v === 'farewell' ? 'FAREWELL ONLY' : v === 'howdy' ? 'HOWDY ONLY' : 'BOTH VENUES';
-                if (v === currentVenue) {
-                    t.classList.add('active');
-                    t.textContent += ' ✓';
-                }
-            });
-            let showArchived = false;
-            let allEvents = [];
-            
-            // Show loading state
-            eventsGrid.innerHTML = `
+        const result = eventDay < referenceDay;
+        console.log(
+          `isPastEvent comparison: ${eventDate} => ${eventDay.toISOString().slice(0, 10)} < ${referenceDay.toISOString().slice(0, 10)} = ${result}`
+        );
+
+        return result;
+      }
+
+      function isTodayEvent(eventDate, referenceDate = new Date()) {
+        const eventDay = parseEventDate(eventDate);
+        const referenceDay = new Date(
+          referenceDate.getFullYear(),
+          referenceDate.getMonth(),
+          referenceDate.getDate()
+        );
+
+        const result = eventDay.getTime() === referenceDay.getTime();
+        console.log(
+          `isTodayEvent comparison: ${eventDate} => ${eventDay.toISOString().slice(0, 10)} === ${referenceDay.toISOString().slice(0, 10)} = ${result}`
+        );
+
+        return result;
+      }
+
+      // Close function for popup window
+      function closeEventsPopup() {
+        // If inside an iframe, close the parent overlay
+        if (window.parent && window.parent !== window) {
+          const modal = window.parent.document.getElementById('events-page-modal');
+          if (modal) {
+            modal.style.display = 'none';
+            window.parent.document.body.style.overflow = '';
+            document.getElementById('events-iframe') &&
+              (document.getElementById('events-iframe').src = '');
+            return;
+          }
+        }
+        // Fallback: popup or direct navigation
+        if (window.opener && !window.opener.closed) {
+          window.close();
+        } else {
+          window.location.href = './windex.html';
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', async function () {
+        const eventsGrid = document.getElementById('events-grid');
+        const venueTabs = document.querySelectorAll('.venue-tab');
+        const archiveToggle = document.querySelector('.archive-toggle');
+
+        let currentVenue = window.currentVenue || 'both';
+        window.currentVenue = currentVenue;
+
+        // Sync active tab to match URL param / window.currentVenue
+        venueTabs.forEach((t) => {
+          t.classList.remove('active');
+          const v = t.dataset.venue;
+          t.textContent =
+            v === 'farewell' ? 'FAREWELL ONLY' : v === 'howdy' ? 'HOWDY ONLY' : 'BOTH VENUES';
+          if (v === currentVenue) {
+            t.classList.add('active');
+            t.textContent += ' ✓';
+          }
+        });
+        let showArchived = false;
+        let allEvents = [];
+
+        // Show loading state
+        eventsGrid.innerHTML = `
                 <div class="loading-spinner" style="grid-column: 1/-1; text-align: center; padding: 3rem;">
                     <div style="font-size: 2rem; margin-bottom: 1rem;">Loading events...</div>
                 </div>
             `;
-            
-            // Fetch events
-            try {
-                const timestamp = new Date().getTime();
-                // Use the 'all' endpoint instead of 'slideshow' to get complete event data
-                const response = await fetch(`/api/events?t=${timestamp}`);
-                if (!response.ok) throw new Error('Failed to load events');
-                
-                let events = await response.json();
-                console.log(`Loaded ${events.length} events`);
-                
-                // Filter out duplicate events (based on title and date)
-                const eventMap = new Map();
-                events.forEach(event => {
-                    const key = `${event.title}-${event.date}-${event.venue}`;
-                    // If the event already exists, keep the one with more information
-                    if (!eventMap.has(key) || (event.imageUrl && !eventMap.get(key).imageUrl)) {
-                        eventMap.set(key, event);
-                    }
-                });
-                
-                allEvents = Array.from(eventMap.values());
-                console.log(`After deduplication: ${allEvents.length} events`);
-                
-                // Initial render
-                filterAndRenderEvents();
-            } catch (error) {
-                console.error('Error loading events:', error);
-                eventsGrid.innerHTML = `
+
+        // Fetch events
+        try {
+          const timestamp = new Date().getTime();
+          // Use the 'all' endpoint instead of 'slideshow' to get complete event data
+          const response = await fetch(`/api/events?t=${timestamp}`);
+          if (!response.ok) throw new Error('Failed to load events');
+
+          let events = await response.json();
+          console.log(`Loaded ${events.length} events`);
+
+          // Filter out duplicate events (based on title and date)
+          const eventMap = new Map();
+          events.forEach((event) => {
+            const key = `${event.title}-${event.date}-${event.venue}`;
+            // If the event already exists, keep the one with more information
+            if (!eventMap.has(key) || (event.imageUrl && !eventMap.get(key).imageUrl)) {
+              eventMap.set(key, event);
+            }
+          });
+
+          allEvents = Array.from(eventMap.values());
+          console.log(`After deduplication: ${allEvents.length} events`);
+
+          // Initial render
+          filterAndRenderEvents();
+        } catch (error) {
+          console.error('Error loading events:', error);
+          eventsGrid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
                         <div style="font-size: 2rem; color: #f44336; margin-bottom: 1rem;">Error loading events</div>
                         <div>Please try again later or check the home page.</div>
                     </div>
                 `;
-            }
-            
-            // Set up event listeners for venue tabs
-            venueTabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    // Update active tab
-                    venueTabs.forEach(t => {
-                        t.classList.remove('active');
-                        // Remove check marks from all tabs
-                        if (t.dataset.venue === 'farewell') {
-                            t.textContent = 'FAREWELL ONLY';
-                        } else if (t.dataset.venue === 'howdy') {
-                            t.textContent = 'HOWDY ONLY';
-                        } else if (t.dataset.venue === 'both') {
-                            t.textContent = 'BOTH VENUES';
-                        }
-                    });
-                    
-                    this.classList.add('active');
-                    
-                    // Update venue filter
-                    currentVenue = this.dataset.venue;
-                    window.currentVenue = currentVenue;
-                    document.body.dataset.state = currentVenue;
-                    
-                    // Add check mark to the active tab
-                    if (currentVenue === 'farewell') {
-                        this.textContent = 'FAREWELL ONLY ✓';
-                    } else if (currentVenue === 'howdy') {
-                        this.textContent = 'HOWDY ONLY ✓';
-                    } else if (currentVenue === 'both') {
-                        this.textContent = 'BOTH VENUES ✓';
-                    }
-                    
-                    // Update displayed events
-                    filterAndRenderEvents();
-                });
+        }
+
+        // Set up event listeners for venue tabs
+        venueTabs.forEach((tab) => {
+          tab.addEventListener('click', function () {
+            // Update active tab
+            venueTabs.forEach((t) => {
+              t.classList.remove('active');
+              // Remove check marks from all tabs
+              if (t.dataset.venue === 'farewell') {
+                t.textContent = 'FAREWELL ONLY';
+              } else if (t.dataset.venue === 'howdy') {
+                t.textContent = 'HOWDY ONLY';
+              } else if (t.dataset.venue === 'both') {
+                t.textContent = 'BOTH VENUES';
+              }
             });
-            
-            // Set up event listener for archive toggle
-            archiveToggle.addEventListener('click', function() {
-                showArchived = !showArchived;
-                this.setAttribute('aria-pressed', showArchived.toString());
-                this.textContent = showArchived ? 'ALL EVENTS ✓' : 'UPCOMING ONLY ✓';
-                
-                // Update displayed events
-                filterAndRenderEvents();
-            });
-            
-            function filterAndRenderEvents() {
-                // Get current date
-                const today = new Date();
-                
-                // Filter events based on current settings
-                const filteredEvents = allEvents.filter(event => {
-                    // Filter by venue
-                    const matchesVenue = currentVenue === 'both' ? true : event.venue === currentVenue;
-                    
-                    // Filter by date (upcoming or archived)
-                    // Use the new utility functions for consistent date handling
-                    const isUpcoming = !isPastEvent(event.date) || isTodayEvent(event.date);
-                    const matchesDate = showArchived ? true : isUpcoming;
-                    
-                    // Debug output
-                    console.log(`Filtering ${event.title}: venue=${matchesVenue}, isUpcoming=${isUpcoming}, matchesDate=${matchesDate}`);
-                    
-                    return matchesVenue && matchesDate;
-                });
-                
-                // Sort events - upcoming first by date
-                filteredEvents.sort((a, b) => {
-                    const dateA = new Date(a.date);
-                    const dateB = new Date(b.date);
-                    
-                    return dateA - dateB;
-                });
-                
-                // Render the filtered events
-                renderEvents(filteredEvents);
+
+            this.classList.add('active');
+
+            // Update venue filter
+            currentVenue = this.dataset.venue;
+            window.currentVenue = currentVenue;
+            document.body.dataset.state = currentVenue;
+
+            // Add check mark to the active tab
+            if (currentVenue === 'farewell') {
+              this.textContent = 'FAREWELL ONLY ✓';
+            } else if (currentVenue === 'howdy') {
+              this.textContent = 'HOWDY ONLY ✓';
+            } else if (currentVenue === 'both') {
+              this.textContent = 'BOTH VENUES ✓';
             }
-            
-            function renderEvents(events) {
-                // Clear the grid
-                eventsGrid.innerHTML = '';
-                
-                // Check if no events match the filters
-                if (events.length === 0) {
-                    eventsGrid.innerHTML = `
+
+            // Update displayed events
+            filterAndRenderEvents();
+          });
+        });
+
+        // Set up event listener for archive toggle
+        archiveToggle.addEventListener('click', function () {
+          showArchived = !showArchived;
+          this.setAttribute('aria-pressed', showArchived.toString());
+          this.textContent = showArchived ? 'ALL EVENTS ✓' : 'UPCOMING ONLY ✓';
+
+          // Update displayed events
+          filterAndRenderEvents();
+        });
+
+        function filterAndRenderEvents() {
+          // Get current date
+          const today = new Date();
+
+          // Filter events based on current settings
+          const filteredEvents = allEvents.filter((event) => {
+            // Filter by venue
+            const matchesVenue = currentVenue === 'both' ? true : event.venue === currentVenue;
+
+            // Filter by date (upcoming or archived)
+            // Use the new utility functions for consistent date handling
+            const isUpcoming = !isPastEvent(event.date) || isTodayEvent(event.date);
+            const matchesDate = showArchived ? true : isUpcoming;
+
+            // Debug output
+            console.log(
+              `Filtering ${event.title}: venue=${matchesVenue}, isUpcoming=${isUpcoming}, matchesDate=${matchesDate}`
+            );
+
+            return matchesVenue && matchesDate;
+          });
+
+          // Sort events - upcoming first by date
+          filteredEvents.sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+
+            return dateA - dateB;
+          });
+
+          // Render the filtered events
+          renderEvents(filteredEvents);
+        }
+
+        function renderEvents(events) {
+          // Clear the grid
+          eventsGrid.innerHTML = '';
+
+          // Check if no events match the filters
+          if (events.length === 0) {
+            eventsGrid.innerHTML = `
                         <div class="no-events" style="grid-column: 1/-1; text-align: center; padding: 3rem;">
                             <div style="font-size: 1.5rem; margin-bottom: 1rem;">No events found for these filters</div>
                             <div>Try changing your venue or date filters.</div>
                         </div>
                     `;
-                    return;
-                }                    // Create event cards for each event
-                events.forEach(event => {
-                    const eventCard = document.createElement('div');
-                    eventCard.className = 'event-list-item';
-                    eventCard.dataset.id = event.id;
-                    
-                    // DEBUG: Log the raw event date for inspection
-                    console.log('RAW EVENT DATE:', event.date, 'TYPE:', typeof event.date);
-                    
-                    // Use the utility functions for consistent date handling
-                    const isPast = isPastEvent(event.date);
-                    const isToday = isTodayEvent(event.date);
-                    
-                    // Debug output for thorough diagnosis
-                    console.log(`Event: ${event.title}`);
-                    console.log('Parsed event date:', parseEventDate(event.date));
-                    console.log('Today at midnight:', new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()));
-                    console.log('isPast:', isPast, 'isToday:', isToday);
-                    
-                    // Only mark as past if it's truly past (not today)
-                    if (isPast && !isToday) {
-                        eventCard.classList.add('past-event');
-                    }
-                    
-                    // Handle all possible image URL fields from the API
-                    const imageUrl = event.imageUrl || event.flyer_image_url || event.legacy_image_url || './img/placeholder-event.jpg';
-                    
-                    eventCard.innerHTML = `
+            return;
+          } // Create event cards for each event
+          events.forEach((event) => {
+            const eventCard = document.createElement('div');
+            eventCard.className = 'event-list-item';
+            eventCard.dataset.id = event.id;
+
+            // DEBUG: Log the raw event date for inspection
+            console.log('RAW EVENT DATE:', event.date, 'TYPE:', typeof event.date);
+
+            // Use the utility functions for consistent date handling
+            const isPast = isPastEvent(event.date);
+            const isToday = isTodayEvent(event.date);
+
+            // Debug output for thorough diagnosis
+            console.log(`Event: ${event.title}`);
+            console.log('Parsed event date:', parseEventDate(event.date));
+            console.log(
+              'Today at midnight:',
+              new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
+            );
+            console.log('isPast:', isPast, 'isToday:', isToday);
+
+            // Only mark as past if it's truly past (not today)
+            if (isPast && !isToday) {
+              eventCard.classList.add('past-event');
+            }
+
+            // Handle all possible image URL fields from the API
+            const imageUrl =
+              event.imageUrl ||
+              event.flyer_image_url ||
+              event.legacy_image_url ||
+              './img/placeholder-event.jpg';
+
+            eventCard.innerHTML = `
                         <div class="event-flyer-container">
                             <img class="event-flyer" src="${imageUrl}" alt="${event.title}" onerror="this.src='./img/placeholder-event.jpg'">
                         </div>
@@ -575,65 +641,71 @@
                                 ${event.ageRestriction ? `<div class="event-info-item"><span class="info-label">Age:</span> ${event.ageRestriction}</div>` : ''}
                             </div>
                             <div class="event-buttons">
-                                ${event.ticketLink || event.ticket_url ? 
-                                    `<a href="${event.ticketLink || event.ticket_url}" target="_blank" rel="noopener noreferrer" class="event-cta glitch-effect">
+                                ${
+                                  event.ticketLink || event.ticket_url
+                                    ? `<a href="${event.ticketLink || event.ticket_url}" target="_blank" rel="noopener noreferrer" class="event-cta glitch-effect">
                                         TICKETS ${event.price || event.suggestedPrice || ''}
-                                    </a>` : 
-                                    event.url ? 
-                                    `<a href="${event.url}" target="_blank" rel="noopener noreferrer" class="event-cta glitch-effect">
+                                    </a>`
+                                    : event.url
+                                      ? `<a href="${event.url}" target="_blank" rel="noopener noreferrer" class="event-cta glitch-effect">
                                         EVENT WEBSITE
-                                    </a>` : 
-                                    ''
+                                    </a>`
+                                      : ''
                                 }
                             </div>
                         </div>
                     `;
-                    
-                    eventsGrid.appendChild(eventCard);
-                });
+
+            eventsGrid.appendChild(eventCard);
+          });
+        }
+
+        function formatDate(dateString) {
+          if (!dateString) return 'TBD';
+
+          try {
+            // Handle ISO date format
+            if (dateString.length === 10 && dateString.includes('-')) {
+              const [year, month, day] = dateString.split('-').map(Number);
+              const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+              const options = { weekday: 'short', month: 'short', day: 'numeric' };
+              return date.toLocaleDateString('en-US', options);
             }
-            
-            function formatDate(dateString) {
-                if (!dateString) return 'TBD';
-                
-                try {
-                    // Handle ISO date format
-                    if (dateString.length === 10 && dateString.includes('-')) {
-                        const [year, month, day] = dateString.split('-').map(Number);
-                        const date = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
-                        const options = { weekday: 'short', month: 'short', day: 'numeric' };
-                        return date.toLocaleDateString('en-US', options);
-                    }
-                    
-                    // Standard date handling
-                    const date = new Date(dateString);
-                    if (isNaN(date.getTime())) return dateString;
-                    
-                    const options = { weekday: 'short', month: 'short', day: 'numeric' };
-                    return date.toLocaleDateString('en-US', options);
-                } catch (error) {
-                    console.error(`Error formatting date: ${dateString}`, error);
-                    return dateString;
-                }
-            }
-            
-            // Debug the events we received from API
-            console.log('Events data structure:', allEvents.length > 0 ? allEvents[0] : 'No events loaded');
-            
-            // Add a debug function that can be called from browser console
-            window.debugEvents = function() {
-                console.table(allEvents.map(e => ({
-                    id: e.id,
-                    title: e.title,
-                    date: e.date,
-                    venue: e.venue,
-                    hasImage: !!e.imageUrl || !!e.flyer_image_url || !!e.legacy_image_url
-                })));
-                return "Events data logged to console";
-            };
-        });
+
+            // Standard date handling
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString;
+
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+          } catch (error) {
+            console.error(`Error formatting date: ${dateString}`, error);
+            return dateString;
+          }
+        }
+
+        // Debug the events we received from API
+        console.log(
+          'Events data structure:',
+          allEvents.length > 0 ? allEvents[0] : 'No events loaded'
+        );
+
+        // Add a debug function that can be called from browser console
+        window.debugEvents = function () {
+          console.table(
+            allEvents.map((e) => ({
+              id: e.id,
+              title: e.title,
+              date: e.date,
+              venue: e.venue,
+              hasImage: !!e.imageUrl || !!e.flyer_image_url || !!e.legacy_image_url,
+            }))
+          );
+          return 'Events data logged to console';
+        };
+      });
     </script>
     <script src="./jss/events-modal.js"></script>
     <script src="./jss/events-modal-calendar.js"></script>
-</body>
+  </body>
 </html>

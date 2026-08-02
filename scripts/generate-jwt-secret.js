@@ -1,12 +1,6 @@
 #!/usr/bin/env node
-// scripts/generate-jwt-secret.js
-// Utility to generate a strong JWT secret
-
 const crypto = require('crypto');
-
-// Generate a 256-bit (32 byte) random secret
 const secret = crypto.randomBytes(32).toString('hex');
-
 console.log('Generated JWT Secret:', secret);
 console.log('');
 console.log('Set this as a secret with:');

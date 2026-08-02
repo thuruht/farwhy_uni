@@ -1,1115 +1,1222 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>admin</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/css/ccssss.css">
-    <link rel="stylesheet" href="/css/fleeting-journey.css">
-    <link rel="stylesheet" href="/css/literary-admin.css">
-    <link rel="stylesheet" href="/css/image-upload.css">
-    <link rel="stylesheet" href="/css/featured-videos.css">
-    <link rel="stylesheet" href="/css/unified-buttons.css">
-    <link rel="stylesheet" href="/css/admin-help.css">
-    <link rel="stylesheet" href="/css/menu-management.css">
-    <link rel="stylesheet" href="/css/admin-header.css">
-    <link rel="stylesheet" href="/css/dark-mode.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/css/ccssss.css" />
+    <link rel="stylesheet" href="/css/fleeting-journey.css" />
+    <link rel="stylesheet" href="/css/literary-admin.css" />
+    <link rel="stylesheet" href="/css/image-upload.css" />
+    <link rel="stylesheet" href="/css/featured-videos.css" />
+    <link rel="stylesheet" href="/css/unified-buttons.css" />
+    <link rel="stylesheet" href="/css/admin-help.css" />
+    <link rel="stylesheet" href="/css/menu-management.css" />
+    <link rel="stylesheet" href="/css/admin-header.css" />
+    <link rel="stylesheet" href="/css/dark-mode.css" />
     <style>
-        /* Custom button styles */
-        .admin-header {
-            width: 100%;
-            background: var(--primary-bg-color) url('/img/bg4.png') center/cover no-repeat;
-            background-attachment: fixed;
-            border-bottom: 1px solid var(--nav-border-color);
-            padding: 0.75rem 2rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100px; /* Reduced from 150px */
-        }
-        
-        .admin-header-content {
-            width: 100%;
-            max-width: 1200px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .admin-header h1 {
-            color: var(--violet, #6c71c4);
-            font-weight: 400;
-            letter-spacing: 4px;
-            text-transform: lowercase;
-            margin: 0;
-            font-size: 2rem;
-            font-family: var(--font-display, 'Playfair Display', serif);
-            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
-        }
-        
-        .header-right {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            color: var(--base3);
-        }
-        
-        #section-indicator {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
-        }
-        
-        .breadcrumb {
-            font-size: 0.85rem;
-            opacity: 0.85;
-            text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
-        }
-        
-        /* Hours Management Styles */
-        .hours-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        
-        .hours-table th, .hours-table td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        
-        .hours-table th {
-            background-color: #f5f5f5;
-            font-weight: bold;
-        }
-        
-        .hours-table input[type="time"], 
-        .hours-table input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        
-        .hours-table input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-        }
-        
-        .hours-table tr.closed {
-            background-color: #f9f9f9;
-        }
-        
-        .hours-table input[disabled] {
-            background-color: #f1f1f1;
-            color: #999;
-        }
-        
-        .howdy-hours-info {
-            background-color: #e3f2fd;
-            border: 1px solid #90caf9;
-            border-radius: 4px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            color: #0d47a1;
-            font-size: 0.9rem;
-        }
-        
-        .howdy-hours-info p {
-            margin: 5px 0;
-        }
-        
-        .alert {
-            position: relative;
-            padding: 0.75rem 1.25rem;
-            margin-bottom: 1rem;
-            border-radius: 0.25rem;
-        }
-        
-        .alert-info {
-            background-color: #e3f2fd;
-            border-color: #90caf9;
-            color: #0d47a1;
-        }
+      .admin-header {
+        width: 100%;
+        background: var(--primary-bg-color) url('/img/bg4.png') center/cover no-repeat;
+        background-attachment: fixed;
+        border-bottom: 1px solid var(--nav-border-color);
+        padding: 0.75rem 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100px;
+      }
+
+      .admin-header-content {
+        width: 100%;
+        max-width: 1200px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .admin-header h1 {
+        color: var(--violet, #6c71c4);
+        font-weight: 400;
+        letter-spacing: 4px;
+        text-transform: lowercase;
+        margin: 0;
+        font-size: 2rem;
+        font-family: var(--font-display, 'Playfair Display', serif);
+        text-shadow: 1px 1px 0 #00000033;
+      }
+
+      .header-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        color: var(--base3);
+      }
+
+      #section-indicator {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        text-shadow: 1px 1px 0 #00000080;
+      }
+
+      .breadcrumb {
+        font-size: 0.85rem;
+        opacity: 0.85;
+        text-shadow: 1px 1px 0 #00000080;
+      }
+
+      .hours-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+
+      .hours-table th,
+      .hours-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+      }
+
+      .hours-table th {
+        background-color: #f5f5f5;
+        font-weight: bold;
+      }
+
+      .hours-table input[type='time'],
+      .hours-table input[type='text'] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      .hours-table input[type='checkbox'] {
+        width: 20px;
+        height: 20px;
+      }
+
+      .hours-table tr.closed {
+        background-color: #f9f9f9;
+      }
+
+      .hours-table input[disabled] {
+        background-color: #f1f1f1;
+        color: #999;
+      }
+
+      .howdy-hours-info {
+        background-color: #e3f2fd;
+        border: 1px solid #90caf9;
+        border-radius: 4px;
+        padding: 10px 15px;
+        margin-bottom: 15px;
+        color: #0d47a1;
+        font-size: 0.9rem;
+      }
+
+      .howdy-hours-info p {
+        margin: 5px 0;
+      }
+
+      .alert {
+        position: relative;
+        padding: 0.75rem 1.25rem;
+        margin-bottom: 1rem;
+        border-radius: 0.25rem;
+      }
+
+      .alert-info {
+        background-color: #e3f2fd;
+        border-color: #90caf9;
+        color: #0d47a1;
+      }
     </style>
-    <link href="/css/quill.snow.css" rel="stylesheet">
-    <!-- Modal and Mobile Responsive Styles -->
+    <link href="/css/quill.snow.css" rel="stylesheet" />
+
     <style>
-        /* Modal Overlay Styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #000000bf;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .modal-overlay.show {
+        display: flex !important;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 8px;
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        box-shadow: 0 10px 30px #0000004c;
+        margin: 0 auto;
+        display: block;
+      }
+
+      .modal-header {
+        padding: 20px 25px 0 25px;
+        border-bottom: 1px solid #eee;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 1;
+      }
+
+      .modal-header h3 {
+        margin: 0 0 15px 0;
+        color: #333;
+        font-size: 1.5rem;
+      }
+
+      #modal-form-body,
+      .modal-body {
+        padding: 25px;
+      }
+
+      .modal-close-btn {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 28px;
+        font-weight: bold;
+        color: #aaa;
+        cursor: pointer;
+        z-index: 2;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+      }
+
+      .modal-close-btn:hover {
+        color: #000;
+        background-color: #f5f5f5;
+      }
+
+      .modal-content .form-group {
+        margin-bottom: 20px;
+        display: block;
+        width: 100%;
+      }
+
+      .modal-content .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+        width: 100%;
+      }
+
+      .modal-content .form-group input,
+      .modal-content .form-group select,
+      .modal-content .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.2s ease;
+        box-sizing: border-box;
+        display: block;
+      }
+
+      .modal-content .form-group input:focus,
+      .modal-content .form-group select:focus,
+      .modal-content .form-group textarea:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px #007bff1a;
+      }
+
+      .modal-content .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+      }
+
+      .form-actions .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 100px;
+      }
+
+      .form-actions .btn-primary {
+        background-color: #007bff;
+        color: white;
+      }
+
+      .form-actions .btn-primary:hover {
+        background-color: #0056b3;
+      }
+
+      .form-actions .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+      }
+
+      .form-actions .btn-secondary:hover {
+        background-color: #545b62;
+      }
+
+      @media (max-width: 768px) {
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.75);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            padding: 20px;
-            box-sizing: border-box;
+          padding: 10px;
+          align-items: flex-start;
+          overflow-y: auto;
         }
-        
-        .modal-overlay.show {
-            display: flex !important;
-        }
-        
-        /* Modal Content */
+
         .modal-content {
-            background: white;
-            border-radius: 8px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            margin: 0 auto;
-            display: block; /* Ensure proper display */
+          max-width: none;
+          width: 100%;
+          max-height: none;
+          min-height: auto;
+          margin: 20px 0;
+          border-radius: 6px;
         }
-        
-        /* Modal Header */
+
         .modal-header {
-            padding: 20px 25px 0 25px;
-            border-bottom: 1px solid #eee;
-            position: sticky;
-            top: 0;
-            background: white;
-            z-index: 1;
+          padding: 15px 20px 0 20px;
         }
-        
+
         .modal-header h3 {
-            margin: 0 0 15px 0;
-            color: #333;
-            font-size: 1.5rem;
+          font-size: 1.3rem;
+          margin-right: 40px;
         }
-        
-        /* Modal Body */
+
         #modal-form-body,
         .modal-body {
-            padding: 25px;
+          padding: 20px;
         }
-        
-        /* Close Button */
+
         .modal-close-btn {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 28px;
-            font-weight: bold;
-            color: #aaa;
-            cursor: pointer;
-            z-index: 2;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.2s ease;
+          top: 12px;
+          right: 15px;
+          font-size: 24px;
+          width: 28px;
+          height: 28px;
         }
-        
-        .modal-close-btn:hover {
-            color: #000;
-            background-color: #f5f5f5;
+
+        .form-actions {
+          flex-direction: column;
+          gap: 10px;
         }
-        
-        /* Form Styles in Modal */
-        .modal-content .form-group {
-            margin-bottom: 20px;
-            display: block;
-            width: 100%;
+
+        .form-actions .btn {
+          width: 100%;
+          padding: 14px 24px;
+          font-size: 16px;
         }
-        
-        .modal-content .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-            width: 100%;
-        }
-        
+
         .modal-content .form-group input,
         .modal-content .form-group select,
         .modal-content .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.2s ease;
-            box-sizing: border-box;
-            display: block;
+          padding: 14px;
+          font-size: 16px;
         }
-        
-        .modal-content .form-group input:focus,
-        .modal-content .form-group select:focus,
-        .modal-content .form-group textarea:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-        }
-        
-        .modal-content .form-group textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-        
-        /* Form Actions */
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        
-        .form-actions .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-width: 100px;
-        }
-        
-        .form-actions .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        
-        .form-actions .btn-primary:hover {
-            background-color: #0056b3;
-        }
-        
-        .form-actions .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-        
-        .form-actions .btn-secondary:hover {
-            background-color: #545b62;
-        }
-        
-        /* Mobile Responsive Styles */
-        @media (max-width: 768px) {
-            .modal-overlay {
-                padding: 10px;
-                align-items: flex-start;
-                overflow-y: auto;
-            }
-            
-            .modal-content {
-                max-width: none;
-                width: 100%;
-                max-height: none;
-                min-height: auto;
-                margin: 20px 0;
-                border-radius: 6px;
-            }
-            
-            .modal-header {
-                padding: 15px 20px 0 20px;
-            }
-            
-            .modal-header h3 {
-                font-size: 1.3rem;
-                margin-right: 40px;
-            }
-            
-            #modal-form-body,
-            .modal-body {
-                padding: 20px;
-            }
-            
-            .modal-close-btn {
-                top: 12px;
-                right: 15px;
-                font-size: 24px;
-                width: 28px;
-                height: 28px;
-            }
-            
-            .form-actions {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .form-actions .btn {
-                width: 100%;
-                padding: 14px 24px;
-                font-size: 16px;
-            }
-            
-            .modal-content .form-group input,
-            .modal-content .form-group select,
-            .modal-content .form-group textarea {
-                padding: 14px;
-                font-size: 16px; /* Prevents zoom on iOS */
-            }
-        }
-        
-        /* Extra small screens */
-        @media (max-width: 480px) {
-            .modal-overlay {
-                padding: 5px;
-            }
-            
-            .modal-content {
-                margin: 10px 0;
-                border-radius: 4px;
-            }
-            
-            .modal-header {
-                padding: 12px 15px 0 15px;
-            }
-            
-            .modal-header h3 {
-                font-size: 1.2rem;
-            }
-            
-            #modal-form-body,
-            .modal-body {
-                padding: 15px;
-            }
-            
-            .modal-close-btn {
-                top: 10px;
-                right: 12px;
-                font-size: 22px;
-                width: 26px;
-                height: 26px;
-            }
-        }
-        
-        /* Admin Dashboard Mobile Improvements */
-        @media (max-width: 768px) {
-            .admin-grid-container {
-                grid-template-columns: 1fr !important;
-                gap: 10px !important;
-                padding: 10px !important;
-            }
-            
-            .sidebar {
-                position: relative !important;
-                width: 100% !important;
-                height: auto !important;
-                margin-bottom: 20px;
-            }
-            
-            .main-content {
-                padding: 10px !important;
-            }
-            
-            .admin-section {
-                padding: 15px !important;
-            }
-            
-            .admin-table-container {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            
-            .admin-table {
-                min-width: 600px;
-            }
-            
-            .admin-table th,
-            .admin-table td {
-                padding: 8px !important;
-                font-size: 14px !important;
-            }
-            
-            .menu-container {
-                padding: 10px !important;
-            }
-            
-            .category-section {
-                margin-bottom: 20px !important;
-            }
-            
-            .menu-item {
-                padding: 12px !important;
-                margin-bottom: 10px !important;
-            }
+      }
+
+      @media (max-width: 480px) {
+        .modal-overlay {
+          padding: 5px;
         }
 
-        /* Menu reordering styles */
-        .menu-container.reorder-mode .menu-item {
-            cursor: move;
-            position: relative;
-            transition: background-color 0.2s;
+        .modal-content {
+          margin: 10px 0;
+          border-radius: 4px;
         }
 
-        .menu-container.reorder-mode .menu-item:hover {
-            background-color: rgba(0, 0, 0, 0.05);
+        .modal-header {
+          padding: 12px 15px 0 15px;
         }
 
-        .menu-container.reorder-mode .menu-item.dragging {
-            opacity: 0.6;
+        .modal-header h3 {
+          font-size: 1.2rem;
         }
 
-        .menu-container.reorder-mode .menu-item.drag-over {
-            border-top: 2px solid #007bff;
+        #modal-form-body,
+        .modal-body {
+          padding: 15px;
         }
 
-        .drag-handle {
-            display: none;
-            position: absolute;
-            left: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: move;
-            color: #666;
-            font-size: 18px;
-            line-height: 1;
+        .modal-close-btn {
+          top: 10px;
+          right: 12px;
+          font-size: 22px;
+          width: 26px;
+          height: 26px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .admin-grid-container {
+          grid-template-columns: 1fr !important;
+          gap: 10px !important;
+          padding: 10px !important;
         }
 
-        .menu-container.reorder-mode .drag-handle {
-            display: block;
+        .sidebar {
+          position: relative !important;
+          width: 100% !important;
+          height: auto !important;
+          margin-bottom: 20px;
         }
 
-        .menu-container.reorder-mode .menu-item-details,
-        .menu-container.reorder-mode .menu-item-description {
-            margin-left: 20px;
+        .main-content {
+          padding: 10px !important;
         }
 
-        /* Venue Management Layout Fixes */
-        .venue-content {
-            width: 100%;
-            max-width: 100%;
+        .admin-section {
+          padding: 15px !important;
         }
-        
-        .venue-section {
-            width: 100%;
-            margin-bottom: 40px;
-            padding: 20px;
-            background: var(--bg-light);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
+
+        .admin-table-container {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
         }
-        
-        .venue-section h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: var(--text-primary);
-            font-size: 1.5rem;
+
+        .admin-table {
+          min-width: 600px;
         }
-        
-        .section-description {
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-            font-size: 1rem;
-            line-height: 1.5;
+
+        .admin-table th,
+        .admin-table td {
+          padding: 8px !important;
+          font-size: 14px !important;
         }
-        
+
         .menu-container {
-            width: 100%;
-            max-width: 100%;
-        }
-        
-        /* Fix menu card to take full width */
-        .menu-card {
-            width: 100% !important;
-            max-width: 100% !important;
-            margin: 0 !important;
-        }
-        
-        .menu-items-container {
-            width: 100%;
-        }
-        
-        .menu-items-table {
-            width: 100%;
-        }
-        
-        /* Remove venue tabs since we only have one venue */
-        .venue-tabs {
-            display: none;
+          padding: 10px !important;
         }
 
-        .section-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+        .category-section {
+          margin-bottom: 20px !important;
         }
-        
-        .section-actions .btn {
-            white-space: nowrap;
+
+        .menu-item {
+          padding: 12px !important;
+          margin-bottom: 10px !important;
         }
-        
-        /* Import Legacy Events Modal Styles */
-        .import-info {
-            margin-bottom: 20px;
-        }
-        
-        .import-info code {
-            background-color: #f5f5f5;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
-            font-size: 0.9rem;
-        }
-        
-        .import-controls {
-            margin: 20px 0;
-        }
-        
-        .import-controls .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .import-controls label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-        
-        .import-controls input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-        }
-        
-        .import-progress {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border: 1px solid #dee2e6;
-        }
-        
-        .import-status {
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-        
-        .import-results {
-            max-height: 300px;
-            overflow-y: auto;
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            padding: 10px;
-        }
-        
-        .import-result-item {
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .import-result-item:last-child {
-            border-bottom: none;
-        }
-        
-        .result-action {
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .result-action.imported {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        
-        .result-action.skipped {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        
-        .result-action.preview {
-            background-color: #d1ecf1;
-            color: #0c5460;
-        }
+      }
+
+      .menu-container.reorder-mode .menu-item {
+        cursor: move;
+        position: relative;
+        transition: background-color 0.2s;
+      }
+
+      .menu-container.reorder-mode .menu-item:hover {
+        background-color: #0000000d;
+      }
+
+      .menu-container.reorder-mode .menu-item.dragging {
+        opacity: 0.6;
+      }
+
+      .menu-container.reorder-mode .menu-item.drag-over {
+        border-top: 2px solid #007bff;
+      }
+
+      .drag-handle {
+        display: none;
+        position: absolute;
+        left: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: move;
+        color: #666;
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .menu-container.reorder-mode .drag-handle {
+        display: block;
+      }
+
+      .menu-container.reorder-mode .menu-item-details,
+      .menu-container.reorder-mode .menu-item-description {
+        margin-left: 20px;
+      }
+
+      .venue-content {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .venue-section {
+        width: 100%;
+        margin-bottom: 40px;
+        padding: 20px;
+        background: var(--bg-light);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+      }
+
+      .venue-section h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: var(--text-primary);
+        font-size: 1.5rem;
+      }
+
+      .section-description {
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .menu-container {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .menu-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+      }
+
+      .menu-items-container {
+        width: 100%;
+      }
+
+      .menu-items-table {
+        width: 100%;
+      }
+
+      .venue-tabs {
+        display: none;
+      }
+
+      .section-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .section-actions .btn {
+        white-space: nowrap;
+      }
+
+      .import-info {
+        margin-bottom: 20px;
+      }
+
+      .import-info code {
+        background-color: #f5f5f5;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 0.9rem;
+      }
+
+      .import-controls {
+        margin: 20px 0;
+      }
+
+      .import-controls .form-group {
+        margin-bottom: 15px;
+      }
+
+      .import-controls label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .import-controls input[type='checkbox'] {
+        width: 18px;
+        height: 18px;
+      }
+
+      .import-progress {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+      }
+
+      .import-status {
+        margin-bottom: 15px;
+        font-weight: 600;
+      }
+
+      .import-results {
+        max-height: 300px;
+        overflow-y: auto;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        padding: 10px;
+      }
+
+      .import-result-item {
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .import-result-item:last-child {
+        border-bottom: none;
+      }
+
+      .result-action {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .result-action.imported {
+        background-color: #d4edda;
+        color: #155724;
+      }
+
+      .result-action.skipped {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+
+      .result-action.preview {
+        background-color: #d1ecf1;
+        color: #0c5460;
+      }
     </style>
-</head>
-<body data-state="farewell">
+  </head>
+  <body data-state="farewell">
     <div class="admin-header">
-        <div class="admin-header-content">
-            <button id="theme-switcher">Toggle Theme</button>
-            <h1 id="main-title">admin</h1>
-            <div class="header-right">
-                <span id="section-indicator">Dashboard</span>
-                <span class="breadcrumb" id="breadcrumb">Home / Dashboard</span>
-            </div>
+      <div class="admin-header-content">
+        <button id="theme-switcher">Toggle Theme</button>
+        <h1 id="main-title">admin</h1>
+        <div class="header-right">
+          <span id="section-indicator">Dashboard</span>
+          <span class="breadcrumb" id="breadcrumb">Home / Dashboard</span>
         </div>
+      </div>
     </div>
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <div id="dashboard-container" class="admin-grid-container">
-        <nav class="admin-dropdown-nav">
-            <label for="admin-nav-select" class="visually-hidden">Admin Navigation</label>
-            <select id="admin-nav-select" class="admin-nav-select">
-                <option value="dashboard">Dashboard</option>
-                <option value="events">Events</option>
-                <option value="blog">Blog</option>
-                <option value="featured-videos">Featured Videos</option>
-                <option value="venue">Venue Management</option>
-                <option value="booking">Booking Submissions</option>
-                <option value="help">Help</option>
-                <option value="logout">Logout</option>
-            </select>
-        </nav>
-        <main class="main-content">
-            <section id="section-dashboard" class="admin-section active">
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-icon">🎪</div><div class="stat-content"><h3>Total Events</h3><p id="stats-total-events">0</p></div></div>
-                    <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-content"><h3>Blog Posts</h3><p id="stats-total-posts">0</p></div></div>
-                    <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-content"><h3>Total Users</h3><p id="stats-total-users">1</p></div></div>
-                    <div class="stat-card" id="booking-stat-card" style="cursor:pointer;" onclick="document.getElementById('admin-nav-select').value='booking'; document.getElementById('admin-nav-select').dispatchEvent(new Event('change'));"><div class="stat-icon">🎸</div><div class="stat-content"><h3>Booking Requests</h3><p style="font-size:0.85rem; margin:0;">new: <span id="stats-unseen-bookings">0</span> &nbsp; read: <span id="stats-seen-bookings">0</span></p></div></div>
+      <nav class="admin-dropdown-nav">
+        <label for="admin-nav-select" class="visually-hidden">Admin Navigation</label>
+        <select id="admin-nav-select" class="admin-nav-select">
+          <option value="dashboard">Dashboard</option>
+          <option value="events">Events</option>
+          <option value="blog">Blog</option>
+          <option value="featured-videos">Featured Videos</option>
+          <option value="venue">Venue Management</option>
+          <option value="booking">Booking Submissions</option>
+          <option value="help">Help</option>
+          <option value="logout">Logout</option>
+        </select>
+      </nav>
+      <main class="main-content">
+        <section id="section-dashboard" class="admin-section active">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">🎪</div>
+              <div class="stat-content">
+                <h3>Total Events</h3>
+                <p id="stats-total-events">0</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📝</div>
+              <div class="stat-content">
+                <h3>Blog Posts</h3>
+                <p id="stats-total-posts">0</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">👥</div>
+              <div class="stat-content">
+                <h3>Total Users</h3>
+                <p id="stats-total-users">1</p>
+              </div>
+            </div>
+            <div
+              class="stat-card"
+              id="booking-stat-card"
+              style="cursor: pointer"
+              onclick="
+                document.getElementById('admin-nav-select').value = 'booking';
+                document.getElementById('admin-nav-select').dispatchEvent(new Event('change'));
+              "
+            >
+              <div class="stat-icon">🎸</div>
+              <div class="stat-content">
+                <h3>Booking Requests</h3>
+                <p style="font-size: 0.85rem; margin: 0">
+                  new: <span id="stats-unseen-bookings">0</span> &nbsp; read:
+                  <span id="stats-seen-bookings">0</span>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="recent-activity">
+            <h3>Recent Activity</h3>
+            <div id="recent-activity-list" class="activity-feed"></div>
+          </div>
+        </section>
+        <section id="section-events" class="admin-section">
+          <div class="section-header">
+            <h2>Event Management</h2>
+            <div class="section-actions">
+              <button
+                class="btn btn-warning"
+                id="import-legacy-events-btn"
+                title="Import and deduplicate events from legacy system"
+              >
+                📥 Import Legacy
+              </button>
+              <button
+                class="btn btn-secondary"
+                id="repair-legacy-events-btn"
+                title="Repair legacy events with missing flyer URLs"
+              >
+                🔧 Repair Legacy
+              </button>
+              <button class="btn btn-primary" id="add-event-btn">+ New Event</button>
+            </div>
+          </div>
+          <div class="filters-bar">
+            <div class="filter-group filter-dropdown-group">
+              <label for="event-venue-filter">Filter by venue:</label>
+              <select id="event-venue-filter" aria-label="Filter events by venue">
+                <option value="">All Venues</option>
+                <option value="farewell">Farewell</option>
+                <option value="howdy">Howdy</option>
+              </select>
+            </div>
+            <div class="filter-group filter-search-group">
+              <input
+                type="text"
+                id="event-search"
+                placeholder="Search events..."
+                aria-label="Search events"
+              />
+            </div>
+          </div>
+          <div id="event-list" class="item-list-container"></div>
+        </section>
+        <section id="section-blog" class="admin-section">
+          <div class="section-header">
+            <h2>Blog Management</h2>
+            <button class="btn btn-primary" id="add-blog-btn">+ New Post</button>
+          </div>
+          <div class="filters-bar">
+            <div class="filter-group filter-dropdown-group">
+              <label for="blog-status-filter">Filter by status:</label>
+              <select id="blog-status-filter" aria-label="Filter blog posts by status">
+                <option value="">All Posts</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+            <div class="filter-group filter-search-group">
+              <input
+                type="text"
+                id="blog-search"
+                placeholder="Search posts..."
+                aria-label="Search blog posts"
+              />
+            </div>
+          </div>
+          <div id="blog-list" class="item-list-container"></div>
+        </section>
+        <section id="section-venue" class="admin-section">
+          <div class="section-header"><h2>Venue Management - Farewell Cafe</h2></div>
+          <div class="venue-content">
+            <div class="venue-section">
+              <h3>Menu Management</h3>
+              <p class="section-description">
+                Add, edit, or remove items from the Farewell Cafe menu. Changes will be reflected on
+                the public menu page.
+              </p>
+              <div class="menu-actions">
+                <button class="btn btn-secondary" id="add-menu-btn">+ Add Menu Item</button>
+                <button class="btn btn-secondary" id="reorder-menu-btn">Reorder Menu</button>
+              </div>
+              <div id="menu-list" class="menu-container"></div>
+            </div>
+            <div class="venue-section">
+              <h3>Business Hours</h3>
+              <p class="section-description">
+                Set the regular business hours for Farewell Cafe. These hours will be displayed on
+                the public site.
+              </p>
+              <div id="hours-editor" class="hours-container"></div>
+            </div>
+          </div>
+        </section>
+        <section id="section-featured-videos" class="admin-section">
+          <div class="section-header"><h2>Featured Videos Carousel</h2></div>
+          <div class="featured-videos-container">
+            <div class="featured-videos-preview">
+              <h3>Current Featured Videos</h3>
+              <div id="featured-videos-preview-container" class="preview-container"></div>
+            </div>
+            <div class="featured-videos-editor">
+              <h3>Edit Featured Videos</h3>
+              <div class="featured-videos-form">
+                <div id="youtube-list-container"></div>
+                <div class="input-group">
+                  <input
+                    type="url"
+                    id="youtube-url"
+                    class="form-control"
+                    placeholder="Enter YouTube Video URL (https://www.youtube.com/watch?v=...)"
+                  />
+                  <button type="button" id="add-youtube-btn" class="btn btn-secondary">
+                    Add Video
+                  </button>
                 </div>
-                <div class="recent-activity"><h3>Recent Activity</h3><div id="recent-activity-list" class="activity-feed"></div></div>
-            </section>
-            <section id="section-events" class="admin-section">
-                <div class="section-header">
-                    <h2>Event Management</h2>
-                    <div class="section-actions">
-                        <button class="btn btn-warning" id="import-legacy-events-btn" title="Import and deduplicate events from legacy system">📥 Import Legacy</button>
-                        <button class="btn btn-secondary" id="repair-legacy-events-btn" title="Repair legacy events with missing flyer URLs">🔧 Repair Legacy</button>
-                        <button class="btn btn-primary" id="add-event-btn">+ New Event</button>
-                    </div>
-                </div>
-                <div class="filters-bar">
-                    <div class="filter-group filter-dropdown-group">
-                        <label for="event-venue-filter">Filter by venue:</label>
-                        <select id="event-venue-filter" aria-label="Filter events by venue">
-                            <option value="">All Venues</option>
-                            <option value="farewell">Farewell</option>
-                            <option value="howdy">Howdy</option>
-                        </select>
-                    </div>
-                    <div class="filter-group filter-search-group">
-                        <input type="text" id="event-search" placeholder="Search events..." aria-label="Search events">
-                    </div>
-                </div>
-                <div id="event-list" class="item-list-container"></div>
-            </section>
-            <section id="section-blog" class="admin-section">
-                <div class="section-header"><h2>Blog Management</h2><button class="btn btn-primary" id="add-blog-btn">+ New Post</button></div>
-                <div class="filters-bar">
-                    <div class="filter-group filter-dropdown-group">
-                        <label for="blog-status-filter">Filter by status:</label>
-                        <select id="blog-status-filter" aria-label="Filter blog posts by status">
-                            <option value="">All Posts</option>
-                            <option value="published">Published</option>
-                            <option value="draft">Draft</option>
-                        </select>
-                    </div>
-                    <div class="filter-group filter-search-group">
-                        <input type="text" id="blog-search" placeholder="Search posts..." aria-label="Search blog posts">
-                    </div>
-                </div>
-                <div id="blog-list" class="item-list-container"></div>
-            </section>
-            <section id="section-venue" class="admin-section">
-                <div class="section-header"><h2>Venue Management - Farewell Cafe</h2></div>
-                <div class="venue-content">
-                    <div class="venue-section">
-                        <h3>Menu Management</h3>
-                        <p class="section-description">Add, edit, or remove items from the Farewell Cafe menu. Changes will be reflected on the public menu page.</p>
-                        <div class="menu-actions">
-                            <button class="btn btn-secondary" id="add-menu-btn">+ Add Menu Item</button>
-                            <button class="btn btn-secondary" id="reorder-menu-btn">Reorder Menu</button>
-                        </div>
-                        <div id="menu-list" class="menu-container"></div>
-                    </div>
-                    <div class="venue-section">
-                        <h3>Business Hours</h3>
-                        <p class="section-description">Set the regular business hours for Farewell Cafe. These hours will be displayed on the public site.</p>
-                        <div id="hours-editor" class="hours-container"></div>
-                    </div>
-                </div>
-            </section>
-            <section id="section-featured-videos" class="admin-section">
-                <div class="section-header"><h2>Featured Videos Carousel</h2></div>
-                <div class="featured-videos-container">
-                    <div class="featured-videos-preview">
-                        <h3>Current Featured Videos</h3>
-                        <div id="featured-videos-preview-container" class="preview-container"></div>
-                    </div>
-                    <div class="featured-videos-editor">
-                        <h3>Edit Featured Videos</h3>
-                        <div class="featured-videos-form">
-                            <div id="youtube-list-container"></div>
-                            <div class="input-group">
-                                <input type="url" id="youtube-url" class="form-control" placeholder="Enter YouTube Video URL (https://www.youtube.com/watch?v=...)">
-                                <button type="button" id="add-youtube-btn" class="btn btn-secondary">Add Video</button>
-                            </div>
-                            <p class="help-text">Add multiple videos to create a carousel in the featured section</p>
-                            <button type="button" id="save-featured-videos-btn" class="btn btn-primary">Save Featured Videos</button>
-                            <div id="featured-videos-status" class="status-message-container"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <section id="section-booking" class="admin-section"></section>
+                <p class="help-text">
+                  Add multiple videos to create a carousel in the featured section
+                </p>
+                <button type="button" id="save-featured-videos-btn" class="btn btn-primary">
+                  Save Featured Videos
+                </button>
+                <div id="featured-videos-status" class="status-message-container"></div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-            <section id="section-help" class="admin-section">
-                <div class="section-header">
-                    <h2>Admin Help Center</h2>
-                </div>
-                <div class="help-container">
-                    <div class="help-toc">
-                        <h3>Table of Contents</h3>
-                        <ul>
-                            <li><a href="#help-overview">Overview</a></li>
-                            <li><a href="#help-events">Events Management</a></li>
-                            <li><a href="#help-blog">Blog Management</a></li>
-                            <li><a href="#help-featured-videos">Featured Videos</a></li>
-                            <li><a href="#help-venue">Venue Management</a></li>
-                            <li><a href="#help-troubleshooting">Troubleshooting</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div class="help-content">
-                        <div id="help-overview" class="help-section">
-                            <h3>Admin Dashboard Overview</h3>
-                            <p>Welcome to the Farewell/Howdy admin dashboard. This interface allows you to manage events, blog posts, featured videos, venue hours, and menu items.</p>
-                            <p>Use the navigation dropdown menu to access different sections of the dashboard.</p>
-                            <div class="help-tip">
-                                <strong>Tip:</strong> The dashboard shows your site statistics and all changes appear on the public site after 5-10 minutes (cache update).
-                            </div>
-                        </div>
-                        
-                        <div id="help-events" class="help-section">
-                            <h3>Events Management</h3>
-                            <p>The Events section lets you create, edit, and delete events for both venues.</p>
-                            
-                            <h4>Creating Events</h4>
-                            <ol>
-                                <li>Click the "+ New Event" button</li>
-                                <li>Fill in the event details including title, description, date, and time</li>
-                                <li>Select the venue (Farewell or Howdy)</li>
-                                <li>Upload a flyer image if available</li>
-                                <li>Click "Save" to create the event</li>
-                            </ol>
-                            
-                            <h4>Editing Events</h4>
-                            <ol>
-                                <li>Find the event in the list</li>
-                                <li>Click the "Edit" button</li>
-                                <li>Update the event details</li>
-                                <li>Click "Save" to update the event</li>
-                            </ol>
-                            
-                            <div class="help-tip">
-                                <strong>Note:</strong> Events can be filtered by venue using the dropdown at the top of the events list.
-                            </div>
-                        </div>
-                        
-                        <div id="help-blog" class="help-section">
-                            <h3>Blog Management</h3>
-                            <p>The Blog section allows you to create and manage blog posts that appear on the public news page.</p>
-                            
-                            <h4>Creating Blog Posts</h4>
-                            <ol>
-                                <li>Click the "+ New Post" button</li>
-                                <li>Enter a title for your post</li>
-                                <li>Use the rich text editor to create your content</li>
-                                <li>Upload an image if desired</li>
-                                <li>Click "Save" to publish the post</li>
-                            </ol>
-                            
-                            <h4>The Rich Text Editor</h4>
-                            <p>The editor toolbar provides formatting options:</p>
-                            <ul>
-                                <li>Text formatting (bold, italic, etc.)</li>
-                                <li>Headings and lists</li>
-                                <li>Adding links</li>
-                                <li>Embedding images</li>
-                            </ul>
-                            
-                            <div class="help-tip">
-                                <strong>Tip:</strong> Images in the blog editor can be resized by clicking and dragging the corners.
-                            </div>
-                        </div>
-                        
-                        <div id="help-featured-videos" class="help-section">
-                            <h3>Featured Videos</h3>
-                            <p>The Featured Videos section lets you create a carousel of YouTube videos that will be displayed on the blog/news page.</p>
-                            
-                            <h4>Adding Videos</h4>
-                            <ol>
-                                <li>Paste a YouTube URL into the input field</li>
-                                <li>Click "Add Video"</li>
-                                <li>Repeat for multiple videos</li>
-                                <li>Click "Save Featured Videos" when finished</li>
-                            </ol>
-                            
-                            <div class="help-tip">
-                                <strong>Supported formats:</strong> The system accepts standard YouTube URLs (youtube.com/watch?v=ID), short URLs (youtu.be/ID), and embed URLs.
-                            </div>
-                        </div>
-                         <div id="help-venue" class="help-section">
-                            <h3>Venue Management</h3>
-                            <p>The Venue Management section allows you to manage Farewell Cafe's business hours and menu items.</p>
-                            
-                            <h4>Business Hours</h4>
-                            <ol>
-                                <li>Set open/close times for each day of the week</li>
-                                <li>Check the "Closed" box for days when the venue is not open</li>
-                                <li>Add notes if needed (e.g., "Private event")</li>
-                                <li>Click "Save Hours" to update</li>
-                            </ol>
-                            
-                            <h4>Menu Management</h4>
-                            <ol>
-                                <li>Browse existing menu sections (Domestics, Boulevard, Craft/Import, etc.)</li>
-                                <li>Click "Edit" on a section to modify its items</li>
-                                <li>Click "Add Item" to add new beverages or food items</li>
-                                <li>Fill out the name, price, category, and description</li>
-                                <li>Make sure "Active" is checked for items to appear on the public menu</li>
-                                <li>Click "Save" to update the menu</li>
-                            </ol>
-                            
-                            <div class="help-tip">
-                                <strong>Note:</strong> Menu items must be marked as "Active" to appear on the public menu. The display order determines the sequence items appear in each category.
-                            </div>
-                        </div>
+        <section id="section-booking" class="admin-section"></section>
 
-                        <div id="help-troubleshooting" class="help-section">
-                            <h3>Troubleshooting</h3>
-                            <p>If you encounter any issues while using the admin dashboard, try these steps:</p>
-                            
-                            <h4>Common Issues</h4>
-                            <ul>
-                                <li><strong>Changes not appearing:</strong> Try refreshing the page or clearing your browser cache.</li>
-                                <li><strong>Upload errors:</strong> Ensure your image is under 5MB and in a supported format (JPG, PNG).</li>
-                                <li><strong>Login issues:</strong> Try clearing cookies or using a private/incognito browsing window.</li>
-                                <li><strong>Duplicate events:</strong> If you notice duplicate events being created, simply delete the extra one for now. This is a known issue that will be fixed in a future update.</li>
-                            </ul>
-                            
-                            <h4>Get Help</h4>
-                            <p>If you continue to experience issues, please contact support:</p>
-                            <p><strong>Email:</strong> <a href="mailto:help_i_broke_the_thing@distorted.work">help_i_broke_the_thing@distorted.work</a></p>
-                            <p>When reporting an issue, please include:</p>
-                            <ul>
-                                <li>What you were trying to do</li>
-                                <li>What steps you took</li>
-                                <li>What error message you received (if any)</li>
-                                <li>Screenshots if possible</li>
-                            </ul>
-                        </div>
-                    </div>
+        <section id="section-help" class="admin-section">
+          <div class="section-header">
+            <h2>Admin Help Center</h2>
+          </div>
+          <div class="help-container">
+            <div class="help-toc">
+              <h3>Table of Contents</h3>
+              <ul>
+                <li><a href="#help-overview">Overview</a></li>
+                <li><a href="#help-events">Events Management</a></li>
+                <li><a href="#help-blog">Blog Management</a></li>
+                <li><a href="#help-featured-videos">Featured Videos</a></li>
+                <li><a href="#help-venue">Venue Management</a></li>
+                <li><a href="#help-troubleshooting">Troubleshooting</a></li>
+              </ul>
+            </div>
+
+            <div class="help-content">
+              <div id="help-overview" class="help-section">
+                <h3>Admin Dashboard Overview</h3>
+                <p>
+                  Welcome to the Farewell/Howdy admin dashboard. This interface allows you to manage
+                  events, blog posts, featured videos, venue hours, and menu items.
+                </p>
+                <p>
+                  Use the navigation dropdown menu to access different sections of the dashboard.
+                </p>
+                <div class="help-tip">
+                  <strong>Tip:</strong> The dashboard shows your site statistics and all changes
+                  appear on the public site after 5-10 minutes (cache update).
                 </div>
-            </section>
-        </main>
+              </div>
+
+              <div id="help-events" class="help-section">
+                <h3>Events Management</h3>
+                <p>The Events section lets you create, edit, and delete events for both venues.</p>
+
+                <h4>Creating Events</h4>
+                <ol>
+                  <li>Click the "+ New Event" button</li>
+                  <li>Fill in the event details including title, description, date, and time</li>
+                  <li>Select the venue (Farewell or Howdy)</li>
+                  <li>Upload a flyer image if available</li>
+                  <li>Click "Save" to create the event</li>
+                </ol>
+
+                <h4>Editing Events</h4>
+                <ol>
+                  <li>Find the event in the list</li>
+                  <li>Click the "Edit" button</li>
+                  <li>Update the event details</li>
+                  <li>Click "Save" to update the event</li>
+                </ol>
+
+                <div class="help-tip">
+                  <strong>Note:</strong> Events can be filtered by venue using the dropdown at the
+                  top of the events list.
+                </div>
+              </div>
+
+              <div id="help-blog" class="help-section">
+                <h3>Blog Management</h3>
+                <p>
+                  The Blog section allows you to create and manage blog posts that appear on the
+                  public news page.
+                </p>
+
+                <h4>Creating Blog Posts</h4>
+                <ol>
+                  <li>Click the "+ New Post" button</li>
+                  <li>Enter a title for your post</li>
+                  <li>Use the rich text editor to create your content</li>
+                  <li>Upload an image if desired</li>
+                  <li>Click "Save" to publish the post</li>
+                </ol>
+
+                <h4>The Rich Text Editor</h4>
+                <p>The editor toolbar provides formatting options:</p>
+                <ul>
+                  <li>Text formatting (bold, italic, etc.)</li>
+                  <li>Headings and lists</li>
+                  <li>Adding links</li>
+                  <li>Embedding images</li>
+                </ul>
+
+                <div class="help-tip">
+                  <strong>Tip:</strong> Images in the blog editor can be resized by clicking and
+                  dragging the corners.
+                </div>
+              </div>
+
+              <div id="help-featured-videos" class="help-section">
+                <h3>Featured Videos</h3>
+                <p>
+                  The Featured Videos section lets you create a carousel of YouTube videos that will
+                  be displayed on the blog/news page.
+                </p>
+
+                <h4>Adding Videos</h4>
+                <ol>
+                  <li>Paste a YouTube URL into the input field</li>
+                  <li>Click "Add Video"</li>
+                  <li>Repeat for multiple videos</li>
+                  <li>Click "Save Featured Videos" when finished</li>
+                </ol>
+
+                <div class="help-tip">
+                  <strong>Supported formats:</strong> The system accepts standard YouTube URLs
+                  (youtube.com/watch?v=ID), short URLs (youtu.be/ID), and embed URLs.
+                </div>
+              </div>
+              <div id="help-venue" class="help-section">
+                <h3>Venue Management</h3>
+                <p>
+                  The Venue Management section allows you to manage Farewell Cafe's business hours
+                  and menu items.
+                </p>
+
+                <h4>Business Hours</h4>
+                <ol>
+                  <li>Set open/close times for each day of the week</li>
+                  <li>Check the "Closed" box for days when the venue is not open</li>
+                  <li>Add notes if needed (e.g., "Private event")</li>
+                  <li>Click "Save Hours" to update</li>
+                </ol>
+
+                <h4>Menu Management</h4>
+                <ol>
+                  <li>Browse existing menu sections (Domestics, Boulevard, Craft/Import, etc.)</li>
+                  <li>Click "Edit" on a section to modify its items</li>
+                  <li>Click "Add Item" to add new beverages or food items</li>
+                  <li>Fill out the name, price, category, and description</li>
+                  <li>Make sure "Active" is checked for items to appear on the public menu</li>
+                  <li>Click "Save" to update the menu</li>
+                </ol>
+
+                <div class="help-tip">
+                  <strong>Note:</strong> Menu items must be marked as "Active" to appear on the
+                  public menu. The display order determines the sequence items appear in each
+                  category.
+                </div>
+              </div>
+
+              <div id="help-troubleshooting" class="help-section">
+                <h3>Troubleshooting</h3>
+                <p>If you encounter any issues while using the admin dashboard, try these steps:</p>
+
+                <h4>Common Issues</h4>
+                <ul>
+                  <li>
+                    <strong>Changes not appearing:</strong> Try refreshing the page or clearing your
+                    browser cache.
+                  </li>
+                  <li>
+                    <strong>Upload errors:</strong> Ensure your image is under 5MB and in a
+                    supported format (JPG, PNG).
+                  </li>
+                  <li>
+                    <strong>Login issues:</strong> Try clearing cookies or using a private/incognito
+                    browsing window.
+                  </li>
+                  <li>
+                    <strong>Duplicate events:</strong> If you notice duplicate events being created,
+                    simply delete the extra one for now. This is a known issue that will be fixed in
+                    a future update.
+                  </li>
+                </ul>
+
+                <h4>Get Help</h4>
+                <p>If you continue to experience issues, please contact support:</p>
+                <p>
+                  <strong>Email:</strong>
+                  <a href="mailto:help_i_broke_the_thing@distorted.work"
+                    >help_i_broke_the_thing@distorted.work</a
+                  >
+                </p>
+                <p>When reporting an issue, please include:</p>
+                <ul>
+                  <li>What you were trying to do</li>
+                  <li>What steps you took</li>
+                  <li>What error message you received (if any)</li>
+                  <li>Screenshots if possible</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
 
-    <!-- Modal for Forms -->
     <div id="form-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="modal-close-btn">&times;</button>
-            <div id="modal-form-body">
-                <!-- Dynamic form content will be inserted here -->
-            </div>
-        </div>
+      <div class="modal-content">
+        <button class="modal-close-btn">&times;</button>
+        <div id="modal-form-body"></div>
+      </div>
     </div>
 
-    <!-- Event Modal -->
-    <div id="event-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="event-modal-title">Add Event</h3>
-                <button class="modal-close-btn" onclick="closeEventForm()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="event-form">
-                    <div class="form-group">
-                        <label for="event-title">Title:</label>
-                        <input type="text" id="event-title" name="title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-date">Date:</label>
-                        <input type="date" id="event-date" name="date" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-time">Time:</label>
-                        <input type="text" id="event-time" name="event_time" placeholder="e.g., Doors 7pm / Music 8pm">
-                    </div>
-                    <div class="form-group">
-                        <label for="event-venue">Venue:</label>
-                        <select id="event-venue" name="venue" required>
-                            <option value="farewell">Farewell</option>
-                            <option value="howdy">Howdy</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-description">Description:</label>
-                        <textarea id="event-description" name="description" rows="4"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-flyer-upload">Flyer Image:</label>
-                        <input type="file" id="event-flyer-upload" accept="image/*">
-                    </div>
-                    <div class="form-group">
-                        <label for="event-flyer-url">Flyer URL:</label>
-                        <input type="url" id="event-flyer-url" name="flyer_image_url">
-                    </div>
-                    <div class="form-group">
-                        <label for="event-ticket-url">Ticket URL:</label>
-                        <input type="url" id="event-ticket-url" name="ticket_url">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" onclick="closeEventForm()" class="btn btn-secondary">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Event</button>
-                    </div>
-                </form>
-            </div>
+    <div id="event-modal" class="modal-overlay" style="display: none">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="event-modal-title">Add Event</h3>
+          <button class="modal-close-btn" onclick="closeEventForm()">&times;</button>
         </div>
+        <div class="modal-body">
+          <form id="event-form">
+            <div class="form-group">
+              <label for="event-title">Title:</label>
+              <input type="text" id="event-title" name="title" required />
+            </div>
+            <div class="form-group">
+              <label for="event-date">Date:</label>
+              <input type="date" id="event-date" name="date" required />
+            </div>
+            <div class="form-group">
+              <label for="event-time">Time:</label>
+              <input
+                type="text"
+                id="event-time"
+                name="event_time"
+                placeholder="e.g., Doors 7pm / Music 8pm"
+              />
+            </div>
+            <div class="form-group">
+              <label for="event-venue">Venue:</label>
+              <select id="event-venue" name="venue" required>
+                <option value="farewell">Farewell</option>
+                <option value="howdy">Howdy</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="event-description">Description:</label>
+              <textarea id="event-description" name="description" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="event-flyer-upload">Flyer Image:</label>
+              <input type="file" id="event-flyer-upload" accept="image/*" />
+            </div>
+            <div class="form-group">
+              <label for="event-flyer-url">Flyer URL:</label>
+              <input type="url" id="event-flyer-url" name="flyer_image_url" />
+            </div>
+            <div class="form-group">
+              <label for="event-ticket-url">Ticket URL:</label>
+              <input type="url" id="event-ticket-url" name="ticket_url" />
+            </div>
+            <div class="form-actions">
+              <button type="button" onclick="closeEventForm()" class="btn btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">Save Event</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
-    <!-- Blog Post Modal -->
-    <div id="blog-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="blog-modal-title">Add Blog Post</h3>
-                <button class="modal-close-btn" onclick="closeBlogForm()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="blog-form">
-                    <div class="form-group">
-                        <label for="blog-title">Title:</label>
-                        <input type="text" id="blog-title" name="title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="blog-content">Content:</label>
-                        <textarea id="blog-content" name="content" rows="6"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="blog-author">Author:</label>
-                        <input type="text" id="blog-author" name="author">
-                    </div>
-                    <div class="form-group">
-                        <label for="blog-image-upload">Featured Image:</label>
-                        <input type="file" id="blog-image-upload" accept="image/*">
-                    </div>
-                    <div class="form-group">
-                        <label for="blog-image-url">Image URL:</label>
-                        <input type="url" id="blog-image-url" name="featured_image_url">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" onclick="closeBlogForm()" class="btn btn-secondary">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Post</button>
-                    </div>
-                </form>
-            </div>
+    <div id="blog-modal" class="modal-overlay" style="display: none">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="blog-modal-title">Add Blog Post</h3>
+          <button class="modal-close-btn" onclick="closeBlogForm()">&times;</button>
         </div>
+        <div class="modal-body">
+          <form id="blog-form">
+            <div class="form-group">
+              <label for="blog-title">Title:</label>
+              <input type="text" id="blog-title" name="title" required />
+            </div>
+            <div class="form-group">
+              <label for="blog-content">Content:</label>
+              <textarea id="blog-content" name="content" rows="6"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="blog-author">Author:</label>
+              <input type="text" id="blog-author" name="author" />
+            </div>
+            <div class="form-group">
+              <label for="blog-image-upload">Featured Image:</label>
+              <input type="file" id="blog-image-upload" accept="image/*" />
+            </div>
+            <div class="form-group">
+              <label for="blog-image-url">Image URL:</label>
+              <input type="url" id="blog-image-url" name="featured_image_url" />
+            </div>
+            <div class="form-actions">
+              <button type="button" onclick="closeBlogForm()" class="btn btn-secondary">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">Save Post</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
-    <!-- Menu Item Modal -->
-    <div id="menu-item-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="menu-item-modal-title">Add Menu Item</h3>
-                <button class="modal-close-btn" onclick="closeMenuItemForm()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="menu-item-form">
-                    <div class="form-group">
-                        <label for="menu-item-name">Name:</label>
-                        <input type="text" id="menu-item-name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="menu-item-description">Description:</label>
-                        <textarea id="menu-item-description" name="description" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="menu-item-price">Price:</label>
-                        <input type="number" id="menu-item-price" name="price" step="0.01" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label for="menu-item-category">Category:</label>
-                        <input type="text" id="menu-item-category" name="category" required>
-                    </div>
-                    <!-- COMMENTED OUT - Menu items don't support images yet
-                    <div class="form-group">
-                        <label for="menu-item-image-upload">Menu Item Image:</label>
-                        <input type="file" id="menu-item-image-upload" accept="image/*">
-                    </div>
-                    <div class="form-group">
-                        <label for="menu-item-image-url">Image URL:</label>
-                        <input type="url" id="menu-item-image-url" name="image_url">
-                    </div>
-                    -->
-                    <div class="form-actions">
-                        <button type="button" onclick="closeMenuItemForm()">Cancel</button>
-                        <button type="submit" id="menu-item-submit-btn">Save</button>
-                    </div>
-                </form>
-            </div>
+    <div id="menu-item-modal" class="modal-overlay" style="display: none">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="menu-item-modal-title">Add Menu Item</h3>
+          <button class="modal-close-btn" onclick="closeMenuItemForm()">&times;</button>
         </div>
+        <div class="modal-body">
+          <form id="menu-item-form">
+            <div class="form-group">
+              <label for="menu-item-name">Name:</label>
+              <input type="text" id="menu-item-name" name="name" required />
+            </div>
+            <div class="form-group">
+              <label for="menu-item-description">Description:</label>
+              <textarea id="menu-item-description" name="description" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="menu-item-price">Price:</label>
+              <input type="number" id="menu-item-price" name="price" step="0.01" min="0" />
+            </div>
+            <div class="form-group">
+              <label for="menu-item-category">Category:</label>
+              <input type="text" id="menu-item-category" name="category" required />
+            </div>
+
+            <div class="form-actions">
+              <button type="button" onclick="closeMenuItemForm()">Cancel</button>
+              <button type="submit" id="menu-item-submit-btn">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
-    <!-- Import Legacy Events Modal -->
-    <div id="import-legacy-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Import Legacy Events</h3>
-                <button class="modal-close-btn" onclick="closeImportLegacyModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="import-info">
-                    <p>This tool will import events from the legacy system and automatically deduplicate any existing events.</p>
-                    <p><strong>Sources:</strong></p>
-                    <ul>
-                        <li>Farewell events: <code>https://fygw0.kcmo.xyz/list/farewell</code></li>
-                        <li>Howdy events: <code>https://fygw0.kcmo.xyz/list/howdy</code></li>
-                    </ul>
-                    <div class="alert alert-info">
-                        <strong>Note:</strong> The system will compare events by title, date, and venue to avoid duplicates. Legacy flyer images will be imported with their original URLs.
-                    </div>
-                </div>
-                
-                <div class="import-controls">
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="import-farewell" checked> Import Farewell events
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="import-howdy" checked> Import Howdy events
-                        </label>
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="dry-run-mode" checked> Dry run mode (preview only, don't save)
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="button" onclick="closeImportLegacyModal()" class="btn btn-secondary">Cancel</button>
-                    <button type="button" onclick="startLegacyImport()" class="btn btn-primary" id="start-import-btn">Start Import</button>
-                </div>
-                
-                <div id="import-progress" class="import-progress" style="display: none;">
-                    <h4>Import Progress</h4>
-                    <div id="import-status" class="import-status"></div>
-                    <div id="import-results" class="import-results"></div>
-                </div>
-            </div>
+    <div id="import-legacy-modal" class="modal-overlay" style="display: none">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Import Legacy Events</h3>
+          <button class="modal-close-btn" onclick="closeImportLegacyModal()">&times;</button>
         </div>
+        <div class="modal-body">
+          <div class="import-info">
+            <p>
+              This tool will import events from the legacy system and automatically deduplicate any
+              existing events.
+            </p>
+            <p><strong>Sources:</strong></p>
+            <ul>
+              <li>Farewell events: <code>https://fygw0.kcmo.xyz/list/farewell</code></li>
+              <li>Howdy events: <code>https://fygw0.kcmo.xyz/list/howdy</code></li>
+            </ul>
+            <div class="alert alert-info">
+              <strong>Note:</strong> The system will compare events by title, date, and venue to
+              avoid duplicates. Legacy flyer images will be imported with their original URLs.
+            </div>
+          </div>
+
+          <div class="import-controls">
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="import-farewell" checked /> Import Farewell events
+              </label>
+            </div>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="import-howdy" checked /> Import Howdy events
+              </label>
+            </div>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="dry-run-mode" checked /> Dry run mode (preview only,
+                don't save)
+              </label>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" onclick="closeImportLegacyModal()" class="btn btn-secondary">
+              Cancel
+            </button>
+            <button
+              type="button"
+              onclick="startLegacyImport()"
+              class="btn btn-primary"
+              id="start-import-btn"
+            >
+              Start Import
+            </button>
+          </div>
+
+          <div id="import-progress" class="import-progress" style="display: none">
+            <h4>Import Progress</h4>
+            <div id="import-status" class="import-status"></div>
+            <div id="import-results" class="import-results"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- Login container for the login screen -->
     <div id="login-container"></div>
 
     <script src="/jss/quill.min.js"></script>
@@ -1120,5 +1227,5 @@
     <script src="/jss/event-form-patch.js"></script>
     <script src="/jss/legacy-import.js"></script>
     <script src="/jss/theme-switcher.js"></script>
-    </body>
-    </html>
+  </body>
+</html>
