@@ -16,12 +16,12 @@
       "database_id": "76dc7b30-005a-4268-afa0-10b2fe242253"
     }
   ],
-  "r2_buckets": [
-    {
-      "binding": "FWHY_IMAGES",
-      "bucket_name": "fwhy-images"
-    }
-  ],
+  // "r2_buckets": [
+  //   {
+  //     "binding": "FWHY_IMAGES",
+  //     "bucket_name": "fwhy-images"
+  //   }
+  // ],
   "kv_namespaces": [
     {
       "binding": "SESSIONS_KV",
