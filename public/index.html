@@ -54,14 +54,42 @@
         text-transform: uppercase;
         letter-spacing: 2px;
       }
+      .addresses {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 25px;
+        margin-bottom: 25px;
+        font-family: 'ds', sans-serif;
+        font-size: 1.2rem;
+      }
+      .addr-card {
+        background-color: #111111ff;
+        border: 2px solid #b0ee00ff;
+        padding: 10px 18px;
+        color: #ffffffff;
+      }
+      .addr-card b {
+        color: #ffff00ff;
+      }
       .ticker-row {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 10px;
-        max-width: 900px;
+        gap: 8px;
+        max-width: 950px;
         margin: 0px auto 30px;
         padding: 0px 10px;
+      }
+      .ticker-ctrl {
+        background-color: #111111ff;
+        color: #b0ee00ff;
+        border: 2px solid #b0ee00ff;
+        font-family: 'hnb2', sans-serif;
+        font-weight: bold;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 0.9rem;
       }
       .ticker-wrap {
         flex: 1;
@@ -75,7 +103,7 @@
       .ticker-inner {
         display: inline-block;
         white-space: nowrap;
-        animation: tk-scroll 50s linear infinite;
+        animation: tk-scroll 32s linear infinite;
       }
       @keyframes tk-scroll {
         0% {
@@ -156,7 +184,7 @@
         margin-top: 30px;
         margin-bottom: 50px;
       }
-      .socials a {
+      .socials a, .menu-btn {
         background-color: #ffffffff;
         color: #000000ff;
         font-weight: bold;
@@ -165,14 +193,13 @@
         font-size: 1.1rem;
         border: 2px solid #000000ff;
         box-shadow: 5px 5px 0px #b0ee00ff;
-        transition: transform 0.1s;
+        cursor: pointer;
       }
-      .socials a:hover {
-        transform: translate(-3px, -3px);
+      .socials a:hover, .menu-btn:hover {
         background-color: #ffff00ff;
         box-shadow: 8px 8px 0px #ff2b13ff;
       }
-      .gb-overlay {
+      .gb-overlay, .menu-overlay {
         position: fixed;
         inset: 0px;
         background-color: #00000088;
@@ -181,7 +208,7 @@
         transition: opacity 0.2s;
         z-index: 999;
       }
-      .gb-overlay.open {
+      .gb-overlay.open, .menu-overlay.open {
         opacity: 1;
         pointer-events: auto;
       }
@@ -201,23 +228,45 @@
       .gb-panel.open {
         transform: translate(-50%, 0%);
       }
-      .gb-header {
+      .menu-panel {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.9);
+        width: min(800px, 95vw);
+        max-height: 85vh;
+        overflow-y: auto;
+        background-color: #111111ff;
+        border: 3px solid #00e2ffff;
+        padding: 25px;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.25s ease-out;
+        z-index: 1000;
+        text-align: left;
+      }
+      .menu-panel.open {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      .gb-header, .menu-header-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 12px;
+        margin-bottom: 15px;
       }
-      .gb-title {
-        font-family: 'hnb2', sans-serif;
-        color: #b0ee00ff;
+      .gb-title, .menu-modal-title {
+        font-family: 'db', serif;
+        color: #00e2ffff;
         font-weight: bold;
-        font-size: 1.1rem;
+        font-size: 1.5rem;
       }
-      .gb-close {
+      .gb-close, .menu-close {
         background: none;
         border: none;
         color: #ff2b13ff;
-        font-size: 1.8rem;
+        font-size: 2rem;
         cursor: pointer;
         line-height: 1;
       }
@@ -341,12 +390,47 @@
       .gb-status.err {
         color: #ff2b13ff;
       }
+      .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+      }
+      .menu-cat {
+        border-bottom: 2px solid #b0ee00ff;
+        padding-bottom: 15px;
+      }
+      .menu-cat-title {
+        font-family: 'ds', sans-serif;
+        font-size: 1.4rem;
+        color: #ffff00ff;
+        margin-bottom: 10px;
+      }
+      .menu-item {
+        margin-bottom: 8px;
+        font-family: 'hnb2', sans-serif;
+      }
+      .menu-item-name {
+        color: #b0ee00ff;
+        font-size: 1rem;
+        font-weight: bold;
+      }
+      .menu-item-desc {
+        color: #888888ff;
+        font-size: 0.85rem;
+      }
     </style>
   </head>
   <body>
     <h1>farewell / howdy new site coming soon</h1>
     <p class="status">calendar updates &amp; information below</p>
+    <div class="addresses">
+      <div class="addr-card"><b>FAREWELL:</b> 6515 STADIUM DRIVE, KANSAS CITY, MO</div>
+      <div class="addr-card"><b>HOWDY:</b> 6523 STADIUM DRIVE, KANSAS CITY, MO</div>
+    </div>
     <div class="ticker-row">
+      <button class="ticker-ctrl" id="tk-prev" type="button">◀</button>
+      <button class="ticker-ctrl" id="tk-pause" type="button">⏸</button>
+      <button class="ticker-ctrl" id="tk-next" type="button">▶</button>
       <div class="ticker-wrap" id="ticker-wrap">
         <div class="ticker-inner" id="ticker-inner"></div>
       </div>
@@ -365,15 +449,56 @@
       </div>
     </div>
     <div class="socials">
+      <button class="menu-btn" id="menu-open" type="button">🍸 MENU</button>
       <a href="https://instagram.com/farewellkcmo" target="_blank" rel="noopener">Farewell IG</a>
       <a href="https://www.facebook.com/farewelltransmission" target="_blank" rel="noopener">Farewell FB</a>
       <a href="https://instagram.com/howdykcmo" target="_blank" rel="noopener">Howdy IG</a>
       <a href="https://www.facebook.com/howdykcmo" target="_blank" rel="noopener">Howdy FB</a>
       <a href="https://www.instagram.com/howdydiythrift/" target="_blank" rel="noopener">Howdy Thrift IG</a>
     </div>
+
+    <div class="menu-overlay" id="menu-overlay"></div>
+    <div class="menu-panel" id="menu-panel">
+      <div class="menu-header-bar">
+        <span class="menu-modal-title">FAREWLL / HOWDY MENU</span>
+        <button class="menu-close" id="menu-close" type="button">×</button>
+      </div>
+      <div class="menu-grid">
+        <div class="menu-cat">
+          <div class="menu-cat-title">COCKTAILS &amp; SPECIALS</div>
+          <div class="menu-item">
+            <div class="menu-item-name">HOUSE COCKTAILS</div>
+            <div class="menu-item-desc">Ask bartender for daily specials and custom drinks</div>
+          </div>
+          <div class="menu-item">
+            <div class="menu-item-name">FULL BAR</div>
+            <div class="menu-item-desc">Wide selection of spirits, liquors, and mixers</div>
+          </div>
+        </div>
+        <div class="menu-cat">
+          <div class="menu-cat-title">BEER &amp; CIDER</div>
+          <div class="menu-item">
+            <div class="menu-item-name">DOMESTICS &amp; CRAFT</div>
+            <div class="menu-item-desc">Cans and bottles available at both venues</div>
+          </div>
+          <div class="menu-item">
+            <div class="menu-item-name">BOULEVARD &amp; SEASONAL</div>
+            <div class="menu-item-desc">Local Kansas City drafts and cans</div>
+          </div>
+        </div>
+        <div class="menu-cat">
+          <div class="menu-cat-title">NON-ALCOHOLIC</div>
+          <div class="menu-item">
+            <div class="menu-item-name">BOOZE-FREE OPTIONS</div>
+            <div class="menu-item-desc">NA Beers, sodas, juices, and sparkling waters</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       (function () {
-        var API = '/api/guestbook';
+        var API = '/api/comments';
         var MAX = 280;
         var COLORS = {
           lima: '#b0ee00ff',
@@ -386,8 +511,9 @@
         var EMOJIS = ['💀', '🖤', '🔥', '🕷️', '⚡', '🕸️', '🔪', '🥀', '⛧', '⛓️', '👻', '🩸', '🪐', '👁️', '🦇', '🏴'];
         var SEED = [{ text: 'leave a note', color: 'lima', name: 'fw/hy', country: '' }];
         var selectedColor = 'lima';
-        var panelOpen = false;
-        var $panel, $overlay, $inner;
+        var isPaused = false;
+        var scrollPos = 0;
+        var $panel, $overlay, $inner, $wrap;
 
         function makeItem(c) {
           var wrap = document.createElement('span');
@@ -419,19 +545,31 @@
             list.forEach(function (c) { frag.appendChild(makeItem(c)); });
             $inner.appendChild(frag);
           });
-          requestAnimationFrame(function () {
-            var w = $inner.scrollWidth / 2;
-            $inner.style.animationDuration = Math.max(45, w / 25) + 's';
-          });
         }
 
         function initTicker() {
           $inner = document.getElementById('ticker-inner');
-          var wrap = document.getElementById('ticker-wrap');
-          if (!$inner || !wrap) return;
+          $wrap = document.getElementById('ticker-wrap');
+          if (!$inner || !$wrap) return;
           populateTicker(SEED);
-          wrap.addEventListener('mouseenter', function () { $inner.style.animationPlayState = 'paused'; });
-          wrap.addEventListener('mouseleave', function () { $inner.style.animationPlayState = 'running'; });
+
+          var btnPause = document.getElementById('tk-pause');
+          var btnPrev = document.getElementById('tk-prev');
+          var btnNext = document.getElementById('tk-next');
+
+          btnPause.addEventListener('click', function() {
+            isPaused = !isPaused;
+            $inner.style.animationPlayState = isPaused ? 'paused' : 'running';
+            btnPause.textContent = isPaused ? '▶' : '⏸';
+          });
+
+          btnPrev.addEventListener('click', function() {
+            $wrap.scrollLeft -= 150;
+          });
+
+          btnNext.addEventListener('click', function() {
+            $wrap.scrollLeft += 150;
+          });
         }
 
         function buildPanel() {
@@ -517,7 +655,6 @@
           if (!$panel) return;
           $panel.classList.add('open');
           $overlay.classList.add('open');
-          panelOpen = true;
           document.getElementById('gb-ta').focus();
         }
 
@@ -525,7 +662,27 @@
           if (!$panel) return;
           $panel.classList.remove('open');
           $overlay.classList.remove('open');
-          panelOpen = false;
+        }
+
+        function initMenuModal() {
+          var menuOpen = document.getElementById('menu-open');
+          var menuClose = document.getElementById('menu-close');
+          var menuOverlay = document.getElementById('menu-overlay');
+          var menuPanel = document.getElementById('menu-panel');
+
+          function openMenu() {
+            menuOverlay.classList.add('open');
+            menuPanel.classList.add('open');
+          }
+
+          function closeMenu() {
+            menuOverlay.classList.remove('open');
+            menuPanel.classList.remove('open');
+          }
+
+          menuOpen.addEventListener('click', openMenu);
+          menuClose.addEventListener('click', closeMenu);
+          menuOverlay.addEventListener('click', closeMenu);
         }
 
         async function handleSubmit() {
@@ -587,11 +744,12 @@
         document.addEventListener('DOMContentLoaded', function () {
           initTicker();
           buildPanel();
+          initMenuModal();
           fetchComments();
         });
 
         document.addEventListener('click', function(e) {
-          if (e.target.closest('#gb-open') || e.target.closest('.gb-panel') || e.target.closest('.socials')) return;
+          if (e.target.closest('#gb-open') || e.target.closest('.gb-panel') || e.target.closest('.socials') || e.target.closest('#menu-panel') || e.target.closest('.ticker-row')) return;
           var flash = document.createElement('div');
           flash.style.position = 'fixed';
           flash.style.top = '0px';
