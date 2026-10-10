@@ -50,9 +50,76 @@
         font-family: 'db', serif;
         font-size: clamp(1.2rem, 3.5vw, 2.2rem);
         color: #00e2ffff;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
         text-transform: uppercase;
         letter-spacing: 2px;
+      }
+      .ticker-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        max-width: 900px;
+        margin: 0px auto 30px;
+        padding: 0px 10px;
+      }
+      .ticker-wrap {
+        flex: 1;
+        overflow: hidden;
+        background-color: #111111ff;
+        border: 2px solid #b0ee00ff;
+        padding: 8px 0px;
+        white-space: nowrap;
+        position: relative;
+      }
+      .ticker-inner {
+        display: inline-block;
+        white-space: nowrap;
+        animation: tk-scroll 50s linear infinite;
+      }
+      @keyframes tk-scroll {
+        0% {
+          transform: translateX(0%);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
+      }
+      .tk-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-right: 20px;
+        font-family: 'hnb2', sans-serif;
+        font-size: 1rem;
+      }
+      .tk-name {
+        color: #00e2ffff;
+        font-weight: bold;
+      }
+      .tk-text {
+        color: #ffffffff;
+      }
+      .tk-sep {
+        color: #ff2b13ff;
+        margin-left: 10px;
+      }
+      .ticker-btn {
+        background-color: #ff2b13ff;
+        color: #ffffffff;
+        border: 2px solid #ffffffff;
+        font-family: 'hnb2', sans-serif;
+        font-weight: bold;
+        padding: 8px 14px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        box-shadow: 3px 3px 0px #b0ee00ff;
+        white-space: nowrap;
+      }
+      .ticker-btn:hover {
+        background-color: #b0ee00ff;
+        color: #000000ff;
+        box-shadow: 3px 3px 0px #ff2b13ff;
       }
       .calendars {
         display: flex;
@@ -105,11 +172,188 @@
         background-color: #ffff00ff;
         box-shadow: 8px 8px 0px #ff2b13ff;
       }
+      .gb-overlay {
+        position: fixed;
+        inset: 0px;
+        background-color: #00000088;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        z-index: 999;
+      }
+      .gb-overlay.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .gb-panel {
+        position: fixed;
+        bottom: 0px;
+        left: 50%;
+        transform: translate(-50%, 100%);
+        width: min(540px, 100vw);
+        background-color: #111111ff;
+        border: 3px solid #b0ee00ff;
+        padding: 20px;
+        transition: transform 0.25s ease-out;
+        z-index: 1000;
+        text-align: left;
+      }
+      .gb-panel.open {
+        transform: translate(-50%, 0%);
+      }
+      .gb-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .gb-title {
+        font-family: 'hnb2', sans-serif;
+        color: #b0ee00ff;
+        font-weight: bold;
+        font-size: 1.1rem;
+      }
+      .gb-close {
+        background: none;
+        border: none;
+        color: #ff2b13ff;
+        font-size: 1.8rem;
+        cursor: pointer;
+        line-height: 1;
+      }
+      .gb-ta-wrap {
+        position: relative;
+        margin-bottom: 10px;
+      }
+      .gb-ta {
+        width: 100%;
+        background-color: #000000ff;
+        border: 2px solid #333333ff;
+        color: #ffffffff;
+        font-family: 'kb', sans-serif;
+        padding: 10px;
+        font-size: 1rem;
+        outline: none;
+        resize: none;
+      }
+      .gb-ta:focus {
+        border-color: #b0ee00ff;
+      }
+      .gb-count {
+        position: absolute;
+        bottom: 8px;
+        right: 10px;
+        font-size: 0.8rem;
+        color: #888888ff;
+      }
+      .gb-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .gb-swatches {
+        display: flex;
+        gap: 6px;
+      }
+      .gb-swatch {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid #000000ff;
+        cursor: pointer;
+        background-color: var(--c);
+      }
+      .gb-swatch.active {
+        outline: 2px solid #ffffffff;
+      }
+      .gb-emoji-btn {
+        background-color: #222222ff;
+        color: #ffffffff;
+        border: 1px solid #444444ff;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+      .gb-emoji-grid {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 4px;
+        margin-bottom: 10px;
+        background-color: #000000ff;
+        padding: 8px;
+      }
+      .gb-emoji {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+      .gb-optional {
+        margin-bottom: 12px;
+      }
+      .gb-optional summary {
+        color: #888888ff;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+      .gb-opts {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .gb-label {
+        font-size: 0.8rem;
+        color: #888888ff;
+      }
+      .gb-input {
+        width: 100%;
+        background-color: #000000ff;
+        border: 1px solid #333333ff;
+        color: #ffffffff;
+        padding: 6px;
+        font-size: 0.9rem;
+      }
+      .gb-submit {
+        width: 100%;
+        background-color: #b0ee00ff;
+        color: #000000ff;
+        font-weight: bold;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        font-size: 1rem;
+        text-transform: uppercase;
+      }
+      .gb-submit:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .gb-status {
+        font-size: 0.85rem;
+        margin-top: 6px;
+        text-align: center;
+      }
+      .gb-status.ok {
+        color: #b0ee00ff;
+      }
+      .gb-status.err {
+        color: #ff2b13ff;
+      }
     </style>
   </head>
   <body>
     <h1>farewell / howdy new site coming soon</h1>
     <p class="status">calendar updates &amp; information below</p>
+    <div class="ticker-row">
+      <div class="ticker-wrap" id="ticker-wrap">
+        <div class="ticker-inner" id="ticker-inner"></div>
+      </div>
+      <button class="ticker-btn" id="gb-open" type="button" aria-label="Leave a note">
+        ✍ note
+      </button>
+    </div>
     <div class="calendars">
       <div class="calendar-box">
         <img src="img/fwcal.png" alt="Farewell Calendar" />
@@ -128,21 +372,239 @@
       <a href="https://www.instagram.com/howdydiythrift/" target="_blank" rel="noopener">Howdy Thrift IG</a>
     </div>
     <script>
-      document.addEventListener('click', function(e) {
-        var flash = document.createElement('div');
-        flash.style.position = 'fixed';
-        flash.style.top = '0px';
-        flash.style.left = '0px';
-        flash.style.width = '100vw';
-        flash.style.height = '100vh';
-        flash.style.backgroundColor = '#ff005533';
-        flash.style.pointerEvents = 'none';
-        flash.style.zIndex = '99999';
-        document.body.appendChild(flash);
-        setTimeout(function() {
-          flash.remove();
-        }, 100);
-      });
+      (function () {
+        var API = '/api/guestbook';
+        var MAX = 280;
+        var COLORS = {
+          lima: '#b0ee00ff',
+          pupil: '#d990ffff',
+          redd: '#ff2b13ff',
+          blew: '#00e2ffff',
+          paper: '#f4f4efff'
+        };
+        var C_KEYS = ['lima', 'pupil', 'redd', 'blew', 'paper'];
+        var EMOJIS = ['💀', '🖤', '🔥', '🕷️', '⚡', '🕸️', '🔪', '🥀', '⛧', '⛓️', '👻', '🩸', '🪐', '👁️', '🦇', '🏴'];
+        var SEED = [{ text: 'leave a note', color: 'lima', name: 'fw/hy', country: '' }];
+        var selectedColor = 'lima';
+        var panelOpen = false;
+        var $panel, $overlay, $inner;
+
+        function makeItem(c) {
+          var wrap = document.createElement('span');
+          wrap.className = 'tk-item';
+          if (c.name) {
+            var n = document.createElement('span');
+            n.className = 'tk-name';
+            n.textContent = c.name + ' ·';
+            wrap.appendChild(n);
+          }
+          var t = document.createElement('span');
+          t.className = 'tk-text';
+          t.style.color = COLORS[c.color] || '#ffffffff';
+          t.textContent = c.text;
+          wrap.appendChild(t);
+          var s = document.createElement('span');
+          s.className = 'tk-sep';
+          s.textContent = '★';
+          wrap.appendChild(s);
+          return wrap;
+        }
+
+        function populateTicker(comments) {
+          if (!$inner) return;
+          var list = comments && comments.length ? comments : SEED;
+          $inner.innerHTML = '';
+          [0, 1].forEach(function () {
+            var frag = document.createDocumentFragment();
+            list.forEach(function (c) { frag.appendChild(makeItem(c)); });
+            $inner.appendChild(frag);
+          });
+          requestAnimationFrame(function () {
+            var w = $inner.scrollWidth / 2;
+            $inner.style.animationDuration = Math.max(45, w / 25) + 's';
+          });
+        }
+
+        function initTicker() {
+          $inner = document.getElementById('ticker-inner');
+          var wrap = document.getElementById('ticker-wrap');
+          if (!$inner || !wrap) return;
+          populateTicker(SEED);
+          wrap.addEventListener('mouseenter', function () { $inner.style.animationPlayState = 'paused'; });
+          wrap.addEventListener('mouseleave', function () { $inner.style.animationPlayState = 'running'; });
+        }
+
+        function buildPanel() {
+          $overlay = document.createElement('div');
+          $overlay.className = 'gb-overlay';
+          $overlay.addEventListener('click', closePanel);
+          document.body.appendChild($overlay);
+
+          $panel = document.createElement('div');
+          $panel.className = 'gb-panel';
+
+          var swatches = C_KEYS.map(function (k) {
+            return '<button class="gb-swatch' + (k === 'lima' ? ' active' : '') + '" data-color="' + k + '" style="--c:' + COLORS[k] + '" type="button"></button>';
+          }).join('');
+
+          var emojiBtns = EMOJIS.map(function (e) {
+            return '<button class="gb-emoji" type="button">' + e + '</button>';
+          }).join('');
+
+          $panel.innerHTML = '<div class="gb-header">' +
+            '<span class="gb-title">leave a note</span>' +
+            '<button class="gb-close" id="gb-close" type="button">×</button>' +
+            '</div>' +
+            '<div class="gb-ta-wrap">' +
+            '<textarea class="gb-ta" id="gb-ta" maxlength="' + MAX + '" placeholder="say your thing…" rows="3"></textarea>' +
+            '<span class="gb-count" id="gb-count">0 / ' + MAX + '</span>' +
+            '</div>' +
+            '<div class="gb-row">' +
+            '<div class="gb-swatches" id="gb-swatches">' + swatches + '</div>' +
+            '<button class="gb-emoji-btn" id="gb-emoji-btn" type="button">😀 emoji</button>' +
+            '</div>' +
+            '<div class="gb-emoji-grid" id="gb-emoji-grid" hidden>' + emojiBtns + '</div>' +
+            '<details class="gb-optional">' +
+            '<summary>+ leave your name (optional)</summary>' +
+            '<div class="gb-opts">' +
+            '<label class="gb-label">name<input class="gb-input" id="gb-name" type="text" maxlength="48" placeholder="anonymous"></label>' +
+            '</div>' +
+            '</details>' +
+            '<button class="gb-submit" id="gb-submit" type="button">post it</button>' +
+            '<div class="gb-status" id="gb-status"></div>';
+
+          document.body.appendChild($panel);
+
+          document.getElementById('gb-close').addEventListener('click', closePanel);
+          document.getElementById('gb-open').addEventListener('click', openPanel);
+
+          var ta = document.getElementById('gb-ta');
+          var ct = document.getElementById('gb-count');
+          ta.addEventListener('input', function () {
+            var n = ta.value.length;
+            ct.textContent = n + ' / ' + MAX;
+          });
+
+          document.getElementById('gb-swatches').addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-color]');
+            if (!btn) return;
+            selectedColor = btn.dataset.color;
+            document.querySelectorAll('.gb-swatch').forEach(function (s) { s.classList.remove('active'); });
+            btn.classList.add('active');
+          });
+
+          document.getElementById('gb-emoji-btn').addEventListener('click', function () {
+            var g = document.getElementById('gb-emoji-grid');
+            g.hidden = !g.hidden;
+          });
+
+          document.getElementById('gb-emoji-grid').addEventListener('click', function (e) {
+            var btn = e.target.closest('.gb-emoji');
+            if (!btn) return;
+            var emoji = btn.textContent;
+            if (ta.value.length + emoji.length > MAX) return;
+            var s = ta.selectionStart, end = ta.selectionEnd;
+            ta.value = ta.value.slice(0, s) + emoji + ta.value.slice(end);
+            ta.selectionStart = ta.selectionEnd = s + emoji.length;
+            ta.focus();
+            ct.textContent = ta.value.length + ' / ' + MAX;
+          });
+
+          document.getElementById('gb-submit').addEventListener('click', handleSubmit);
+        }
+
+        function openPanel() {
+          if (!$panel) return;
+          $panel.classList.add('open');
+          $overlay.classList.add('open');
+          panelOpen = true;
+          document.getElementById('gb-ta').focus();
+        }
+
+        function closePanel() {
+          if (!$panel) return;
+          $panel.classList.remove('open');
+          $overlay.classList.remove('open');
+          panelOpen = false;
+        }
+
+        async function handleSubmit() {
+          var ta = document.getElementById('gb-ta');
+          var submit = document.getElementById('gb-submit');
+          var text = ta.value.trim();
+          if (!text) {
+            setStatus('type something first', 'err');
+            return;
+          }
+          var name = document.getElementById('gb-name').value.trim().slice(0, 48);
+          submit.disabled = true;
+          submit.textContent = 'posting…';
+          try {
+            var res = await fetch(API, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: text, color: selectedColor, name: name })
+            });
+            if (!res.ok) throw new Error();
+            var data = await res.json();
+            setStatus('✓ posted — thanks!', 'ok');
+            ta.value = '';
+            document.getElementById('gb-count').textContent = '0 / ' + MAX;
+            if (data.comments) populateTicker(data.comments);
+            setTimeout(closePanel, 1700);
+          } catch (err) {
+            setStatus("couldn't post — try again", 'err');
+            submit.disabled = false;
+            submit.textContent = 'post it';
+          }
+        }
+
+        function setStatus(msg, type) {
+          var el = document.getElementById('gb-status');
+          el.textContent = msg;
+          el.className = 'gb-status ' + (type || '');
+          if (type === 'ok') {
+            setTimeout(function () { el.textContent = ''; }, 2400);
+          }
+          if (type !== 'err') {
+            var s = document.getElementById('gb-submit');
+            s.disabled = false;
+            s.textContent = 'post it';
+          }
+        }
+
+        async function fetchComments() {
+          try {
+            var res = await fetch(API);
+            if (!res.ok) return;
+            var data = await res.json();
+            if (data && Array.isArray(data.comments) && data.comments.length) {
+              populateTicker(data.comments);
+            }
+          } catch (err) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+          initTicker();
+          buildPanel();
+          fetchComments();
+        });
+
+        document.addEventListener('click', function(e) {
+          if (e.target.closest('#gb-open') || e.target.closest('.gb-panel') || e.target.closest('.socials')) return;
+          var flash = document.createElement('div');
+          flash.style.position = 'fixed';
+          flash.style.top = '0px';
+          flash.style.left = '0px';
+          flash.style.width = '100vw';
+          flash.style.height = '100vh';
+          flash.style.backgroundColor = '#ff005533';
+          flash.style.pointerEvents = 'none';
+          flash.style.zIndex = '99999';
+          document.body.appendChild(flash);
+          setTimeout(function() { flash.remove(); }, 100);
+        });
+      })();
     </script>
   </body>
 </html>
