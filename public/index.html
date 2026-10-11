@@ -54,24 +54,6 @@
         text-transform: uppercase;
         letter-spacing: 2px;
       }
-      .addresses {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 20px;
-        font-family: 'ds', sans-serif;
-        font-size: 1.1rem;
-      }
-      .addr-card {
-        background-color: #111111ff;
-        border: 2px solid #b0ee00ff;
-        padding: 8px 14px;
-        color: #ffffffff;
-      }
-      .addr-card b {
-        color: #ffff00ff;
-      }
       .ticker-section {
         max-width: 950px;
         margin: 0px auto 30px;
@@ -171,7 +153,7 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 20px;
+        gap: 25px;
         margin-bottom: 40px;
       }
       .calendar-box {
@@ -186,12 +168,24 @@
         height: auto;
         display: block;
       }
+      .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-top: 10px;
+        padding: 0px 5px;
+      }
       .calendar-title {
         font-family: 'ds', sans-serif;
         font-size: 1.8rem;
         color: #ffff00ff;
-        margin-top: 10px;
-        text-align: left;
+      }
+      .calendar-address {
+        font-family: 'hnb2', sans-serif;
+        font-size: 0.85rem;
+        color: #888888ff;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
       .socials {
         font-family: 'hnb2', sans-serif;
@@ -251,7 +245,7 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%) scale(0.9);
-        width: min(800px, 95vw);
+        width: min(850px, 95vw);
         max-height: 85vh;
         overflow-y: auto;
         background-color: #111111ff;
@@ -410,41 +404,47 @@
       }
       .menu-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 15px;
-      }
-      .menu-cat {
-        border-bottom: 2px solid #b0ee00ff;
-        padding-bottom: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
       }
       .menu-cat-title {
-        font-family: 'ds', sans-serif;
+        font-family: 'db', serif;
         font-size: 1.3rem;
         color: #ffff00ff;
-        margin-bottom: 8px;
+        border-bottom: 2px solid #ff2b13ff;
+        padding-bottom: 4px;
+        margin-bottom: 10px;
       }
       .menu-item {
-        margin-bottom: 6px;
+        margin-bottom: 8px;
         font-family: 'hnb2', sans-serif;
+      }
+      .menu-item-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
       }
       .menu-item-name {
         color: #b0ee00ff;
         font-size: 0.95rem;
         font-weight: bold;
       }
+      .menu-item-price {
+        color: #00e2ffff;
+        font-size: 0.95rem;
+        font-weight: bold;
+      }
       .menu-item-desc {
         color: #888888ff;
         font-size: 0.8rem;
+        margin-top: 2px;
       }
     </style>
   </head>
   <body>
     <h1>farewell / howdy new site coming soon</h1>
     <p class="status">calendar updates &amp; information below</p>
-    <div class="addresses">
-      <div class="addr-card"><b>FAREWELL:</b> 6515 STADIUM DRIVE, KANSAS CITY, MO</div>
-      <div class="addr-card"><b>HOWDY:</b> 6523 STADIUM DRIVE, KANSAS CITY, MO</div>
-    </div>
+
     <div class="ticker-section">
       <div class="ticker-row">
         <div class="ticker-wrap" id="ticker-wrap">
@@ -462,18 +462,26 @@
         </button>
       </div>
     </div>
+
     <div class="calendars">
       <div class="calendar-box">
         <img src="img/fwcal.png" alt="Farewell Calendar" />
-        <div class="calendar-title">FAREWELL</div>
+        <div class="calendar-header">
+          <div class="calendar-title">FAREWELL</div>
+          <div class="calendar-address">6515 Stadium Dr</div>
+        </div>
       </div>
       <div class="calendar-box">
         <img src="img/hycal.png" alt="Howdy Calendar" />
-        <div class="calendar-title">HOWDY</div>
+        <div class="calendar-header">
+          <div class="calendar-title">HOWDY</div>
+          <div class="calendar-address">6523 Stadium Dr</div>
+        </div>
       </div>
     </div>
+
     <div class="socials">
-      <button class="menu-btn" id="menu-open" type="button">🍸 MENU</button>
+      <button class="menu-btn" id="menu-open" type="button">🍸 FAREWELL DRINKS MENU</button>
       <a href="https://instagram.com/farewellkcmo" target="_blank" rel="noopener">Farewell IG</a>
       <a href="https://www.facebook.com/farewelltransmission" target="_blank" rel="noopener">Farewell FB</a>
       <a href="https://instagram.com/howdykcmo" target="_blank" rel="noopener">Howdy IG</a>
@@ -484,38 +492,93 @@
     <div class="menu-overlay" id="menu-overlay"></div>
     <div class="menu-panel" id="menu-panel">
       <div class="menu-header-bar">
-        <span class="menu-modal-title">FAREWELL / HOWDY MENU</span>
+        <span class="menu-modal-title">FAREWELL DRINKS MENU</span>
         <button class="menu-close" id="menu-close" type="button">×</button>
       </div>
       <div class="menu-grid">
         <div class="menu-cat">
-          <div class="menu-cat-title">COCKTAILS &amp; SPECIALS</div>
+          <div class="menu-cat-title">COCKTAILS</div>
           <div class="menu-item">
-            <div class="menu-item-name">HOUSE COCKTAILS</div>
-            <div class="menu-item-desc">Ask bartender for daily specials and custom drinks</div>
+            <div class="menu-item-row"><span class="menu-item-name">STRAY DOG</span><span class="menu-item-price">$9</span></div>
+            <div class="menu-item-desc">Tito's vodka, kahlua, non-dairy milk.</div>
           </div>
           <div class="menu-item">
-            <div class="menu-item-name">FULL BAR</div>
-            <div class="menu-item-desc">Wide selection of spirits, liquors, and mixers</div>
+            <div class="menu-item-row"><span class="menu-item-name">CRANSYLVANIA</span><span class="menu-item-price">$9</span></div>
+            <div class="menu-item-desc">Old grandad bourbon, cranberry juice, lemon juice, maple syrup, sparkling water.</div>
+          </div>
+          <div class="menu-item">
+            <div class="menu-item-row"><span class="menu-item-name">RYE &amp; GOSLING</span><span class="menu-item-price">$7</span></div>
+            <div class="menu-item-desc">Roulette rye, lime juice, ginger beer, aromatic bitters.</div>
+          </div>
+          <div class="menu-item">
+            <div class="menu-item-row"><span class="menu-item-name">LEAKY ROOF</span><span class="menu-item-price">$9</span></div>
+            <div class="menu-item-desc">Farewell's mystery liquor concoction, triple sec, sweet n' sour, cola.</div>
+          </div>
+          <div class="menu-item">
+            <div class="menu-item-row"><span class="menu-item-name">YUPPIE SPEEDBALL</span><span class="menu-item-price">$9</span></div>
+            <div class="menu-item-desc">Jose cuervo blanco tequila, revel berry yerba mate, pear liquor, grenadine.</div>
+          </div>
+          <div class="menu-item">
+            <div class="menu-item-row"><span class="menu-item-name">WELL SHOT</span><span class="menu-item-price">$4</span></div>
+          </div>
+          <div class="menu-item">
+            <div class="menu-item-row"><span class="menu-item-name">WELL MIX</span><span class="menu-item-price">$5</span></div>
           </div>
         </div>
+
         <div class="menu-cat">
-          <div class="menu-cat-title">BEER &amp; CIDER</div>
-          <div class="menu-item">
-            <div class="menu-item-name">DOMESTICS &amp; CRAFT</div>
-            <div class="menu-item-desc">Cans and bottles available at both venues</div>
-          </div>
-          <div class="menu-item">
-            <div class="menu-item-name">BOULEVARD &amp; SEASONAL</div>
-            <div class="menu-item-desc">Local Kansas City drafts and cans</div>
-          </div>
+          <div class="menu-cat-title">DOMESTICS</div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Hamm's</span><span class="menu-item-price">$3</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">PBR</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Rolling Rock</span><span class="menu-item-price">$4</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Miller Lite</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Bud Light</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Bud Heavy</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Coors Banquet</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Michelob</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Yeungling</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Twisted Tea</span><span class="menu-item-price">$5</span></div></div>
         </div>
+
         <div class="menu-cat">
-          <div class="menu-cat-title">NON-ALCOHOLIC</div>
-          <div class="menu-item">
-            <div class="menu-item-name">BOOZE-FREE OPTIONS</div>
-            <div class="menu-item-desc">NA Beers, sodas, juices, and sparkling waters</div>
-          </div>
+          <div class="menu-cat-title">BOULEVARD &amp; SEASONAL</div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Wheat</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Pale Ale</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Tank 7</span><span class="menu-item-price">$7</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Space Camper</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Quirk</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">TL Monk &amp; Honey</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Mother's Coffee Stout</span><span class="menu-item-price">$5</span></div></div>
+        </div>
+
+        <div class="menu-cat">
+          <div class="menu-cat-title">CRAFT / IMPORT</div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Modelo</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Victoria</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Guinness</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Stella</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Blue Moon</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Founder's IPA</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Lagunita's IPA</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Sea Quench Sour</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Angry Orchard</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Blake's Ciders</span><span class="menu-item-price">$7</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Stiegl Radler</span><span class="menu-item-price">$8</span></div></div>
+        </div>
+
+        <div class="menu-cat">
+          <div class="menu-cat-title">BOOZE-FREE</div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Athletics</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Coors Edge N/A</span><span class="menu-item-price">$4</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Red Bull</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">AriZona Iced Tea</span><span class="menu-item-price">$2.50</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Yerba Mate</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Waterloo</span><span class="menu-item-price">$2</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Coke</span><span class="menu-item-price">$2</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Diet Coke</span><span class="menu-item-price">$2</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Sprite</span><span class="menu-item-price">$2</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Ginger Ale</span><span class="menu-item-price">$2</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Casamara</span><span class="menu-item-price">$6</span></div></div>
         </div>
       </div>
     </div>
