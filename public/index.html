@@ -614,7 +614,7 @@
           var f = function (opts) { return new Intl.DateTimeFormat('en-US', Object.assign({ timeZone: 'America/Chicago' }, opts)).format(now); };
           var clockEl = document.getElementById('kc-clock');
           if (clockEl) {
-            clockEl.textContent = f({ weekday: 'long' }) + ', ' + f({ month: 'long', day: 'numeric', year: 'numeric' }) + ' / ' + f({ hour: '2-digit', minute: '2-digit', hour12: false }) + ' (' + f({ hour: 'numeric', minute: '2-digit', hour12: true }) + ')';
+            clockEl.textContent = 'KCMO TIME: ' + f({ weekday: 'short' }) + ', ' + f({ month: 'short', day: 'numeric' }) + ' · ' + f({ hour: 'numeric', minute: '2-digit', hour12: true });
           }
         }
 
