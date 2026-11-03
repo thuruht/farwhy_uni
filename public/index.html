@@ -32,7 +32,7 @@
         background-color: #050505ff;
         color: #ffffffff;
         font-family: 'kb', sans-serif;
-        padding: 20px;
+        padding: 15px;
         margin: 0px;
         text-align: center;
       }
@@ -42,57 +42,43 @@
         color: #b0ee00ff;
         text-transform: lowercase;
         margin-top: 10px;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         letter-spacing: -1px;
         text-shadow: 3px 3px 0px #ff2b13ff;
       }
+      #kc-clock {
+        font-family: 'hnb2', sans-serif;
+        font-size: 1.1rem;
+        color: #00e2ffff;
+        margin-bottom: 15px;
+        letter-spacing: 1px;
+      }
       p.status {
         font-family: 'db', serif;
-        font-size: clamp(1.2rem, 3.5vw, 2.2rem);
-        color: #00e2ffff;
+        font-size: clamp(1.1rem, 3.5vw, 2.2rem);
+        color: #ffff00ff;
         margin-bottom: 20px;
         text-transform: uppercase;
         letter-spacing: 2px;
       }
-      .addresses {
+      .ticker-section {
+        max-width: 950px;
+        margin: 0px auto 30px;
+        padding: 0px 5px;
         display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 25px;
-        margin-bottom: 25px;
-        font-family: 'ds', sans-serif;
-        font-size: 1.2rem;
-      }
-      .addr-card {
-        background-color: #111111ff;
-        border: 2px solid #b0ee00ff;
-        padding: 10px 18px;
-        color: #ffffffff;
-      }
-      .addr-card b {
-        color: #ffff00ff;
+        flex-direction: column;
+        gap: 8px;
       }
       .ticker-row {
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        max-width: 950px;
-        margin: 0px auto 30px;
-        padding: 0px 10px;
-      }
-      .ticker-ctrl {
-        background-color: #111111ff;
-        color: #b0ee00ff;
-        border: 2px solid #b0ee00ff;
-        font-family: 'hnb2', sans-serif;
-        font-weight: bold;
-        padding: 6px 10px;
-        cursor: pointer;
-        font-size: 0.9rem;
+        width: 100%;
       }
       .ticker-wrap {
         flex: 1;
+        min-width: 0px;
         overflow: hidden;
         background-color: #111111ff;
         border: 2px solid #b0ee00ff;
@@ -132,13 +118,34 @@
         color: #ff2b13ff;
         margin-left: 10px;
       }
+      .ticker-controls-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        gap: 8px;
+      }
+      .ticker-ctrl-group {
+        display: flex;
+        gap: 6px;
+      }
+      .ticker-ctrl {
+        background-color: #111111ff;
+        color: #b0ee00ff;
+        border: 2px solid #b0ee00ff;
+        font-family: 'hnb2', sans-serif;
+        font-weight: bold;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
       .ticker-btn {
         background-color: #ff2b13ff;
         color: #ffffffff;
         border: 2px solid #ffffffff;
         font-family: 'hnb2', sans-serif;
         font-weight: bold;
-        padding: 8px 14px;
+        padding: 6px 14px;
         font-size: 0.95rem;
         cursor: pointer;
         box-shadow: 3px 3px 0px #b0ee00ff;
@@ -153,7 +160,7 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 20px;
+        gap: 25px;
         margin-bottom: 40px;
       }
       .calendar-box {
@@ -168,19 +175,31 @@
         height: auto;
         display: block;
       }
+      .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-top: 10px;
+        padding: 0px 5px;
+      }
       .calendar-title {
         font-family: 'ds', sans-serif;
         font-size: 1.8rem;
         color: #ffff00ff;
-        margin-top: 10px;
-        text-align: left;
+      }
+      .calendar-address {
+        font-family: 'hnb2', sans-serif;
+        font-size: 0.85rem;
+        color: #888888ff;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
       .socials {
         font-family: 'hnb2', sans-serif;
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 15px;
+        gap: 12px;
         margin-top: 30px;
         margin-bottom: 50px;
       }
@@ -189,15 +208,15 @@
         color: #000000ff;
         font-weight: bold;
         text-decoration: none;
-        padding: 12px 20px;
-        font-size: 1.1rem;
+        padding: 10px 18px;
+        font-size: 1rem;
         border: 2px solid #000000ff;
-        box-shadow: 5px 5px 0px #b0ee00ff;
+        box-shadow: 4px 4px 0px #b0ee00ff;
         cursor: pointer;
       }
       .socials a:hover, .menu-btn:hover {
         background-color: #ffff00ff;
-        box-shadow: 8px 8px 0px #ff2b13ff;
+        box-shadow: 6px 6px 0px #ff2b13ff;
       }
       .gb-overlay, .menu-overlay {
         position: fixed;
@@ -233,12 +252,12 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%) scale(0.9);
-        width: min(800px, 95vw);
+        width: min(850px, 95vw);
         max-height: 85vh;
         overflow-y: auto;
         background-color: #111111ff;
         border: 3px solid #00e2ffff;
-        padding: 25px;
+        padding: 20px;
         opacity: 0;
         pointer-events: none;
         transition: all 0.25s ease-out;
@@ -260,7 +279,7 @@
         font-family: 'db', serif;
         color: #00e2ffff;
         font-weight: bold;
-        font-size: 1.5rem;
+        font-size: 1.4rem;
       }
       .gb-close, .menu-close {
         background: none;
@@ -392,64 +411,85 @@
       }
       .menu-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
         gap: 20px;
       }
-      .menu-cat {
-        border-bottom: 2px solid #b0ee00ff;
-        padding-bottom: 15px;
-      }
       .menu-cat-title {
-        font-family: 'ds', sans-serif;
-        font-size: 1.4rem;
+        font-family: 'db', serif;
+        font-size: 1.3rem;
         color: #ffff00ff;
+        border-bottom: 2px solid #ff2b13ff;
+        padding-bottom: 4px;
         margin-bottom: 10px;
       }
       .menu-item {
         margin-bottom: 8px;
         font-family: 'hnb2', sans-serif;
       }
+      .menu-item-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+      }
       .menu-item-name {
         color: #b0ee00ff;
-        font-size: 1rem;
+        font-size: 0.95rem;
+        font-weight: bold;
+      }
+      .menu-item-price {
+        color: #00e2ffff;
+        font-size: 0.95rem;
         font-weight: bold;
       }
       .menu-item-desc {
         color: #888888ff;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
+        margin-top: 2px;
       }
     </style>
   </head>
   <body>
     <h1>farewell / howdy new site coming soon</h1>
+    <div id="kc-clock"></div>
     <p class="status">calendar updates &amp; information below</p>
-    <div class="addresses">
-      <div class="addr-card"><b>FAREWELL:</b> 6515 STADIUM DRIVE, KANSAS CITY, MO</div>
-      <div class="addr-card"><b>HOWDY:</b> 6523 STADIUM DRIVE, KANSAS CITY, MO</div>
-    </div>
-    <div class="ticker-row">
-      <button class="ticker-ctrl" id="tk-prev" type="button">◀</button>
-      <button class="ticker-ctrl" id="tk-pause" type="button">⏸</button>
-      <button class="ticker-ctrl" id="tk-next" type="button">▶</button>
-      <div class="ticker-wrap" id="ticker-wrap">
-        <div class="ticker-inner" id="ticker-inner"></div>
+
+    <div class="ticker-section">
+      <div class="ticker-row">
+        <div class="ticker-wrap" id="ticker-wrap">
+          <div class="ticker-inner" id="ticker-inner"></div>
+        </div>
       </div>
-      <button class="ticker-btn" id="gb-open" type="button" aria-label="Leave a note">
-        ✍ note
-      </button>
+      <div class="ticker-controls-bar">
+        <div class="ticker-ctrl-group">
+          <button class="ticker-ctrl" id="tk-prev" type="button">◀</button>
+          <button class="ticker-ctrl" id="tk-pause" type="button">⏸</button>
+          <button class="ticker-ctrl" id="tk-next" type="button">▶</button>
+        </div>
+        <button class="ticker-btn" id="gb-open" type="button" aria-label="Leave a note">
+          ✍ note
+        </button>
+      </div>
     </div>
+
     <div class="calendars">
       <div class="calendar-box">
         <img src="img/fwcal.png" alt="Farewell Calendar" />
-        <div class="calendar-title">FAREWELL</div>
+        <div class="calendar-header">
+          <div class="calendar-title">FAREWELL</div>
+          <div class="calendar-address">6515 Stadium Dr</div>
+        </div>
       </div>
       <div class="calendar-box">
         <img src="img/hycal.png" alt="Howdy Calendar" />
-        <div class="calendar-title">HOWDY</div>
+        <div class="calendar-header">
+          <div class="calendar-title">HOWDY</div>
+          <div class="calendar-address">6523 Stadium Dr</div>
+        </div>
       </div>
     </div>
+
     <div class="socials">
-      <button class="menu-btn" id="menu-open" type="button">🍸 MENU</button>
+      <button class="menu-btn" id="menu-open" type="button">🍸 FAREWELL DRINKS MENU</button>
       <a href="https://instagram.com/farewellkcmo" target="_blank" rel="noopener">Farewell IG</a>
       <a href="https://www.facebook.com/farewelltransmission" target="_blank" rel="noopener">Farewell FB</a>
       <a href="https://instagram.com/howdykcmo" target="_blank" rel="noopener">Howdy IG</a>
@@ -460,38 +500,93 @@
     <div class="menu-overlay" id="menu-overlay"></div>
     <div class="menu-panel" id="menu-panel">
       <div class="menu-header-bar">
-        <span class="menu-modal-title">FAREWLL / HOWDY MENU</span>
+        <span class="menu-modal-title">FAREWELL DRINKS MENU</span>
         <button class="menu-close" id="menu-close" type="button">×</button>
       </div>
       <div class="menu-grid">
         <div class="menu-cat">
-          <div class="menu-cat-title">COCKTAILS &amp; SPECIALS</div>
+          <div class="menu-cat-title">COCKTAILS</div>
           <div class="menu-item">
-            <div class="menu-item-name">HOUSE COCKTAILS</div>
-            <div class="menu-item-desc">Ask bartender for daily specials and custom drinks</div>
+            <div class="menu-item-row"><span class="menu-item-name">STRAY DOG</span><span class="menu-item-price">$9</span></div>
+            <div class="menu-item-desc">Tito's vodka, kahlua, non-dairy milk.</div>
           </div>
           <div class="menu-item">
-            <div class="menu-item-name">FULL BAR</div>
-            <div class="menu-item-desc">Wide selection of spirits, liquors, and mixers</div>
+            <div class="menu-item-row"><span class="menu-item-name">CRANSYLVANIA</span><span class="menu-item-price">$9</span></div>
+            <div class="menu-item-desc">Old grandad bourbon, cranberry juice, lemon juice, maple syrup, sparkling water.</div>
+          </div>
+          <div class="menu-item">
+            <div class="menu-item-row"><span class="menu-item-name">RYE &amp; GOSLING</span><span class="menu-item-price">$7</span></div>
+            <div class="menu-item-desc">Roulette rye, lime juice, ginger beer, aromatic bitters.</div>
+          </div>
+          <div class="menu-item">
+            <div class="menu-item-row"><span class="menu-item-name">LEAKY ROOF</span><span class="menu-item-price">$9</span></div>
+            <div class="menu-item-desc">Farewell's mystery liquor concoction, triple sec, sweet n' sour, cola.</div>
+          </div>
+          <div class="menu-item">
+            <div class="menu-item-row"><span class="menu-item-name">YUPPIE SPEEDBALL</span><span class="menu-item-price">$9</span></div>
+            <div class="menu-item-desc">Jose cuervo blanco tequila, revel berry yerba mate, pear liquor, grenadine.</div>
+          </div>
+          <div class="menu-item">
+            <div class="menu-item-row"><span class="menu-item-name">WELL SHOT</span><span class="menu-item-price">$4</span></div>
+          </div>
+          <div class="menu-item">
+            <div class="menu-item-row"><span class="menu-item-name">WELL MIX</span><span class="menu-item-price">$5</span></div>
           </div>
         </div>
+
         <div class="menu-cat">
-          <div class="menu-cat-title">BEER &amp; CIDER</div>
-          <div class="menu-item">
-            <div class="menu-item-name">DOMESTICS &amp; CRAFT</div>
-            <div class="menu-item-desc">Cans and bottles available at both venues</div>
-          </div>
-          <div class="menu-item">
-            <div class="menu-item-name">BOULEVARD &amp; SEASONAL</div>
-            <div class="menu-item-desc">Local Kansas City drafts and cans</div>
-          </div>
+          <div class="menu-cat-title">DOMESTICS</div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Hamm's</span><span class="menu-item-price">$3</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">PBR</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Rolling Rock</span><span class="menu-item-price">$4</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Miller Lite</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Bud Light</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Bud Heavy</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Coors Banquet</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Michelob</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Yeungling</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Twisted Tea</span><span class="menu-item-price">$5</span></div></div>
         </div>
+
         <div class="menu-cat">
-          <div class="menu-cat-title">NON-ALCOHOLIC</div>
-          <div class="menu-item">
-            <div class="menu-item-name">BOOZE-FREE OPTIONS</div>
-            <div class="menu-item-desc">NA Beers, sodas, juices, and sparkling waters</div>
-          </div>
+          <div class="menu-cat-title">BOULEVARD &amp; SEASONAL</div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Wheat</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Pale Ale</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Tank 7</span><span class="menu-item-price">$7</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Space Camper</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Quirk</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">TL Monk &amp; Honey</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Mother's Coffee Stout</span><span class="menu-item-price">$5</span></div></div>
+        </div>
+
+        <div class="menu-cat">
+          <div class="menu-cat-title">CRAFT / IMPORT</div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Modelo</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Victoria</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Guinness</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Stella</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Blue Moon</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Founder's IPA</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Lagunita's IPA</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Sea Quench Sour</span><span class="menu-item-price">$6</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Angry Orchard</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Blake's Ciders</span><span class="menu-item-price">$7</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Stiegl Radler</span><span class="menu-item-price">$8</span></div></div>
+        </div>
+
+        <div class="menu-cat">
+          <div class="menu-cat-title">BOOZE-FREE</div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Athletics</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Coors Edge N/A</span><span class="menu-item-price">$4</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Red Bull</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">AriZona Iced Tea</span><span class="menu-item-price">$2.50</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Yerba Mate</span><span class="menu-item-price">$5</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Waterloo</span><span class="menu-item-price">$2</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Coke</span><span class="menu-item-price">$2</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Diet Coke</span><span class="menu-item-price">$2</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Sprite</span><span class="menu-item-price">$2</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Ginger Ale</span><span class="menu-item-price">$2</span></div></div>
+          <div class="menu-item"><div class="menu-item-row"><span class="menu-item-name">Casamara</span><span class="menu-item-price">$6</span></div></div>
         </div>
       </div>
     </div>
@@ -509,11 +604,25 @@
         };
         var C_KEYS = ['lima', 'pupil', 'redd', 'blew', 'paper'];
         var EMOJIS = ['💀', '🖤', '🔥', '🕷️', '⚡', '🕸️', '🔪', '🥀', '⛧', '⛓️', '👻', '🩸', '🪐', '👁️', '🦇', '🏴'];
-        var SEED = [{ text: 'leave a note', color: 'lima', name: 'fw/hy', country: '' }];
+        var SEED = [
+          { text: 'welcome to farewell & howdy', color: 'lima', name: 'fw/hy' },
+          { text: 'leave a note in the guestbook', color: 'blew', name: 'kcmo' },
+          { text: 'new site coming soon', color: 'pupil', name: 'notice' },
+          { text: 'check calendars below for upcoming shows', color: 'paper', name: 'events' },
+          { text: 'howdy is all ages & booze-free', color: 'redd', name: 'info' }
+        ];
         var selectedColor = 'lima';
         var isPaused = false;
-        var scrollPos = 0;
         var $panel, $overlay, $inner, $wrap;
+
+        function updateClock() {
+          var now = new Date();
+          var f = function (opts) { return new Intl.DateTimeFormat('en-US', Object.assign({ timeZone: 'America/Chicago' }, opts)).format(now); };
+          var clockEl = document.getElementById('kc-clock');
+          if (clockEl) {
+            clockEl.textContent = 'KCMO TIME: ' + f({ weekday: 'short' }) + ', ' + f({ month: 'short', day: 'numeric' }) + ' · ' + f({ hour: 'numeric', minute: '2-digit', hour12: true });
+          }
+        }
 
         function makeItem(c) {
           var wrap = document.createElement('span');
@@ -746,10 +855,12 @@
           buildPanel();
           initMenuModal();
           fetchComments();
+          updateClock();
+          setInterval(updateClock, 1000);
         });
 
         document.addEventListener('click', function(e) {
-          if (e.target.closest('#gb-open') || e.target.closest('.gb-panel') || e.target.closest('.socials') || e.target.closest('#menu-panel') || e.target.closest('.ticker-row')) return;
+          if (e.target.closest('#gb-open') || e.target.closest('.gb-panel') || e.target.closest('.gb-overlay') || e.target.closest('.socials') || e.target.closest('#menu-panel') || e.target.closest('#menu-overlay') || e.target.closest('.ticker-section')) return;
           var flash = document.createElement('div');
           flash.style.position = 'fixed';
           flash.style.top = '0px';
